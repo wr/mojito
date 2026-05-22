@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Mojito</title>
+    <link>https://github.com/wr/mojito</link>
+    <description>Mojito updates</description>
+    <language>en</language>
+    <item>
+      <title>Mojito 0.1.0</title>
+      <pubDate>Fri, 22 May 2026 02:57:35 +0000</pubDate>
+      <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+      <sparkle:version>1</sparkle:version>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure url="https://github.com/wr/mojito/releases/download/v0.1.0/Mojito-0.1.0.dmg" type="application/octet-stream" length="6613608" sparkle:edSignature="p5ITT28dpq9K/BMlnSxw8L5MV9d0WuN6Q3OI8aREP7RLKL9rt/2awVHltNciNbUqNcqpTiV2159lVafxOa4aDQ==" />
+    </item>
+  </channel>
+</rss>
