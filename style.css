@@ -60,6 +60,13 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Off-screen carousel apps live at translateX(±1200px). .stage clip-path
+   hides them visually but doesn't stop them from contributing to body
+   scrollWidth, so the page scrolls sideways into empty space. `clip`
+   (not `hidden`) avoids creating a scroll container that would break
+   the sticky topbar. */
+body { overflow-x: clip; }
+
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-hover); }
 
