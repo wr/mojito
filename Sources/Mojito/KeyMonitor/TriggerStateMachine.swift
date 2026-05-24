@@ -94,6 +94,18 @@ enum TriggerAction: Equatable {
     /// text field. Currently always 0 because every input in the sequence
     /// (arrows + B + A) is consumed before reaching the field.
     case triggerKonami(deleteCount: Int)
+    /// Ambient emoticon candidate — the user typed a word (no leading `:`)
+    /// followed by a terminator (space, period, etc.) and the state machine
+    /// is asking Engine to look the word up in `AmbientEmoticonTable`. The
+    /// terminator was passed through to the focused app (`consumesKey: false`).
+    /// Engine no-ops if there's no match; otherwise it deletes
+    /// `word.count + 1` chars and replaces with `emoji + terminator`.
+    case checkAmbientEmoticon(word: String, terminator: Character)
+    /// Ambient emoticon fired without a terminator — the word itself is the
+    /// complete match (e.g. `<3`, `>:)`). The last char of the word was just
+    /// typed and passed through (`consumesKey: false`); Engine deletes
+    /// `word.count` chars and replaces with the emoji.
+    case insertAmbientEmoticon(word: String)
 }
 
 struct TriggerStateMachine {
@@ -153,7 +165,34 @@ struct TriggerStateMachine {
     /// leave it alone.
     private static let emoticonMaxIdle: TimeInterval = 1.0
 
+    /// Buffer of chars typed in `.idle` since the last terminator. Drives
+    /// ambient emoticon detection (e.g. `<3 `, `XD `, `>:) `). Reset on
+    /// terminator (after a lookup), focus change, arrow keys, escape,
+    /// return/tab, colon entering capture, and after `emoticonMaxIdle` of
+    /// keyboard silence.
+    private var idleWord: String = ""
+
+    /// Wall-clock time of the most recent keystroke that contributed to
+    /// `idleWord`. Mirrors `lastCaptureKeystrokeAt` for the colon path.
+    private var lastIdleKeystrokeAt: Date? = nil
+
+    /// Word-terminator chars for ambient detection. Whitespace + sentence
+    /// punctuation. Closing brackets like `)` are deliberately *not* here —
+    /// they're part of emoticons (`B)`, `>:)`).
+    private static let ambientTerminators: Set<Character> = [
+        " ", "\t", "\n", ".", ",", ";", "!", "?",
+    ]
+
     mutating func handle(_ input: TriggerInput) -> TriggerOutput {
+        // Drop a stale ambient word if the user paused too long since the last
+        // contributing keystroke. Same threshold as the colon-emoticon idle
+        // check — covers click-to-move-caret followed by a delayed type.
+        if let last = lastIdleKeystrokeAt,
+           Date().timeIntervalSince(last) > Self.emoticonMaxIdle {
+            idleWord = ""
+            lastIdleKeystrokeAt = nil
+        }
+
         let output = process(input)
         // After processing, refresh word-boundary tracking when we end up idle.
         if case .idle = state {
@@ -216,6 +255,9 @@ struct TriggerStateMachine {
         case (.idle, .cmdZ):
             // Engine decides whether to actually undo (depends on whether
             // there's a pending emoticon-undo entry within the window).
+            // Drop the ambient buffer — Cmd+Z is a context-switching action.
+            idleWord = ""
+            lastIdleKeystrokeAt = nil
             return TriggerOutput(action: .maybeUndoEmoticon, consumesKey: false)
 
         case (.capturing, .cmdZ):
@@ -227,6 +269,22 @@ struct TriggerStateMachine {
 
         case (.idle, .colon):
             revivableQuery = nil
+            // Ambient prefix carve-out: if idleWord is exactly one of the
+            // known "starts an ambient emoticon containing `:`" prefixes
+            // (currently just `>`), let the colon continue the ambient word
+            // instead of starting colon-capture. Otherwise `>:)` would be
+            // intercepted by the colon path and only `:)` would convert,
+            // leaving the `>` behind.
+            if AmbientEmoticonTable.colonContinuationPrefixes.contains(idleWord) {
+                idleWord += ":"
+                lastIdleKeystrokeAt = Date()
+                if let fire = checkImmediateAmbientFire() {
+                    return fire
+                }
+                return TriggerOutput(action: .none, consumesKey: false)
+            }
+            idleWord = ""
+            lastIdleKeystrokeAt = nil
             if lastWasWordChar {
                 // Right after a letter/digit (e.g. "5:35", "foo:bar") — don't trigger; pass through.
                 return .passthrough
@@ -237,6 +295,12 @@ struct TriggerStateMachine {
             return TriggerOutput(action: .none, consumesKey: false)
 
         case (.idle, .backspace):
+            // Keep the ambient buffer in sync with the field — drop the last
+            // char if there's anything there.
+            if !idleWord.isEmpty {
+                idleWord = String(idleWord.dropLast())
+                lastIdleKeystrokeAt = idleWord.isEmpty ? nil : Date()
+            }
             // Revival: user typed `:foo<cancel-char>`, then backspaced the cancel char back
             // off. The `:foo` is still in the focused app — re-open the picker.
             // Revival is normal-scope only (we don't track scope across cancel).
@@ -248,8 +312,47 @@ struct TriggerStateMachine {
             }
             return .passthrough
 
-        case (.idle, _):
+        case (.idle, .nameChar(let c)):
             revivableQuery = nil
+            idleWord += String(c)
+            lastIdleKeystrokeAt = Date()
+            if let fire = checkImmediateAmbientFire() {
+                return fire
+            }
+            return .passthrough
+
+        case (.idle, .cancelChar(let c)):
+            revivableQuery = nil
+            if Self.ambientTerminators.contains(c) {
+                // Terminator — check the accumulated word against the ambient
+                // table, then reset. Empty word means there was nothing to
+                // match (e.g. two terminators in a row); no need to ask Engine.
+                let word = idleWord
+                idleWord = ""
+                lastIdleKeystrokeAt = nil
+                if word.isEmpty {
+                    return .passthrough
+                }
+                return TriggerOutput(
+                    action: .checkAmbientEmoticon(word: word, terminator: c),
+                    consumesKey: false
+                )
+            }
+            // Non-terminator punctuation (`<`, `>`, `)`, `(`, `_`, etc.) —
+            // part of an emoticon body. Append and keep accumulating.
+            idleWord += String(c)
+            lastIdleKeystrokeAt = Date()
+            if let fire = checkImmediateAmbientFire() {
+                return fire
+            }
+            return .passthrough
+
+        case (.idle, _):
+            // Arrows, focus change, escape, return/tab in idle — all caret-
+            // motion-y or context-switching. Drop the buffer.
+            revivableQuery = nil
+            idleWord = ""
+            lastIdleKeystrokeAt = nil
             return .passthrough
 
         // MARK: capturing — colon
@@ -282,11 +385,18 @@ struct TriggerStateMachine {
             let next = q + String(c)
             state = .capturing(query: next)
             // Pass the character through so it appears in the text field.
-            return TriggerOutput(
-                action: q.isEmpty ? .openPicker(query: next, scope: currentScope)
-                                  : .refreshPicker(query: next, scope: currentScope),
-                consumesKey: false
-            )
+            let threshold = pickerThreshold(for: currentScope)
+            let action: TriggerAction
+            if next.count < threshold {
+                // Below threshold — keep capturing silently so a terminator can still
+                // fire a colon emoticon (e.g. `:D `), but don't surface the picker.
+                action = .none
+            } else if q.count < threshold {
+                action = .openPicker(query: next, scope: currentScope)
+            } else {
+                action = .refreshPicker(query: next, scope: currentScope)
+            }
+            return TriggerOutput(action: action, consumesKey: false)
 
         // MARK: capturing — backspace
 
@@ -304,12 +414,13 @@ struct TriggerStateMachine {
             }
             let next = String(q.dropLast())
             state = .capturing(query: next)
-            // Let the backspace through; refresh picker (or close if empty).
-            return TriggerOutput(
-                action: next.isEmpty ? .closePicker
-                                     : .refreshPicker(query: next, scope: currentScope),
-                consumesKey: false
-            )
+            // Let the backspace through; refresh picker, or close it if the
+            // remaining query is empty or has dropped below the threshold.
+            let threshold = pickerThreshold(for: currentScope)
+            let action: TriggerAction = next.count < threshold
+                ? .closePicker
+                : .refreshPicker(query: next, scope: currentScope)
+            return TriggerOutput(action: action, consumesKey: false)
 
         // MARK: capturing — picker navigation
 
@@ -394,5 +505,29 @@ struct TriggerStateMachine {
         lastWasWordChar = false
         revivableQuery = nil
         konamiProgress = 0
+        idleWord = ""
+        lastIdleKeystrokeAt = nil
+        lastCaptureKeystrokeAt = nil
+    }
+
+    /// Minimum query length before the picker opens. Suppresses the briefly-
+    /// visible single-letter picker (e.g. when typing `:D ` for 😃, or `:s`
+    /// before `:smile:`). Symbols-only scope keeps the 1-char threshold
+    /// because the symbols corpus is dominated by single-char entries.
+    private func pickerThreshold(for scope: CaptureScope) -> Int {
+        scope == .symbolsOnly ? 1 : 2
+    }
+
+    /// Returns an immediate-fire output if the current `idleWord` is a
+    /// complete ambient emoticon that should fire without waiting for a
+    /// terminator. Clears `idleWord` as a side effect when firing.
+    private mutating func checkImmediateAmbientFire() -> TriggerOutput? {
+        guard AmbientEmoticonTable.shouldFireImmediately(idleWord) else {
+            return nil
+        }
+        let word = idleWord
+        idleWord = ""
+        lastIdleKeystrokeAt = nil
+        return TriggerOutput(action: .insertAmbientEmoticon(word: word), consumesKey: false)
     }
 }

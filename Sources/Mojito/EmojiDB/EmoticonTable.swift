@@ -28,6 +28,12 @@ enum EmoticonTable {
         "3":   "😺",
         "*":   "😘",
 
+        // Apostrophe variants (`:'(`, `:')`) — query is "'", terminator is
+        // the closing paren. `'` is a name char (see `KeyMonitor.isNameChar`)
+        // so the apostrophe lands in the query rather than ending capture.
+        "'(":  "😢",
+        "')":  "😂",
+
         // Dash variants (`:-)`, `:-D`, …) — query is "-".
         "-)":  "🙂",
         "-(":  "🙁",
