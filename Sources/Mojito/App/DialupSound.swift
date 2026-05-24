@@ -134,9 +134,13 @@ private struct DialupView: View {
     let startDate: Date
     let onDismiss: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     // Sampled from the bundled app icons.
     private let mojitoGreen  = Color(red: 0.45, green: 0.78, blue: 0.27)   // RGB 115/200/69
     private let mojitoOrange = Color(red: 0.95, green: 0.70, blue: 0.25)   // RGB 242/179/65
+    // Native SVG fill (#2E3192). Used in light mode; dark mode flips to white.
+    private let wordmarkBlue = Color(red: 0x2E / 255.0, green: 0x31 / 255.0, blue: 0x92 / 255.0)
 
     /// All five vertical gaps + four-side padding share this value.
     private let rhythm: CGFloat = 32
@@ -159,8 +163,13 @@ private struct DialupView: View {
         }
     }
 
-    /// Bundled scrambled image, native colors.
-    private static let wordmark: NSImage? = ImageBlob.load("v06")
+    /// Bundled scrambled image, native colors. Marked as a template so
+    /// SwiftUI's `.foregroundStyle` can re-tint the single-color SVG fill.
+    private static let wordmark: NSImage? = {
+        guard let image = ImageBlob.load("v06") else { return nil }
+        image.isTemplate = true
+        return image
+    }()
 
     @ViewBuilder
     private var logo: some View {
@@ -170,6 +179,7 @@ private struct DialupView: View {
                 .interpolation(.high)
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 70)
+                .foregroundStyle(colorScheme == .dark ? Color.white : wordmarkBlue)
         }
     }
 
