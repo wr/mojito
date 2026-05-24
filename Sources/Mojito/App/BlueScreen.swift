@@ -58,8 +58,11 @@ enum BlueScreen {
         unregister = EffectDismisser.register(anyKey: true, dismiss)
 
         // Compy 386 startup chirp (~1s) — fires the moment the screen
-        // appears for that authentic boot-failure vibe.
+        // appears for that authentic boot-failure vibe. Trimmed 20% on
+        // volume; full-loudness was too punchy when the panel is already
+        // taking the whole screen.
         if let sound = AudioBlob.load("s15") {
+            sound.volume = 0.8
             startupSound = sound
             sound.play()
         }
@@ -130,18 +133,22 @@ private struct BlueScreenView: View {
                 // really does center over the body block.
                 .fixedSize(horizontal: true, vertical: false)
             }
-            // CRT power-on: blue + content collapsed to a thin horizontal
-            // slit, then expanded to full screen with a slight upward drift
-            // and a brightness ramp. The black ZStack below it shows through
-            // above and below the slit during the expand.
-            .scaleEffect(x: 1, y: poweredOn ? 1 : 0.04, anchor: .center)
-            .offset(y: poweredOn ? 0 : -6)
-            .opacity(poweredOn ? 1 : 0.55)
+            // CRT power-on: blue + content starts compressed (X 0.8, Y 0.6)
+            // and snaps to full size with an `easeOutBack` overshoot. Black
+            // backdrop fills the exposed margins during the snap.
+            .scaleEffect(
+                x: poweredOn ? 1.0 : 0.8,
+                y: poweredOn ? 1.0 : 0.6,
+                anchor: .center
+            )
         }
         .contentShape(Rectangle())
         .onTapGesture { onDismiss() }
         .onAppear {
-            withAnimation(.easeOut(duration: 0.32)) {
+            // CSS `easeOutBack` cubic-bezier(0.34, 1.56, 0.64, 1). The 1.56
+            // control on the Y axis is what produces the overshoot past 1.0
+            // before settling.
+            withAnimation(.timingCurve(0.34, 1.56, 0.64, 1, duration: 0.22)) {
                 poweredOn = true
             }
         }
