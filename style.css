@@ -662,11 +662,13 @@ code {
   justify-content: center;
   flex-shrink: 0;
 }
+/* Real Safari toolbar extension buttons show the extension's full-color
+   app icon, not a monochrome glyph. Using app-icon.png reads correctly
+   at small size and doesn't need any dark-mode filter. */
 .safari-ext-icon {
   display: block;
-  width: 14px;
-  height: 14px;
-  /* menubar SVG is black on transparent — invert it for dark mode below */
+  width: 20px;
+  height: 20px;
 }
 
 /* Mastodon dark site */
@@ -1260,8 +1262,6 @@ footer {
   .safari-url-text { color: rgba(255, 255, 255, 0.85); }
   .safari-url-pill svg { color: rgba(255, 255, 255, 0.55); }
   .safari-nav-pill { color: rgba(255, 255, 255, 0.65); }
-  /* Mojito menubar SVG is black-on-transparent — invert to white for dark */
-  .safari-ext-icon { filter: invert(1) brightness(1.6); }
 
   /* Reminders — dark glass body */
   .app-reminders {
