@@ -619,10 +619,12 @@ code {
   overflow-x: hidden;
 }
 
-/* ===== 4. Mastodon (Safari + dark Mastodon site) ===== */
-.app-mastodon {
-  background: #16181c; /* dark site bg */
-}
+/* ===== 4. Mastodon (Safari + dark Mastodon site) =====
+   .app-mastodon intentionally has NO solid background — the .mst-body
+   below owns the dark site bg. Without this, the safari-tb's translucent
+   light glass sits over the dark page bg and renders as a dim grey
+   ("dark border" effect in light mode). With no .app bg, the toolbar's
+   glass picks up the hero-card wallpaper instead, like real Tahoe Safari. */
 /* Safari title bar — pill-grouped Tahoe chrome. Real Tahoe Safari uses a
    very light glass material that picks up tint from the page below; an
    off-white near-#fafafa with a hint of warmth reads as glass at this size.
@@ -662,13 +664,11 @@ code {
   justify-content: center;
   flex-shrink: 0;
 }
-/* Real Safari toolbar extension buttons show the extension's full-color
-   app icon, not a monochrome glyph. Using app-icon.png reads correctly
-   at small size and doesn't need any dark-mode filter. */
 .safari-ext-icon {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+  /* menubar SVG is black on transparent — invert it for dark mode below */
 }
 
 /* Mastodon dark site */
@@ -1262,6 +1262,8 @@ footer {
   .safari-url-text { color: rgba(255, 255, 255, 0.85); }
   .safari-url-pill svg { color: rgba(255, 255, 255, 0.55); }
   .safari-nav-pill { color: rgba(255, 255, 255, 0.65); }
+  /* Mojito menubar SVG is black-on-transparent — invert to white for dark */
+  .safari-ext-icon { filter: invert(1) brightness(1.6); }
 
   /* Reminders — dark glass body */
   .app-reminders {
