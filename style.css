@@ -1137,6 +1137,12 @@ footer {
     -webkit-user-select: none;
     user-select: none;
   }
+  /* Scale the desktop "Stuff" folder down so it doesn't dwarf the
+     scaled-down app windows on narrow viewports. */
+  .desktop-icons { top: 16px; right: 14px; gap: 10px; }
+  .desktop-icon  { width: 56px; }
+  .folder-img    { width: 44px; height: 44px; }
+  .icon-label    { font-size: 11px; }
   /* App windows have fixed pixel widths (380–680px). On a narrow viewport
      the wider ones (Terminal 680, TextEdit 600, Mastodon 540) overflow the
      stage and get clipped. Shrink the carousel + picker proportionally to
@@ -1158,6 +1164,9 @@ footer {
   .hero-card { min-height: 520px; }
   .carousel,
   .picker-anchor { transform: scale(0.45); transform-origin: center center; }
+  .desktop-icon { width: 48px; }
+  .folder-img   { width: 36px; height: 36px; }
+  .icon-label   { font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
