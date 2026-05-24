@@ -1,5 +1,17 @@
 import AppKit
 
+// When xcodebuild launches Mojito Dev as the test host, skip the
+// menubar/event-tap startup — single-instance enforcement would kill the
+// test runner if a real Mojito Dev is already running, and the test
+// bundle doesn't need the app's behavior. Test bundle loads after the
+// runloop is up; just bring NSApp online and idle.
+let isUnderXCTest = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+if isUnderXCTest {
+    _ = NSApplication.shared
+    NSApp.run()
+    exit(0)
+}
+
 #if DEBUG
 // Dev bundle ID scopes UserDefaults separately from the released app, so
 // a fresh dev launch would have no usage counts, exclusions, or
