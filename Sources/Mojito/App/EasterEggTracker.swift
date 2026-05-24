@@ -202,6 +202,10 @@ enum EasterEggTracker {
         guard cache.insert(egg.rawValue).inserted else { return }
         UserDefaults.standard.set(Array(cache), forKey: PrefsKey.easterEggsDiscovered)
         NotificationCenter.default.post(name: .easterEggDiscovered, object: nil)
+        // In-app banner is the primary signal — sits above egg panels and
+        // doesn't depend on notification permission. DiscoveryNotifier still
+        // fires so the discovery shows up in Notification Center history.
+        AchievementBanner.show(egg)
         DiscoveryNotifier.notify(egg)
     }
 
