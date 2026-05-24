@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mojito — Autocomplete :emoji: everywhere on macOS</title>
+<meta name="description" content="Autocomplete :emoji: everywhere on macOS. Type a colon to search any emoji or symbol in seconds.">
+<meta property="og:title" content="Mojito — Autocomplete :emoji: everywhere on macOS">
+<meta property="og:description" content="Autocomplete :emoji: everywhere on macOS. Type a colon to search any emoji or symbol in seconds.">
+<meta property="og:image" content="https://mojito.wells.ee/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="style.css?v=38">
+</head>
+<body>
+
+<nav class="topbar">
+  <a class="brand" href="/">
+    <img src="app-icon.png" alt="" width="28" height="28">
+    <span>Mojito</span>
+  </a>
+  <div class="nav-links">
+    <a href="https://github.com/wr/mojito">GitHub</a>
+    <a href="https://buymeacoffee.com/wellsriley">Donate</a>
+    <a class="nav-cta" href="https://github.com/wr/mojito/releases/latest/download/Mojito.dmg">
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v7.69l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 0 1 1.06-1.06l2.72 2.72V2.25A.75.75 0 0 1 8 1.5Zm-5.25 11a.75.75 0 0 1 .75.75v.25a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-.25a.75.75 0 0 1 1.5 0v.25A2 2 0 0 1 12 15.5H4a2 2 0 0 1-2-2v-.25a.75.75 0 0 1 .75-.75Z"/></svg>
+      <span>Download for macOS</span>
+    </a>
+  </div>
+</nav>
+
+<section class="hero" aria-label="Live demo">
+  <header class="hero-header">
+    <h1>Autocomplete <code>:emoji:</code> everywhere.</h1>
+    <p class="hero-sub">Type <code>:</code> to search for any emoji or symbol in seconds.</p>
+  </header>
+  <div class="hero-card">
+
+    <!-- desktop icons (noninteractive, always behind app windows) -->
+    <div class="desktop-icons" aria-hidden="true">
+      <div class="desktop-icon">
+        <img class="folder-img"
+             src="folder.png?v=2"
+             srcset="folder.png?v=2 1x, folder@2x.png?v=2 2x"
+             alt="" width="72" height="72">
+        <span class="icon-label">Stuff</span>
+      </div>
+    </div>
+
+    <!-- stage clips the carousel so apps slide off-screen cleanly,
+         while the picker lives outside the stage in its own overlay -->
+    <div class="stage">
+      <div class="carousel" id="carousel">
+
+        <!-- 1. TextEdit -->
+        <div class="app app-textedit" data-app="textedit">
+          <div class="title-bar te-tb">
+            <span class="stoplight stop-red"></span>
+            <span class="stoplight stop-yellow"></span>
+            <span class="stoplight stop-green"></span>
+            <span class="title-text">Untitled.txt — Edited</span>
+          </div>
+          <div class="app-body te-body">
+            <textarea class="demo-input" data-app="textedit" rows="6"
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+              aria-label="TextEdit document"></textarea>
+          </div>
+        </div>
+
+        <!-- 2. iMessage (Tahoe style) -->
+        <div class="app app-imessage" data-app="imessage">
+          <div class="title-bar im-tb">
+            <span class="stoplight stop-red"></span>
+            <span class="stoplight stop-yellow"></span>
+            <span class="stoplight stop-green"></span>
+          </div>
+          <div class="im-contact-header">
+            <div class="im-avatar-big">S</div>
+            <div class="im-contact-pill">
+              <span>Sarah</span>
+              <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+                <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M4.5 2.5 8 6l-3.5 3.5"/>
+              </svg>
+            </div>
+            <div class="im-meta-header">
+              <div class="im-meta-label">iMessage</div>
+              <div class="im-meta-time">Today · 9:42 AM</div>
+            </div>
+          </div>
+          <div class="app-body im-body">
+            <div class="bubbles">
+              <div class="bubble received">running late, sorry!</div>
+              <div class="bubble received">be there in 10</div>
+            </div>
+            <div class="im-compose">
+              <button class="im-circle" aria-label="Attach" tabindex="-1">
+                <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+                  <path fill="currentColor" d="M8 3.5a.75.75 0 0 1 .75.75v3h3a.75.75 0 0 1 0 1.5h-3v3a.75.75 0 0 1-1.5 0v-3h-3a.75.75 0 0 1 0-1.5h3v-3A.75.75 0 0 1 8 3.5Z"/>
+                </svg>
+              </button>
+              <div class="im-pill">
+                <textarea class="demo-input" data-app="imessage" rows="1"
+                  placeholder="iMessage"
+                  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                  aria-label="iMessage compose"></textarea>
+                <button class="im-pill-btn" aria-label="Dictate" tabindex="-1">
+                  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                    <g fill="currentColor">
+                      <rect x="2"  y="6"  width="1.2" height="4"  rx="0.6"/>
+                      <rect x="4.5" y="4.5" width="1.2" height="7"  rx="0.6"/>
+                      <rect x="7"  y="2.5" width="1.2" height="11" rx="0.6"/>
+                      <rect x="9.5" y="4.5" width="1.2" height="7"  rx="0.6"/>
+                      <rect x="12" y="6"  width="1.2" height="4"  rx="0.6"/>
+                    </g>
+                  </svg>
+                </button>
+              </div>
+              <button class="im-circle" aria-label="Emoji" tabindex="-1">
+                <svg viewBox="0 0 18 18" width="17" height="17" aria-hidden="true">
+                  <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.3"/>
+                  <circle cx="6.6" cy="8" r="0.9" fill="currentColor"/>
+                  <circle cx="11.4" cy="8" r="0.9" fill="currentColor"/>
+                  <path d="M6 11c.7.9 1.7 1.4 3 1.4s2.3-.5 3-1.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Terminal -->
+        <div class="app app-terminal" data-app="terminal">
+          <div class="title-bar term-tb">
+            <span class="stoplight stop-red"></span>
+            <span class="stoplight stop-yellow"></span>
+            <span class="stoplight stop-green"></span>
+            <span class="title-text">~ — -zsh — 80×24</span>
+          </div>
+          <div class="app-body term-body">
+            <div class="term-out term-login">Last login: Sun May 23 16:42:01 on ttys001</div>
+            <div class="term-line"><span class="term-prompt">wells@mojito ~ %</span> git status</div>
+            <div class="term-out">On branch main
+Changes not staged for commit:
+        <span class="term-mod">modified:   Sources/Mojito/Picker/FuzzyMatcher.swift</span></div>
+            <div class="term-line term-input-line">
+              <span class="term-prompt">wells@mojito ~ %</span>
+              <textarea class="demo-input term-textarea" data-app="terminal" rows="1"
+                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                aria-label="Terminal input"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Mastodon (Safari window with dark Mastodon compose) -->
+        <div class="app app-mastodon" data-app="mastodon">
+          <!-- Safari chrome: stoplights + floating Tahoe-style pills -->
+          <div class="title-bar safari-tb">
+            <span class="stoplight stop-red"></span>
+            <span class="stoplight stop-yellow"></span>
+            <span class="stoplight stop-green"></span>
+            <div class="tb-pill safari-nav-pill">
+              <svg viewBox="0 0 12 12" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M7.5 2.5 3.5 6l4 3.5"/></svg>
+              <svg viewBox="0 0 12 12" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M4.5 2.5 8.5 6l-4 3.5"/></svg>
+            </div>
+            <div class="tb-pill safari-url-pill">
+              <svg viewBox="0 0 16 12" width="16" height="13" aria-hidden="true"><rect x="1.5" y="1.5" width="13" height="8" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.2"/><line x1="6" y1="10.5" x2="10" y2="10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              <span class="safari-url-text">mastodon.social</span>
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="M3 8a5 5 0 1 0 1.5-3.5M3 3v2.5h2.5"/></svg>
+            </div>
+            <div class="tb-pill safari-action-pill">
+              <img class="safari-ext-icon" src="mojito-mark.svg" alt="" width="18" height="18">
+            </div>
+          </div>
+
+          <!-- Mastodon site (dark) -->
+          <div class="app-body mst-body">
+            <div class="mst-profile">
+              <img class="mst-avatar" src="avatar.jpg" alt="" width="56" height="56">
+              <div class="mst-name-block">
+                <div class="mst-name">Wells Riley</div>
+                <div class="mst-handle">@wellsriley</div>
+              </div>
+            </div>
+            <div class="mst-compose">
+              <div class="mst-options">
+                <div class="mst-option">
+                  <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Zm-5 6.5h10M8 1.5c1.8 1.8 2.7 4.2 2.7 6.5S9.8 12.7 8 14.5C6.2 12.7 5.3 10.3 5.3 8S6.2 3.3 8 1.5Z"/></svg>
+                  Public, quotes allowed
+                </div>
+                <div class="mst-option">
+                  <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M5 2.5h2v.7h2.6v1H8.5C8.3 5.4 7.7 6.4 7 7.3c.4.4 1 .9 1.5 1.3l-.4.9c-.6-.4-1.2-.9-1.7-1.4-.7.7-1.5 1.3-2.3 1.6L3.7 9c.9-.4 1.7-.9 2.4-1.5C5.5 6.7 5 5.8 4.8 4.7l.9-.2c.2.8.6 1.6 1.1 2.2.5-.6 1-1.4 1.2-2.2H3v-1H5v-.7zm5.4 4.4 2.2 5.6h-1l-.5-1.3h-2l-.5 1.3h-1l2.2-5.6h.6zm.4 3.4-.7-1.9-.7 1.9h1.4z"/></svg>
+                  English
+                </div>
+              </div>
+              <textarea class="demo-input mst-textarea" data-app="mastodon" rows="3"
+                placeholder="What's on your mind?"
+                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                aria-label="Mastodon compose"></textarea>
+              <div class="mst-toolbar">
+                <div class="mst-tools">
+                  <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" d="M3 4.5A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 3 13.5v-9Zm2 6 2-3 2.5 3.5 2-1.5 2.5 3"/></svg>
+                  <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M4 14V8M9 14V4M14 14v-8"/></svg>
+                  <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" d="m9 3 7 12H2L9 3Zm0 4v4m0 2v.5"/></svg>
+                  <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="8" r="0.9" fill="currentColor"/><circle cx="11" cy="8" r="0.9" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M6.5 11.5c.7.7 1.6 1 2.5 1s1.8-.3 2.5-1"/></svg>
+                </div>
+                <div class="mst-right">
+                  <span class="mst-count">500</span>
+                  <div class="mst-publish">Post</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Reminders -->
+        <div class="app app-reminders" data-app="reminders">
+          <div class="title-bar rm-tb">
+            <span class="stoplight stop-red"></span>
+            <span class="stoplight stop-yellow"></span>
+            <span class="stoplight stop-green"></span>
+            <div class="tb-pill rm-tb-left">
+              <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><rect x="2" y="3.5" width="9" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="12.5" cy="3.5" r="2.2" fill="currentColor"/><path stroke="#fff" stroke-width="1.1" stroke-linecap="round" d="M12.5 2.6v1.8M11.6 3.5h1.8"/></svg>
+              <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.3"/><line x1="6" y1="3" x2="6" y2="13" stroke="currentColor" stroke-width="1.3"/></svg>
+            </div>
+            <div class="tb-pill rm-tb-right">
+              <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" d="M8 2.5v8m0-8L5.5 5m2.5-2.5L10.5 5M3.5 9v3a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V9"/></svg>
+              <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><line x1="3" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="3" y1="8" x2="10" y2="8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="3" y1="11" x2="8" y2="11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="12" cy="11" r="2.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path stroke="currentColor" stroke-width="1.1" stroke-linecap="round" d="M12 10v2M11 11h2"/></svg>
+              <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M8 3v10M3 8h10"/></svg>
+              <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.3"/><line x1="10.3" y1="10.3" x2="13" y2="13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+          <div class="app-body rm-body">
+            <div class="rm-list-title">Reminders</div>
+            <div class="rm-item rm-done">
+              <span class="rm-check rm-check-done">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><path fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M3 7.2 5.7 10 11 4.5"/></svg>
+              </span>
+              <span class="rm-text">Reply to Sarah</span>
+            </div>
+            <div class="rm-item rm-done">
+              <span class="rm-check rm-check-done">
+                <svg viewBox="0 0 14 14" aria-hidden="true"><path fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M3 7.2 5.7 10 11 4.5"/></svg>
+              </span>
+              <span class="rm-text">Submit timesheet</span>
+            </div>
+            <div class="rm-item">
+              <span class="rm-check"></span>
+              <span class="rm-text">Renew library card</span>
+            </div>
+            <div class="rm-item rm-active">
+              <span class="rm-check"></span>
+              <textarea class="demo-input rm-textarea" data-app="reminders" rows="1"
+                placeholder="Add a reminder…"
+                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                aria-label="Add reminder"></textarea>
+            </div>
+            <button class="rm-add" aria-label="New reminder" tabindex="-1">
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                <path fill="currentColor" d="M8 3.5a.75.75 0 0 1 .75.75v3h3a.75.75 0 0 1 0 1.5h-3v3a.75.75 0 0 1-1.5 0v-3h-3a.75.75 0 0 1 0-1.5h3v-3A.75.75 0 0 1 8 3.5Z"/>
+              </svg>
+              <span>New Reminder</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- shared picker, positioned absolutely above the carousel.
+         role="listbox" lives on the <ol> itself (not the outer wrapper) so
+         the listbox→option parent/child relationship is direct, which the
+         WAI-ARIA listbox pattern requires. aria-hidden is toggled by JS. -->
+    <div class="picker-anchor">
+      <div class="picker" id="picker" aria-hidden="true">
+        <ol class="picker-list" id="picker-list" role="listbox" aria-label="Emoji suggestions"></ol>
+        <div class="picker-divider"></div>
+        <div class="picker-footer">
+          <span class="hint"><kbd>↑↓</kbd> select</span>
+          <span class="hint"><kbd>↵</kbd> insert</span>
+          <span class="hint"><kbd>⎋</kbd> dismiss</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<main>
+
+<section id="about" class="prose">
+  <h2>About</h2>
+  <p>Mojito lives in your menu bar and watches for a colon followed by a few letters. A picker appears at your cursor with fuzzy matches; use the arrows to choose and Return to insert. To skip the picker, type the closing colon — <code>:heart:</code> resolves directly. The same shortcodes you already use in Slack and GitHub now work in Notes, Messages, your terminal, anywhere you type.</p>
+  <p>Emoticons work too. Type <code>:)</code> or <code>&lt;3</code> and they're translated as you go. Symbols use double colons: <code>::cmd::</code> for ⌘, <code>::option::</code> for ⌥, <code>::return::</code> for ↵. Mojito honors your default skin tone, and stays out of apps that already have their own emoji picker.</p>
+</section>
+
+<section id="privacy" class="prose">
+  <h2>Privacy</h2>
+  <p>Nothing leaves your Mac. Keystrokes are matched against the shortcode list locally; nothing is logged, transmitted, or stored. Password and other secure-text fields are ignored entirely. The only network request Mojito makes is checking for app updates.</p>
+</section>
+
+</main>
+
+<footer>
+  <a href="https://github.com/wr/mojito">GitHub</a>
+  <span>·</span>
+  <a href="https://buymeacoffee.com/wellsriley">Donate</a>
+  <span>·</span>
+  <a href="mailto:mojito@wells.ee">Contact</a>
+</footer>
+
+<script src="picker.js?v=38" defer></script>
+</body>
+</html>
