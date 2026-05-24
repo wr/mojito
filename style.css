@@ -1060,11 +1060,22 @@ footer {
 
 .socials svg { display: block; }
 
+.footer-links {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--text-soft);
+}
+.footer-links a { color: var(--text-soft); }
+.footer-links a:hover { color: var(--text); }
+.footer-links span { margin: 0 8px; opacity: 0.5; }
+
 .copyright {
   margin: 0;
   font-size: 13px;
   color: var(--text-soft);
 }
+.copyright a { color: var(--text-soft); }
+.copyright a:hover { color: var(--text); }
 
 @media (max-width: 640px) {
   /* On phones, the demo is autoplay-only — no tapping into the textarea,
