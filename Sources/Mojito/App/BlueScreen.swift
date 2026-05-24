@@ -75,6 +75,11 @@ private struct BlueScreenView: View {
     private let bsodFG = Color(red: 0.85, green: 0.85, blue: 0.85)
     private let bsodHeaderBg = Color(red: 0.6, green: 0.6, blue: 0.6)
 
+    /// Drives the CRT power-on animation. Starts at 0 (image collapsed to a
+    /// thin horizontal slit on a black backdrop) and animates to 1 (full
+    /// image) on appear.
+    @State private var poweredOn: Bool = false
+
     /// Body lines indented to match the reference image. `*` bullets,
     /// continuation lines aligned with the text-after-bullet column.
     /// The block is a single fixed-width VStack vertically and horizontally
@@ -82,46 +87,64 @@ private struct BlueScreenView: View {
     /// body text block above it.
     var body: some View {
         ZStack {
-            bsodBlue.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 0) {
-                // Inverted "Windows" pill — centered above the body block.
-                HStack {
-                    Spacer()
-                    Text(" Mojito ")
-                        .font(.system(size: 22, weight: .regular, design: .monospaced))
-                        .foregroundColor(bsodBlue)
-                        .padding(.horizontal, 2)
-                        .background(bsodHeaderBg)
-                    Spacer()
-                }
-                .padding(.bottom, 20)
+            // CRT "off" backdrop — the slit + blue image scales up against
+            // this. Without it, scaleY < 1 would leak the desktop through.
+            Color.black.ignoresSafeArea()
 
-                // Body text — left-aligned monospace lines.
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("A fatal exception 0E has occurred at 0xDEADBEEF:0xCAFEBABE in VXD")
-                    Text("MOJITO(01) + 0xC0FFEE42. The current application will be terminated.")
-                    Text(" ")
-                    Text("*   Press any key to terminate the current application.")
-                    Text("*   Press  CTRL+ALT+DEL  again to restart your computer. You will")
-                    Text("    lose any unsaved information in all applications.")
-                    Text(" ")
+            ZStack {
+                bsodBlue
+                VStack(alignment: .leading, spacing: 0) {
+                    // Inverted "Windows" pill — centered above the body block.
                     HStack {
                         Spacer()
-                        blinkingPrompt
+                        Text(" Mojito ")
+                            .font(.system(size: 22, weight: .regular, design: .monospaced))
+                            .foregroundColor(bsodBlue)
+                            .padding(.horizontal, 2)
+                            .background(bsodHeaderBg)
                         Spacer()
                     }
+                    .padding(.bottom, 20)
+
+                    // Body text — left-aligned monospace lines.
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("A fatal exception 0E has occurred at 0xDEADBEEF:0xCAFEBABE in VXD")
+                        Text("MOJITO(01) + 0xC0FFEE42. The current application will be terminated.")
+                        Text(" ")
+                        Text("*   Press any key to terminate the current application.")
+                        Text("*   Press  CTRL+ALT+DEL  again to restart your computer. You will")
+                        Text("    lose any unsaved information in all applications.")
+                        Text(" ")
+                        HStack {
+                            Spacer()
+                            blinkingPrompt
+                            Spacer()
+                        }
+                    }
+                    .font(.system(size: 22, weight: .regular, design: .monospaced))
+                    .foregroundColor(bsodFG)
                 }
-                .font(.system(size: 22, weight: .regular, design: .monospaced))
-                .foregroundColor(bsodFG)
+                // The whole block — pill + body — is treated as one fixed-width
+                // unit and centered both axes. Using `.fixedSize` lets SwiftUI
+                // measure the natural width of the longest line so the pill
+                // really does center over the body block.
+                .fixedSize(horizontal: true, vertical: false)
             }
-            // The whole block — pill + body — is treated as one fixed-width
-            // unit and centered both axes. Using `.fixedSize` lets SwiftUI
-            // measure the natural width of the longest line so the pill
-            // really does center over the body block.
-            .fixedSize(horizontal: true, vertical: false)
+            // CRT power-on: blue + content collapsed to a thin horizontal
+            // slit, then expanded to full screen with a slight upward drift
+            // and a brightness ramp. The black ZStack below it shows through
+            // above and below the slit during the expand.
+            .scaleEffect(x: 1, y: poweredOn ? 1 : 0.04, anchor: .center)
+            .offset(y: poweredOn ? 0 : -6)
+            .opacity(poweredOn ? 1 : 0.55)
         }
         .contentShape(Rectangle())
         .onTapGesture { onDismiss() }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.32)) {
+                poweredOn = true
+            }
+        }
     }
 
     private var blinkingPrompt: some View {
