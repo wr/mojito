@@ -1417,13 +1417,13 @@ footer {
 
   /* TextEdit — dark glass body */
   .app-textedit {
-    background: rgba(38, 38, 40, 0.94);
+    background: rgba(28, 28, 30, 0.94);
   }
   .app-textedit .demo-input { color: #f2f2f5; caret-color: #f2f2f5; }
 
   /* iMessage — dark glass body */
   .app-imessage {
-    background: rgba(38, 38, 40, 0.94);
+    background: rgba(28, 28, 30, 0.94);
   }
   .im-avatar-big {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
@@ -1455,7 +1455,7 @@ footer {
   .im-pill-btn { color: rgba(255, 255, 255, 0.45); }
 
   /* Safari — dark glass chrome (page below is already Mastodon dark) */
-  .safari-tb { background: rgba(36, 36, 38, 0.92); }
+  .safari-tb { background: rgba(26, 26, 28, 0.92); }
   .safari-url-text { color: rgba(255, 255, 255, 0.85); }
   .safari-url-pill svg { color: rgba(255, 255, 255, 0.55); }
   .safari-nav-pill { color: rgba(255, 255, 255, 0.65); }
@@ -1464,7 +1464,7 @@ footer {
 
   /* Reminders — dark glass body */
   .app-reminders {
-    background: rgba(38, 38, 40, 0.94);
+    background: rgba(28, 28, 30, 0.94);
   }
   .rm-tb-left,
   .rm-tb-right,
