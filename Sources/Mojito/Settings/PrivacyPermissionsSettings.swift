@@ -1,0 +1,197 @@
+import SwiftUI
+
+struct PrivacyPermissionsSettingsView: View {
+    @EnvironmentObject private var permissions: PermissionsCoordinator
+
+    @State private var axPromptFired = false
+    @State private var imPromptFired = false
+
+    var body: some View {
+        Form {
+            // Permissions first — actionable rows the user might need to
+            // change. Privacy explanation lives below, since once the user
+            // has read it once they're unlikely to revisit.
+            Section("Permissions") {
+                permissionRow(
+                    title: "Accessibility",
+                    detail: "Anchors the picker next to your text cursor.",
+                    granted: permissions.accessibility,
+                    onAction: handleAccessibility
+                )
+                permissionRow(
+                    title: "Input Monitoring",
+                    detail: "Watches keystrokes for the `:` trigger.",
+                    granted: permissions.inputMonitoring,
+                    onAction: handleInputMonitoring
+                )
+            }
+
+            Section("Privacy") {
+                PrivacyDetailsRows()
+                HStack {
+                    Text("Danger zone")
+                    Spacer()
+                    ClearStatsButton()
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    // MARK: - Rows
+
+    private func permissionRow(
+        title: String,
+        detail: String,
+        granted: Bool,
+        onAction: @escaping () -> Void
+    ) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                Text(detail)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            if granted {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(.green)
+            } else {
+                Button("Allow", action: onAction)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    // MARK: - Actions
+
+    private func handleAccessibility() {
+        if axPromptFired {
+            permissions.openAccessibilitySettings()
+        } else {
+            _ = permissions.promptAccessibility()
+            axPromptFired = true
+        }
+    }
+
+    private func handleInputMonitoring() {
+        if imPromptFired {
+            permissions.openInputMonitoringSettings()
+        } else {
+            _ = permissions.promptInputMonitoring()
+            imPromptFired = true
+        }
+    }
+}
+
+// MARK: - Privacy details
+
+/// The four explainer rows shown in Settings → Privacy & Permissions and in
+/// the onboarding "Privacy details…" sheet. Pulled into one view so both
+/// surfaces stay in sync.
+struct PrivacyDetailsRows: View {
+    var body: some View {
+        privacyRow(
+            icon: "keyboard",
+            title: "Keystrokes aren't logged",
+            detail: "Used to detect `:` triggers. Nothing else."
+        )
+        privacyRow(
+            icon: "internaldrive",
+            title: "Your data stays on this Mac",
+            detail: "Usage counts, settings, and your exclusion list are stored locally. \(AppInfo.displayName) doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂"
+        )
+        privacyRow(
+            icon: "dollarsign.circle",
+            title: "Funded by donations",
+            detail: "No ads, tracking, or subscriptions."
+        ) {
+            Button("Donate") {
+                NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsriley")!)
+            }
+        }
+        privacyRow(
+            icon: "chevron.left.forwardslash.chevron.right",
+            title: "Open source and auditable",
+            detail: "All the code is on GitHub. Read it, build it, fork it."
+        ) {
+            Button("View source") {
+                NSWorkspace.shared.open(URL(string: "https://github.com/wr/mojito")!)
+            }
+        }
+    }
+
+    private func privacyRow(icon: String, title: String, detail: String) -> some View {
+        privacyRow(icon: icon, title: title, detail: detail) { EmptyView() }
+    }
+
+    private func privacyRow<Accessory: View>(
+        icon: String,
+        title: String,
+        detail: String,
+        @ViewBuilder accessory: () -> Accessory
+    ) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(.tint)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                Text(detail)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            accessory()
+        }
+        .padding(.vertical, 2)
+    }
+}
+
+/// Modal sheet surfaced by the onboarding permissions step. Hero icon up
+/// top, settings-styled grouped list of the privacy rows, Done button at
+/// the bottom-right.
+struct PrivacyDetailsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(spacing: 18) {
+                Image(systemName: "hand.raised.fill")
+                    .font(.system(size: 44))
+                    .foregroundStyle(.tint)
+                    .padding(.top, 24)
+
+                VStack(spacing: 6) {
+                    Text("Privacy")
+                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    Text("\(AppInfo.displayName) is built to respect your privacy. Here's how.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 420)
+                }
+
+                Form {
+                    PrivacyDetailsRows()
+                }
+                .formStyle(.grouped)
+                .scrollDisabled(true)
+            }
+
+            HStack {
+                Spacer()
+                Button("Done") { dismiss() }
+                    .keyboardShortcut(.defaultAction)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+        }
+        .frame(width: 500, height: 520)
+    }
+}
