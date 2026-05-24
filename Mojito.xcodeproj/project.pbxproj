@@ -47,6 +47,7 @@
 		67DA454189FA317D03701E01 /* Snowfall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 463478D4F770642DDCBA5C8F /* Snowfall.swift */; };
 		68D7BD3B3AB6699B56D7D578 /* s04.bin in Resources */ = {isa = PBXBuildFile; fileRef = 54037341F6A92839A94F3408 /* s04.bin */; };
 		6A8EC5B13FA4A0AC0F338875 /* ConfettiSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB589505841013FF5EF5500 /* ConfettiSound.swift */; };
+		6B48E883C3B324C8ABB16C93 /* AmbientEmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */; };
 		6F9314FB48040BE582D87716 /* BlueScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD72EE1D10D399387F1DD1C8 /* BlueScreen.swift */; };
 		75008F5E9E8750E55512283C /* FzyScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */; };
 		751B7D80FF9EA3BA8B30B8FC /* EasterEggsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA756B434C9FED6B691D07B8 /* EasterEggsSettings.swift */; };
@@ -158,6 +159,7 @@
 		5FB7AB3DB0E63AF30880FE66 /* BrowserURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserURL.swift; sourceTree = "<group>"; };
 		6666150B793721D5095E72A8 /* SymbolsDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolsDatabase.swift; sourceTree = "<group>"; };
 		6E2009C3B36DF9228B873244 /* EmoticonTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmoticonTable.swift; sourceTree = "<group>"; };
+		6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientEmoticonTable.swift; sourceTree = "<group>"; };
 		702AC2870CD686AB17CC518E /* UpdaterCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterCoordinator.swift; sourceTree = "<group>"; };
 		70F2866D3BE0CC5D08CF9AD1 /* Emoji */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Emoji; path = Resources/Emoji; sourceTree = SOURCE_ROOT; };
 		74DB9192DF20F83CAD8A820C /* ImageBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBlob.swift; sourceTree = "<group>"; };
@@ -438,6 +440,7 @@
 		D822FEA7909C200A1E98FE7E /* EmojiDB */ = {
 			isa = PBXGroup;
 			children = (
+				6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */,
 				AB126DDBD153A051CDEF105B /* EggIndex.swift */,
 				9528726096C90D6A0523B86F /* Emoji.swift */,
 				019FC9E40B9630700D2106CE /* EmojiDatabase.swift */,
@@ -607,6 +610,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B43E634B3FAB6B7FBF2CFC6C /* AboutSettings.swift in Sources */,
+				6B48E883C3B324C8ABB16C93 /* AmbientEmoticonTable.swift in Sources */,
 				3FDBEFA3636F345D917BE553 /* AppContext.swift in Sources */,
 				87F16A28F58C4854576DD450 /* AppDelegate.swift in Sources */,
 				9CCEA0B70EEB77F988521DDB /* AppInfo.swift in Sources */,

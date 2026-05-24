@@ -149,6 +149,10 @@ final class KeyMonitor {
 
     private func isNameChar(_ c: Character) -> Bool {
         if c.isLetter || c.isNumber { return true }
-        return c == "_" || c == "-" || c == "+"
+        // `'` is included so `:'(` and `:')` can be captured as queries with
+        // body `'` and terminator `(` / `)`. Side effect: `:foo'bar` is also
+        // a valid (if rarely useful) query; harmless because there's no
+        // shortcode that matches.
+        return c == "_" || c == "-" || c == "+" || c == "'"
     }
 }

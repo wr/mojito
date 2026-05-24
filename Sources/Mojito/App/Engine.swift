@@ -47,6 +47,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// non-undo keystroke that would mutate text, app/process changes, or
     /// shutdown. Backs WEL-52 / WEL-53.
     private var pendingEmoticonUndo: EmoticonUndo?
+    /// Monotonic counter of inputs received. Conversion handlers capture
+    /// this at dispatch time; if it advances during the 80ms async window,
+    /// the user has typed past the conversion and we skip the undo entry.
+    private var inputSeq: Int = 0
     /// Max seconds after an emoticon insertion during which Cmd+Z or
     /// Backspace will roll it back. After this window the entry is dropped
     /// and the keystroke behaves normally.
@@ -254,6 +258,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     private func process(input: TriggerInput) -> Bool {
+        inputSeq &+= 1
         // BSOD-style "press any key to continue" effects pre-empt
         // everything — any keystroke pops them off the stack and is
         // consumed so it doesn't leak into the focused app underneath.
@@ -290,6 +295,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
             return false
         }
+
+        // W-67: any keystroke other than backspace/cmdZ ends the
+        // emoticon-undo window. Without this, the undo entry persists
+        // across subsequent typing — and `TextInserter.replace` deletes
+        // from the current caret, not the post-conversion caret, so a
+        // backspace after `:) ` would delete the space and then *type*
+        // `:)` after the emoji (e.g. `🙂 ` → `🙂:)`).
+        pendingEmoticonUndo = nil
 
         // Before opening, check if current app/site is excluded or if the focused
         // field is a password field. Both must short-circuit BEFORE we transition
@@ -369,8 +382,33 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // on slower fields the synth-backspaces could fire while the
             // terminator was still in flight, leaving it stranded after
             // the inserted emoji (e.g. `:)` → `🙂)`).
+            let seqAtDispatch = inputSeq
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
-                self?.handleEmoticon(query: q, terminator: term)
+                guard let self else { return }
+                self.handleEmoticon(query: q, terminator: term)
+                if self.inputSeq != seqAtDispatch { self.pendingEmoticonUndo = nil }
+            }
+
+        case .checkAmbientEmoticon(let word, let term):
+            // Same 80ms deferral as the colon-emoticon path — the terminator
+            // was passed through to the focused app and we have to wait for
+            // it to land before issuing the synthetic backspaces.
+            let seqAtDispatch = inputSeq
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
+                guard let self else { return }
+                self.handleAmbientEmoticon(word: word, terminator: term)
+                if self.inputSeq != seqAtDispatch { self.pendingEmoticonUndo = nil }
+            }
+
+        case .insertAmbientEmoticon(let word):
+            // Immediate-fire ambient: no terminator, the last char of `word`
+            // was the trigger and was passed through. Same 80ms deferral so
+            // it actually lands before we delete back.
+            let seqAtDispatch = inputSeq
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
+                guard let self else { return }
+                self.handleAmbientEmoticonImmediate(word: word)
+                if self.inputSeq != seqAtDispatch { self.pendingEmoticonUndo = nil }
             }
 
         case .abortEmoticon:
@@ -736,6 +774,51 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // replacement was `:<query><terminator>` — restoring that is what
         // Cmd+Z / Backspace will do during the undo window.
         let original = ":" + query + String(terminator)
+        pendingEmoticonUndo = EmoticonUndo(
+            emojiInserted: replacement,
+            originalText: original,
+            insertedAt: Date(),
+            pid: FocusedElementCache.shared.focusedPID
+        )
+    }
+
+    /// Immediate-fire ambient — the entire word is the emoticon body
+    /// (no trailing terminator). Engine deletes `word.count` chars and
+    /// replaces them with the emoji.
+    private func handleAmbientEmoticonImmediate(word: String) {
+        let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
+        guard enabled, let emoji = AmbientEmoticonTable.emoji(for: word) else {
+            pendingEmoticonUndo = nil
+            return
+        }
+        TextInserter.replace(charactersToDelete: word.count, with: emoji)
+
+        pendingEmoticonUndo = EmoticonUndo(
+            emojiInserted: emoji,
+            originalText: word,
+            insertedAt: Date(),
+            pid: FocusedElementCache.shared.focusedPID
+        )
+    }
+
+    /// Ambient counterpart to `handleEmoticon` — the user typed a whole
+    /// word (no leading `:`) followed by a terminator, and we look the word
+    /// up in `AmbientEmoticonTable`. Same enable gate, same undo registration.
+    private func handleAmbientEmoticon(word: String, terminator: Character) {
+        let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
+        guard enabled, let emoji = AmbientEmoticonTable.emoji(for: word) else {
+            pendingEmoticonUndo = nil
+            return
+        }
+        // Field reads `<word><terminator>`. Delete both, then re-emit the
+        // emoji followed by the terminator — terminator is never part of an
+        // ambient emoticon (those are letter/punct sequences without
+        // trailing whitespace), so it always survives the conversion.
+        let charsToDelete = word.count + 1
+        let replacement = emoji + String(terminator)
+        TextInserter.replace(charactersToDelete: charsToDelete, with: replacement)
+
+        let original = word + String(terminator)
         pendingEmoticonUndo = EmoticonUndo(
             emojiInserted: replacement,
             originalText: original,
