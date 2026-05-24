@@ -109,21 +109,26 @@ enum CeleryMan {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    /// Called by Paul's COMPUTER's click handler. One-shot: swap the two
-    /// video sources and fire the "4d3d3d3-engage" chant once.
+    /// Called by Paul's COMPUTER's click handler. One-shot: fire the
+    /// "4d3d3d3 engage" chant immediately and swap the two video sources
+    /// 2s into the audio so the visual change lands on cue with the
+    /// reference (Tim & Eric's Paul says the line *before* the new clips
+    /// appear).
     private static func handlePaulClicked() {
         guard !didSwap else { return }
         didSwap = true
-        // Swap clip assignments (user wanted these flipped from the
-        // previous round: now celery6/v09 → CINCO panel, celery9/v10 →
-        // Celery Man panel).
-        celeryHost?.swap(to: "v10")
-        cincoHost?.swap(to: "v09")
-        // Fire the engage chant once. AudioBlob is the standard scrambled
+        // Fire the engage chant first. AudioBlob is the standard scrambled
         // loader; s16.bin is 4d3d3d3d.wav.
         if let sound = AudioBlob.load("s16") {
             engagePlayer = sound
             sound.play()
+        }
+        // Hold the videos on their original clips until the chant has been
+        // playing for ~2s, then swap (celery6/v09 → CINCO, celery9/v10 →
+        // Celery Man — flipped from the previous round on purpose).
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            celeryHost?.swap(to: "v10")
+            cincoHost?.swap(to: "v09")
         }
     }
 
