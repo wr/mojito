@@ -1,9 +1,12 @@
 import AppKit
 import SwiftUI
 
-/// One of the discoverable effects. See `EasterEgg` for the
-/// (opaque) identity; the trigger keyword is decoded at runtime from
-/// `EggStrings` and not present in source.
+/// Full-screen confetti shower.
+///
+/// Similar architecture to EmojiRain (transparent click-through panel, Canvas
+/// inside TimelineView, closed-form physics) but the particles are tilted
+/// colored rectangles instead of emoji. Cheaper to draw, and a cleaner
+/// "celebration" read than mixed emoji.
 @MainActor
 enum ConfettiRain {
     private static var activeWindow: NSWindow?

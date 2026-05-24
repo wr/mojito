@@ -7,6 +7,9 @@ import Foundation
 /// Encoding: bytewise XOR against a rolling key starting at `0xA5`, advancing
 /// `+1` per byte. Trivially reversible to anyone determined enough, but it
 /// defeats `strings <binary>` and a casual scan of the source.
+///
+/// Regenerate via `python3 scripts/build_egg_strings.py < keywords.txt`
+/// (`keywords.txt` is plaintext — kept out of git; see the script header).
 enum EggStrings {
     private static func decode(_ bytes: [UInt8]) -> String {
         var out = [UInt8]()
@@ -17,9 +20,7 @@ enum EggStrings {
         return String(decoding: out, as: UTF8.self)
     }
 
-    // Encoded byte arrays, one per discoverable effect. Generated; do not
-    // hand-edit. To rotate or add: change the XOR mask above and re-derive
-    // each row by encoding the plaintext form against the new key.
+    // Encoded byte arrays, one per discoverable effect.
     static let k01: String        = decode([0x9f, 0xcb, 0xc8, 0xc2, 0xc0, 0xde, 0xc4, 0x96])
     static let k03: String          = decode([0x9f, 0xcb, 0xc8, 0xc7, 0xcf, 0x90])
     static let k04: String      = decode([0x9f, 0xc5, 0xc8, 0xc6, 0xcf, 0xcf, 0xdf, 0xd8, 0xc4, 0x94])

@@ -15,8 +15,8 @@ enum EffectDismisser {
     /// `anyKey` means the effect wants ANY key (not just Esc) to dismiss
     /// it — used by BSOD so the iconic "Press any key to continue" prompt
     /// is honest. `anyKeyArmedAt` is a wall-clock guard: synthetic delete
-    /// keystrokes from inserting nothing for the keyword re-enter the tap
-    /// and would otherwise dismiss the BSOD the same frame it shows.
+    /// keystrokes from inserting nothing for the BSOD effect re-enter the
+    /// tap and would otherwise dismiss the BSOD the same frame it shows.
     private struct Entry {
         let token: Int
         let dismiss: () -> Void

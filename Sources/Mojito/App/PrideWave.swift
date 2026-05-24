@@ -1,9 +1,12 @@
 import AppKit
 import SwiftUI
 
-/// One of the discoverable effects. See `EasterEgg` for the
-/// (opaque) identity; the trigger keyword is decoded at runtime from
-/// `EggStrings` and not present in source.
+/// Centered rainbow ribbon that ripples across the screen.
+///
+/// All six pride-flag stripes share a single waveform — the bottom of stripe i
+/// is the top of stripe i+1, so adjacent colors meet on a perfect shared edge
+/// with no gaps or overlap. Translucent so the user can still see through to
+/// whatever they were doing.
 @MainActor
 enum PrideWave {
     private static var activeWindow: NSWindow?

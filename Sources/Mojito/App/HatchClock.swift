@@ -2,9 +2,31 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
-/// One of the discoverable effects. See `EasterEgg` for the
-/// (opaque) identity; the trigger keyword is decoded at runtime from
-/// `EggStrings` and not present in source.
+/// The Swan Station countdown clock.
+///
+/// Architecture (rewritten — split-flap):
+///   - Pure SwiftUI. Each digit cell is a `FlipCard` that owns its own
+///     top-flap / bottom-flap angle state.
+///   - Canonical split-flap / vestaboard animation: four layers per cell.
+///       1. Static back top half  = NEXT (digit, theme)   — revealed when top flap finishes falling
+///       2. Static back bottom half = CURRENT (digit, theme) — covered until bottom flap lands
+///       3. Top flap (foreground) = CURRENT (digit, theme), hinged at BOTTOM, 0° → -90°
+///       4. Bottom flap (foreground) = NEXT (digit, theme), hinged at TOP, +90° → 0°
+///     Top flap falls first (phase 1), then bottom flap stands up (phase 2).
+///   - Each FLAP carries its own (digit, theme) pair so that color changes
+///     animate in lockstep with the digit change. During a flip:
+///       - falling top flap + static bottom-back = OLD everything
+///       - static top-back + rising bottom flap  = NEW everything
+///   - The colon between hours and minutes is a plain static `Text(":")`,
+///     NOT a flip card. It never animates and is given a fixed-width frame so
+///     adjacent digit cards can't crowd it.
+///   - Hieroglyph phase: 5 digit cells; first 3 (0,1,2) are red-on-black,
+///     last 2 (3,4) are black-on-red. Each cell flips at a uniform 1.0s
+///     cadence; per-cell start is offset by i * 0.1s so the row cascades
+///     without per-flip jitter.
+///   - End wrap (000:00 → 108:00): each cell first snaps to "0" (one flip
+///     from whatever glyph it was showing), then rolls forward 0 → 1 → …
+///     → target.
 @MainActor
 enum HatchClock {
     private static var activeWindow: NSWindow?

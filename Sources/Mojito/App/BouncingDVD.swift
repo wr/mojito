@@ -1,9 +1,21 @@
 import AppKit
 import SwiftUI
 
-/// One of the discoverable effects. See `EasterEgg` for the
-/// (opaque) identity; the trigger keyword is decoded at runtime from
-/// `EggStrings` and not present in source.
+/// Bouncing DVD logo, the eternal screensaver.
+///
+/// Logo bounces against the four screen edges. Color cycles only at the
+/// moment the logo touches a wall — never mid-flight, so the visual matches
+/// the lore. If a collision happens to land within a small tolerance of a
+/// corner (logo center within ~6 px of where both axes flip simultaneously),
+/// it counts as a "corner hit" — the logo briefly flashes white, the screen
+/// celebrates, and the effect dismisses.
+///
+/// Position uses a triangle wave for clean reflection at the edges. The
+/// previous integer "bounceCount" approach drifted (because the modulo
+/// math used `truncatingRemainder` which is biased) and made the logo fall
+/// short of the screen edges. Here we compute distance traveled along each
+/// axis, derive both the position and the wall-hit count from the same
+/// number, and color-change only when that count increments.
 @MainActor
 enum BouncingDVD {
     private static var activeWindow: NSWindow?

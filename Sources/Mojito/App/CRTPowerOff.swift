@@ -1,9 +1,13 @@
 import AppKit
 import SwiftUI
 
-/// One of the discoverable effects. See `EasterEgg` for the
-/// (opaque) identity; the trigger keyword is decoded at runtime from
-/// `EggStrings` and not present in source.
+/// CRT-style power-off animation overlaid on the whole desktop. Black panel
+/// that does the classic three-stage shrink:
+///   1. The "screen" collapses vertically into a thin bright horizontal
+///      line in the center (~150ms).
+///   2. The line shrinks to a single bright dot (~200ms).
+///   3. The dot fades to black with the bundled CRT-thunk audio.
+/// Total ~1.2s, then auto-dismisses.
 @MainActor
 enum CRTPowerOff {
     private static var activeWindow: NSWindow?

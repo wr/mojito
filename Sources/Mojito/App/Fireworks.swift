@@ -2,9 +2,13 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
-/// One of the discoverable effects. See `EasterEgg` for the
-/// (opaque) identity; the trigger keyword is decoded at runtime from
-/// `EggStrings` and not present in source.
+/// Bursting fireworks across the upper half of the screen.
+///
+/// Each burst is a colored shell rising from the bottom, then exploding into
+/// a sphere of sparks that fall with gravity and fade. Secondary "child"
+/// explosions a moment after the main pop give the burst a layered feel.
+/// Each burst's pop is paired with a short synthesized "pew" tone, pitched
+/// differently per burst so a salvo feels musical rather than monotone.
 @MainActor
 enum Fireworks {
     private static var activeWindow: NSWindow?

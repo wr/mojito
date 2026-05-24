@@ -1,9 +1,18 @@
 import AppKit
 import SwiftUI
 
-/// One of the discoverable effects. See `EasterEgg` for the
-/// (opaque) identity; the trigger keyword is decoded at runtime from
-/// `EggStrings` and not present in source.
+/// Classic Snake in a regular game window.
+///
+/// Arrow keys steer; Esc quits. Key handling lives on a custom NSWindow
+/// subclass — SwiftUI's NSHostingView doesn't put a child responder into
+/// the chain reliably, and global/local NSEvent monitors are unreliable
+/// for LSUIElement apps. Overriding `keyDown` on the window itself works
+/// because unhandled keys bubble up the responder chain and the window is
+/// the last stop.
+///
+/// Visual treatment is delightful instead of utilitarian: emoji snake
+/// (head distinct from body), apple food, retro arcade-style scoreboard,
+/// and a custom green border + title bar.
 @MainActor
 enum SnakeGame {
     fileprivate static var window: SnakeWindow?
@@ -64,9 +73,9 @@ enum SnakeGame {
 
 /// NSWindow subclass that intercepts key events for Snake. Arrow keys steer;
 /// Esc closes the window. Other keys are ignored — we used to bail on any
-/// non-arrow key, but the synthetic backspace burst from the the keyword
-/// shortcode deletion arrives at this window once it becomes key, which
-/// instantly closed the game before the user saw anything.
+/// non-arrow key, but the synthetic backspace burst from the trigger
+/// deletion arrives at this window once it becomes key, which instantly
+/// closed the game before the user saw anything.
 fileprivate final class SnakeWindow: NSWindow {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { true }

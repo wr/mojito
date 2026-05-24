@@ -2,9 +2,12 @@ import AppKit
 import SwiftUI
 import WebKit
 
-/// One of the discoverable effects. See `EasterEgg` for the
-/// (opaque) identity; the trigger keyword is decoded at runtime from
-/// `EggStrings` and not present in source.
+/// TROGDOR! Opens a small WKWebView window pointed at the homestarrunner.com
+/// Trogdor page, zoomed out to 60% so the whole flash-era game frame fits.
+///
+/// We deliberately do NOT make this fullscreen — it's a window with a real
+/// close button, sitting on top of the desktop. The user can drag it around,
+/// click the close button, or hit Esc (via EffectDismisser) to dismiss.
 @MainActor
 enum Trogdor {
     private static var window: NSWindow?
@@ -17,12 +20,12 @@ enum Trogdor {
             NSApp.activate(ignoringOtherApps: true)
             return
         }
-        // Defer ~180ms so the synthetic backspaces firing from
-        // the keyword finish landing in the user's text field BEFORE we
-        // steal focus via `NSApp.activate`. Without this delay the
-        // pending backspaces race the focus switch, get delivered to
-        // the WKWebView which doesn't know what to do with them, and
-        // AppKit plays the system "donk" alert beep.
+        // Defer ~180ms so the synthetic backspaces firing from the trigger
+        // deletion finish landing in the user's text field BEFORE we steal
+        // focus via `NSApp.activate`. Without this delay the pending
+        // backspaces race the focus switch, get delivered to the WKWebView
+        // which doesn't know what to do with them, and AppKit plays the
+        // system "donk" alert beep.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             MainActor.assumeIsolated { openWindow() }
         }
