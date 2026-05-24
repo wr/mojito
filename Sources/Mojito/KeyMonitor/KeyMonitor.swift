@@ -71,6 +71,13 @@ final class KeyMonitor {
     }
 
     private func handle(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
+        // Skip events we posted ourselves (via TextInserter). Without this,
+        // synthetic backspaces emitted during an emoticon replacement land
+        // in this callback while `pendingEmoticonUndo` is set and trigger
+        // the undo path immediately — turning `:)` into `::)`.
+        if event.getIntegerValueField(.eventSourceUserData) == TextInserter.synthMarker {
+            return Unmanaged.passUnretained(event)
+        }
         // The tap can be auto-disabled by the system if it takes too long; re-enable.
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let tap = eventTap { CGEvent.tapEnable(tap: tap, enable: true) }
