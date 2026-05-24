@@ -44,12 +44,12 @@ enum CeleryMan {
         let visible = screen.visibleFrame
 
         // Sizes — side-by-side arrangement, baseline-aligned.
-        //   - Celery Man (landscape): 30% smaller than the prior 320pt height.
-        //   - CINCO ID (portrait):    20% taller than the prior 320pt height.
+        //   - Celery Man (landscape): 0.91x the 320pt baseline height.
+        //   - CINCO ID (portrait):    1.56x the 320pt baseline height.
         //   - Paul's COMPUTER:        small panel anchored under the videos.
-        let celeryHeight: CGFloat = 320 * 0.7
+        let celeryHeight: CGFloat = 320 * 0.91
         let celerySize = NSSize(width: celeryHeight * 300.0 / 206.0, height: celeryHeight)
-        let cincoHeight: CGFloat = 320 * 1.2
+        let cincoHeight: CGFloat = 320 * 1.56
         let cincoSize  = NSSize(width: cincoHeight * 180.0 / 290.0, height: cincoHeight)
         let paulSize   = NSSize(width: 320, height: 130)
         let columnGap: CGFloat = 24
