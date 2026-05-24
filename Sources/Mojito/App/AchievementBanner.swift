@@ -2,14 +2,23 @@ import AppKit
 import SwiftUI
 
 /// In-app achievement banner shown when an easter egg is first discovered.
+/// Visually mirrors a macOS notification banner: ~22pt squircle corners,
+/// `.hudWindow` glass, slides in from the right edge of the main screen.
+/// Sits just below the menu bar, in the same screen position macOS uses
+/// for notifications — so the OS chip can layer above it without overlap
+/// if it fires too.
+///
 /// Rendered at `kCGPopUpMenuWindowLevel` (101) so it draws above the full-
-/// screen egg panels (which sit at `kCGStatusWindowLevel` = 25). The system
-/// notification from `DiscoveryNotifier` still fires alongside this banner
-/// for Notification Center history — this is the primary, guaranteed signal.
+/// screen egg panels (`kCGStatusWindowLevel` = 25). The system notification
+/// from `DiscoveryNotifier` still fires for Notification Center history.
 @MainActor
 enum AchievementBanner {
     private static var queue: [EasterEgg] = []
     private static var currentPanel: NSPanel?
+    private static let bannerSize = NSSize(width: 320, height: 64)
+    private static let margin: CGFloat = 12
+    private static let cornerRadius: CGFloat = 18
+    private static let holdDuration: TimeInterval = 3.5
 
     static func show(_ egg: EasterEgg) {
         queue.append(egg)
@@ -21,18 +30,19 @@ enum AchievementBanner {
         let egg = queue.removeFirst()
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
 
-        let bannerSize = NSSize(width: 360, height: 80)
-        let margin: CGFloat = 16
         let visibleFrame = screen.visibleFrame
-        let restingOrigin = NSPoint(
+        let restingFrame = NSRect(
             x: visibleFrame.maxX - bannerSize.width - margin,
-            y: visibleFrame.maxY - bannerSize.height - margin
+            y: visibleFrame.maxY - bannerSize.height - margin,
+            width: bannerSize.width,
+            height: bannerSize.height
         )
-        // Off-screen above the resting position; we animate down into place.
-        let offscreenOrigin = NSPoint(x: restingOrigin.x, y: restingOrigin.y + bannerSize.height + margin + 40)
+        // Off-screen to the right of the main screen edge — matches the
+        // direction macOS notifications slide in from on Sonoma+.
+        let offscreenFrame = restingFrame.offsetBy(dx: bannerSize.width + margin + 40, dy: 0)
 
         let panel = NSPanel(
-            contentRect: NSRect(origin: offscreenOrigin, size: bannerSize),
+            contentRect: offscreenFrame,
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -40,47 +50,92 @@ enum AchievementBanner {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
+        panel.alphaValue = 0.8
         panel.ignoresMouseEvents = true
         panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.popUpMenuWindow)))
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
 
-        let total = EasterEggTracker.totalCount
-        let discovered = EasterEggTracker.discoveredCount
+        // AppKit glass background. SwiftUI's `.regularMaterial` inside a
+        // borderless transparent NSPanel renders empty on macOS 14+;
+        // NSVisualEffectView as the actual contentView is reliable. Same
+        // pattern as DialupSound. `.popover` is a lighter, more subtle
+        // glass than `.hudWindow`.
+        let glass = NSVisualEffectView()
+        glass.material = .sidebar
+        glass.blendingMode = .behindWindow
+        glass.state = .active
+        glass.wantsLayer = true
+        glass.layer?.cornerRadius = cornerRadius
+        glass.layer?.cornerCurve = .continuous
+        glass.layer?.masksToBounds = true
+        glass.translatesAutoresizingMaskIntoConstraints = false
+
         let host = NSHostingView(rootView: BannerView(
             egg: egg,
-            discoveredCount: discovered,
-            totalCount: total
+            discoveredCount: EasterEggTracker.discoveredCount,
+            totalCount: EasterEggTracker.totalCount
         ))
-        host.frame = NSRect(origin: .zero, size: bannerSize)
-        panel.contentView = host
+        host.translatesAutoresizingMaskIntoConstraints = false
+        glass.addSubview(host)
+        NSLayoutConstraint.activate([
+            host.leadingAnchor.constraint(equalTo: glass.leadingAnchor),
+            host.trailingAnchor.constraint(equalTo: glass.trailingAnchor),
+            host.topAnchor.constraint(equalTo: glass.topAnchor),
+            host.bottomAnchor.constraint(equalTo: glass.bottomAnchor),
+        ])
+        panel.contentView = glass
         panel.orderFrontRegardless()
         currentPanel = panel
 
-        // Slide in.
-        NSAnimationContext.runAnimationGroup({ ctx in
-            ctx.duration = 0.35
-            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            panel.animator().setFrameOrigin(restingOrigin)
-        })
-
-        // Hold ~3.5 s, slide out, then dequeue the next banner.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35 + 3.5) {
-            MainActor.assumeIsolated {
-                guard currentPanel === panel else { return }
-                NSAnimationContext.runAnimationGroup({ ctx in
-                    ctx.duration = 0.35
-                    ctx.timingFunction = CAMediaTimingFunction(name: .easeIn)
-                    panel.animator().setFrameOrigin(offscreenOrigin)
-                    panel.animator().alphaValue = 0
-                }, completionHandler: {
-                    MainActor.assumeIsolated {
-                        panel.orderOut(nil)
-                        if currentPanel === panel { currentPanel = nil }
-                        showNext()
+        // Slide in. We can't use `panel.setFrame(animate:)` — it blocks
+        // the main thread for the animation duration, which freezes the
+        // very easter-egg effect we're announcing. `animator().setFrame`
+        // silently no-ops on borderless panels. So we drive the slide
+        // ourselves with a non-blocking Timer; cheap (60 Hz × 0.35 s ≈
+        // 21 setFrameOrigin calls).
+        slide(panel: panel, from: offscreenFrame, to: restingFrame) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + holdDuration) {
+                MainActor.assumeIsolated {
+                    guard currentPanel === panel else { return }
+                    slide(panel: panel, from: restingFrame, to: offscreenFrame) {
+                        MainActor.assumeIsolated {
+                            panel.orderOut(nil)
+                            if currentPanel === panel { currentPanel = nil }
+                            showNext()
+                        }
                     }
-                })
+                }
             }
         }
+    }
+
+    private static let slideDuration: TimeInterval = 0.35
+
+    /// Non-blocking timer-driven setFrameOrigin animation with ease-out.
+    private static func slide(
+        panel: NSPanel,
+        from start: NSRect,
+        to end: NSRect,
+        completion: @escaping () -> Void
+    ) {
+        let startTime = Date()
+        let dur = slideDuration
+        let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { t in
+            MainActor.assumeIsolated {
+                let elapsed = Date().timeIntervalSince(startTime)
+                let progress = min(1.0, elapsed / dur)
+                // Ease-out cubic: snappy entry, soft settle.
+                let eased = 1 - pow(1 - progress, 3)
+                let x = start.minX + (end.minX - start.minX) * eased
+                let y = start.minY + (end.minY - start.minY) * eased
+                panel.setFrameOrigin(NSPoint(x: x, y: y))
+                if progress >= 1.0 {
+                    t.invalidate()
+                    completion()
+                }
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
     }
 }
 
@@ -89,44 +144,25 @@ private struct BannerView: View {
     let discoveredCount: Int
     let totalCount: Int
 
-    // Sampled from the bundled app icons (also used by DialupView).
-    private let mojitoOrange = Color(red: 0.95, green: 0.70, blue: 0.25)
-
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(alignment: .center, spacing: 10) {
             Text(egg.emojiGlyph ?? "🎉")
-                .font(.system(size: 36))
-                .frame(width: 44, height: 44)
-
-            VStack(alignment: .leading, spacing: 2) {
+                .font(.system(size: 26))
+                .frame(width: 36, height: 36)
+            VStack(alignment: .leading, spacing: 1) {
                 Text("Easter egg discovered")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundStyle(mojitoOrange)
-                    .textCase(.uppercase)
-                Text(egg.title)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
-                Text(discoveredCount >= totalCount
-                     ? "All \(totalCount) found"
-                     : "\(discoveredCount) of \(totalCount)")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                Text(egg.title)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
             }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(.regularMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
-                )
-                .shadow(color: .black.opacity(0.20), radius: 12, x: 0, y: 4)
-        )
-        .padding(2)
     }
 }
