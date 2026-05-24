@@ -33,6 +33,13 @@ enum CaretLocator {
         // screen coords (bottom-left origin) the TOP is `frame.maxY`, NOT
         // `frame.minY`.
         if let frame = elementFrame, isOnScreen(frame), frame.width < 4000, frame.height < 4000 {
+            // Skip the top-left anchor for large content areas (terminals, editors,
+            // browser panes) where the cursor can be anywhere in the element —
+            // callers fall back to mouse position instead.
+            guard frame.height <= 160 else {
+                os_log("caret unavailable — element too tall for top-left estimate (%{public}.0f pt)", log: log, type: .info, frame.height)
+                return nil
+            }
             let caretHeight: CGFloat = max(16, min(frame.height, 22))
             let rect = CGRect(
                 x: frame.minX + 4,
