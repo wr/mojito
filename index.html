@@ -11,7 +11,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<link rel="stylesheet" href="style.css?v=48">
+<link rel="stylesheet" href="style.css?v=55">
 </head>
 <body>
 
@@ -37,14 +37,41 @@
   </header>
   <div class="hero-card">
 
-    <!-- desktop icons (noninteractive, always behind app windows) -->
-    <div class="desktop-icons" aria-hidden="true">
-      <div class="desktop-icon">
+    <!-- desktop icons. The folder is draggable as an easter egg: drop it on
+         the trash and the site "crashes" (Sad Mac). Trash lives bottom-right. -->
+    <div class="desktop-icons">
+      <div class="desktop-icon desktop-folder" id="desktop-folder" draggable="true" tabindex="-1">
         <img class="folder-img"
              src="folder.png?v=2"
              srcset="folder.png?v=2 1x, folder@2x.png?v=2 2x"
-             alt="" width="72" height="72">
-        <span class="icon-label">Stuff</span>
+             alt="" width="72" height="72" draggable="false">
+        <span class="icon-label">Website</span>
+      </div>
+    </div>
+    <div class="desktop-trash" id="desktop-trash" aria-hidden="true">
+      <img class="trash-img"
+           src="trash.png?v=1"
+           srcset="trash.png?v=1 1x, trash@2x.png?v=1 2x"
+           alt="" width="104" height="128" draggable="false">
+    </div>
+
+    <!-- Sad Mac crash overlay, shown when the Website folder is dragged to trash. -->
+    <div class="sadmac" id="sadmac" aria-hidden="true">
+      <div class="sadmac-inner">
+        <div class="sadmac-face" aria-hidden="true">
+          <div class="sadmac-row sadmac-row-eyes">
+            <span class="sadmac-eye"><span class="sadmac-x">X</span></span>
+            <span class="sadmac-eye"><span class="sadmac-x">X</span></span>
+          </div>
+          <div class="sadmac-row sadmac-row-mouth">
+            <span class="sadmac-mouth"></span>
+          </div>
+        </div>
+        <div class="sadmac-codes">
+          <div>0000000F</div>
+          <div>00000003</div>
+        </div>
+        <div class="sadmac-hint">click to reboot</div>
       </div>
     </div>
 
@@ -321,6 +348,6 @@ Changes not staged for commit:
   <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
 </footer>
 
-<script src="picker.js?v=41" defer></script>
+<script src="picker.js?v=43" defer></script>
 </body>
 </html>
