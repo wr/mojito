@@ -1032,9 +1032,39 @@ footer {
   text-align: center;
 }
 
-footer a { color: var(--text-soft); }
-footer a:hover { color: var(--text); }
-footer span { margin: 0 8px; opacity: 0.5; }
+.socials {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--text-soft);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.socials a:hover {
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.socials svg { display: block; }
+
+.copyright {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-soft);
+}
 
 @media (max-width: 640px) {
   /* On phones, the demo is autoplay-only — no tapping into the textarea,
@@ -1189,6 +1219,8 @@ footer span { margin: 0 8px; opacity: 0.5; }
   .rm-textarea::placeholder { color: rgba(255, 255, 255, 0.36); }
   .rm-item { border-bottom-color: rgba(255, 255, 255, 0.08); }
   .rm-check { border-color: rgba(255, 255, 255, 0.30); }
+
+  .socials a:hover { background: rgba(255, 255, 255, 0.08); }
 
   /* picker rows on the dark menu material */
   .picker-row { color: #fff; }
