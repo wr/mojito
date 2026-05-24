@@ -1021,61 +1021,108 @@ main { max-width: 620px; margin: 0 auto; padding: 0 28px; }
 
 .prose p:last-child { margin-bottom: 0; }
 
-/* footer */
+/* footer — a single Tahoe-style frosted pill, lifted right off the
+   .tb-pill recipe used in the app windows above, with the copyright
+   sitting quietly below it. The top hairline is a gradient that fades
+   to transparent at the page edges so it reads as a section break,
+   not a hard rule. */
 footer {
-  max-width: 620px;
-  margin: 80px auto 0;
-  padding: 32px 28px 48px;
-  border-top: 1px solid var(--border);
-  font-size: 14px;
-  color: var(--text-soft);
+  max-width: 720px;
+  margin: 96px auto 0;
+  padding: 44px 28px 56px;
   text-align: center;
+  background:
+    linear-gradient(90deg,
+      transparent 0%,
+      var(--border) 18%,
+      var(--border) 82%,
+      transparent 100%) top / 100% 1px no-repeat;
 }
 
-.socials {
-  list-style: none;
-  margin: 0 0 14px;
-  padding: 0;
-  display: flex;
-  justify-content: center;
+.footer-pill {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  height: 44px;
+  padding: 0 6px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border: 0.5px solid rgba(0, 0, 0, 0.07);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 10px 30px rgba(30, 140, 84, 0.09);
+  margin-bottom: 20px;
 }
 
-.socials a {
+.footer-socials {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.footer-socials a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  color: var(--text-soft);
-  transition: color 0.15s ease, background 0.15s ease;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: rgba(0, 0, 0, 0.55);
+  transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease;
 }
 
-.socials a:hover {
-  color: var(--text);
+.footer-socials a:hover {
+  color: rgba(0, 0, 0, 0.88);
   background: rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
 }
 
-.socials svg { display: block; }
+.footer-socials svg { display: block; }
 
-.footer-links {
-  margin: 0 0 8px;
-  font-size: 14px;
-  color: var(--text-soft);
+.footer-pill-divider {
+  width: 0.5px;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.12);
+  margin: 0 10px;
+  flex-shrink: 0;
 }
-.footer-links a { color: var(--text-soft); }
-.footer-links a:hover { color: var(--text); }
-.footer-links span { margin: 0 8px; opacity: 0.5; }
+
+.footer-text-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.footer-text-links a {
+  color: rgba(0, 0, 0, 0.62);
+  transition: color 0.18s ease;
+}
+
+.footer-text-links a:hover { color: rgba(0, 0, 0, 0.88); }
 
 .copyright {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-soft);
+  letter-spacing: -0.005em;
 }
-.copyright a { color: var(--text-soft); }
-.copyright a:hover { color: var(--text); }
+
+.copyright a {
+  color: var(--accent);
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.copyright a:hover { color: var(--accent-hover); }
 
 @media (max-width: 640px) {
   /* On phones, the demo is autoplay-only — no tapping into the textarea,
@@ -1231,7 +1278,23 @@ footer {
   .rm-item { border-bottom-color: rgba(255, 255, 255, 0.08); }
   .rm-check { border-color: rgba(255, 255, 255, 0.30); }
 
-  .socials a:hover { background: rgba(255, 255, 255, 0.08); }
+  /* footer pill — dark glass variant matching the dark tb-pill */
+  .footer-pill {
+    background: rgba(60, 60, 64, 0.50);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.10),
+      0 1px 2px rgba(0, 0, 0, 0.30),
+      0 10px 30px rgba(46, 184, 103, 0.11);
+  }
+  .footer-pill-divider { background: rgba(255, 255, 255, 0.12); }
+  .footer-socials a { color: rgba(255, 255, 255, 0.65); }
+  .footer-socials a:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.10);
+  }
+  .footer-text-links a { color: rgba(255, 255, 255, 0.72); }
+  .footer-text-links a:hover { color: #fff; }
 
   /* picker rows on the dark menu material */
   .picker-row { color: #fff; }
