@@ -4081,4 +4081,126 @@
   } else {
     autoplayLoop();
   }
+
+  /* ---------- easter egg: drag "Website" folder to trash to crash the site.
+     Uses HTML5 drag-and-drop, no touch support (mobile is autoplay-only and
+     drag-and-drop isn't a native touch gesture anyway). On drop, we stop the
+     autoplay loop, play a short synthesized "death chime" via Web Audio, and
+     show the Sad Mac overlay (#sadmac). Click anywhere on the overlay to
+     reload — the page literally reboots itself. */
+  const folder = document.getElementById('desktop-folder');
+  const trash = document.getElementById('desktop-trash');
+  const sadmac = document.getElementById('sadmac');
+
+  if (folder && trash && sadmac) {
+    folder.addEventListener('dragstart', (e) => {
+      folder.classList.add('is-dragging');
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        // Firefox refuses to start a drag unless something is in dataTransfer.
+        try { e.dataTransfer.setData('text/plain', 'website'); } catch (_) {}
+
+        // Build a macOS Finder-style drag image: folder icon with its full
+        // drop-shadow intact (the browser would otherwise clip the source
+        // element's shadow at the element box), plus a blue accent pill for
+        // the label. Element must be in the DOM and visible for the browser
+        // to snapshot it; we park it offscreen and remove it on the next
+        // tick (the snapshot is captured synchronously).
+        const ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        const img = document.createElement('img');
+        img.className = 'drag-ghost-img';
+        img.src = 'folder.png?v=2';
+        img.srcset = 'folder.png?v=2 1x, folder@2x.png?v=2 2x';
+        img.width = 72; img.height = 72; img.alt = '';
+        const label = document.createElement('span');
+        label.className = 'drag-ghost-label';
+        label.textContent = 'Website';
+        ghost.appendChild(img);
+        ghost.appendChild(label);
+        document.body.appendChild(ghost);
+        // Offset roughly centers the drag image on the cursor (icon center).
+        e.dataTransfer.setDragImage(ghost, 58, 40);
+        setTimeout(() => ghost.remove(), 0);
+      }
+    });
+    folder.addEventListener('dragend', () => {
+      folder.classList.remove('is-dragging');
+      trash.classList.remove('is-dropzone');
+    });
+
+    // dragenter/dragover must preventDefault to mark the element as a drop
+    // target; otherwise the browser won't fire `drop`.
+    const allowDrop = (e) => {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      trash.classList.add('is-dropzone');
+    };
+    trash.addEventListener('dragenter', allowDrop);
+    trash.addEventListener('dragover', allowDrop);
+    trash.addEventListener('dragleave', (e) => {
+      // Only un-highlight when we actually leave the trash, not when crossing
+      // over its child elements (dragleave fires on every child boundary).
+      if (e.target === trash || !trash.contains(e.relatedTarget)) {
+        trash.classList.remove('is-dropzone');
+      }
+    });
+    trash.addEventListener('drop', (e) => {
+      e.preventDefault();
+      trash.classList.remove('is-dropzone');
+      folder.classList.remove('is-dragging');
+      crashTheSite();
+    });
+  }
+
+  function crashTheSite() {
+    stopAutoplay();
+    // Hide the active app + picker instantly so the "crash" feels abrupt
+    // — even before the overlay fades in.
+    if (picker) picker.classList.remove('show');
+    playDeathChime();
+    if (sadmac) {
+      sadmac.setAttribute('aria-hidden', 'false');
+      // next frame so the transition runs
+      requestAnimationFrame(() => sadmac.classList.add('is-on'));
+      sadmac.addEventListener('click', () => {
+        window.location.reload();
+      }, { once: true });
+    }
+  }
+
+  // Classic-Mac-style death chime — a short, harsh descending square-wave
+  // motif. Synthesized so we don't have to ship an audio file. Best-effort:
+  // silently bails if Web Audio is unavailable or blocked.
+  function playDeathChime() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      const now = ctx.currentTime;
+      // Three descending notes, square wave, short envelope each.
+      const notes = [
+        { f: 440, t: 0.00, d: 0.18 },
+        { f: 277, t: 0.18, d: 0.22 },
+        { f: 130, t: 0.42, d: 0.55 },
+      ];
+      const master = ctx.createGain();
+      master.gain.value = 0.18;
+      master.connect(ctx.destination);
+      notes.forEach((n) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(n.f, now + n.t);
+        g.gain.setValueAtTime(0, now + n.t);
+        g.gain.linearRampToValueAtTime(1, now + n.t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+        osc.connect(g).connect(master);
+        osc.start(now + n.t);
+        osc.stop(now + n.t + n.d + 0.02);
+      });
+      // Close the context after the chime finishes.
+      setTimeout(() => { try { ctx.close(); } catch (_) {} }, 1500);
+    } catch (_) { /* no audio, no problem */ }
+  }
 })();

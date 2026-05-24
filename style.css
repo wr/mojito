@@ -203,7 +203,9 @@ code {
   /* No overflow:hidden here — that's done by .stage. Picker can spill out. */
 }
 
-/* desktop icons — always BEHIND windows. z-index: 0 (below .stage at z:1) */
+/* desktop icons — sit BEHIND windows (z:0, below .stage at z:1) but the icon
+   itself re-enables pointer-events so the folder can be dragged. The folder
+   and trash live in corners where the centered app windows don't cover them. */
 .desktop-icons {
   position: absolute;
   top: 24px;
@@ -226,11 +228,57 @@ code {
   text-align: center;
 }
 
+.desktop-folder {
+  pointer-events: auto;
+  cursor: grab;
+  -webkit-user-drag: element;
+}
+.desktop-folder:active { cursor: grabbing; }
+.desktop-folder.is-dragging { opacity: 0.45; }
+
+/* Custom drag image — sits offscreen, the browser snapshots it for the
+   floating drag cursor. Padded so the icon's drop-shadow has room (browsers
+   clip the drag snapshot to the element's bounding box, which otherwise
+   slices straight through the shadow). Label is rendered as a macOS Finder-
+   style blue accent pill with white text. */
+.drag-ghost {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 22px 18px;
+  pointer-events: none;
+  /* Keep typography consistent with the rest of the site. */
+  font-family: inherit;
+}
+
+.drag-ghost-img {
+  width: 72px;
+  height: 72px;
+  display: block;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.28));
+}
+
+.drag-ghost-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: #fff;
+  background: #0064E0; /* macOS system accent blue */
+  padding: 1px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
 .folder-img {
   width: 72px;
   height: 72px;
   display: block;
   filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
+  -webkit-user-drag: none;
 }
 
 .icon-label {
@@ -243,16 +291,152 @@ code {
   text-shadow: 0 1px 2px rgba(0,0,0,0.55);
 }
 
+/* Trash sits in the bottom-right corner of the hero-card "desktop". Same
+   z-index as the folder so it stays behind the app windows; pointer-events
+   are re-enabled on the trash itself so it can receive drop events. */
+.desktop-trash {
+  position: absolute;
+  bottom: 20px;
+  right: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 84px;
+  text-align: center;
+  z-index: 0;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.trash-img {
+  /* Trash artwork is taller than wide; size by height and let width follow. */
+  width: auto;
+  height: 61px;
+  display: block;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.20));
+  transition: filter 0.18s ease;
+  -webkit-user-drag: none;
+}
+
+/* Hovering with a drag: darken the trash to indicate a valid drop target,
+   no scale (per design feedback — the trash itself stays put). */
+.desktop-trash.is-dropzone .trash-img {
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.20)) brightness(0.55);
+}
+
+/* Sad Mac crash overlay — full-viewport black screen with a tiny pixelated
+   sad face centered in the middle, classic Mac OS bomb-style hex codes
+   below, and a cursor hint. Click anywhere reloads the page. */
+.sadmac {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 0.12s linear;
+  /* Monospace bitmap-y stack for the codes. */
+  font-family: "Chicago", "ChicagoFLF", "Andale Mono", "Courier New", monospace;
+  color: #fff;
+}
+
+.sadmac.is-on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sadmac-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  transform: scale(1);
+  /* image-rendering pixelated keeps the chunky face crisp at any size. */
+  image-rendering: pixelated;
+}
+
+/* The face is drawn with CSS — a rounded white box for the head with two
+   black X-eyes and a frowny mouth. Kept deliberately chunky/low-fi. */
+.sadmac-face {
+  width: 132px;
+  height: 132px;
+  background: #fff;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 26px 18px;
+  box-sizing: border-box;
+  position: relative;
+  box-shadow: 0 0 0 4px #000, 0 0 0 8px #fff;
+}
+
+.sadmac-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.sadmac-eye {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 1;
+  font-family: "Chicago", "Andale Mono", "Courier New", monospace;
+}
+
+.sadmac-mouth {
+  width: 50px;
+  height: 12px;
+  border-top: 4px solid #000;
+  border-left: 4px solid #000;
+  border-right: 4px solid #000;
+  border-radius: 18px 18px 0 0;
+}
+
+.sadmac-codes {
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.sadmac-hint {
+  margin-top: 4px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
 /* stage clips the carousel so apps slide off-screen cleanly within the hero
    card. We only need to clip HORIZONTALLY (the slide direction) — clipping
    vertically too would also lop off the bottom of every app's drop shadow.
-   `clip-path: inset(-9999px 0)` clips left/right tight, top/bottom loose. */
+   `clip-path: inset(-9999px 0)` clips left/right tight, top/bottom loose.
+   pointer-events:none lets the corner desktop icons (z-index:0, behind the
+   stage) still receive drag/drop events even though the stage covers them
+   visually; .app.is-active re-enables pointer events on the active window. */
 .stage {
   position: absolute;
   inset: 0;
   clip-path: inset(-9999px 0);
   border-radius: inherit;
   z-index: 1;
+  pointer-events: none;
 }
 
 /* carousel is just a positioning context; each app positions itself absolutely
@@ -1137,12 +1321,14 @@ footer {
     -webkit-user-select: none;
     user-select: none;
   }
-  /* Scale the desktop "Stuff" folder down so it doesn't dwarf the
+  /* Scale the desktop folder + trash down so they don't dwarf the
      scaled-down app windows on narrow viewports. */
   .desktop-icons { top: 16px; right: 14px; gap: 10px; }
   .desktop-icon  { width: 56px; }
   .folder-img    { width: 44px; height: 44px; }
   .icon-label    { font-size: 11px; }
+  .desktop-trash { bottom: 14px; right: 14px; width: 56px; }
+  .trash-img     { height: 38px; }
   /* App windows have fixed pixel widths (380–680px). On a narrow viewport
      the wider ones (Terminal 680, TextEdit 600, Mastodon 540) overflow the
      stage and get clipped. Shrink the carousel + picker proportionally to
@@ -1167,6 +1353,8 @@ footer {
   .desktop-icon { width: 48px; }
   .folder-img   { width: 36px; height: 36px; }
   .icon-label   { font-size: 10px; }
+  .desktop-trash { width: 48px; }
+  .trash-img    { height: 31px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
