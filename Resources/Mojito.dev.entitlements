@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+	<!-- Development-only. The self-signed "Mojito Dev" identity created by
+	     scripts/setup-dev-signing.sh has a different team ID than the SwiftPM
+	     debug dylibs Xcode produces, so hardened runtime would otherwise reject
+	     them on launch. Release builds use Resources/Mojito.entitlements which
+	     does NOT carry this flag. -->
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
+</dict>
+</plist>

@@ -1,0 +1,165 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Source of truth
+- GitHub: github.com/wr/mojito
+- Linear project: Mojito (id: 08a62212-7546-4dee-b7c4-0ffed3fff097), Personal team (key `W`, issue IDs `W-123`)
+- Branch prefix: wells/
+- PR mode: ready
+
+## What this is
+
+Mojito is a macOS menu-bar utility (`ee.wells.Mojito`, deployment target 14.0) that expands `:emoji:` shortcodes into real emoji in any text field anywhere on macOS. It hooks `CGEventTap` to watch keystrokes globally, runs a state machine over the events, and uses synthetic keyboard events to delete the typed `:query:` and insert the chosen emoji. The original design doc lives at `PLAN.md` and is still mostly accurate.
+
+## Commands
+
+```bash
+# Regenerate Xcode project after editing project.yml or adding/removing Swift files
+xcodegen generate
+
+# Debug build (signed with the local "Mojito Dev" identity).
+# Debug builds use bundle ID `ee.wells.Mojito.dev`, product name "Mojito Dev",
+# and produce "Mojito Dev.app" — so dev TCC grants stay separate from the
+# released Mojito.app. The dev build inherits the release app's UserDefaults
+# as a fallback layer (see Sources/Mojito/App/main.swift).
+xcodebuild -project Mojito.xcodeproj -scheme Mojito -configuration Debug -destination 'platform=macOS' build
+
+# Run a fresh Debug build (a post-build phase rsyncs Mojito Dev.app to /Applications)
+pkill -x "Mojito Dev"; open "/Applications/Mojito Dev.app"
+
+# Full release (Developer ID signing → notarize → staple → Sparkle-sign DMG → gh release → push gh-pages).
+# APPLE_TEAM_ID and GITHUB_REPO come from your shell env (e.g. ~/.zshrc or a local .envrc).
+scripts/release.sh <version>
+
+# One-time dev environment setup: creates a stable self-signed "Mojito Dev" identity
+# in the user keychain so TCC grants survive rebuilds.
+scripts/setup-dev-signing.sh
+
+# Rebuild the bundled emoji DB from emojibase (SHA-pinned; mismatched checksums abort)
+python3 scripts/build_emoji_db.py
+
+# Run the unit test suite (xcodegen + xcodebuild test). Also wired into the
+# pre-push hook below — activate once per clone with the line under it.
+scripts/run-tests.sh
+git config core.hooksPath .githooks
+```
+
+## Testing
+
+Pure-logic unit tests live under `Tests/MojitoTests/` and use Apple's Swift
+Testing framework (`@Test` / `#expect`). `scripts/run-tests.sh` regenerates
+the Xcode project and runs `xcodebuild test`; the `.githooks/pre-push` hook
+calls it, so a failing test blocks `git push` once the hook is enabled.
+
+What's worth testing here: anything pure-logic with no AppKit / AX /
+CGEventTap dependency — `TriggerStateMachine`, `FzyScorer`, `FuzzyMatcher`,
+`EmojiDatabase`, `SkinTone`, `EmoticonTable`, `AmbientEmoticonTable`,
+`SymbolsDatabase`, the regex paths in `ExclusionStore`. What's NOT worth
+testing in this repo: anything that touches `AXUIElement`, `CGEventTap`,
+`NSPanel`, synthetic `CGEvent` posting, or the focused-element cache —
+those need a live AX-permitted environment and tend to break in ways unit
+tests don't catch anyway.
+
+`Sources/Mojito/App/main.swift` short-circuits into a bare runloop when
+`XCTestConfigurationFilePath` is set, so the test bundle can load into the
+host app without firing up the menubar / single-instance / event-tap
+machinery.
+
+### Things that have bitten us repeatedly
+
+- **You MUST run `xcodegen generate` after**: adding/removing/renaming a `.swift` file, changing `project.yml`, or touching anything under `Resources/` that's referenced by the build phase. `xcodebuild` will appear to succeed against a stale project without picking up new files.
+- **SourceKit cross-file diagnostics lie.** Editing a Swift file in this repo regularly produces `Cannot find type 'PickerViewModel'` / `Cannot find 'PrefsKey'` diagnostics for symbols defined in sibling files. They resolve at build time. Trust `xcodebuild`, not SourceKit, when verifying correctness.
+- **Do not switch to ad-hoc signing (`-`).** The "Mojito Dev" self-signed identity is what keeps Accessibility / Input Monitoring TCC grants stable across rebuilds. Every ad-hoc rebuild gets a fresh cdhash and TCC treats it as a different app.
+- **Debug builds have their own bundle ID (`ee.wells.Mojito.dev`).** This is intentional — it keeps the dev build's TCC grants, login-item registration, and ⌘-Tab presence fully separate from any released `Mojito.app` on the same Mac. You'll need to grant Accessibility + Input Monitoring once to `Mojito Dev.app` (separately from `Mojito.app`); they'll persist across rebuilds because the "Mojito Dev" code-signing identity is stable. Sparkle is disabled in Debug so the dev build doesn't try to update itself to the release.
+- **Don't bump the emoji DB by re-running `build_emoji_db.py` alone.** The script pins SHA256 digests of upstream emojibase files in `EXPECTED_SHA256`. Bumping requires manual review + paste of new digests (the script explains the procedure in its header).
+- **`SUPublicEDKey` in `Resources/Info.plist` must be set before any release.** `scripts/release.sh` aborts if it's empty. Generate via `./bin/generate_keys` (Sparkle stashes the private key in the login keychain, prints the public key; paste public into `project.yml`).
+
+## Architecture
+
+### Trigger loop
+
+The keystroke pipeline is:
+
+```
+KeyMonitor (CGEventTap, .cgSessionEventTap)
+   ↓ TriggerInput
+TriggerStateMachine (.idle / .capturing(query:))
+   ↓ TriggerAction (+ consumesKey)
+Engine.apply(action:)
+   ↓
+TextInserter (synthetic CGEvents) — or special effects (EmojiRain, ConfettiRain, MoofSound)
+```
+
+`KeyMonitor.start()` is asserted to run on the main queue via `dispatchPrecondition`. This is load-bearing: the tap's runloop source is added to `CFRunLoopGetCurrent()`, which means the C callback fires on the main thread. The `Engine` delegate methods are declared `nonisolated` and use `MainActor.assumeIsolated` to dispatch synchronously — this is what lets the callback's return value (consume vs pass through) depend on state-machine output. Do not switch to `Task { @MainActor in … }` here; you lose the synchronous return semantics.
+
+### Two insertion modes
+
+`TriggerAction.insertEmoji(query:mode:)` carries an `InsertMode`:
+
+- **`.fromPicker`** — user pressed Return / Tab. The terminating key was consumed (`consumesKey: true`), so the focused app has `:query` (no closing colon) when `Engine.insert` runs synchronously. Delete `query.count + 1` chars and replace.
+- **`.exactMatch`** — user typed the closing `:`. The colon was *not* consumed; it passes through. `Engine.apply` defers via `DispatchQueue.main.async` so the closing colon lands in the focused app first, then deletes `query.count + 2` chars. The exact-match path also handles the `:random:`, `:mojito:`, `:moof:`, `:confetti:` sentinel queries before falling through to `database.exact(key)` — if no shortcode matches, the typed `:query:` stays as-is (no surprise replacement).
+
+`TriggerAction.checkEmoticon(query:terminator:)` fires when a cancel char (space/punctuation) ends capture. `Engine.handleEmoticon` looks up the table in `EmoticonTable` and decides whether to consume the terminator (e.g. `:)` — terminator is part of the emoticon) or preserve it (e.g. `:D ` — space is just a delimiter).
+
+### Picker
+
+`PickerWindow` is an `NSPanel` (borderless, non-activating, `.statusWindow` level) hosting a SwiftUI `PickerView`. `Engine` defers `show(near:)` by one runloop tick after a keystroke so the focused app processes the key (caret moves) before we ask AX where the caret is — otherwise AX returns stale coordinates.
+
+`FocusedElementCache` is a singleton that maintains the active app's focused `AXUIElement` via an `AXObserver` subscribed to `kAXFocusedUIElementChangedNotification`. `CaretLocator` and `AppContext.focusedFieldIsSecure` read from the cache to avoid a synchronous cross-process AX call on every `:` trigger. `AppDelegate` eagerly initializes the singleton at launch.
+
+### Emoji search
+
+`EmojiDatabase.indexed` is an array of `IndexedEmoji`, each carrying a real `Emoji` plus precomputed `EmojiHaystack` entries (lowercased `[Character]` arrays for every shortcode + label). This is built once at DB load. `FuzzyMatcher.search` iterates `database.indexed` and runs `FzyScorer.score(needle:haystack:)` — a Swift port of John Hawthorn's fzy scoring algorithm. Critically, the search loop **never allocates strings**, which keeps per-keystroke cost in the microseconds.
+
+Special "pinned" rows are appended after the fzy results when the query is a 3+ char prefix of `random`, `mojito`, `moof`, `confetti`. Each uses a sentinel hexcode (e.g. `FuzzyMatcher.randomHexcode`) so `Engine.insert` and `PickerView` can identify them without string-matching the label. Symbols (★ ⌘ ⌥ etc.) live in `SymbolsDatabase.indexed()` and get prepended to the corpus only when `PrefsKey.symbolsEnabled` is true.
+
+### Skin tone
+
+`Emoji.supportsSkinTone` is decoded from `k: bool` in `emoji.json`, populated by `build_emoji_db.py` from emojibase's `skins` array. `SkinTone.apply(to:)` inserts the modifier **after the first scalar** of the emoji string — not appended at the end. This matters for ZWJ sequences: `🧔‍♀️` (U+1F9D4 ZWJ U+2640 FE0F) + dark modifier must become `🧔🏿‍♀️` ([1F9D4, 1F3FF, 200D, 2640, FE0F]), not `🧔‍♀️🏿`. The Engine and the picker preview both go through `SkinTone.apply(to:)`.
+
+### Security / signing posture
+
+- Dev (`Resources/Mojito.dev.entitlements`) carries `cs.disable-library-validation` so the self-signed identity can load Xcode-signed SwiftPM dylibs.
+- Release (`Resources/Mojito.entitlements`) is minimal (just `app-sandbox: false`). Library validation stays on — defense against dylib injection.
+- `release.sh` re-signs every helper inside `Sparkle.framework` (XPC services, `Updater.app`, `Autoupdate`) explicitly with the Developer ID identity + hardened runtime + secure timestamp. The default SwiftPM-produced signatures use Sparkle's distribution identity and Apple's notary rejects them.
+- The release script bumps both `MARKETING_VERSION` (semver, drives `CFBundleShortVersionString` and `sparkle:shortVersionString`) and `CURRENT_PROJECT_VERSION` (integer build number, drives `CFBundleVersion` and `sparkle:version`). Sparkle's version comparison uses the build number, not the marketing version — confusing these caused the v0.1.1 → v0.1.2 update flow to silently no-op the first time.
+
+### What's persisted
+
+UserDefaults only. Keys live in `PrefsKey`. Notably: `usageCounts` (hexcode → int) drives the fuzzy match's frequency boost; `pausedUntil` (timeIntervalSince1970) is read at launch by `AppDelegate` to restore pause state; `firstLaunchDate` is stamped once on the very first launch and shown as "User since" in About. Nothing else is written or transmitted (no telemetry, no analytics).
+
+### Onboarding / Settings windows
+
+Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose()`, which ref-counts visible non-menubar windows and toggles `NSApp.setActivationPolicy(.regular / .accessory)` accordingly. When any settings/onboarding window is open, Mojito has a dock icon and shows in ⌘Tab; when the last closes, it drops back to a pure menu-bar app.
+
+`SettingsRoot` uses a `NavigationSplitView` with a manually-managed `NSWindow` (not SwiftUI's `Settings` scene, which is flaky for `.accessory` apps). A small `WindowAccessor` `NSViewRepresentable` reaches up to the hosting `NSWindow` to set `.title` dynamically based on the selected sidebar tab.
+
+## File layout (where to look)
+
+- `Sources/Mojito/App/` — entry point, `Engine`, easter-egg effects, updater, dock-icon manager
+- `Sources/Mojito/KeyMonitor/` — `CGEventTap` wrapper + state machine
+- `Sources/Mojito/Picker/` — NSPanel + SwiftUI picker + caret positioning
+- `Sources/Mojito/EmojiDB/` — emoji/emoticon/symbol data + `FzyScorer`
+- `Sources/Mojito/Context/` — frontmost-app/URL detection + focused-AX-element cache
+- `Sources/Mojito/Inserter/` — synthetic-keystroke insertion
+- `Sources/Mojito/Permissions/` — AX + Input Monitoring permission polling/prompting
+- `Sources/Mojito/Exclusions/` — apps / URL patterns Mojito stays out of
+- `Sources/Mojito/MenuBar/` — `NSStatusItem` controller
+- `Sources/Mojito/Onboarding/`, `Sources/Mojito/Settings/` — SwiftUI window content
+- `Sources/Mojito/Util/PrefsKey.swift` — every UserDefaults key in one place
+- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `build_emoji_db.py`, `update_appcast.py`
+- `bin/` — vendored `generate_keys` and `sign_update` from Sparkle (committed so release doesn't depend on DerivedData being intact)
+- `Resources/` — Info.plist, entitlements, emoji.json, AppIcon.icns, easter-egg assets
+
+## Issue tracking & workflow
+
+Linear + Git workflow lives in `~/.claude/CLAUDE.md` (Linear SSOT + Git workflow sections). The `## Source of truth` block at the top of this file scopes those behaviors to this repo.
+
+Mojito-specific notes:
+
+- **Project URL:** https://linear.app/wells-riley/project/mojito-c138ddd4ca3b
+- **Statuses available:** Backlog, Todo, Todo (AI), In Progress, In Review, Done, Canceled, Duplicate.
+- **Branches:** `wells/w-NN-short-slug` (lowercase `w-NN` + kebab slug — matches Linear's auto-generated `gitBranchName`).
+- **Commits / PR titles:** reference the uppercase ID (e.g. `W-42: fix caret position on Sonoma`) so Linear auto-links.
+- **Always open a PR**, even for solo work — don't push directly to `main`. One commit per logical change.

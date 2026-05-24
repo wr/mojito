@@ -1,0 +1,199 @@
+name: Mojito
+options:
+  bundleIdPrefix: ee.wells
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Manual
+    # "Mojito Dev" is a stable self-signed cert created by scripts/setup-dev-signing.sh.
+    # Using a persistent identity (instead of ad-hoc "-") keeps macOS TCC grants —
+    # Accessibility, Input Monitoring — across rebuilds.
+    CODE_SIGN_IDENTITY: "Mojito Dev"
+    ENABLE_HARDENED_RUNTIME: YES
+    OTHER_SWIFT_FLAGS: "$(inherited)"
+    SWIFT_STRICT_CONCURRENCY: minimal
+
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.6.0"
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts
+    from: "2.2.0"
+
+targets:
+  Mojito:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources/Mojito
+      - path: Resources/Assets.xcassets
+      - path: Resources/Emoji
+        type: folder
+      # Ship AppIcon.icns as a direct bundle resource. actool's auto-generated
+      # icns (via .appiconset) on Xcode 26 drops the 64/512/1024 renditions,
+      # leaving macOS to fall back to the blueprint placeholder. The hand-built
+      # icns (iconutil from /tmp/AppIcon.iconset) carries all 10 macOS sizes.
+      - path: Resources/AppIcon.icns
+        buildPhase: resources
+      # Debug builds use this icon (selected via the per-config
+      # APP_ICON_NAME build setting + $(APP_ICON_NAME) substitution in
+      # Info.plist). The extra 3 MB ships in Release too because xcodegen
+      # doesn't conditionalize resource sources per config — acceptable
+      # cost in exchange for a single source of truth.
+      - path: Resources/AppIconDev.icns
+        buildPhase: resources
+      # Opaque-named effect assets. Names don't reveal their content; see
+      # the Bundle.url(forResource:) call sites in Sources/Mojito/App/ for
+      # which file is which.
+      - path: Resources/s01.bin
+        buildPhase: resources
+      - path: Resources/s02.bin
+        buildPhase: resources
+      - path: Resources/s03.bin
+        buildPhase: resources
+      - path: Resources/s04.bin
+        buildPhase: resources
+      - path: Resources/s05.bin
+        buildPhase: resources
+      - path: Resources/s06.bin
+        buildPhase: resources
+      - path: Resources/s07.bin
+        buildPhase: resources
+      - path: Resources/s08.bin
+        buildPhase: resources
+      - path: Resources/s09.bin
+        buildPhase: resources
+      - path: Resources/s13.bin
+        buildPhase: resources
+      - path: Resources/s14.bin
+        buildPhase: resources
+      - path: Resources/s15.bin
+        buildPhase: resources
+      - path: Resources/s16.bin
+        buildPhase: resources
+      - path: Resources/v01.bin
+        buildPhase: resources
+      - path: Resources/v02.bin
+        buildPhase: resources
+      - path: Resources/v03.bin
+        buildPhase: resources
+      - path: Resources/v04.bin
+        buildPhase: resources
+      - path: Resources/v05.bin
+        buildPhase: resources
+      - path: Resources/v06.bin
+        buildPhase: resources
+      - path: Resources/v07.bin
+        buildPhase: resources
+      - path: Resources/v08.bin
+        buildPhase: resources
+      - path: Resources/v09.bin
+        buildPhase: resources
+      - path: Resources/v10.bin
+        buildPhase: resources
+      - path: Resources/v11.bin
+        buildPhase: resources
+      - path: Resources/v12.bin
+        buildPhase: resources
+    info:
+      path: Resources/Info.plist
+      properties:
+        # $(PRODUCT_NAME) resolves to "Mojito" for Release and "Mojito Dev"
+        # for Debug (see configs.Debug below). Keeps the menu-bar app's
+        # display name aligned with the bundle so the dev build is visibly
+        # distinct everywhere macOS surfaces an app name.
+        CFBundleName: "$(PRODUCT_NAME)"
+        CFBundleDisplayName: "$(PRODUCT_NAME)"
+        # Substituted at build time from MARKETING_VERSION / CURRENT_PROJECT_VERSION
+        # below. release.sh bumps MARKETING_VERSION; Info.plist preprocessing
+        # picks it up so the shipped bundle always reflects the released version.
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        # AppIcon.icns is shipped as a top-level Resources file (see sources
+        # block below). Tells LaunchServices / Finder / NSWorkspace.icon(forFile:)
+        # exactly which icon to use without round-tripping through actool.
+        CFBundleIconFile: "$(APP_ICON_NAME)"
+        LSMinimumSystemVersion: "14.0"
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: "© 2026 Wells Riley"
+        SUFeedURL: "https://mojito.wells.ee/appcast.xml"
+        SUEnableInstallerLauncherService: true
+        SUPublicEDKey: "NUW/cpxaKEqfwn2Uca4Zz9n01EmxhN0RRwhdma8GIuM="
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ee.wells.Mojito
+        # Pin the Swift module name to "Mojito" so `@testable import Mojito`
+        # works in Debug too — otherwise it'd derive from PRODUCT_NAME and
+        # become "Mojito_Dev" for the dev build.
+        PRODUCT_MODULE_NAME: Mojito
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        GENERATE_INFOPLIST_FILE: NO
+        COMBINE_HIDPI_IMAGES: YES
+        # Empty string disables actool's AppIcon compilation. We ship our own
+        # hand-built AppIcon.icns as a resource (see sources block above).
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+      configs:
+        Debug:
+          # Dev entitlements include cs.disable-library-validation so the
+          # self-signed "Mojito Dev" identity can load Xcode's debug dylibs.
+          CODE_SIGN_ENTITLEMENTS: Resources/Mojito.dev.entitlements
+          # Debug builds get a distinct bundle ID + product name so macOS TCC
+          # tracks Accessibility / Input Monitoring grants separately from
+          # the released app. A shipped Mojito.app and a dev Mojito Dev.app
+          # can coexist on the same Mac with independent permissions, login
+          # items, and ⌘-Tab entries.
+          PRODUCT_BUNDLE_IDENTIFIER: ee.wells.Mojito.dev
+          PRODUCT_NAME: "Mojito Dev"
+          # Visually distinct dock/Finder icon so the dev build is obviously
+          # the dev build at a glance. Resolved into CFBundleIconFile via
+          # $(APP_ICON_NAME) above.
+          APP_ICON_NAME: "AppIconDev"
+        Release:
+          # Release ships with the minimum entitlements — library validation
+          # stays enabled so dylib injection is blocked by Hardened Runtime.
+          CODE_SIGN_ENTITLEMENTS: Resources/Mojito.entitlements
+          APP_ICON_NAME: "AppIcon"
+    dependencies:
+      - package: Sparkle
+      - package: KeyboardShortcuts
+    postBuildScripts:
+      # Debug builds: also install "Mojito Dev.app" into /Applications so it
+      # shows up in Spotlight / Finder / Launchpad consistently and can be
+      # launched from a stable path. Release builds skip this — those go
+      # through scripts/release.sh which handles signing + DMG separately.
+      - name: Install Mojito Dev to /Applications (Debug only)
+        script: |
+          if [ "$CONFIGURATION" = "Debug" ]; then
+            rsync -a --delete "$TARGET_BUILD_DIR/$WRAPPER_NAME/" "/Applications/$WRAPPER_NAME/"
+            echo "Copied $WRAPPER_NAME to /Applications/"
+          fi
+        basedOnDependencyAnalysis: false
+    scheme:
+      testTargets:
+        - MojitoTests
+
+  MojitoTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Tests/MojitoTests
+    dependencies:
+      - target: Mojito
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: ee.wells.MojitoTests
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Mojito Dev.app/Contents/MacOS/Mojito Dev"
