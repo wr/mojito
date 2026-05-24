@@ -6,16 +6,14 @@ import os.log
 enum CaretLocator {
     private static let log = OSLog(subsystem: "ee.wells.Mojito", category: "CaretLocator")
 
-    /// Returns a screen-space (bottom-left origin) rect for the current text caret, or nil.
+    /// Screen-space (bottom-left origin) caret rect, or nil.
     ///
-    /// The big risk in AX-driven caret tracking is apps that return junk bounds. We defend
-    /// by requiring the caret rect to sit inside the focused element's own frame — if it
-    /// doesn't, we treat the result as untrusted and return nil so the caller can fall back.
+    /// Apps sometimes return junk bounds. We require the caret to sit
+    /// inside the focused element's frame; otherwise return nil and let
+    /// the caller fall back.
     static func caretRect() -> CGRect? {
-        // Prefer the cached focused element — it's kept fresh by AX observer
-        // notifications and avoids a synchronous cross-process IPC per call.
-        // Fall back to a fresh system-wide lookup if the cache is empty
-        // (transitions, AX unusable).
+        // Cached element avoids a synchronous cross-process IPC; the AX
+        // observer keeps it fresh. Fall back to system-wide if empty.
         let focused: AXUIElement
         if let cached = FocusedElementCache.shared.element {
             focused = cached
@@ -31,10 +29,9 @@ enum CaretLocator {
             return rect
         }
 
-        // Fallback: anchor at the top-left of the focused element (where the caret usually
-        // is in an empty / start-of-document text view). In AppKit screen coordinates
-        // (bottom-left origin) the TOP of the element is `frame.maxY`, NOT `frame.minY` —
-        // using minY here previously dropped the picker at the *bottom* of the text view.
+        // Fallback to the top-left of the focused element. In AppKit
+        // screen coords (bottom-left origin) the TOP is `frame.maxY`, NOT
+        // `frame.minY`.
         if let frame = elementFrame, isOnScreen(frame), frame.width < 4000, frame.height < 4000 {
             let caretHeight: CGFloat = max(16, min(frame.height, 22))
             let rect = CGRect(
@@ -99,7 +96,7 @@ enum CaretLocator {
             return false
         }
         if let elementFrame {
-            // Caret should be inside the focused element (allowing some slack for text overflow).
+            // Caret should sit inside the element (slack for text overflow).
             let slack: CGFloat = 8
             let expanded = elementFrame.insetBy(dx: -slack, dy: -slack)
             if !expanded.contains(CGPoint(x: rect.midX, y: rect.midY)) {
@@ -122,8 +119,8 @@ enum CaretLocator {
 
     // MARK: - Coordinate conversion
 
-    /// AX uses top-left origin rooted at the menu-bar screen. AppKit uses bottom-left origin
-    /// rooted at the same screen. Flip Y.
+    /// AX is top-left origin, AppKit is bottom-left, both rooted at the
+    /// menu-bar screen. Flip Y.
     private static func convertFromAXScreen(_ rect: CGRect) -> CGRect {
         guard let primary = NSScreen.screens.first else { return rect }
         let primaryHeight = primary.frame.height

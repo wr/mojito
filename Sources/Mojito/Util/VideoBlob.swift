@@ -1,19 +1,13 @@
 import Foundation
 
-/// Decodes a scrambled video blob (`vNN.bin`) to a temp file on first use
-/// and caches the resulting URL. AVPlayer wants a URL/file-backed source,
-/// so unlike `AudioBlob`/`ImageBlob` we can't hand it raw decoded bytes —
-/// we write the decoded payload to `NSTemporaryDirectory()/MojitoVideos/`
-/// once per app launch and hand the same URL out on subsequent calls.
+/// AVPlayer wants a URL, so unlike `AudioBlob`/`ImageBlob` we decode
+/// `vNN.bin` to a per-launch temp file and cache the URL.
 enum VideoBlob {
     private static let key: UInt8 = 0x5A
-    /// Wrapped in a serial queue to keep concurrent first-time decodes from
-    /// racing each other to write the same temp file.
+    /// Serializes concurrent first-time decodes writing the same temp file.
     private static let lock = NSLock()
     private static var cache: [String: URL] = [:]
 
-    /// Returns a temp-file URL pointing at the decoded `.mp4`. nil if the
-    /// resource isn't present or decoding/writing fails.
     static func url(_ name: String) -> URL? {
         lock.lock()
         defer { lock.unlock() }

@@ -2,16 +2,8 @@ import AppKit
 import CoreGraphics
 import CoreText
 
-/// Cascading green katakana/digits.
-///
-/// Implementation: a single layer-backed NSView that draws all columns in
-/// one `draw(_:)` pass per tick. We tried per-column CATextLayers in a
-/// previous iteration but the multi-line CATextLayer + mask + frame-driven
-/// positioning combo rendered nothing visible (glyphs clipped to a too-
-/// narrow column box, mask coordinate-space mismatches). One direct
-/// Core Text pass per frame is well within budget at 30 Hz for a few
-/// hundred columns and gives us pixel-perfect control over fade + head
-/// highlight.
+/// Cascading green katakana/digits. Layer-backed NSView draws all columns
+/// in one Core Text pass per tick (30 Hz).
 @MainActor
 enum MatrixRain {
     private static var activeWindow: NSWindow?
@@ -46,10 +38,6 @@ enum MatrixRain {
     }
 }
 
-/// Custom-drawn NSView. Each tick the timer advances column phases and
-/// triggers a redraw; `draw(_:)` walks the columns and paints glyph stacks
-/// directly into the current CGContext. Tear-down is explicit via stop()
-/// to invalidate the timer + drop column refs.
 @MainActor
 private final class MatrixHostView: NSView {
     private let duration: TimeInterval
@@ -76,9 +64,7 @@ private final class MatrixHostView: NSView {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) not supported") }
 
-    /// Cocoa default is flipped == false (origin bottom-left). We're going
-    /// to draw glyphs top-down so flipped == true keeps the math obvious.
-    override var isFlipped: Bool { true }
+    override var isFlipped: Bool { true }  // top-left origin
 
     private func buildColumns(in frame: NSRect) {
         let columnCount = Int(frame.width / columnSpacing) + 1
@@ -103,7 +89,7 @@ private final class MatrixHostView: NSView {
     }
 
     private func start() {
-        // 30 Hz is enough for the cascade feel; lower than 60 Hz halves CPU.
+        // 30 Hz halves CPU vs 60 Hz; cascade still reads smoothly.
         tickTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
@@ -126,7 +112,6 @@ private final class MatrixHostView: NSView {
 
     private func advance() {
         let elapsed = Date().timeIntervalSince(startDate)
-        // Re-roll the glyphs for any column that's past its cycle window.
         for i in columns.indices {
             let step = Int(elapsed / columns[i].cycleEvery)
             if step != columns[i].lastCycleStep {
@@ -147,21 +132,15 @@ private final class MatrixHostView: NSView {
             : 1.0
 
         let viewBounds = bounds
-        // Use the AppKit monospaced font so katakana actually renders
-        // (vs. CT's default that often falls back to a no-glyph box).
+        // AppKit's monospaced font — CT's default renders no-glyph boxes for katakana.
         let font = NSFont.monospacedSystemFont(ofSize: glyphSize, weight: .regular)
 
         let bodyColor = NSColor(red: 0.0, green: 0.85, blue: 0.25, alpha: 1)
         let headColor = NSColor(red: 0.92, green: 1.0, blue: 0.92, alpha: 1)
 
-        // Flip context y-axis once; subsequent text positions are in the
-        // flipped frame so we just bump textPosition per glyph.
         ctx.saveGState()
         ctx.textMatrix = CGAffineTransform(scaleX: 1, y: -1)
-        // Cache an NSString attrs dict; mutate the foreground color per glyph
-        // rather than alloc-ing a new attributedString every time. CTLine
-        // allocation per glyph is unavoidable since the string changes, but
-        // the dict reuse keeps the per-glyph alloc count to one.
+        // Mutate one attrs dict instead of allocating per glyph.
         var attrs: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: NSColor.green.cgColor,

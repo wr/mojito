@@ -19,41 +19,30 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var permissions: PermissionsCoordinator?
     private var permissionsObserver: AnyCancellable?
 
-    /// Bundle ID of app where current capture started — if it changes, we cancel.
     private var captureContext: ActiveContext?
-    /// AX-focused element snapshot taken when `:` was typed. The picker is
-    /// shown one runloop tick later; if focus has moved (e.g. user hit ⌘Space
-    /// for Spotlight between the `:` and the picker show), we abort instead
-    /// of plopping the picker on the wrong window. Identity comparison via
-    /// `CFEqual` is intentional — we want the *same* AX element, not just a
-    /// similar one.
+    /// Snapshot of the AX-focused element at `:` time. The picker shows one
+    /// runloop tick later; if focus has moved, we cancel rather than render on
+    /// the wrong window. Identity via `CFEqual` — same element, not similar.
     private var captureFocusSnapshot: AXUIElement?
-    /// PID of the focused-app process at capture start. Used as a fallback
-    /// when the AX element identity can't be compared (e.g. AX returned nil
-    /// for the new focus and we can't tell if it's the same element).
+    /// Fallback for when AX element identity can't be compared.
     private var captureFocusPID: pid_t?
     private var usage: [String: Int]
     private var workspaceObserver: NSObjectProtocol?
     private var prefsObserver: NSObjectProtocol?
-    /// Cached prefs read in `FuzzyMatcher.search` on every keystroke. Refreshed
-    /// on UserDefaults.didChangeNotification instead — measurable per-keystroke
-    /// hit when read directly.
+    /// Cached because `FuzzyMatcher.search` reads them on every keystroke and
+    /// direct UserDefaults reads are a measurable per-keystroke cost.
     private var useFrequencyBoost: Bool
     private var symbolsEnabled: Bool
     private var symbolsRequireDoubleColon: Bool
 
-    /// Single most-recent emoticon insertion that's still inside its undo
-    /// window. Cleared on: successful undo, timeout, focus change, any
-    /// non-undo keystroke that would mutate text, app/process changes, or
-    /// shutdown. Backs WEL-52 / WEL-53.
+    /// Most-recent emoticon insertion still inside its undo window. Cleared on
+    /// successful undo, timeout, focus change, any text-mutating keystroke,
+    /// app switch, or shutdown.
     private var pendingEmoticonUndo: EmoticonUndo?
-    /// Monotonic counter of inputs received. Conversion handlers capture
-    /// this at dispatch time; if it advances during the 80ms async window,
-    /// the user has typed past the conversion and we skip the undo entry.
+    /// Captured at dispatch time by deferred conversion handlers; if it has
+    /// advanced when the handler fires, the user typed past us and we skip the
+    /// undo entry.
     private var inputSeq: Int = 0
-    /// Max seconds after an emoticon insertion during which Cmd+Z or
-    /// Backspace will roll it back. After this window the entry is dropped
-    /// and the keystroke behaves normally.
     private static let emoticonUndoWindow: TimeInterval = 3.0
 
     init(database: EmojiDatabase, exclusions: ExclusionStore) {
@@ -66,14 +55,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
 
-        // Mouse-click outside the picker dismisses (same effect as Esc, but doesn't consume).
+        // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
             self?.cancelCapture()
         }
 
-        // Cancel capture when the user actually switches apps. Done via NSWorkspace
-        // notification instead of polling on every keystroke — the per-keystroke check was
-        // racing the picker's `orderFrontRegardless()` and resetting state mid-typing.
+        // Per-keystroke polling raced the picker's `orderFrontRegardless()`,
+        // so we listen for real app switches instead.
         workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification,
             object: nil,
@@ -84,13 +72,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
         }
 
-        // Cancel capture when the focused AX element changes mid-capture (e.g.
-        // user types `:`, then ⌘Space → Spotlight before/while the picker is
-        // about to render). NSWorkspace.didActivateApplicationNotification
-        // alone isn't enough because some focus changes (Spotlight, system
-        // panels, in-app field-to-field jumps) don't fire it reliably or fire
-        // it too late. The AX-level notification fires synchronously when the
-        // focused element changes.
+        // Spotlight, system panels, and in-app field jumps don't fire
+        // didActivateApplicationNotification reliably — AX does, synchronously.
         FocusedElementCache.shared.onFocusChange = { [weak self] in
             MainActor.assumeIsolated {
                 self?.handleFocusChanged()
@@ -126,24 +109,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
               let bundleID = app.bundleIdentifier else { return }
         // Our own panel briefly looking frontmost is not a real app switch.
         if bundleID == Bundle.main.bundleIdentifier { return }
-        // App switch invalidates any pending emoticon-undo entry — the
-        // target text field is no longer focused.
         pendingEmoticonUndo = nil
         guard case .capturing = stateMachine.state else { return }
         guard bundleID != captureContext?.bundleID else { return }
         cancelCapture()
     }
 
-    /// AX-level focus-change callback. Distinct from `handleAppActivated`
-    /// because some focus shifts (Spotlight, system panels, in-app jumps)
-    /// don't fire `didActivateApplicationNotification`.
     private func handleFocusChanged() {
-        // Any focus shift drops the pending emoticon-undo entry. The user
-        // moving the caret elsewhere means we'd be editing the wrong text.
         pendingEmoticonUndo = nil
         guard case .capturing = stateMachine.state else { return }
-        // If we never captured a snapshot (shouldn't happen — we always set
-        // both at capture start), be conservative and cancel.
         guard let snapshot = captureFocusSnapshot else {
             cancelCapture()
             return
@@ -155,20 +129,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             cancelCapture()
             return
         }
-        // Same app — check the element identity. CFEqual handles AX element
-        // equality correctly across copies.
-        if let current = cache.element {
-            if !CFEqual(snapshot, current) {
-                cancelCapture()
-            }
+        // CFEqual handles AX element equality across copies.
+        if let current = cache.element, !CFEqual(snapshot, current) {
+            cancelCapture()
         }
-        // If the cache has no element right now, this is a transient nil
-        // during a focus transition — wait for the next callback to decide.
+        // Nil current element = transient focus-transition state; wait for the next callback.
     }
 
-    /// Single point that tears down an in-flight capture (picker hidden,
-    /// state machine reset, snapshot cleared). Use this instead of
-    /// open-coding the three lines so all cancel paths stay in sync.
     private func cancelCapture() {
         stateMachine.reset()
         viewModel.reset()
@@ -213,11 +180,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         reconcile()
     }
 
-    /// Clears in-memory and on-disk usage in lockstep — otherwise the next
-    /// emoji insert would write the stale in-memory map back to UserDefaults.
-    /// Writes an empty dict (rather than `removeObject`) so the dev build's
-    /// registered fallback from the release app's domain (see main.swift)
-    /// can't shine through and resurrect cleared counts.
+    /// In-memory and on-disk must clear in lockstep, else the next insert
+    /// writes the stale map back. Writes an empty dict rather than
+    /// `removeObject` so the dev build's release-domain fallback (see
+    /// main.swift) can't resurrect cleared counts.
     func clearUsageStats() {
         objectWillChange.send()
         usage = [:]
@@ -250,44 +216,36 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     nonisolated func keyMonitorDidLoseTap(_ monitor: KeyMonitor) {
         MainActor.assumeIsolated {
             self.cancelCapture()
-            // The tap may have been disabled because the user revoked Input Monitoring.
-            // Let the permissions coordinator know so it resumes polling and we can
-            // surface the missing-permission state in the UI.
+            // Tap may have died because the user revoked Input Monitoring —
+            // let the coordinator resume polling and surface the UI state.
             self.permissions?.handleInputMonitoringLost()
         }
     }
 
     private func process(input: TriggerInput) -> Bool {
         inputSeq &+= 1
-        // BSOD-style "press any key to continue" effects pre-empt
-        // everything — any keystroke pops them off the stack and is
+        // BSOD-style "press any key" effects pre-empt everything; the key is
         // consumed so it doesn't leak into the focused app underneath.
         if case .idle = stateMachine.state, EffectDismisser.topWantsAnyKey() {
             EffectDismisser.dismissTop()
             return true
         }
 
-        // Esc bails out of any in-flight full-screen effect first. We only
-        // pre-empt when state is idle so an Esc-during-capture still cancels
+        // Only pre-empt Esc when idle so Esc-during-capture still cancels
         // the picker the normal way.
         if case .escape = input, case .idle = stateMachine.state,
            EffectDismisser.dismissTop() {
             return true
         }
 
-        // WEL-53: backspace right after an emoticon insertion undoes it.
-        // Only fires when we're idle (so capture-mid backspace still works
-        // normally) and there's a fresh undo entry. Any other backspace
-        // falls through to the state machine.
         if case .idle = stateMachine.state, case .backspace = input,
            pendingEmoticonUndo != nil, performEmoticonUndoIfFresh() {
             return true
         }
-        // WEL-52: Cmd+Z right after an emoticon insertion undoes it.
-        // Intercepted here (not in the state machine) because the consume
-        // decision depends on whether there's a fresh undo entry — info the
-        // state machine doesn't have. If there's no entry, fall through and
-        // let cmdZ pass through to the focused app's normal undo.
+        // Cmd+Z is intercepted here (not in the state machine) because the
+        // consume decision depends on whether there's a fresh undo entry,
+        // which the state machine doesn't track. No entry → pass through to
+        // the focused app's normal undo.
         if case .cmdZ = input {
             if case .idle = stateMachine.state,
                pendingEmoticonUndo != nil, performEmoticonUndoIfFresh() {
@@ -296,18 +254,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             return false
         }
 
-        // W-67: any keystroke other than backspace/cmdZ ends the
-        // emoticon-undo window. Without this, the undo entry persists
-        // across subsequent typing — and `TextInserter.replace` deletes
-        // from the current caret, not the post-conversion caret, so a
-        // backspace after `:) ` would delete the space and then *type*
-        // `:)` after the emoji (e.g. `🙂 ` → `🙂:)`).
+        // Any other keystroke closes the undo window. Otherwise the entry
+        // persists across typing, and `TextInserter.replace` deletes from
+        // the current caret (not the post-conversion one) — backspace after
+        // `:) ` would delete the space and then *type* `:)` after the emoji
+        // (`🙂 ` → `🙂:)`).
         pendingEmoticonUndo = nil
 
-        // Before opening, check if current app/site is excluded or if the focused
-        // field is a password field. Both must short-circuit BEFORE we transition
-        // out of `.idle` — otherwise the state machine starts buffering name chars
-        // and the picker renders password fragments in the empty-state row.
+        // Exclusion + secure-field check must short-circuit BEFORE we leave
+        // `.idle`, else the state machine buffers chars and the picker
+        // renders password fragments in the empty-state row.
         if case .idle = stateMachine.state, case .colon = input {
             let context = AppContextDetector.current()
             if context.focusedFieldIsSecure {
@@ -317,9 +273,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 return false
             }
             captureContext = context
-            // Snapshot the focused element + PID so the deferred picker show
-            // (one runloop tick later) and any subsequent focus-change
-            // notifications can detect if focus has moved out from under us.
+            // Snapshot now so the deferred picker show and any focus-change
+            // notifications can detect movement out from under us.
             captureFocusSnapshot = FocusedElementCache.shared.element
             captureFocusPID = FocusedElementCache.shared.focusedPID
         }
@@ -343,8 +298,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         case .openPicker(let q, let scope):
             updateResults(query: q, scope: scope)
-            // Defer one runloop tick so the keystroke has been delivered to the focused app
-            // (which moves the caret) before we ask AX where the caret is.
+            // Defer one tick: the keystroke moves the caret in the focused
+            // app after the tap callback returns. AX returns stale coords if
+            // we ask before then.
             scheduleRepositionAndShow()
 
         case .refreshPicker(let q, let scope):
@@ -355,10 +311,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if delta > 0 { viewModel.selectNext() } else { viewModel.selectPrevious() }
 
         case .insertEmoji(let q, let mode, let scope):
-            // `.exactMatch` (closing `:`) passes the closing colon through to
-            // the focused app — we have to wait one runloop tick for it to
-            // arrive before deleting `:query:`. `.fromPicker` (Return / Tab)
-            // consumed the key, so we can act immediately.
+            // `.exactMatch` passed the closing `:` through to the focused
+            // app — wait one tick for it to land before deleting `:query:`.
+            // `.fromPicker` consumed the key, so we can act immediately.
             switch mode {
             case .exactMatch:
                 DispatchQueue.main.async { [weak self] in
@@ -375,13 +330,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
-            // Defer ~80ms so the cancel char (which was passed through but
-            // not yet processed when this callback fires) actually lands
-            // in the focused app's text field before we issue the
-            // backspaces. The previous one-runloop-tick delay was racy —
-            // on slower fields the synth-backspaces could fire while the
-            // terminator was still in flight, leaving it stranded after
-            // the inserted emoji (e.g. `:)` → `🙂)`).
+            // 80ms gives the passed-through terminator time to land in slow
+            // text fields before synth-backspaces fire. One-tick wasn't
+            // enough — terminator could end up stranded after the emoji
+            // (`:)` → `🙂)`).
             let seqAtDispatch = inputSeq
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
                 guard let self else { return }
@@ -390,9 +342,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
 
         case .checkAmbientEmoticon(let word, let term):
-            // Same 80ms deferral as the colon-emoticon path — the terminator
-            // was passed through to the focused app and we have to wait for
-            // it to land before issuing the synthetic backspaces.
             let seqAtDispatch = inputSeq
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
                 guard let self else { return }
@@ -401,9 +350,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
 
         case .insertAmbientEmoticon(let word):
-            // Immediate-fire ambient: no terminator, the last char of `word`
-            // was the trigger and was passed through. Same 80ms deferral so
-            // it actually lands before we delete back.
+            // No terminator; the last char of `word` was the trigger and
+            // was passed through. Same 80ms wait as above.
             let seqAtDispatch = inputSeq
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
                 guard let self else { return }
@@ -412,10 +360,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
 
         case .abortEmoticon:
-            // WEL-54: the user paused too long mid-capture for this to be a
-            // genuine emoticon attempt. Close the picker; leave the typed
-            // `:query<term>` in the focused app as-is. Drop any stale undo
-            // entry so a subsequent backspace behaves normally.
+            // User paused too long for this to be a genuine emoticon. Close
+            // the picker; leave `:query<term>` in the app as-is.
             viewModel.reset()
             pickerWindow.hide()
             stateMachine.reset()
@@ -425,8 +371,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             pendingEmoticonUndo = nil
 
         case .maybeUndoEmoticon:
-            // Unreachable in practice — Engine intercepts cmdZ before the
-            // state machine sees it. Kept for switch exhaustiveness.
+            // Unreachable: Engine intercepts cmdZ before the state machine
+            // sees it. Here for switch exhaustiveness.
             _ = performEmoticonUndoIfFresh()
 
         case .triggerKonami(let deleteCount):
@@ -435,9 +381,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
-            // Every char in the sequence was consumed, so deleteCount is
-            // normally 0. Still honor a non-zero value defensively in case
-            // the state machine starts requiring deletion again later.
+            // Sequence chars are all consumed today so deleteCount is 0;
+            // honor non-zero defensively in case that changes.
             DispatchQueue.main.async {
                 if deleteCount > 0 {
                     TextInserter.deleteBackward(deleteCount)
@@ -449,18 +394,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     private func scheduleRepositionAndShow() {
-        // Run on next tick: the user's keystroke that triggered this action hasn't been
-        // delivered to the focused app yet (CGEventTap callback runs *before* delivery), so
-        // the caret hasn't moved. Asking AX now returns stale coordinates.
+        // Defer one tick: the tap callback runs before the OS delivers the
+        // keystroke to the focused app, so the caret hasn't moved yet. AX
+        // returns stale coordinates if we ask now.
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             guard !self.viewModel.results.isEmpty else {
                 self.pickerWindow.hide()
                 return
             }
-            // Focus may have changed between the `:` trigger and now (e.g.
-            // user hit ⌘Space and Spotlight grabbed focus). Don't pop the
-            // picker on the wrong window — cancel cleanly instead.
             if self.focusHasChangedSinceCapture() {
                 self.cancelCapture()
                 return
@@ -470,9 +412,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
     }
 
-    /// True if the currently-focused AX element (or its owning app's PID)
-    /// differs from the snapshot taken at capture start. Conservative: returns
-    /// true on PID mismatch even if AX element comparison can't be performed.
     private func focusHasChangedSinceCapture() -> Bool {
         let cache = FocusedElementCache.shared
         if let snapPID = captureFocusPID,
@@ -481,14 +420,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             return true
         }
         guard let snapshot = captureFocusSnapshot else {
-            // No snapshot recorded — be permissive (this path shouldn't
-            // happen in practice since we always set the snapshot at `:`).
             return false
         }
         if let current = cache.element {
             return !CFEqual(snapshot, current)
         }
-        // Current element is nil during a transition; trust PID check above.
+        // Nil current element = transition; trust the PID check above.
         return false
     }
 
@@ -507,7 +444,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         viewModel.update(query: query, results: results)
     }
 
-    /// Maps prefs + state-machine scope into the FuzzyMatcher corpus to search.
     private func corpusFor(scope: CaptureScope) -> SearchCorpus {
         switch scope {
         case .symbolsOnly:
@@ -528,26 +464,18 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
-            // Any text-modifying action invalidates the pending emoticon undo —
-            // a backspace after a regular emoji insert should not roll back
-            // the previous emoticon.
+            // Any text-modifying action drops the pending emoticon undo.
             pendingEmoticonUndo = nil
         }
 
-        // Leading-colon count: `:foo` is 1, `::foo` is 2. Used to compute
-        // how many chars to delete before insertion.
+        // `:foo` = 1, `::foo` = 2.
         let leadingColons = (scope == .symbolsOnly) ? 2 : 1
 
-        // Two paths:
-        //  - `.fromPicker` (Return / Tab): user explicitly selected a row,
-        //    so we honor that selection — including special rows (🎁 ???, 🎲).
-        //    The closing colon was consumed; only `:query` (or `::query`) is
-        //    in the focused app — delete `leadingColons + query.count`.
-        //  - `.exactMatch` (closing `:`): the typed text is `:query:` (or
-        //    `::query:`). Delete `leadingColons + query.count + 1` iff
-        //    something resolves; otherwise leave the text alone.
         switch mode {
         case .fromPicker:
+            // Closing colon was consumed; `:query` (or `::query`) is in the
+            // focused app. User explicitly picked a row, including special
+            // rows (🎁 ???, 🎲).
             guard let scored = viewModel.topResult else { return }
             let charsToDelete = query.count + leadingColons
             if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
@@ -556,17 +484,19 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if scored.emoji.hexcode == FuzzyMatcher.k02Hex {
                 guard let pick = database.all.randomElement() else { return }
                 TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(pick))
-                return  // intentionally don't recordUsage — random rolls shouldn't bias future search
+                return  // random rolls shouldn't bias future search
             }
             TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(scored.emoji))
             recordUsage(emoji: scored.emoji)
 
         case .exactMatch:
+            // Typed text is `:query:` (or `::query:`). Delete only if
+            // something resolves; otherwise leave the text alone.
             let key = query.lowercased()
-            let charsToDelete = query.count + leadingColons + 1  // includes trailing colon
+            let charsToDelete = query.count + leadingColons + 1  // + trailing colon
 
-            // Symbols-only (`::query:`): top-1 fuzzy search against the symbols
-            // corpus, accept only an exact label match. No easter eggs, no random.
+            // `::query:`: top-1 fuzzy against symbols, exact label only.
+            // No easter eggs, no random.
             if scope == .symbolsOnly {
                 let hits = FuzzyMatcher.search(
                     query: query, in: database, usage: [:],
@@ -579,10 +509,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 return
             }
 
-            // Keyword → opaque-id lookup. `EggIndex` keeps the trigger
-            // words exclusively as SHA-256 hashes — plain keywords don't
-            // appear in source or in the binary. The id it returns is the
-            // same string that's already used as the hexcode constant.
+            // `EggIndex` keeps trigger words as SHA-256 hashes — plain
+            // keywords don't appear in source or the binary. The returned id
+            // matches the hexcode constant.
             if let id = EggIndex.id(forExactQuery: key) {
                 if id == FuzzyMatcher.k02Hex {
                     guard let pick = database.all.randomElement() else { return }
@@ -598,12 +527,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 recordUsage(emoji: exact)
                 return
             }
-            // No exact match → no replacement. `:query:` stays in the text.
         }
     }
 
-    /// Dispatches every easter-egg sentinel. Returns true if `hexcode` matched
-    /// (and the focused-app text was already deleted), false otherwise.
+    /// Returns true if `hexcode` matched (and the text was already deleted).
     private func triggerEasterEgg(hexcode: String, deleteCount: Int) -> Bool {
         switch hexcode {
         case FuzzyMatcher.k01Hex:
@@ -677,10 +604,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             EasterEggTracker.record(.k99)
         case FuzzyMatcher.k20Hex:
             TextInserter.deleteBackward(deleteCount)
-            // Wait for the synthetic backspaces above to drain into the
-            // focused app — otherwise the new key window swallows them
-            // (Snake closes on Esc; the game's keyDown sees nothing else
-            // notable, but the focus race is still brittle).
+            // Let synth-backspaces drain before opening the key window;
+            // otherwise the game swallows them.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                 MainActor.assumeIsolated {
                     SnakeGame.start()
@@ -690,7 +615,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             return true
         case FuzzyMatcher.k21Hex:
             TextInserter.deleteBackward(deleteCount)
-            // Same backspace-drain delay as Snake.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                 MainActor.assumeIsolated {
                     TicTacToeGame.start()
@@ -717,9 +641,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case FuzzyMatcher.k27Hex:
             TextInserter.deleteBackward(deleteCount)
             EasterEggTracker.record(.k27)
-            // Defer the browser open so the synthetic backspaces above
-            // land in the user's text field before focus shifts to the
-            // browser. Otherwise the deletes hit the browser's URL bar.
+            // Let backspaces land before focus shifts to the browser,
+            // else the deletes hit the URL bar.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 Rickroll.go()
             }
@@ -729,10 +652,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             EasterEggTracker.record(.k29)
         case FuzzyMatcher.k30Hex:
             TextInserter.deleteBackward(deleteCount)
-            // Wait for the synthetic backspaces above to drain into the
-            // focused app — celery man opens a key window (same pattern
-            // as SnakeGame/TicTacToeGame) that would otherwise swallow
-            // them. The 0.18s delay matches what those games use.
+            // Same backspace-drain pattern as Snake — celery man opens
+            // a key window that would otherwise swallow them.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                 MainActor.assumeIsolated {
                     CeleryMan.start()
@@ -751,28 +672,21 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         UserDefaults.standard.set(usage, forKey: PrefsKey.usageCounts)
     }
 
-    /// Try to convert `:query<terminator>` into an emoticon. No-op if the
-    /// emoticons feature is disabled or no entry matches.
+    /// Convert `:query<terminator>` into an emoticon, or no-op.
     private func handleEmoticon(query: String, terminator: Character) {
         let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
         guard enabled, let match = EmoticonTable.match(query: query, terminator: terminator) else {
-            // Not an emoticon match — the typed `:query<term>` stays as-is.
-            // No undo entry to register; clear any stale one.
             pendingEmoticonUndo = nil
             return
         }
-        // The focused app now reads `:<query><terminator>`. Always delete
-        // all three; restore the terminator after the emoji if it wasn't
-        // part of the emoticon itself.
+        // App reads `:<query><terminator>` — delete all three. Restore the
+        // terminator after the emoji unless it was part of the emoticon.
         let charsToDelete = 1 + query.count + 1
         let replacement = match.consumesTerminator
             ? match.emoji
             : match.emoji + String(terminator)
         TextInserter.replace(charactersToDelete: charsToDelete, with: replacement)
 
-        // Record undo state. The original text that was on screen before the
-        // replacement was `:<query><terminator>` — restoring that is what
-        // Cmd+Z / Backspace will do during the undo window.
         let original = ":" + query + String(terminator)
         pendingEmoticonUndo = EmoticonUndo(
             emojiInserted: replacement,
@@ -782,9 +696,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         )
     }
 
-    /// Immediate-fire ambient — the entire word is the emoticon body
-    /// (no trailing terminator). Engine deletes `word.count` chars and
-    /// replaces them with the emoji.
+    /// Immediate-fire ambient: the whole word is the emoticon body, no
+    /// trailing terminator. Delete `word.count` and replace with the emoji.
     private func handleAmbientEmoticonImmediate(word: String) {
         let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
         guard enabled, let emoji = AmbientEmoticonTable.emoji(for: word) else {
@@ -801,19 +714,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         )
     }
 
-    /// Ambient counterpart to `handleEmoticon` — the user typed a whole
-    /// word (no leading `:`) followed by a terminator, and we look the word
-    /// up in `AmbientEmoticonTable`. Same enable gate, same undo registration.
+    /// Ambient counterpart to `handleEmoticon` — a word with no leading `:`
+    /// followed by a terminator, looked up in `AmbientEmoticonTable`.
     private func handleAmbientEmoticon(word: String, terminator: Character) {
         let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
         guard enabled, let emoji = AmbientEmoticonTable.emoji(for: word) else {
             pendingEmoticonUndo = nil
             return
         }
-        // Field reads `<word><terminator>`. Delete both, then re-emit the
-        // emoji followed by the terminator — terminator is never part of an
-        // ambient emoticon (those are letter/punct sequences without
-        // trailing whitespace), so it always survives the conversion.
+        // Ambient entries are letter/punct sequences with no trailing
+        // whitespace, so the terminator always survives the conversion.
         let charsToDelete = word.count + 1
         let replacement = emoji + String(terminator)
         TextInserter.replace(charactersToDelete: charsToDelete, with: replacement)
@@ -827,38 +737,27 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         )
     }
 
-    /// Roll back the most recent emoticon conversion if it's still inside
-    /// the undo window and the user hasn't moved focus elsewhere. Returns
-    /// true if an undo actually fired (caller should consume the key).
+    /// Returns true if an undo fired (caller should consume the key).
     private func performEmoticonUndoIfFresh() -> Bool {
         guard let entry = pendingEmoticonUndo else { return false }
-        // Window expired → drop it and let the keystroke through.
         if Date().timeIntervalSince(entry.insertedAt) > Self.emoticonUndoWindow {
             pendingEmoticonUndo = nil
             return false
         }
-        // Focus moved to a different app → can't safely surgery the wrong
-        // text field. Drop the entry; pass the keystroke through.
         if let storedPID = entry.pid,
            let currentPID = FocusedElementCache.shared.focusedPID,
            storedPID != currentPID {
             pendingEmoticonUndo = nil
             return false
         }
-        // Delete the inserted emoji (count grapheme clusters, not UTF-16
-        // code units — TextInserter's backspaces are one-per-grapheme since
-        // macOS treats the whole ZWJ sequence as one delete). Then type
-        // the original `:query<term>` back.
+        // Grapheme-count, not UTF-16: macOS deletes a ZWJ sequence as one
+        // backspace and TextInserter sends one per grapheme.
         let emojiLen = entry.emojiInserted.count
         TextInserter.replace(charactersToDelete: emojiLen, with: entry.originalText)
         pendingEmoticonUndo = nil
         return true
     }
 
-    /// Apply the user's skin-tone preference to `emoji` if (a) the emoji
-    /// supports tone modifiers and (b) the preference isn't `.default`.
-    /// Returns the modified character string (just the base for non-toned
-    /// emoji, or default tone).
     private func characterWithSkinTone(_ emoji: Emoji) -> String {
         let tone = SkinTone.current
         guard emoji.supportsSkinTone else { return emoji.character }
@@ -866,8 +765,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 }
 
-/// Snapshot of a just-completed emoticon insertion that can be reversed by
-/// pressing Cmd+Z or Backspace within `Engine.emoticonUndoWindow` seconds.
+/// Cmd+Z or Backspace within `Engine.emoticonUndoWindow` reverses this.
 private struct EmoticonUndo {
     let emojiInserted: String
     let originalText: String

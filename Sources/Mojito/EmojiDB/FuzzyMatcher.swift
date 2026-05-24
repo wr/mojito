@@ -6,29 +6,22 @@ struct ScoredEmoji {
     let score: Int
 }
 
-/// One-time-built indexed corpus for the experimental Symbols set. Built
-/// lazily on first read so apps that never enable Symbols never pay for it.
+/// Built lazily so apps that never enable Symbols don't pay for it.
 @MainActor
 private enum SymbolsCorpus {
     static let entries: [IndexedEmoji] = SymbolsDatabase.indexed()
 }
 
-/// Which corpus FuzzyMatcher should search. Set by Engine based on the user's
-/// symbol prefs and the current trigger-state-machine scope.
+/// Set by Engine from symbol prefs + state-machine scope.
 enum SearchCorpus {
     case emojiOnly          // `:foo` with symbols off, OR symbols on + double-colon required
     case emojiAndSymbols    // `:foo` with symbols on + double-colon NOT required
-    case symbolsOnly        // `::foo` (only reachable when symbols on + double-colon required)
+    case symbolsOnly        // `::foo` (only when symbols on + double-colon required)
 }
 
 struct FuzzyMatcher {
-    // Opaque sentinel hexcodes. These are the only ids referenced anywhere
-    // else in the codebase — neither the trigger keywords nor any
-    // user-facing names appear here. Plain-text keywords live exclusively
-    // as hashes in `EggIndex`.
-    //
-    // The Swift identifier names stay descriptive so the rest of the code
-    // is readable; the *literal values* are what get embedded in the binary.
+    // Opaque sentinel hexcodes — the only ids referenced elsewhere.
+    // Trigger keywords live exclusively as SHA-256 hashes in `EggIndex`.
     static let k01Hex    = "k01"
     static let k02Hex       = "k02"
     static let k03Hex         = "k03"
@@ -55,17 +48,11 @@ struct FuzzyMatcher {
     static let k27Hex     = "k27"
     static let k29Hex          = "k29"
     static let k30Hex       = "k30"
-    /// Konami code payoff — fires from the state machine, not the picker,
-    /// so it has no entry in `EggIndex` and isn't typeable.
+    /// Fires from the state machine, not the picker — no `EggIndex` entry.
     static let k99Hex       = "k99"
-    /// Minimum query length before a special row surfaces. Below this we
-    /// don't even hash — saves a round-trip on every keystroke. Shorter
-    /// keywords (any of length 2) match at length 2 instead; `EggIndex`
-    /// already encodes that.
+    /// Below this we skip the hash lookup. 2-char keywords still match at 2.
     private static let specialMinPrefix = 2
 
-    /// Display data for a pinned row, keyed by opaque id. Keywords live
-    /// only in `EggIndex` (as hashes) — nothing here reveals them.
     private struct PinnedRow {
         let hexcode: String
         let character: String
@@ -101,23 +88,16 @@ struct FuzzyMatcher {
         k30Hex:        PinnedRow(hexcode: k30Hex,        character: "🥬", label: "???",      order: 73),
     ]
 
-    /// Hexcodes whose picker rows render with the playful rainbow gradient.
-    /// Only the v0.1 named rows (random/confetti/pride). Everything else
-    /// pinned shows the `???` mystery label.
+    /// Named pinned rows that get the rainbow gradient instead of `???`.
     static let rainbowHexcodes: Set<String> = [
         k02Hex, k04Hex, k05Hex
     ]
 
-    /// Every pinned-row hexcode (used by PickerView to render the `???`
-    /// mystery label for any non-rainbow pinned egg).
     static let pinnedHexcodes: Set<String> = Set(pinnedRows.keys)
 
-    /// Returns the top `limit` emoji ranked by fzy-style fuzzy match against
-    /// `query`. Frequency boost (if enabled) adds up to +5.0 to the raw score.
-    ///
-    /// All haystacks are precomputed at DB load (see `EmojiDatabase.indexed`),
-    /// so per-keystroke cost is just the scorer's DP — no string allocation,
-    /// no `.lowercased()`, no `[Character]` construction in the hot loop.
+    /// Top `limit` results by fzy score. Frequency boost adds up to +5.0.
+    /// All haystacks are precomputed, so the per-keystroke loop never
+    /// allocates — no `.lowercased()`, no `[Character]` construction.
     @MainActor
     static func search(
         query: String,
@@ -154,14 +134,12 @@ struct FuzzyMatcher {
 
             var finalScore = bestScore
             if useFrequencyBoost, let count = usage[indexed.emoji.hexcode], count > 0 {
-                // Cap the boost so frequently-used emoji can't dominate
-                // unrelated queries — at most +5.0, roughly the strength of
-                // one extra strong-bonus match.
+                // Cap at +5.0 (~ one extra strong-bonus match) so popular
+                // emoji can't dominate unrelated queries.
                 finalScore += min(5.0, Double(count) * 0.2)
             }
 
-            // ScoredEmoji.score is Int for stable ordering elsewhere; multiply
-            // by 1000 to preserve the fzy gap penalties (~0.01 increments).
+            // × 1000 preserves fzy's ~0.01 gap penalties as an Int.
             let intScore = Int(finalScore * 1000)
             results.append(ScoredEmoji(
                 emoji: indexed.emoji,
@@ -178,10 +156,8 @@ struct FuzzyMatcher {
 
         let lowercased = query.lowercased()
 
-        // Pinned rows at the TOP of results. Keywords aren't stored in
-        // source — we hash the typed query and look up against `EggIndex`,
-        // which holds every valid prefix as a SHA-256 digest. Skipped in
-        // symbols-only mode — `::random` shouldn't roll an emoji.
+        // Pinned rows at top. Hash the query against `EggIndex` (no
+        // plaintext keywords in source). Skipped for `::symbols`.
         var output: [ScoredEmoji] = []
         if corpus != .symbolsOnly,
            lowercased.count >= specialMinPrefix,
@@ -195,7 +171,6 @@ struct FuzzyMatcher {
             ))
         }
 
-        // Fill the remaining slots with real fuzzy matches.
         let remainingSlots = max(0, limit - output.count)
         output.append(contentsOf: trimmed.prefix(remainingSlots))
         return output

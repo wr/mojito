@@ -1,16 +1,8 @@
 import AppKit
 
-/// Toggles the app's activation policy based on visible non-menubar windows.
-///
-/// `LSUIElement: true` keeps Mojito out of the dock by default. When the user
-/// opens Settings or Onboarding we promote to `.regular` so they get a real
-/// dock icon and the app appears in ⌘Tab — the natural macOS feel for a
-/// window-bearing app. When the last such window closes we drop back to
-/// `.accessory` and the dock icon disappears.
-///
-/// Reference-counted so multiple simultaneous windows behave correctly: if
-/// Settings is already open and Onboarding opens, closing Settings alone
-/// doesn't kick us back to accessory mode.
+/// Promotes to `.regular` (dock icon + ⌘Tab) while any Settings/Onboarding
+/// window is open; reverts to `.accessory` when the last one closes.
+/// Ref-counted so closing one of multiple visible windows doesn't demote.
 @MainActor
 enum DockIconManager {
     private static var refCount = 0

@@ -1,14 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// "Connecting To Mojito Online…" — what if Apple shipped a dial-up modem
-/// dialog in macOS Tahoe?
-///
-/// Real titled NSWindow with system stoplights, behind-window glass, native
-/// SF Pro typography, the Mojito menubar mark, and SF Symbols animating
-/// via SwiftUI's symbolEffect. The handshake sound plays while the window
-/// is open; closing the window (stoplight, Esc) stops it. The window also
-/// auto-dismisses a couple of seconds after "Connected!" lands.
+/// "Connecting To Mojito Online…" — Tahoe-styled dial-up modem dialog.
+/// Handshake plays while the window is open; closing stops it and an
+/// auto-dismiss fires a few seconds after "Connected!".
 @MainActor
 enum DialupSound {
     fileprivate static var window: NSWindow?
@@ -16,9 +11,6 @@ enum DialupSound {
     private static var player: NSSound?
     private static var dismissWorkItem: DispatchWorkItem?
 
-    /// Stage timing (seconds since open). Tuned so dialing dominates, then a
-    /// long "connecting" stretch, then "Connected!" arrives at ~20s and
-    /// holds for 3s before the window auto-dismisses.
     fileprivate static let stageBreakpoints = (
         dialingEnd:    6.0,
         connectingEnd: 27.0,
@@ -48,7 +40,6 @@ enum DialupSound {
         w.level = .floating
         w.standardWindowButton(.zoomButton)?.isHidden = true
 
-        // Glass background — NSVisualEffectView pinned to the window's content frame.
         let glass = NSVisualEffectView()
         glass.material = .windowBackground
         glass.state = .active
@@ -73,8 +64,7 @@ enum DialupSound {
         window = w
         DockIconManager.windowDidOpen()
 
-        // Start the modem audio. No fallback beep — if the asset is missing,
-        // play nothing instead of triggering the system alert sound.
+        // No fallback beep — better silent than system alert.
         if let sound = AudioBlob.load("s03") {
             player = sound
             sound.play()
@@ -105,10 +95,8 @@ enum DialupSound {
             }
         }
 
-        // `orderFrontRegardless` instead of `makeKeyAndOrderFront + NSApp.activate` —
-        // the latter combo was triggering a macOS focus-shuffle alert sound
-        // when the dialer popped up. The window still receives mouse clicks
-        // on its stoplight buttons without being key.
+        // makeKeyAndOrderFront + NSApp.activate triggered macOS's
+        // focus-shuffle alert sound. Stoplights still work without key.
         w.orderFrontRegardless()
     }
 }
@@ -126,8 +114,7 @@ private enum DialStage: Int, CaseIterable {
         }
     }
 
-    /// SF Symbols, paired (unfilled / filled). Unfilled shows before this
-    /// stage is reached; filled shows once we're on or past it.
+    /// Filled once we're on or past this stage.
     var symbolNames: (unfilled: String, filled: String) {
         switch self {
         case .dialing:    return ("phone",            "phone.fill")
@@ -151,9 +138,7 @@ private struct DialupView: View {
     private let mojitoGreen  = Color(red: 0.45, green: 0.78, blue: 0.27)   // RGB 115/200/69
     private let mojitoOrange = Color(red: 0.95, green: 0.70, blue: 0.25)   // RGB 242/179/65
 
-    /// One rhythmic value used for: window-edge → logo, logo → 3-up,
-    /// 3-up → status, status → button, button → bottom, AND horizontal
-    /// edges. All five vertical gaps match all four sides of padding.
+    /// All five vertical gaps + four-side padding share this value.
     private let rhythm: CGFloat = 32
 
     var body: some View {
@@ -169,14 +154,12 @@ private struct DialupView: View {
             }
             .padding(rhythm)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // Don't fade into the connected state — the snap reads as
-            // "handshake completed, you're online" rather than a gentle
-            // arrival.
+            // Connected snaps in — reads as "handshake done, online".
             .animation(stage == .connected ? nil : .easeInOut(duration: 0.35), value: stage)
         }
     }
 
-    /// Cursive wordmark — bundled scrambled image rendered with native colors.
+    /// Bundled scrambled image, native colors.
     private static let wordmark: NSImage? = ImageBlob.load("v06")
 
     @ViewBuilder
@@ -190,9 +173,7 @@ private struct DialupView: View {
         }
     }
 
-    /// Three stage cards. Each card shows the unfilled SF Symbol until its
-    /// stage is reached, then the filled variant. Active card pulses via
-    /// the native symbol effect.
+    /// Three stage cards. Active card pulses via symbolEffect.
     private func stages(current: DialStage) -> some View {
         HStack(spacing: 18) {
             ForEach(DialStage.allCases, id: \.rawValue) { stage in
@@ -220,7 +201,7 @@ private struct DialupView: View {
             stageIcon(symbol, isActive: isActive, reached: reached)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // The connected card snaps on; earlier stages still crossfade.
+        // Connected snaps; earlier stages crossfade.
         .animation(stage == .connected ? nil : .easeInOut(duration: 0.3), value: isActive)
     }
 
@@ -240,8 +221,7 @@ private struct DialupView: View {
         }
     }
 
-    /// Stage label — crossfades on stage change. No loader dots (the active
-    /// card's pulsing icon already carries the in-flight feel).
+    /// Stage label, crossfading. The pulsing icon carries the in-flight feel.
     private func statusBlock(stage: DialStage) -> some View {
         Text(stage.label)
             .font(.system(size: 18, weight: .semibold, design: .rounded))
@@ -250,8 +230,7 @@ private struct DialupView: View {
             .id(stage)
     }
 
-    /// "Hang up" — closes the window (and stops the modem sound via the
-    /// willCloseNotification observer set up in `play()`).
+    /// Closes the window; the willCloseNotification observer stops the sound.
     private var hangUpButton: some View {
         Button(action: onDismiss) {
             HStack(spacing: 6) {

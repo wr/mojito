@@ -1,12 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// Full-screen confetti shower.
-///
-/// Similar architecture to EmojiRain (transparent click-through panel, Canvas
-/// inside TimelineView, closed-form physics) but the particles are tilted
-/// colored rectangles instead of emoji. Cheaper to draw, and a cleaner
-/// "celebration" read than mixed emoji.
+/// Confetti shower. Same architecture as EmojiRain; tilted colored
+/// rectangles are cheaper to draw than mixed emoji.
 @MainActor
 enum ConfettiRain {
     private static var activeWindow: NSWindow?
@@ -16,7 +12,7 @@ enum ConfettiRain {
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
         let frame = screen.frame
 
-        // Re-trigger replaces any in-flight shower instead of being suppressed.
+        // Re-trigger replaces any in-flight shower.
         activeWindow?.orderOut(nil)
         activeWindow = nil
 
@@ -25,21 +21,19 @@ enum ConfettiRain {
             .cyan, .blue, .indigo, .purple, .pink
         ]
 
-        // Two cannons: bottom-left and bottom-right. Each fires particles up
-        // and inward across most of the screen width, then gravity pulls
-        // them back down. Initial vy is strongly negative (upward); vx is
-        // signed by emitter side with some spread.
+        // Two cannons (bottom-left, bottom-right) fire up and inward;
+        // gravity pulls particles back down.
         let particlesPerSide = Int(Double(60) * emit)
-        let cannonY = frame.height + 10           // just below the bottom edge
-        let leftCannonX = -10.0                   // just left of the left edge
+        let cannonY = frame.height + 10
+        let leftCannonX = -10.0
         let rightCannonX = Double(frame.width) + 10
         var particles: [Particle] = []
         particles.reserveCapacity(particlesPerSide * 2)
 
-        for side in [-1.0, 1.0] {                 // -1 = left cannon, +1 = right
+        for side in [-1.0, 1.0] {                 // -1 = left, +1 = right
             let originX = side < 0 ? leftCannonX : rightCannonX
             for _ in 0..<particlesPerSide {
-                // Bias horizontal velocity toward the screen center.
+                // Bias horizontal velocity toward screen center.
                 let vxMagnitude: CGFloat = .random(in: 700...1100)
                 let vx = side < 0 ? vxMagnitude : -vxMagnitude
                 particles.append(Particle(
@@ -118,8 +112,7 @@ private struct ConfettiView: View {
 
                     let x = p.startX + p.vx * t
                     let y = p.startY + p.vy * t + 0.5 * gravity * t * t
-                    // Particles travel off the top, sides, OR back down past
-                    // the bottom — skip when out of bounds in any direction.
+                    // Particles can exit top, sides, or fall past the bottom.
                     guard y < offScreenY,
                           x > -30, x < bounds.width + 30 else { continue }
 

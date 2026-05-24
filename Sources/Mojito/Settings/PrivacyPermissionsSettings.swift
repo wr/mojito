@@ -8,9 +8,8 @@ struct PrivacyPermissionsSettingsView: View {
 
     var body: some View {
         Form {
-            // Permissions first — actionable rows the user might need to
-            // change. Privacy explanation lives below, since once the user
-            // has read it once they're unlikely to revisit.
+            // Permissions first — the actionable rows. Privacy
+            // explanation below since it's read-once.
             Section("Permissions") {
                 permissionRow(
                     title: "Accessibility",
@@ -89,9 +88,7 @@ struct PrivacyPermissionsSettingsView: View {
 
 // MARK: - Privacy details
 
-/// The four explainer rows shown in Settings → Privacy & Permissions and in
-/// the onboarding "Privacy details…" sheet. Pulled into one view so both
-/// surfaces stay in sync.
+/// Shared between Settings → Privacy and the onboarding "Privacy details…" sheet.
 struct PrivacyDetailsRows: View {
     var body: some View {
         privacyRow(
@@ -153,9 +150,7 @@ struct PrivacyDetailsRows: View {
     }
 }
 
-/// Modal sheet surfaced by the onboarding permissions step. Hero icon up
-/// top, settings-styled grouped list of the privacy rows, Done button at
-/// the bottom-right.
+/// Surfaced by the onboarding permissions step.
 struct PrivacyDetailsSheet: View {
     @Environment(\.dismiss) private var dismiss
 

@@ -1,7 +1,7 @@
 import Foundation
 
 enum DefaultExclusions {
-    /// Bundle IDs of apps that already have native `:emoji:` autocomplete.
+    /// Apps that already have native `:emoji:` autocomplete.
     static let bundleIDs: [String] = [
         "com.tinyspeck.slackmacgap",          // Slack
         "com.hnc.Discord",                    // Discord
@@ -19,7 +19,7 @@ enum DefaultExclusions {
         "com.readdle.smartemail-Mac",         // Spark
     ]
 
-    /// Host or glob patterns for websites with native shortcode support.
+    /// Websites with native shortcode support.
     static let urlPatterns: [String] = [
         "*.slack.com",
         "discord.com",

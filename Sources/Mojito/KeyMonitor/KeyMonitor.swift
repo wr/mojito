@@ -19,11 +19,8 @@ final class KeyMonitor {
     private(set) var isRunning = false
 
     func start() -> Bool {
-        // The CGEventTap callback dispatches via `MainActor.assumeIsolated`
-        // in Engine. That's only safe if the tap is installed on the main
-        // run loop — i.e. start() runs on the main thread. Guard the
-        // invariant explicitly so a future caller can't introduce a subtle
-        // crash by invoking us from a background queue.
+        // Engine's `MainActor.assumeIsolated` callback dispatch is only safe
+        // if the tap installs on the main run loop.
         dispatchPrecondition(condition: .onQueue(.main))
         guard !isRunning else { return true }
 
@@ -58,8 +55,7 @@ final class KeyMonitor {
     func stop() {
         if let tap = eventTap {
             CGEvent.tapEnable(tap: tap, enable: false)
-            // Without invalidation the underlying Mach port leaks for the
-            // process lifetime — `CFRunLoopRemoveSource` alone isn't enough.
+            // CFRunLoopRemoveSource alone leaks the underlying Mach port.
             CFMachPortInvalidate(tap)
         }
         if let source = runLoopSource {
@@ -71,14 +67,13 @@ final class KeyMonitor {
     }
 
     private func handle(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
-        // Skip events we posted ourselves (via TextInserter). Without this,
-        // synthetic backspaces emitted during an emoticon replacement land
-        // in this callback while `pendingEmoticonUndo` is set and trigger
-        // the undo path immediately — turning `:)` into `::)`.
+        // Skip our own synthetic events — otherwise synth-backspaces from
+        // an emoticon replacement re-trigger the undo path and turn
+        // `:)` into `::)`.
         if event.getIntegerValueField(.eventSourceUserData) == TextInserter.synthMarker {
             return Unmanaged.passUnretained(event)
         }
-        // The tap can be auto-disabled by the system if it takes too long; re-enable.
+        // The system auto-disables the tap if it takes too long.
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let tap = eventTap { CGEvent.tapEnable(tap: tap, enable: true) }
             delegate?.keyMonitorDidLoseTap(self)
@@ -97,9 +92,8 @@ final class KeyMonitor {
         let keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
         let flags = event.flags
 
-        // Cmd+Z (no other modifiers) gets routed through as a dedicated
-        // input so the engine can offer emoticon-undo. Anything else with
-        // modifiers (⌘Tab, ⌘C, …) is ignored — those mustn't trigger or
+        // Cmd+Z (no other modifiers) routes through so the engine can
+        // offer emoticon-undo. Other modifier combos must not trigger or
         // interrupt capture.
         if flags.contains(.maskCommand) {
             if keyCode == kVK_ANSI_Z
@@ -121,16 +115,11 @@ final class KeyMonitor {
         case kVK_UpArrow:       return .arrowUp
         case kVK_DownArrow:     return .arrowDown
         case kVK_Delete, kVK_ForwardDelete: return .backspace
-        case kVK_LeftArrow:
-            // While the picker is open, swallow caret movement so the picker stays put. The
-            // typed `:query` invariant survives because the focused app never sees the arrow.
-            return .arrowLeft
-        case kVK_RightArrow:
-            return .arrowRight
+        case kVK_LeftArrow:  return .arrowLeft
+        case kVK_RightArrow: return .arrowRight
         default: break
         }
 
-        // Read the unicode character produced by the keystroke.
         var length: Int = 0
         var chars = [UniChar](repeating: 0, count: 4)
         event.keyboardGetUnicodeString(maxStringLength: 4, actualStringLength: &length, unicodeString: &chars)
@@ -138,21 +127,13 @@ final class KeyMonitor {
         let char = Character(scalar)
 
         if char == ":" { return .colon }
-
         if isNameChar(char) { return .nameChar(char) }
-
-        // Whitespace, punctuation, etc. cancel capture by passing through.
-        // The character travels with the input so Engine can check it
-        // against the emoticon table.
         return .cancelChar(char)
     }
 
     private func isNameChar(_ c: Character) -> Bool {
         if c.isLetter || c.isNumber { return true }
-        // `'` is included so `:'(` and `:')` can be captured as queries with
-        // body `'` and terminator `(` / `)`. Side effect: `:foo'bar` is also
-        // a valid (if rarely useful) query; harmless because there's no
-        // shortcode that matches.
+        // `'` lets `:'(` / `:')` capture with body `'` and terminator `(`/`)`.
         return c == "_" || c == "-" || c == "+" || c == "'"
     }
 }

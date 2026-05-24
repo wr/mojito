@@ -1,10 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// Classic Windows Solitaire victory cascade. Cards launch from the top-
-/// right corner, fall under gravity, bounce off the bottom of the screen,
-/// and leave colored trails behind them. 52 cards, ~8s total, click-through
-/// overlay.
+/// Windows Solitaire victory cascade — 52 cards from the top-right
+/// corner, gravity, floor bounce, colored trails.
 @MainActor
 enum SolitaireWin {
     private static var activeWindow: NSWindow?
@@ -16,9 +14,7 @@ enum SolitaireWin {
         activeWindow?.orderOut(nil)
         activeWindow = nil
 
-        // Build the deck — 52 cards launching from the top-right with
-        // staggered launch times and slightly randomized initial velocities
-        // so the cascade reads as a stream, not a single salvo.
+        // Staggered + randomized so it reads as a stream, not a salvo.
         let suits: [CardSuit] = [.hearts, .diamonds, .clubs, .spades]
         let ranks: [String] = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
         var cards: [SolitaireCard] = []
@@ -76,7 +72,7 @@ private enum CardSuit: CaseIterable {
         }
     }
     var isRed: Bool { self == .hearts || self == .diamonds }
-    /// Trail tint — picks one of the four classic Solitaire trail colors.
+    /// One of the four classic Solitaire trail colors.
     var trailColor: Color {
         switch self {
         case .hearts:   return Color(red: 0.95, green: 0.20, blue: 0.30)
@@ -114,7 +110,6 @@ private struct SolitaireWinView: View {
                     ? max(0.0, (duration - elapsed) / 0.5)
                     : 1.0
 
-                // Origin point: just inside the top-right corner.
                 let originX = bounds.width - cardWidth / 2 - 8
                 let originY: CGFloat = 8 + cardHeight / 2
 
@@ -122,7 +117,6 @@ private struct SolitaireWinView: View {
                     let t = elapsed - card.launchTime
                     guard t > 0 else { continue }
 
-                    // Simulate ballistic + multiple floor bounces.
                     let (x, y, _) = positionWithBounces(
                         x0: originX,
                         y0: originY,
@@ -134,8 +128,7 @@ private struct SolitaireWinView: View {
                         damping: bounceDamping
                     )
 
-                    // Trail: stride backward in time, draw progressively
-                    // smaller, more transparent dots along the path.
+                    // Trail: stride backward in time, shrinking dots.
                     let trailSteps = 18
                     let trailStep: TimeInterval = 0.04
                     for i in 1...trailSteps {
@@ -163,7 +156,6 @@ private struct SolitaireWinView: View {
                         c.fill(Path(ellipseIn: rect), with: .color(card.suit.trailColor))
                     }
 
-                    // Skip drawing the card itself once it's off to the left.
                     guard x > -cardWidth, y < bounds.height + cardHeight else { continue }
 
                     drawCard(ctx: ctx, card: card, x: x, y: y, opacity: Double(endFade))
@@ -174,11 +166,9 @@ private struct SolitaireWinView: View {
         .ignoresSafeArea()
     }
 
-    /// Closed-form integrator with discrete bounce events. We track when
-    /// the card's parabolic arc next intersects the floor; if that happens
-    /// before `t`, we "consume" that bounce (advance start time + flip vy
-    /// with damping) and continue. Doing this in a loop avoids per-frame
-    /// state — every card's position is a pure function of `t`.
+    /// Closed-form with discrete bounces. Solves each arc's floor
+    /// intersection, advances time, flips vy with damping. Pure function
+    /// of `t` — no per-frame state.
     private func positionWithBounces(
         x0: CGFloat, y0: CGFloat,
         vx: CGFloat, vy: CGFloat,
@@ -192,12 +182,9 @@ private struct SolitaireWinView: View {
         let vxCur = vx
         var vyCur = vy
         var tRemaining = CGFloat(t)
-        // Hard cap on iterations — energy decays geometrically; in
-        // practice we settle in <8 bounces. Cap prevents runaway loops
-        // if vy is pathological.
+        // Cap against pathological vy; typically settles in <8 bounces.
         for _ in 0..<20 {
-            // Time-to-floor for the current segment, solving:
-            //   py + vy * t + 0.5 * g * t^2 = floorY
+            // Time-to-floor: py + vy*t + 0.5*g*t² = floorY
             let a = 0.5 * gravity
             let b = vyCur
             let c = py - floorY
@@ -207,7 +194,7 @@ private struct SolitaireWinView: View {
                 let sq = sqrt(disc)
                 let r1 = (-b + sq) / (2 * a)
                 let r2 = (-b - sq) / (2 * a)
-                // Want the smallest *positive* root.
+                // Smallest positive root.
                 let candidates = [r1, r2].filter { $0 > 1e-4 }
                 tFloor = candidates.min() ?? .infinity
             } else {
@@ -215,18 +202,15 @@ private struct SolitaireWinView: View {
             }
 
             if tFloor >= tRemaining {
-                // No bounce within remaining time — integrate to end.
                 px += vxCur * tRemaining
                 py += vyCur * tRemaining + 0.5 * gravity * tRemaining * tRemaining
-                // Approximate angular position from vx.
                 return (px, py, vxCur * 0.02)
             }
-            // Advance to the floor contact, then bounce.
             px += vxCur * tFloor
             py = floorY
             vyCur = -(vyCur + gravity * tFloor) * damping
             tRemaining -= tFloor
-            // If the bounce is microscopic, give up to avoid burning iterations.
+            // Bail on microscopic bounces.
             if abs(vyCur) < 30 {
                 px += vxCur * tRemaining
                 return (px, py, vxCur * 0.02)
@@ -240,7 +224,6 @@ private struct SolitaireWinView: View {
                           width: cardWidth, height: cardHeight)
         var c = ctx
         c.opacity = opacity
-        // White face with thin gray border.
         c.fill(Path(roundedRect: rect, cornerRadius: 6), with: .color(.white))
         c.stroke(Path(roundedRect: rect, cornerRadius: 6),
                  with: .color(Color.black.opacity(0.35)), lineWidth: 1)
@@ -249,19 +232,16 @@ private struct SolitaireWinView: View {
             ? Color(red: 0.85, green: 0.05, blue: 0.05)
             : .black
 
-        // Rank top-left.
         let rank = Text(card.rank)
             .font(.system(size: 16, weight: .bold, design: .serif))
             .foregroundColor(textColor)
         c.draw(c.resolve(rank), at: CGPoint(x: rect.minX + 9, y: rect.minY + 12), anchor: .center)
 
-        // Suit symbol below rank.
         let suitSmall = Text(card.suit.symbol)
             .font(.system(size: 14))
             .foregroundColor(textColor)
         c.draw(c.resolve(suitSmall), at: CGPoint(x: rect.minX + 9, y: rect.minY + 28), anchor: .center)
 
-        // Big center suit.
         let suitBig = Text(card.suit.symbol)
             .font(.system(size: 32))
             .foregroundColor(textColor)

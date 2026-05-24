@@ -1,11 +1,9 @@
 import Foundation
 
-/// Discoverable effects. Persisted-set ids are opaque (`k01` … `k21`) so
-/// neither the binary nor the on-disk plist reveals which effects exist or
-/// what their trigger keywords are. The user-facing strings (title /
-/// detail / hint) still live as plain text — they have to render somewhere
-/// — but only after the effect is discovered does the title leak to the
-/// user, and the hints intentionally never quote the trigger word.
+/// Discoverable effects. Persisted ids are opaque (`k01`…) so neither the
+/// binary nor the plist reveals which effects exist or their triggers.
+/// User-facing strings have to render somewhere — but titles only leak
+/// after discovery, and hints never quote the trigger word.
 enum EasterEgg: String, CaseIterable, Identifiable {
     case k01
     case k03
@@ -37,7 +35,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// User-facing name shown once the egg has been discovered.
+    /// Shown once the egg has been discovered.
     var title: String {
         switch self {
         case .k01: return "Emoji rain"
@@ -70,11 +68,9 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Detail shown next to a discovered egg in the About panel. Spells
-    /// out the trigger now that the user has found it. Trigger keywords
-    /// are decoded from `EggStrings` at runtime so they don't appear as
-    /// plaintext in the source — every reference between backticks below
-    /// would otherwise be a free spoiler for anyone reading the repo.
+    /// Shown next to a discovered egg in About — spells out the trigger.
+    /// Backticked keywords decode from `EggStrings` so they're not
+    /// plaintext spoilers in the source.
     var detail: String {
         switch self {
         case .k01: return "`\(EggStrings.k01)` — the house special."
@@ -173,14 +169,12 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     }
 }
 
-/// Persists the set of effects the user has discovered.
+/// Persists the set of discovered effects.
 @MainActor
 enum EasterEggTracker {
-    /// In-memory mirror of the persisted set. Loaded on first access via a
-    /// one-time migration: pre-obfuscation builds stored plain-text raw
-    /// values (e.g. `"mojito"`) and we hash those, look them up against
-    /// `EggIndex`, and rewrite the persisted set as opaque ids. The legacy
-    /// strings never appear in source — they exist only as hashes inside
+    /// One-time migration on first read: pre-obfuscation builds stored
+    /// plain raw values; we hash those against `EggIndex` and rewrite to
+    /// opaque ids. Legacy strings live only inside
     /// `EggIndex.migrateLegacyRawValue`.
     private static var cache: Set<String> = loadAndMigrate()
 
@@ -203,8 +197,7 @@ enum EasterEggTracker {
         return converted
     }
 
-    /// Record discovery. Idempotent — subsequent triggers of the same egg
-    /// don't re-fire the notification or repost the change.
+    /// Idempotent — re-triggers don't re-notify.
     static func record(_ egg: EasterEgg) {
         guard cache.insert(egg.rawValue).inserted else { return }
         UserDefaults.standard.set(Array(cache), forKey: PrefsKey.easterEggsDiscovered)
@@ -219,10 +212,8 @@ enum EasterEggTracker {
     static var discoveredCount: Int { cache.count }
     static var totalCount: Int { EasterEgg.allCases.count }
 
-    /// Wipes both the discovered-set and Perfect Bounce counter. Writes an
-    /// empty array (not `removeObject`) for the same reason `clearUsageStats`
-    /// does — the dev build registers the release domain as a fallback layer,
-    /// so a removed key would resurrect from there.
+    /// Writes an empty array (not `removeObject`) so the dev build's
+    /// release-domain fallback can't resurrect the set. See `clearUsageStats`.
     static func reset() {
         cache.removeAll()
         UserDefaults.standard.set([String](), forKey: PrefsKey.easterEggsDiscovered)

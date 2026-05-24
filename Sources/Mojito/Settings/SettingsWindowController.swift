@@ -1,10 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Imperative window controller for the Settings window. We don't use SwiftUI's `Settings`
-/// scene because it's flaky for `.accessory` apps in macOS Tahoe — the
-/// `Selector("showSettingsWindow:")` trick stops resolving once the menu bar isn't installed
-/// in the standard place.
+/// SwiftUI's `Settings` scene is flaky for `.accessory` apps on Tahoe —
+/// `Selector("showSettingsWindow:")` stops resolving once the menu bar
+/// isn't installed in the standard place.
 @MainActor
 final class SettingsWindowController {
     private var window: NSWindow?
@@ -27,18 +26,14 @@ final class SettingsWindowController {
 
         let hosting = NSHostingController(rootView: root)
         let window = NSWindow(contentViewController: hosting)
-        // Title is set dynamically from `SettingsRoot` based on the current
-        // sidebar selection (About → "About", General → "General", etc.).
+        // SettingsRoot rewrites the title per sidebar selection.
         window.title = "Settings"
-        // Unified-toolbar look (matches System Settings on Tahoe):
-        //  - .fullSizeContentView lets content extend behind the title-bar
-        //    strip so scrolling pushes it under the translucent material.
-        //  - titlebarAppearsTransparent stays FALSE: keeping the native
-        //    title-bar material is what produces the scroll-under blur. With
-        //    it true the title-bar area becomes fully transparent and there's
-        //    nothing to blur the content with — that was the hard edge.
-        //  - .unified toolbar style + NSToolbar with at least one item makes
-        //    AppKit render the unified material across the whole strip.
+        // Unified-toolbar look (System Settings on Tahoe):
+        //  - `fullSizeContentView` lets content scroll behind the title bar.
+        //  - `titlebarAppearsTransparent` stays FALSE — the native title-bar
+        //    material is what produces the scroll-under blur.
+        //  - `.unified` + a non-empty NSToolbar renders the unified material
+        //    across the whole strip.
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
         window.titleVisibility = .visible
         window.toolbarStyle = .unified
@@ -73,12 +68,10 @@ final class SettingsWindowDelegate: NSObject, NSWindowDelegate {
     }
 
     func windowWillClose(_ notification: Notification) {
-        // Detach so close() doesn't recurse into the window that's already closing.
+        // Detach so close() doesn't recurse into the closing window.
         let c = controller
         controller = nil
         c?.close()
-        // DockIconManager will drop the activation policy back to .accessory
-        // if this was the last visible non-menubar window.
         DockIconManager.windowDidClose()
     }
 }

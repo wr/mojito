@@ -1,11 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// Payoff for entering the Konami code via the picker.
-///
-/// Combines a rainbow particle burst with a brief "+30 LIVES" banner — a nod
-/// to the Contra cheat. Triggered exclusively by the state machine when the
-/// arrow sequence ↑↑↓↓←→←→BA is matched in `.capturing` empty-query state.
+/// "+30 LIVES" Contra-cheat banner. Triggered by the state machine when
+/// ↑↑↓↓←→←→BA is matched in `.capturing` empty-query state.
 @MainActor
 enum KonamiPayoff {
     private static var activeWindow: NSWindow?

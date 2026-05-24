@@ -1,16 +1,13 @@
 import Foundation
 
-/// One scoreable string for an emoji — shortcode or label. Pre-lowercased and
-/// pre-charified at DB load so the fuzzy scorer doesn't reallocate per search.
+/// Pre-lowercased + pre-charified at DB load — the fuzzy scorer never
+/// reallocates per search.
 struct EmojiHaystack {
-    /// The form to display in the picker if this haystack matches.
     let display: String
-    /// Random-access, pre-lowercased character array for the scorer.
     let chars: [Character]
 }
 
-/// Bundles an `Emoji` with its precomputed haystacks. `FuzzyMatcher` iterates
-/// these directly so the per-keystroke search loop never allocates.
+/// `FuzzyMatcher` iterates these directly so the per-keystroke loop never allocates.
 struct IndexedEmoji {
     let emoji: Emoji
     let haystacks: [EmojiHaystack]

@@ -1,17 +1,10 @@
 import Foundation
 
-/// Word-keyed emoticon table for *ambient* detection — no leading `:` required.
+/// Ambient emoticons — no leading `:` required.
 ///
-/// `TriggerStateMachine` accumulates an `idleWord` from each printable
-/// keystroke in `.idle` and consults this table whenever a terminator char
-/// (space, tab, newline, sentence punctuation) lands. The terminator itself
-/// is never part of the lookup key; only the run of chars between
-/// terminators (or between start-of-input and the first terminator) is
-/// matched.
-///
-/// Compared to `EmoticonTable` (which is keyed by the suffix after `:`),
-/// this one carries the full literal sequence the user typed, so
-/// case-sensitive variants like `XD` vs `xD` need explicit entries.
+/// Keys are full literal sequences typed between terminators, so case
+/// variants (`XD` / `xD`) need separate entries. Unlike `EmoticonTable`
+/// (which keys on the suffix after `:`), the terminator never enters the key.
 enum AmbientEmoticonTable {
     private static let map: [String: String] = [
         "<3":   "❤️",
@@ -25,25 +18,20 @@ enum AmbientEmoticonTable {
         "o_O":  "😳",
     ]
 
-    /// Returns the emoji for a candidate word, or nil if no entry matches.
     static func emoji(for word: String) -> String? {
         map[word]
     }
 
-    /// True if the word should fire the moment it completes, without waiting
-    /// for a terminator. Restricted to emoticons whose leading character is
-    /// non-alphanumeric (`<3`, `</3`, `>:)`, `>:(`), so letter-led ones like
-    /// `XD` or `B)` still require a terminator and don't eat into normal
-    /// prose (`XDog`, `Bobby`).
+    /// Fire the moment a non-alphanumeric-led entry completes (`<3`,
+    /// `>:)` etc.). Letter-led entries (`XD`, `B)`) wait for a terminator
+    /// so they don't eat into prose (`XDog`, `Bobby`).
     static func shouldFireImmediately(_ word: String) -> Bool {
         guard let first = word.first else { return false }
         if first.isLetter || first.isNumber { return false }
         return map[word] != nil
     }
 
-    /// All distinct first-character prefixes of ambient emoticons that contain a `:`
-    /// somewhere after the first char (currently just `>`). The state machine uses
-    /// this to decide whether a `:` typed in idle should continue building an ambient
-    /// word instead of starting colon-capture.
+    /// First-char prefixes that may legitimately continue with `:` (so
+    /// `>:)` doesn't get hijacked by colon-capture).
     static let colonContinuationPrefixes: Set<String> = [">"]
 }

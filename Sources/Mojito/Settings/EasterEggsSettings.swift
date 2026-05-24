@@ -1,14 +1,11 @@
 import SwiftUI
 import AppKit
 
-/// Stats + Easter eggs settings pane. Lifted out of About so the About
-/// page can stay focused on the app/donation/credits.
 struct EasterEggsSettingsView: View {
-    /// Observed so `engine.clearUsageStats()` re-renders the stats block.
+    /// Observed so `clearUsageStats()` re-renders the stats block.
     @EnvironmentObject private var engine: Engine
     @State private var justCopied = false
-    /// Bumped on `.easterEggDiscovered` so the section re-evaluates
-    /// `EasterEggTracker.isDiscovered(_:)` while the pane is open.
+    /// Bumped on `.easterEggDiscovered` so the section re-renders while open.
     @State private var easterEggsTick: Int = 0
 
     private let rowPadding: CGFloat = 2
@@ -62,7 +59,7 @@ struct EasterEggsSettingsView: View {
 
     // MARK: - Easter eggs
 
-    /// Scrambled Dogcow tile (`v01.bin`) used in the dogcow row.
+    /// Scrambled Dogcow tile (`v01.bin`).
     private static let dogcowImage: NSImage? = {
         guard let image = ImageBlob.load("v01") else { return nil }
         image.isTemplate = true
@@ -126,9 +123,7 @@ struct EasterEggsSettingsView: View {
         }
     }
 
-    /// Returns the detail string for a discovered egg, with a per-egg
-    /// inline metric where applicable. Perfect Bounce shows the running
-    /// corner-hit count from `PrefsKey.perfectBounceCount`.
+    /// Perfect Bounce appends a running corner-hit count.
     private func detailText(for egg: EasterEgg) -> String {
         switch egg {
         case .k31:
@@ -218,8 +213,7 @@ struct EasterEggsSettingsView: View {
 
 // MARK: - Reset eggs button
 
-/// Destructive button + confirmation for wiping easter-egg discovery progress.
-/// Parallels `ClearStatsButton` in `AboutSettings.swift`.
+/// Parallels `ClearStatsButton`.
 struct ResetEasterEggsButton: View {
     @State private var confirm = false
     var isDisabled: Bool = false

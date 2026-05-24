@@ -1,12 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// After Dark's iconic Flying Toasters.
-///
-/// A flock of winged toasters glides diagonally across the screen (top-right
-/// to bottom-left), with the occasional slice of toast for variety. Wings flap
-/// at ~6 Hz. Each item launches at a random time and position so the screen
-/// stays populated for the duration.
+/// After Dark's Flying Toasters: winged toasters glide top-right to
+/// bottom-left, occasional toast slice for variety, wings flap at ~6 Hz.
 @MainActor
 enum FlyingToasters {
     private static var activeWindow: NSWindow?
@@ -22,7 +18,7 @@ enum FlyingToasters {
         var items: [Toaster] = []
         items.reserveCapacity(itemCount)
         for _ in 0..<itemCount {
-            // Start above and to the right of visible bounds; travel down-left.
+            // Start above/right of bounds; travel down-left.
             let startX = CGFloat.random(in: frame.width * 0.3...frame.width * 1.4)
             let startY = CGFloat.random(in: -frame.height * 0.4...frame.height * 0.4)
             items.append(Toaster(
@@ -89,14 +85,12 @@ private struct ToastersView: View {
                 for item in items {
                     let t = elapsed - item.launchTime
                     guard t > 0 else { continue }
-                    // Direction: down-left at ~30° below horizontal.
-                    let angle = Double.pi / 6
+                    let angle = Double.pi / 6  // ~30° below horizontal
                     let dx = -CGFloat(cos(angle)) * item.speed * CGFloat(t)
                     let dy = CGFloat(sin(angle)) * item.speed * CGFloat(t)
                     let x = item.startX + dx
                     let y = item.startY + dy
 
-                    // Skip when fully off bottom-left.
                     guard x > -120, y < bounds.height + 120 else { continue }
 
                     let wingPhase = elapsed * 12 + item.wingPhaseOffset
@@ -118,7 +112,6 @@ private struct ToastersView: View {
 
     private func drawToaster(ctx: GraphicsContext, center: CGPoint, wingPhase: Double) {
         let bodyRect = CGRect(x: center.x - 32, y: center.y - 22, width: 64, height: 44)
-        // Chrome body.
         ctx.fill(
             Path(roundedRect: bodyRect, cornerRadius: 6),
             with: .linearGradient(
@@ -127,26 +120,22 @@ private struct ToastersView: View {
                 endPoint: CGPoint(x: bodyRect.minX, y: bodyRect.maxY)
             )
         )
-        // Toast slots.
         let slotRect = CGRect(x: bodyRect.minX + 8, y: bodyRect.minY + 6, width: bodyRect.width - 16, height: 8)
         ctx.fill(Path(roundedRect: slotRect, cornerRadius: 2), with: .color(.black))
-        // Lever knob.
         ctx.fill(
             Path(roundedRect: CGRect(x: bodyRect.maxX - 9, y: bodyRect.midY - 3, width: 7, height: 6), cornerRadius: 1),
             with: .color(Color(white: 0.3))
         )
 
-        // Wings — two trapezoids, flap up/down with phase.
+        // Wings — two trapezoids flapping with phase.
         let flap = CGFloat(sin(wingPhase)) * 10
         let wingTopY = center.y - 8 - flap
         var wingPath = Path()
-        // Left wing.
         wingPath.move(to: CGPoint(x: bodyRect.minX + 4, y: bodyRect.minY + 8))
         wingPath.addLine(to: CGPoint(x: bodyRect.minX - 28, y: wingTopY - 6))
         wingPath.addLine(to: CGPoint(x: bodyRect.minX - 24, y: wingTopY + 6))
         wingPath.addLine(to: CGPoint(x: bodyRect.minX + 4, y: bodyRect.minY + 16))
         wingPath.closeSubpath()
-        // Right wing.
         wingPath.move(to: CGPoint(x: bodyRect.maxX - 4, y: bodyRect.minY + 8))
         wingPath.addLine(to: CGPoint(x: bodyRect.maxX + 28, y: wingTopY - 6))
         wingPath.addLine(to: CGPoint(x: bodyRect.maxX + 24, y: wingTopY + 6))
@@ -157,7 +146,7 @@ private struct ToastersView: View {
     }
 
     private func drawToast(ctx: GraphicsContext, center: CGPoint) {
-        // Slice of toast: rounded golden-brown rectangle with darker crust.
+        // Golden inside, darker crust border.
         let outer = CGRect(x: center.x - 22, y: center.y - 22, width: 44, height: 44)
         ctx.fill(
             Path(roundedRect: outer, cornerRadius: 4),

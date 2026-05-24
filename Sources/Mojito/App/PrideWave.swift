@@ -15,7 +15,7 @@ enum PrideWave {
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
         let frame = screen.frame
 
-        // Re-trigger replaces any in-flight wave instead of being suppressed.
+        // Re-trigger replaces any in-flight wave.
         activeWindow?.orderOut(nil)
         activeWindow = nil
 

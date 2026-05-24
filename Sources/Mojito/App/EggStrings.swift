@@ -1,15 +1,12 @@
 import Foundation
 
-/// Decoded trigger strings for the hidden effects. Keyed by opaque id —
-/// match the case raw values on `EasterEgg`. The plaintext form is never
-/// in source; bytes below decode at runtime via a per-index XOR mask.
-///
-/// Encoding: bytewise XOR against a rolling key starting at `0xA5`, advancing
-/// `+1` per byte. Trivially reversible to anyone determined enough, but it
-/// defeats `strings <binary>` and a casual scan of the source.
+/// Trigger strings for hidden effects, keyed by opaque id (matches
+/// `EasterEgg` raw values). Plaintext is never in source — decoded at
+/// runtime via a rolling XOR key starting at `0xA5`. Trivially reversible
+/// but defeats `strings <binary>` and a casual source scan.
 ///
 /// Regenerate via `python3 scripts/build_egg_strings.py < keywords.txt`
-/// (`keywords.txt` is plaintext — kept out of git; see the script header).
+/// (keywords.txt is plaintext, kept out of git — see script header).
 enum EggStrings {
     private static func decode(_ bytes: [UInt8]) -> String {
         var out = [UInt8]()
@@ -20,7 +17,6 @@ enum EggStrings {
         return String(decoding: out, as: UTF8.self)
     }
 
-    // Encoded byte arrays, one per discoverable effect.
     static let k01: String        = decode([0x9f, 0xcb, 0xc8, 0xc2, 0xc0, 0xde, 0xc4, 0x96])
     static let k03: String          = decode([0x9f, 0xcb, 0xc8, 0xc7, 0xcf, 0x90])
     static let k04: String      = decode([0x9f, 0xc5, 0xc8, 0xc6, 0xcf, 0xcf, 0xdf, 0xd8, 0xc4, 0x94])
@@ -47,7 +43,7 @@ enum EggStrings {
     static let k29: String           = decode([0x9f, 0xc5, 0xd5, 0xdc, 0x93])
     static let k30: String        = decode([0x9f, 0xc5, 0xc2, 0xc4, 0xcc, 0xd8, 0xd2, 0x96])
 
-    // Picker pinned-row labels (no surrounding colons).
+    // Pinned-row labels (no surrounding colons).
     static let k04Label: String = decode([0xc6, 0xc9, 0xc9, 0xce, 0xcc, 0xde, 0xdf, 0xc5])
     static let k05Label: String    = decode([0xd5, 0xd4, 0xce, 0xcc, 0xcc])
 }

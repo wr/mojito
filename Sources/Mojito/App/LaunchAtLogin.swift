@@ -16,14 +16,12 @@ enum LaunchAtLogin {
         }
     }
 
-    /// Current state of the system login-item registration.
     static var isEnabled: Bool {
         SMAppService.mainApp.status == .enabled
     }
 
-    /// Mirrors the system state into the UserDefaults-backed `@AppStorage` key
-    /// so toggles stay accurate when the user removes Mojito from System
-    /// Settings → Login Items behind our back.
+    /// Mirrors system state into the `@AppStorage` key so toggles stay accurate
+    /// when the user removes Mojito from System Settings → Login Items.
     static func syncFromSystem() {
         let current = isEnabled
         if UserDefaults.standard.bool(forKey: PrefsKey.launchAtLogin) != current {

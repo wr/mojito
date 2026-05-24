@@ -8,9 +8,7 @@ struct Emoji: Decodable, Identifiable, Hashable {
     let tags: [String]
     let group: Int
     let order: Int
-    /// True if the emoji has skin-tone variants. Set from emojibase's
-    /// `skins` array at DB-build time. Sentinel/easter-egg entries default
-    /// to false.
+    /// From emojibase's `skins` array. Sentinel/egg entries default to false.
     let supportsSkinTone: Bool
 
     var id: String { hexcode }

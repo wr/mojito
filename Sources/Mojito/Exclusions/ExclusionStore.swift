@@ -10,9 +10,7 @@ final class ExclusionStore: ObservableObject {
 
     private let defaults = UserDefaults.standard
     private var cancellables = Set<AnyCancellable>()
-    /// Compiled regex cache for URL patterns containing `*`. Keyed by the
-    /// (lowercased) pattern; rebuilt only when urlPatterns changes. Avoids
-    /// recompiling per-`:` keystroke during isExcluded().
+    /// Rebuilt when urlPatterns changes so isExcluded() doesn't recompile per `:`.
     private var compiledPatterns: [String: NSRegularExpression] = [:]
 
     private init() {
@@ -39,9 +37,8 @@ final class ExclusionStore: ObservableObject {
             .sink { [weak self] in self?.defaults.set(Array($0), forKey: PrefsKey.excludedBundleIDs) }
             .store(in: &cancellables)
 
-        // Build the pattern cache from the initial set first, then watch for
-        // changes. The `.dropFirst()` skips the synthetic emit Combine sends
-        // on subscribe — without it we'd rebuild the cache twice on launch.
+        // `.dropFirst()` below skips Combine's synthetic on-subscribe emit
+        // so the cache rebuilds once at launch, not twice.
         rebuildPatternCache(urlPatterns)
         $urlPatterns
             .dropFirst()
@@ -81,8 +78,7 @@ final class ExclusionStore: ObservableObject {
         urlPatterns = Set(DefaultExclusions.urlPatterns)
     }
 
-    /// Glob match: `*` matches any subdomain segment. Compiled regexes are
-    /// cached in `compiledPatterns` so this is a dictionary lookup per call.
+    /// `*` matches any single subdomain segment.
     private func matches(host: String, pattern: String) -> Bool {
         if !pattern.contains("*") { return host == pattern }
         guard let regex = compiledPatterns[pattern] else { return false }

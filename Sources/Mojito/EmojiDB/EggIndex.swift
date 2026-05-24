@@ -1,57 +1,40 @@
 import CryptoKit
 import Foundation
 
-/// Opaque-id ↔ keyword lookup for the hidden effects in the picker.
+/// Trigger keywords stored exclusively as SHA-256 hashes — plaintext
+/// never appears in source or the binary. `strings <app-binary>` and a
+/// casual source read won't surface them.
 ///
-/// All trigger keywords (the words users type between colons) are stored
-/// here exclusively as SHA-256 hashes. Plain-text keywords never appear in
-/// the binary or in source — `strings <app-binary>` and a casual read of
-/// the source files won't surface them.
-///
-/// At runtime: hash the user's lowercased query and look it up in the
-/// `exact` (for closing-colon submissions) or `prefix` (for picker pinning)
-/// table. A hit returns the opaque id (`"k01"` … `"k21"`) that the rest
-/// of the codebase already uses as the sentinel hexcode for that effect.
-///
-/// Not annotated `@MainActor` so the migration helper can run from the
-/// tracker's static initializer without isolation gymnastics.
+/// Not `@MainActor` so the tracker's static initializer can migrate
+/// without isolation gymnastics.
 enum EggIndex {
 
     // MARK: - Lookups
 
-    /// Hash of the full keyword → opaque id. Use for closing-colon submission.
+    /// For closing-colon submission (`:mojito:`).
     static func id(forExactQuery raw: String) -> String? {
         exact[hash(raw.lowercased())]
     }
 
-    /// Hash of a prefix (length 3+, or full word for shorter words) → opaque id.
-    /// Use for the picker's pinned-row matching.
+    /// For picker pinned-row matching (prefix length 3+ or full short word).
     static func id(forPrefix raw: String) -> String? {
         prefix[hash(raw.lowercased())]
     }
 
-    /// Maps a *legacy* plain-text raw value (as previously persisted in
-    /// UserDefaults under `easterEggsDiscovered`) to its current opaque id.
-    /// Returns nil for values that don't match any known keyword.
+    /// Maps legacy plain-text values (pre-obfuscation) to opaque ids.
     static func migrateLegacyRawValue(_ raw: String) -> String? {
-        // Legacy values were just the lowercased keyword (e.g. "mojito"),
-        // except `lost` was previously stored as `42`. Hash both and try.
+        // Legacy values were the lowercased keyword; `lost` was stored as `42`.
         if let id = exact[hash(raw.lowercased())] { return id }
         if raw == "42" { return exact[hash("lost")] }
         return nil
     }
 
-    /// Lowercased SHA-256 hex digest.
     private static func hash(_ s: String) -> String {
         let digest = SHA256.hash(data: Data(s.utf8))
         return digest.map { String(format: "%02x", $0) }.joined()
     }
 
     // MARK: - Tables (generated — do not hand-edit)
-    //
-    // Generator lives in build notes; regenerate when adding/removing eggs.
-    // Each row pairs a hash digest with the effect's opaque id. Keywords
-    // intentionally do NOT appear in source.
 
     private static let exact: [String: String] = [
         "09d8516dbf1a3e0498d3252fe1e786ea217f870bc1a438eddec1f483bca01fee": "k01",
