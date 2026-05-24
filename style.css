@@ -1042,9 +1042,14 @@ footer span { margin: 0 8px; opacity: 0.5; }
   }
   /* App windows have fixed pixel widths (380–680px). On a narrow viewport
      the wider ones (Terminal 680, TextEdit 600, Mastodon 540) overflow the
-     stage and get clipped. Shrink the whole carousel + picker proportionally
-     to fit the viewport while keeping the design ratio intact. */
-  .stage,
+     stage and get clipped. Shrink the carousel + picker proportionally to
+     fit the viewport while keeping the design ratio intact.
+
+     NOTE: scale .carousel, NOT .stage. .stage's clip-path is applied in
+     unscaled local coords — scaling .stage clips first and scales after,
+     which strips the leading/trailing edge of every line inside the apps
+     (e.g. the terminal shows the middle of each line, not the whole line). */
+  .carousel,
   .picker-anchor { transform: scale(0.55); transform-origin: center center; }
 }
 
@@ -1054,7 +1059,7 @@ footer span { margin: 0 8px; opacity: 0.5; }
   .brand span { display: none; }
   .picker { left: 12px; }
   .hero-card { min-height: 520px; }
-  .stage,
+  .carousel,
   .picker-anchor { transform: scale(0.45); transform-origin: center center; }
 }
 

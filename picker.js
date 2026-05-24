@@ -3596,14 +3596,24 @@
     const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.55;
     const inputRect = input.getBoundingClientRect();
     const anchorRect = anchor.getBoundingClientRect();
+    // Mobile breakpoints apply `transform: scale()` to .picker-anchor (and to
+    // the sibling .carousel). getBoundingClientRect returns post-transform
+    // viewport px, but getComputedStyle padding / canvas measureText /
+    // picker.offsetHeight are all unscaled CSS px. Normalize the rect-derived
+    // offsets to unscaled CSS px so every value below is in the same coord
+    // space. The picker is positioned via style.left/top in CSS px inside the
+    // scaled anchor, so the browser scales those coords on render — meaning
+    // we should write them at *unscaled* magnitudes.
+    const scaleX = (anchor.offsetWidth && anchorRect.width / anchor.offsetWidth) || 1;
+    const scaleY = (anchor.offsetHeight && anchorRect.height / anchor.offsetHeight) || 1;
 
     const textBefore = input.value.slice(0, q.start);
     const lineIndex = (textBefore.match(/\n/g) || []).length;
     const lastNewline = textBefore.lastIndexOf('\n');
     const currentLineText = textBefore.slice(lastNewline + 1);
 
-    const inputOffsetX = inputRect.left - anchorRect.left;
-    const inputOffsetY = inputRect.top - anchorRect.top;
+    const inputOffsetX = (inputRect.left - anchorRect.left) / scaleX;
+    const inputOffsetY = (inputRect.top - anchorRect.top) / scaleY;
 
     const colonX = inputOffsetX + padLeft + measureTextWidth(currentLineText) - (input.scrollLeft || 0);
     const lineBaseY = inputOffsetY + padTop + lineIndex * lineHeight - (input.scrollTop || 0);
@@ -3612,11 +3622,13 @@
 
     // If placing the picker below the line would push it off the bottom of
     // the hero-card, place it above the line instead — mirrors the real app,
-    // which flips the picker when it would clip below the screen.
+    // which flips the picker when it would clip below the screen. Use the
+    // unscaled anchor height so this check works at any scale factor.
+    const anchorHeight = anchor.offsetHeight || anchorRect.height;
     const pickerHeight = picker.offsetHeight || 280;
     const margin = 6;
     let pickerTop;
-    if (colonBottom + margin + pickerHeight > anchorRect.height) {
+    if (colonBottom + margin + pickerHeight > anchorHeight) {
       pickerTop = colonTop - margin - pickerHeight;
     } else {
       pickerTop = colonBottom + margin;
