@@ -1,7 +1,7 @@
 import AppKit
 
 /// Opens the canonical rickroll URL in the default browser. Triggered by
-/// `:rickroll:`. No window, no asset — just `NSWorkspace.open`.
+/// the keyword. No window, no asset — just `NSWorkspace.open`.
 @MainActor
 enum Rickroll {
     static func go() {

@@ -1,6 +1,6 @@
 import AppKit
 
-/// Plays the Windows tada chime. Triggered by `:tada:`. No visual.
+/// Plays the Windows tada chime. Triggered by the keyword. No visual.
 @MainActor
 enum TadaSound {
     private static var player: NSSound?

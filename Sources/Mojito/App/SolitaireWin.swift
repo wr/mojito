@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Classic Windows Solitaire victory cascade. Triggered by `:solitaire:`.
+/// Classic Windows Solitaire victory cascade. Triggered by the keyword.
 /// Cards launch from the top-right corner, fall under gravity, bounce off
 /// the bottom of the screen, and leave colored trails behind them. 52
 /// cards, ~8s total, click-through overlay.

@@ -71,36 +71,39 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     }
 
     /// Detail shown next to a discovered egg in the About panel. Spells
-    /// out the trigger now that the user has found it.
+    /// out the trigger now that the user has found it. Trigger keywords
+    /// are decoded from `EggStrings` at runtime so they don't appear as
+    /// plaintext in the source — every reference between backticks below
+    /// would otherwise be a free spoiler for anyone reading the repo.
     var detail: String {
         switch self {
-        case .mojito:          return "`:mojito:` — the house special."
-        case .moof:            return "`:moof:` — Clarus the dogcow."
-        case .confetti:        return "`:confetti:` — small victories."
-        case .pride:           return "`:pride:` — every June, all year."
-        case .sosumi:          return "`:sosumi:` — System 7's last word."
-        case .floppy:          return "`:floppy:` — the sound of saving."
-        case .dialup:          return "`:dialup:` — the handshake."
-        case .wilhelm:         return "`:wilhelm:` — Hollywood's loudest hand-me-down."
-        case .snow:            return "`:snow:` — a quiet snowfall."
-        case .matrix:          return "`:matrix:` — wake up, Neo."
-        case .fireworks:       return "`:fireworks:` — Roman candles, indoors."
-        case .trogdor:         return "`:trogdor:` — burninate."
-        case .lost:            return "`:lost:` — 4 8 15 16 23 42."
-        case .toasters:        return "`:toasters:` — bread on the wing."
-        case .dvd:             return "`:dvd2:` — please let it hit the corner."
+        case .mojito:          return "`\(EggStrings.mojito)` — the house special."
+        case .moof:            return "`\(EggStrings.moof)` — Clarus the dogcow."
+        case .confetti:        return "`\(EggStrings.confetti)` — small victories."
+        case .pride:           return "`\(EggStrings.pride)` — every June, all year."
+        case .sosumi:          return "`\(EggStrings.sosumi)` — System 7's last word."
+        case .floppy:          return "`\(EggStrings.floppy)` — the sound of saving."
+        case .dialup:          return "`\(EggStrings.dialup)` — the handshake."
+        case .wilhelm:         return "`\(EggStrings.wilhelm)` — Hollywood's loudest hand-me-down."
+        case .snow:            return "`\(EggStrings.snow)` — a quiet snowfall."
+        case .matrix:          return "`\(EggStrings.matrix)` — wake up, Neo."
+        case .fireworks:       return "`\(EggStrings.fireworks)` — Roman candles, indoors."
+        case .trogdor:         return "`\(EggStrings.trogdor)` — burninate."
+        case .lost:            return "`\(EggStrings.lost)` — 4 8 15 16 23 42."
+        case .toasters:        return "`\(EggStrings.toasters)` — bread on the wing."
+        case .dvd:             return "`\(EggStrings.dvd)` — please let it hit the corner."
         case .perfectBounce:   return "the corner. Finally."
-        case .bsod:            return "`:bsod:` — press any key to continue."
+        case .bsod:            return "`\(EggStrings.bsod)` — press any key to continue."
         case .konami:          return "Type `:` then ↑↑↓↓←→←→BA."
-        case .snake:           return "`:snakegame:` — eat. grow. wrap."
-        case .thermonuclear:   return "`:globalthermonuclearwar:` — shall we play a game?"
-        case .myleg:           return "`:myleg:` — yelled by a fry cook in Bikini Bottom."
-        case .tada:            return "`:tada:` — that little victory chime."
-        case .xp:              return "`:xp:` — welcome back, Wells."
-        case .solitaire:       return "`:solitaire:` — the cards cascade once more."
-        case .rickroll:        return "`:rickroll:` — you should know better."
-        case .crt:             return "`:crt:` — *thunk*. Lights out."
-        case .celery:          return "`:celery:` — good morning, Paul."
+        case .snake:           return "`\(EggStrings.snake)` — eat. grow. wrap."
+        case .thermonuclear:   return "`\(EggStrings.thermonuclear)` — shall we play a game?"
+        case .myleg:           return "`\(EggStrings.myleg)` — yelled by a fry cook in Bikini Bottom."
+        case .tada:            return "`\(EggStrings.tada)` — that little victory chime."
+        case .xp:              return "`\(EggStrings.xp)` — welcome back, Wells."
+        case .solitaire:       return "`\(EggStrings.solitaire)` — the cards cascade once more."
+        case .rickroll:        return "`\(EggStrings.rickroll)` — you should know better."
+        case .crt:             return "`\(EggStrings.crt)` — *thunk*. Lights out."
+        case .celery:          return "`\(EggStrings.celery)` — good morning, Paul."
         }
     }
 

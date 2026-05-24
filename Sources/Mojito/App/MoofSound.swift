@@ -1,6 +1,6 @@
 import AppKit
 
-/// Plays the bundled Quadra startup chime once. Used by the `:moof:` egg.
+/// Plays the bundled Quadra startup chime once. Used by the the keyword egg.
 @MainActor
 enum MoofSound {
     private static var player: NSSound?

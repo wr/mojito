@@ -1,6 +1,6 @@
 import AppKit
 
-/// Plays the bundled confetti chime once. Used by the `:confetti:` egg.
+/// Plays the bundled confetti chime once. Used by the the keyword egg.
 @MainActor
 enum ConfettiSound {
     private static var player: NSSound?

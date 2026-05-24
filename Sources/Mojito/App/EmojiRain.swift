@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Borderless full-screen emoji rain. Triggered by the `:mojito:` easter egg.
+/// Borderless full-screen emoji rain. Triggered by the the keyword easter egg.
 ///
 /// Implementation: a transparent click-through `NSPanel` hosting a SwiftUI
 /// `Canvas` driven by `TimelineView(.animation)`. Particles are generated

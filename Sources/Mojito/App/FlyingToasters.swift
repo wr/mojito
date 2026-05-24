@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// After Dark's iconic Flying Toasters. Triggered by `:toasters:`.
+/// After Dark's iconic Flying Toasters. Triggered by the keyword.
 ///
 /// A flock of winged toasters glides diagonally across the screen (top-right
 /// to bottom-left), with the occasional slice of toast for variety. Wings flap

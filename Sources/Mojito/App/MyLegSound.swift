@@ -1,6 +1,6 @@
 import AppKit
 
-/// Plays the bundled SpongeBob "My leg!" clip. Triggered by `:myleg:`.
+/// Plays the bundled SpongeBob "My leg!" clip. Triggered by the keyword.
 @MainActor
 enum MyLegSound {
     private static var player: NSSound?

@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 /// CRT-style power-off animation overlaid on the whole desktop. Triggered
-/// by `:crt:`. Black panel that does the classic three-stage shrink:
+/// by the keyword. Black panel that does the classic three-stage shrink:
 ///   1. The "screen" collapses vertically into a thin bright horizontal
 ///      line in the center (~150ms).
 ///   2. The line shrinks to a single bright dot (~200ms).

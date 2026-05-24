@@ -62,7 +62,7 @@ struct EasterEggsSettingsView: View {
 
     // MARK: - Easter eggs
 
-    /// Scrambled Dogcow tile (`v01.bin`) used in the `:moof:` row.
+    /// Scrambled Dogcow tile (`v01.bin`) used in the dogcow row.
     private static let dogcowImage: NSImage? = {
         guard let image = ImageBlob.load("v01") else { return nil }
         image.isTemplate = true

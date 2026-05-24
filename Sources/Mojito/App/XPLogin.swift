@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Fake Windows XP welcome screen. Triggered by `:xp:`. Full-screen panel
+/// Fake Windows XP welcome screen. Triggered by the keyword. Full-screen panel
 /// with the iconic Luna palette: deep navy bars top & bottom, a royal-blue
 /// background between, the iconic orange highlight rule above the bottom
 /// bar, a vertical white divider, the Microsoft Windows XP wordmark on

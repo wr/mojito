@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Bouncing DVD logo, the eternal screensaver. Triggered by `:dvd2:`.
+/// Bouncing DVD logo, the eternal screensaver. Triggered by the keyword.
 ///
 /// Logo bounces against the four screen edges. Color cycles only at the
 /// moment the logo touches a wall — never mid-flight, so the visual matches
