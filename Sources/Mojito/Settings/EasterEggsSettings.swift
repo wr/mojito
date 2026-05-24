@@ -131,7 +131,7 @@ struct EasterEggsSettingsView: View {
     /// corner-hit count from `PrefsKey.perfectBounceCount`.
     private func detailText(for egg: EasterEgg) -> String {
         switch egg {
-        case .perfectBounce:
+        case .k31:
             let count = UserDefaults.standard.integer(forKey: PrefsKey.perfectBounceCount)
             return egg.detail + " (\(count))"
         default:
@@ -150,7 +150,7 @@ struct EasterEggsSettingsView: View {
                 if let glyph = egg.emojiGlyph {
                     Text(glyph)
                         .font(.system(size: 22))
-                } else if egg == .moof, let nsImage = Self.dogcowImage {
+                } else if egg == .k03, let nsImage = Self.dogcowImage {
                     Image(nsImage: nsImage)
                         .resizable()
                         .interpolation(.high)

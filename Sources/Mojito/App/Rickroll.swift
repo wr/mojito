@@ -1,7 +1,8 @@
 import AppKit
 
-/// Opens the canonical rickroll URL in the default browser. Triggered by
-/// the keyword. No window, no asset — just `NSWorkspace.open`.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum Rickroll {
     static func go() {

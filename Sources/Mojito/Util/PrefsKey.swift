@@ -25,8 +25,8 @@ enum PrefsKey {
     /// `::foo` is required to search symbols. Keeps the noisy symbols
     /// corpus off the default `:` flow.
     static let symbolsRequireDoubleColon = "mojito.symbols.requireDoubleColon"
-    /// Count of DVD-logo corner hits across all the keyword sessions. Drives
-    /// the "Perfect Bounce" discovery + the inline counter rendered in the
-    /// Easter eggs settings list.
+    /// Persistent counter for an opaque effect-progress milestone. Read by
+    /// `EasterEgg.k31`'s inline detail row. Storage key kept as-is for
+    /// backward compatibility with existing installs.
     static let perfectBounceCount    = "mojito.perfectBounce.count"
 }

@@ -1,26 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Borderless full-screen emoji rain. Triggered by the the keyword easter egg.
-///
-/// Implementation: a transparent click-through `NSPanel` hosting a SwiftUI
-/// `Canvas` driven by `TimelineView(.animation)`. Particles are generated
-/// up-front with staggered launch times and random emoji from the full
-/// database. Position is a pure function of time:
-///
-///   Phase 1 (in-flight): y = y₀ + v·t + ½g·t²
-///   Phase 2 (post-bounce): y = groundY + v'·t' + ½g·t'², where
-///                          v' = -damping · (v + g·t_bounce)
-///
-/// Each particle bounces exactly once when it hits the bottom edge, with a
-/// damping factor in 0.4–0.7 (so the second arc is shorter than the first).
-/// After the second descent, the particle falls off-screen normally.
-///
-/// Perf notes:
-///  - Text is resolved per unique emoji per frame and reused across all
-///    particles of that emoji. Even with ~100 unique emoji this is cheap.
-///  - TimelineView is capped at 30 fps via `minimumInterval`.
-///  - Off-screen particles are skipped before any transform/draw work.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum EmojiRain {
     private static var activeWindow: NSWindow?

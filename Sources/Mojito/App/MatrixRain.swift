@@ -2,16 +2,9 @@ import AppKit
 import CoreGraphics
 import CoreText
 
-/// Cascading green katakana/digits. Triggered by the keyword.
-///
-/// Implementation: a single layer-backed NSView that draws all columns in
-/// one `draw(_:)` pass per tick. We tried per-column CATextLayers in a
-/// previous iteration but the multi-line CATextLayer + mask + frame-driven
-/// positioning combo rendered nothing visible (glyphs clipped to a too-
-/// narrow column box, mask coordinate-space mismatches). One direct
-/// Core Text pass per frame is well within budget at 30 Hz for a few
-/// hundred columns and gives us pixel-perfect control over fade + head
-/// highlight.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum MatrixRain {
     private static var activeWindow: NSWindow?

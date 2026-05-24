@@ -2,18 +2,9 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
-/// "Shall we play a game?" — Tic-Tac-Toe in the WarGames style. Triggered by
-/// the keyword.
-///
-/// 3×3 board, human plays X, computer plays O. The CPU runs full minimax —
-/// optimal play means the best the user can do is a draw. (That's exactly
-/// the punchline of the movie: the only winning move is not to play.)
-///
-/// Visual treatment matches the 1983 film's WOPR display: thick glowing
-/// cyan X's and O's on a deep blue-black background, drawn with stroked
-/// shapes (not text) so they look like vector CRT graphics rather than
-/// terminal glyphs. After the stalemate the board clears and the famous
-/// "A STRANGE GAME..." monologue types out one character at a time.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum TicTacToeGame {
     private static var window: NSWindow?

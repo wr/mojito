@@ -1,14 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// "Connecting To Mojito Online…" — what if Apple shipped a dial-up modem
-/// dialog in macOS Tahoe? Triggered by the keyword.
-///
-/// Real titled NSWindow with system stoplights, behind-window glass, native
-/// SF Pro typography, the Mojito menubar mark, and SF Symbols animating
-/// via SwiftUI's symbolEffect. The handshake sound plays while the window
-/// is open; closing the window (stoplight, Esc) stops it. The window also
-/// auto-dismisses a couple of seconds after "Connected!" lands.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum DialupSound {
     fileprivate static var window: NSWindow?

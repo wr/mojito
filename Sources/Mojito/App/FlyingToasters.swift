@@ -1,12 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// After Dark's iconic Flying Toasters. Triggered by the keyword.
-///
-/// A flock of winged toasters glides diagonally across the screen (top-right
-/// to bottom-left), with the occasional slice of toast for variety. Wings flap
-/// at ~6 Hz. Each item launches at a random time and position so the screen
-/// stays populated for the duration.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum FlyingToasters {
     private static var activeWindow: NSWindow?

@@ -1,6 +1,8 @@
 import AppKit
 
-/// Plays the bundled Quadra startup chime once. Used by the the keyword egg.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum MoofSound {
     private static var player: NSSound?

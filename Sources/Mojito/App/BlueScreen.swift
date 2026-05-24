@@ -1,17 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Faithful Windows 9x "Blue Screen of Death". Triggered by the keyword.
-///
-/// Full-screen blue panel with the canonical VGA-font message. The
-/// composition matches the reference screenshot: the message block sits
-/// roughly at vertical midpoint, the "Windows" pill is inverted (blue
-/// glyph on light-gray background) and centered above the message body,
-/// then a blank line and the "Press any key to continue _" prompt with a
-/// blinking caret.
-///
-/// Dismiss is click-only (the non-activating NSPanel can't reliably grab
-/// global key events) plus the global Esc handler in `EffectDismisser`.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum BlueScreen {
     private static var activeWindow: NSWindow?

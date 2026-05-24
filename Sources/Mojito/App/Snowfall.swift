@@ -1,21 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Drifting snowflakes. Triggered by the keyword.
-///
-/// Reuses ParticlePanel + Canvas + TimelineView. Slower terminal velocity than
-/// EmojiRain, sideways drift via per-particle sine wave, no bounce.
-///
-/// Performance / leak fixes (WEL-13/43):
-///   - On dismiss we set `panel.contentView = nil` so the SwiftUI tree (and
-///     its TimelineView frame ticker) actually tears down. Without this the
-///     TimelineView keeps requesting redraws forever, even though
-///     `paused: false` is documented as "always animate" — `orderOut` alone
-///     doesn't stop it. Same pattern as BouncingDVD.
-///   - `ctx.resolve(Text(...))` happens once per Canvas body invocation,
-///     hoisted out of the per-particle loop. Previously we paid for 640+
-///     resolves every frame.
-///   - Particle count reduced from 80/sec to 50/sec (was 640 total; now 400).
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum Snowfall {
     private static var activeWindow: NSWindow?

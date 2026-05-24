@@ -1,10 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Classic Windows Solitaire victory cascade. Triggered by the keyword.
-/// Cards launch from the top-right corner, fall under gravity, bounce off
-/// the bottom of the screen, and leave colored trails behind them. 52
-/// cards, ~8s total, click-through overlay.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum SolitaireWin {
     private static var activeWindow: NSWindow?

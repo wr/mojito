@@ -2,13 +2,9 @@ import AppKit
 import SwiftUI
 import WebKit
 
-/// TROGDOR! Opens a small WKWebView window pointed at the homestarrunner.com
-/// Trogdor page, zoomed out to 60% so the whole flash-era game frame fits.
-/// Triggered by the keyword.
-///
-/// We deliberately do NOT make this fullscreen — it's a window with a real
-/// close button, sitting on top of the desktop. The user can drag it around,
-/// click the close button, or hit Esc (via EffectDismisser) to dismiss.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum Trogdor {
     private static var window: NSWindow?

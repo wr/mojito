@@ -1,6 +1,8 @@
 import AppKit
 
-/// Plays the bundled SpongeBob "My leg!" clip. Triggered by the keyword.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum MyLegSound {
     private static var player: NSSound?

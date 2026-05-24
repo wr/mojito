@@ -3,18 +3,9 @@ import AVFoundation
 import AVKit
 import SwiftUI
 
-/// Three-window Celery Man arrangement. Triggered by its corresponding keyword.
-///
-/// Layout (Tim & Eric reference still):
-///   - LEFT:  "Celery Man" — landscape clip (v04), starts as the original
-///   - RIGHT: "CINCO ID" — portrait clip (v03), starts as the original
-///   - BELOW (between/under): "Paul's COMPUTER" — fake file-panel mock,
-///                            inert until clicked once.
-///
-/// First click anywhere inside Paul's COMPUTER swaps the two video windows'
-/// sources to the alternates (v09 for Celery Man, v10 for CINCO ID). Further
-/// clicks do nothing. Audio loop (`s14`, the celery.wav) plays the whole time
-/// any window in the trio is open.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum CeleryMan {
     private static var windows: Set<NSWindow> = []

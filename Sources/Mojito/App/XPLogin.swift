@@ -1,12 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Fake Windows XP welcome screen. Triggered by the keyword. Full-screen panel
-/// with the iconic Luna palette: deep navy bars top & bottom, a royal-blue
-/// background between, the iconic orange highlight rule above the bottom
-/// bar, a vertical white divider, the Microsoft Windows XP wordmark on
-/// the left, and a single user tile on the right. Click the tile to play
-/// the XP startup chime and fade out.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum XPLogin {
     private static var activeWindow: NSWindow?
