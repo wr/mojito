@@ -1,11 +1,13 @@
 import AppKit
-import SwiftUI
 
-/// After Dark's Flying Toasters: winged toasters glide top-right to
-/// bottom-left, occasional toast slice for variety, wings flap at ~6 Hz.
+/// After Dark's Flying Toasters: 100×100 winged-toaster sprite (`v12.bin`,
+/// XOR-scrambled GIF) drifts top-right → bottom-left, repeated ~14 times
+/// with randomized start, speed, and launch delay. GIF wing-flap animation
+/// is driven by `NSImageView.animates`, not redrawn.
 @MainActor
 enum FlyingToasters {
     private static var activeWindow: NSWindow?
+    private static let sprite: NSImage? = ImageBlob.load("v12")
 
     static func start(duration: TimeInterval = 8.0) {
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
@@ -22,30 +24,29 @@ enum FlyingToasters {
             let startX = CGFloat.random(in: frame.width * 0.3...frame.width * 1.4)
             let startY = CGFloat.random(in: -frame.height * 0.4...frame.height * 0.4)
             items.append(Toaster(
-                isToast: Double.random(in: 0...1) < 0.25,
                 startX: startX,
                 startY: startY,
                 speed: .random(in: 80...160),
-                launchTime: .random(in: 0..<(duration * 0.6)),
-                wingPhaseOffset: .random(in: 0...(2 * .pi))
+                launchTime: .random(in: 0..<(duration * 0.6))
             ))
         }
 
         let panel = ParticlePanel.makeFullScreen(frame: frame)
-        let host = NSHostingView(rootView: ToastersView(
+        let field = ToasterField(
+            sprite: sprite,
             items: items,
-            startDate: Date(),
             bounds: frame.size,
             duration: duration
-        ))
-        host.frame = CGRect(origin: .zero, size: frame.size)
-        panel.contentView = host
+        )
+        panel.contentView = field
         panel.orderFrontRegardless()
         activeWindow = panel
+        field.start()
 
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
+                field.stop()
                 panel.orderOut(nil)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
@@ -60,102 +61,92 @@ enum FlyingToasters {
 }
 
 private struct Toaster {
-    let isToast: Bool
     let startX: CGFloat
     let startY: CGFloat
     let speed: CGFloat
     let launchTime: TimeInterval
-    let wingPhaseOffset: Double
 }
 
-private struct ToastersView: View {
-    let items: [Toaster]
-    let startDate: Date
-    let bounds: CGSize
-    let duration: TimeInterval
+private final class ToasterField: NSView {
+    private let items: [Toaster]
+    private let imageViews: [NSImageView]
+    private let bounds_: CGSize
+    private let duration: TimeInterval
+    private var startDate: Date = Date()
+    private var timer: Timer?
+    /// 100×100 sprite; keeping native size — looks tiny on a 5K display
+    /// but matches the After Dark feel.
+    private let spriteSize: CGFloat = 100
 
-    var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { context in
-            let elapsed = context.date.timeIntervalSince(startDate)
-            Canvas { ctx, _ in
-                let endFade = elapsed > duration - 0.5
-                    ? max(0.0, (duration - elapsed) / 0.5)
-                    : 1.0
-
-                for item in items {
-                    let t = elapsed - item.launchTime
-                    guard t > 0 else { continue }
-                    let angle = Double.pi / 6  // ~30° below horizontal
-                    let dx = -CGFloat(cos(angle)) * item.speed * CGFloat(t)
-                    let dy = CGFloat(sin(angle)) * item.speed * CGFloat(t)
-                    let x = item.startX + dx
-                    let y = item.startY + dy
-
-                    guard x > -120, y < bounds.height + 120 else { continue }
-
-                    let wingPhase = elapsed * 12 + item.wingPhaseOffset
-
-                    var c = ctx
-                    c.opacity = endFade
-                    if item.isToast {
-                        drawToast(ctx: c, center: CGPoint(x: x, y: y))
-                    } else {
-                        drawToaster(ctx: c, center: CGPoint(x: x, y: y), wingPhase: wingPhase)
-                    }
-                }
-            }
+    init(sprite: NSImage?, items: [Toaster], bounds: CGSize, duration: TimeInterval) {
+        self.items = items
+        self.bounds_ = bounds
+        self.duration = duration
+        self.imageViews = items.map { _ in
+            let iv = NSImageView()
+            iv.image = sprite
+            iv.imageScaling = .scaleProportionallyUpOrDown
+            iv.animates = true
+            iv.isHidden = true
+            return iv
         }
-        .frame(width: bounds.width, height: bounds.height)
-        .ignoresSafeArea()
-        .background(Color.black.opacity(0.7))
+        super.init(frame: CGRect(origin: .zero, size: bounds))
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.black.withAlphaComponent(0.7).cgColor
+        for iv in imageViews { addSubview(iv) }
     }
 
-    private func drawToaster(ctx: GraphicsContext, center: CGPoint, wingPhase: Double) {
-        let bodyRect = CGRect(x: center.x - 32, y: center.y - 22, width: 64, height: 44)
-        ctx.fill(
-            Path(roundedRect: bodyRect, cornerRadius: 6),
-            with: .linearGradient(
-                Gradient(colors: [Color(white: 0.9), Color(white: 0.55), Color(white: 0.85)]),
-                startPoint: CGPoint(x: bodyRect.minX, y: bodyRect.minY),
-                endPoint: CGPoint(x: bodyRect.minX, y: bodyRect.maxY)
-            )
-        )
-        let slotRect = CGRect(x: bodyRect.minX + 8, y: bodyRect.minY + 6, width: bodyRect.width - 16, height: 8)
-        ctx.fill(Path(roundedRect: slotRect, cornerRadius: 2), with: .color(.black))
-        ctx.fill(
-            Path(roundedRect: CGRect(x: bodyRect.maxX - 9, y: bodyRect.midY - 3, width: 7, height: 6), cornerRadius: 1),
-            with: .color(Color(white: 0.3))
-        )
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError() }
 
-        // Wings — two trapezoids flapping with phase.
-        let flap = CGFloat(sin(wingPhase)) * 10
-        let wingTopY = center.y - 8 - flap
-        var wingPath = Path()
-        wingPath.move(to: CGPoint(x: bodyRect.minX + 4, y: bodyRect.minY + 8))
-        wingPath.addLine(to: CGPoint(x: bodyRect.minX - 28, y: wingTopY - 6))
-        wingPath.addLine(to: CGPoint(x: bodyRect.minX - 24, y: wingTopY + 6))
-        wingPath.addLine(to: CGPoint(x: bodyRect.minX + 4, y: bodyRect.minY + 16))
-        wingPath.closeSubpath()
-        wingPath.move(to: CGPoint(x: bodyRect.maxX - 4, y: bodyRect.minY + 8))
-        wingPath.addLine(to: CGPoint(x: bodyRect.maxX + 28, y: wingTopY - 6))
-        wingPath.addLine(to: CGPoint(x: bodyRect.maxX + 24, y: wingTopY + 6))
-        wingPath.addLine(to: CGPoint(x: bodyRect.maxX - 4, y: bodyRect.minY + 16))
-        wingPath.closeSubpath()
-        ctx.fill(wingPath, with: .color(Color(white: 0.95)))
-        ctx.stroke(wingPath, with: .color(.black), lineWidth: 1)
+    func start() {
+        startDate = Date()
+        // 60 Hz movement; GIF wing-flap is driven independently by NSImageView.
+        let t = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.tick() }
+        }
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
     }
 
-    private func drawToast(ctx: GraphicsContext, center: CGPoint) {
-        // Golden inside, darker crust border.
-        let outer = CGRect(x: center.x - 22, y: center.y - 22, width: 44, height: 44)
-        ctx.fill(
-            Path(roundedRect: outer, cornerRadius: 4),
-            with: .color(Color(red: 0.7, green: 0.45, blue: 0.18))
-        )
-        let inner = outer.insetBy(dx: 4, dy: 4)
-        ctx.fill(
-            Path(roundedRect: inner, cornerRadius: 3),
-            with: .color(Color(red: 0.96, green: 0.78, blue: 0.42))
-        )
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    private func tick() {
+        let elapsed = Date().timeIntervalSince(startDate)
+        // Last 0.5 s: fade the container so toasters trail out together.
+        let endFade: CGFloat = elapsed > duration - 0.5
+            ? max(0.0, CGFloat((duration - elapsed) / 0.5))
+            : 1.0
+        layer?.opacity = Float(endFade)
+
+        // ~30° below horizontal, leftward — matches the old Canvas vector.
+        let angle = Double.pi / 6
+        let cosA = CGFloat(cos(angle))
+        let sinA = CGFloat(sin(angle))
+
+        for (i, item) in items.enumerated() {
+            let iv = imageViews[i]
+            let t = elapsed - item.launchTime
+            guard t > 0 else { iv.isHidden = true; continue }
+
+            let dx = -cosA * item.speed * CGFloat(t)
+            let dy = sinA * item.speed * CGFloat(t)
+            let x = item.startX + dx
+            // Canvas coords are y-down; NSView coords are y-up. Flip.
+            let yDown = item.startY + dy
+            let y = bounds_.height - yDown - spriteSize
+
+            // Cull once the sprite has cleared the left edge or fallen
+            // off the bottom (matches the old Canvas culling).
+            if x < -spriteSize - 20 || yDown > bounds_.height + 120 {
+                iv.isHidden = true
+                continue
+            }
+            iv.isHidden = false
+            iv.frame = CGRect(x: x, y: y, width: spriteSize, height: spriteSize)
+        }
     }
 }

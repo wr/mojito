@@ -67,6 +67,7 @@
 		89AB6401CC7F94BCBF0D3437 /* s16.bin in Resources */ = {isa = PBXBuildFile; fileRef = E87A9C3A9251B8908CFB056A /* s16.bin */; };
 		8E134BA69353865C487310E0 /* AppIconDev.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9E22F5735A6F6E1E450909B2 /* AppIconDev.icns */; };
 		8EE9F3A928A7AFDB16C6D9A2 /* OnboardingRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4512D76E20BD99269775200B /* OnboardingRoot.swift */; };
+		9234FF3040DB70F660567DCB /* v12.bin in Resources */ = {isa = PBXBuildFile; fileRef = 8616DAC09008096A70541CEE /* v12.bin */; };
 		9CB4AA2C8D9DE6B788068AA9 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = EB2F085FF2A8206D2905DF27 /* Sparkle */; };
 		9CCEA0B70EEB77F988521DDB /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DA7C9FD3286A7839BA642D /* AppInfo.swift */; };
 		A9A15B339C05195BB45CC09F /* MyLegSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C4C16E01184684E33C3437 /* MyLegSound.swift */; };
@@ -168,6 +169,7 @@
 		7E63ABA27E65953D84162097 /* SolitaireWin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolitaireWin.swift; sourceTree = "<group>"; };
 		7EB589505841013FF5EF5500 /* ConfettiSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiSound.swift; sourceTree = "<group>"; };
 		83366C0C02EF9F599EC2B65A /* VideoBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoBlob.swift; sourceTree = "<group>"; };
+		8616DAC09008096A70541CEE /* v12.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v12.bin; sourceTree = "<group>"; };
 		877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultExclusions.swift; sourceTree = "<group>"; };
 		8792D3A9CA964FE06B29F30F /* PrideWave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrideWave.swift; sourceTree = "<group>"; };
 		90F7DB616A5940BE3DE17B77 /* EggStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggStrings.swift; sourceTree = "<group>"; };
@@ -285,6 +287,7 @@
 				4F4CFB098FFC29AB8C8B9855 /* v09.bin */,
 				EE4174E56EEBEA3423926E2A /* v10.bin */,
 				D3C7F5A4189B7652C993C384 /* v11.bin */,
+				8616DAC09008096A70541CEE /* v12.bin */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -577,6 +580,7 @@
 				CA1857DDE9F106C6CCB3FD2F /* v09.bin in Resources */,
 				FBA7F794BE95BEC4E4D84AD8 /* v10.bin in Resources */,
 				E29AE211BD536EA5FD09BF0E /* v11.bin in Resources */,
+				9234FF3040DB70F660567DCB /* v12.bin in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
