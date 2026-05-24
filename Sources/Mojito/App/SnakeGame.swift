@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Classic Snake in a regular game window. Triggered by `:snakegame:`.
+/// Classic Snake in a regular game window.
 ///
 /// Arrow keys steer; Esc quits. Key handling lives on a custom NSWindow
 /// subclass — SwiftUI's NSHostingView doesn't put a child responder into
@@ -73,9 +73,9 @@ enum SnakeGame {
 
 /// NSWindow subclass that intercepts key events for Snake. Arrow keys steer;
 /// Esc closes the window. Other keys are ignored — we used to bail on any
-/// non-arrow key, but the synthetic backspace burst from the `:snakegame:`
-/// shortcode deletion arrives at this window once it becomes key, which
-/// instantly closed the game before the user saw anything.
+/// non-arrow key, but the synthetic backspace burst from the trigger
+/// deletion arrives at this window once it becomes key, which instantly
+/// closed the game before the user saw anything.
 fileprivate final class SnakeWindow: NSWindow {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { true }

@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Bouncing DVD logo, the eternal screensaver. Triggered by `:dvd2:`.
+/// Bouncing DVD logo, the eternal screensaver.
 ///
 /// Logo bounces against the four screen edges. Color cycles only at the
 /// moment the logo touches a wall — never mid-flight, so the visual matches
@@ -71,7 +71,7 @@ enum BouncingDVD {
                     let defaults = UserDefaults.standard
                     let next = (defaults.object(forKey: PrefsKey.perfectBounceCount) as? Int ?? 0) + 1
                     defaults.set(next, forKey: PrefsKey.perfectBounceCount)
-                    EasterEggTracker.record(.perfectBounce)
+                    EasterEggTracker.record(.k31)
 
                     ConfettiRain.start()
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {

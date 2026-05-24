@@ -123,7 +123,7 @@ private struct PickerRow: View {
     /// instead.
     @ViewBuilder
     private var leadingGlyph: some View {
-        if scored.emoji.hexcode == FuzzyMatcher.moofHexcode,
+        if scored.emoji.hexcode == FuzzyMatcher.k03Hex,
            let nsImage = Self.dogcowImage {
             // Template rendering picks up the current foreground color —
             // black on light backgrounds, white on dark.

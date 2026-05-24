@@ -7,165 +7,168 @@ import Foundation
 /// — but only after the effect is discovered does the title leak to the
 /// user, and the hints intentionally never quote the trigger word.
 enum EasterEgg: String, CaseIterable, Identifiable {
-    case mojito          = "k01"
-    case moof            = "k03"
-    case confetti        = "k04"
-    case pride           = "k05"
-    case sosumi          = "k06"
-    case floppy          = "k07"
-    case dialup          = "k08"
-    case wilhelm         = "k09"
-    case snow            = "k10"
-    case matrix          = "k11"
-    case fireworks       = "k12"
-    case trogdor         = "k13"
-    case lost            = "k14"
-    case toasters        = "k16"
-    case dvd             = "k17"
-    case perfectBounce   = "k31"
-    case bsod            = "k19"
-    case konami          = "k99"
-    case snake           = "k20"
-    case thermonuclear   = "k21"
-    case myleg           = "k22"
-    case tada            = "k23"
-    case xp              = "k24"
-    case solitaire       = "k25"
-    case rickroll        = "k27"
-    case crt             = "k29"
-    case celery          = "k30"
+    case k01
+    case k03
+    case k04
+    case k05
+    case k06
+    case k07
+    case k08
+    case k09
+    case k10
+    case k11
+    case k12
+    case k13
+    case k14
+    case k16
+    case k17
+    case k31
+    case k19
+    case k99
+    case k20
+    case k21
+    case k22
+    case k23
+    case k24
+    case k25
+    case k27
+    case k29
+    case k30
 
     var id: String { rawValue }
 
     /// User-facing name shown once the egg has been discovered.
     var title: String {
         switch self {
-        case .mojito:          return "Emoji rain"
-        case .moof:            return "Moof!"
-        case .confetti:        return "Confetti shower"
-        case .pride:           return "Pride wave"
-        case .sosumi:          return "Sosumi"
-        case .floppy:          return "Floppy disk"
-        case .dialup:          return "Dial-up"
-        case .wilhelm:         return "Wilhelm scream"
-        case .snow:            return "Snowfall"
-        case .matrix:          return "The Matrix"
-        case .fireworks:       return "Fireworks"
-        case .trogdor:         return "Trogdor!"
-        case .lost:            return "The Hatch"
-        case .toasters:        return "Flying Toasters"
-        case .dvd:             return "Bouncing DVD"
-        case .perfectBounce:   return "Perfect Bounce"
-        case .bsod:            return "Blue Screen"
-        case .konami:          return "Konami Code"
-        case .snake:           return "Snake"
-        case .thermonuclear:   return "Global Thermonuclear War"
-        case .myleg:           return "My leg!"
-        case .tada:            return "Ta-da!"
-        case .xp:              return "Bliss"
-        case .solitaire:       return "Solitaire Win"
-        case .rickroll:        return "Rickroll"
-        case .crt:             return "CRT Power Off"
-        case .celery:          return "Celery Man"
+        case .k01: return "Emoji rain"
+        case .k03: return "Moof!"
+        case .k04: return "Confetti shower"
+        case .k05: return "Pride wave"
+        case .k06: return "Sosumi"
+        case .k07: return "Floppy disk"
+        case .k08: return "Dial-up"
+        case .k09: return "Wilhelm scream"
+        case .k10: return "Snowfall"
+        case .k11: return "The Matrix"
+        case .k12: return "Fireworks"
+        case .k13: return "Trogdor!"
+        case .k14: return "The Hatch"
+        case .k16: return "Flying Toasters"
+        case .k17: return "Bouncing DVD"
+        case .k31: return "Perfect Bounce"
+        case .k19: return "Blue Screen"
+        case .k99: return "Konami Code"
+        case .k20: return "Snake"
+        case .k21: return "Global Thermonuclear War"
+        case .k22: return "My leg!"
+        case .k23: return "Ta-da!"
+        case .k24: return "Bliss"
+        case .k25: return "Solitaire Win"
+        case .k27: return "Rickroll"
+        case .k29: return "CRT Power Off"
+        case .k30: return "Celery Man"
         }
     }
 
     /// Detail shown next to a discovered egg in the About panel. Spells
-    /// out the trigger now that the user has found it.
+    /// out the trigger now that the user has found it. Trigger keywords
+    /// are decoded from `EggStrings` at runtime so they don't appear as
+    /// plaintext in the source — every reference between backticks below
+    /// would otherwise be a free spoiler for anyone reading the repo.
     var detail: String {
         switch self {
-        case .mojito:          return "`:mojito:` — the house special."
-        case .moof:            return "`:moof:` — Clarus the dogcow."
-        case .confetti:        return "`:confetti:` — small victories."
-        case .pride:           return "`:pride:` — every June, all year."
-        case .sosumi:          return "`:sosumi:` — System 7's last word."
-        case .floppy:          return "`:floppy:` — the sound of saving."
-        case .dialup:          return "`:dialup:` — the handshake."
-        case .wilhelm:         return "`:wilhelm:` — Hollywood's loudest hand-me-down."
-        case .snow:            return "`:snow:` — a quiet snowfall."
-        case .matrix:          return "`:matrix:` — wake up, Neo."
-        case .fireworks:       return "`:fireworks:` — Roman candles, indoors."
-        case .trogdor:         return "`:trogdor:` — burninate."
-        case .lost:            return "`:lost:` — 4 8 15 16 23 42."
-        case .toasters:        return "`:toasters:` — bread on the wing."
-        case .dvd:             return "`:dvd2:` — please let it hit the corner."
-        case .perfectBounce:   return "the corner. Finally."
-        case .bsod:            return "`:bsod:` — press any key to continue."
-        case .konami:          return "Type `:` then ↑↑↓↓←→←→BA."
-        case .snake:           return "`:snakegame:` — eat. grow. wrap."
-        case .thermonuclear:   return "`:globalthermonuclearwar:` — shall we play a game?"
-        case .myleg:           return "`:myleg:` — yelled by a fry cook in Bikini Bottom."
-        case .tada:            return "`:tada:` — that little victory chime."
-        case .xp:              return "`:xp:` — welcome back, Wells."
-        case .solitaire:       return "`:solitaire:` — the cards cascade once more."
-        case .rickroll:        return "`:rickroll:` — you should know better."
-        case .crt:             return "`:crt:` — *thunk*. Lights out."
-        case .celery:          return "`:celery:` — good morning, Paul."
+        case .k01: return "`\(EggStrings.k01)` — the house special."
+        case .k03: return "`\(EggStrings.k03)` — Clarus the dogcow."
+        case .k04: return "`\(EggStrings.k04)` — small victories."
+        case .k05: return "`\(EggStrings.k05)` — every June, all year."
+        case .k06: return "`\(EggStrings.k06)` — System 7's last word."
+        case .k07: return "`\(EggStrings.k07)` — the sound of saving."
+        case .k08: return "`\(EggStrings.k08)` — the handshake."
+        case .k09: return "`\(EggStrings.k09)` — Hollywood's loudest hand-me-down."
+        case .k10: return "`\(EggStrings.k10)` — a quiet snowfall."
+        case .k11: return "`\(EggStrings.k11)` — wake up, Neo."
+        case .k12: return "`\(EggStrings.k12)` — Roman candles, indoors."
+        case .k13: return "`\(EggStrings.k13)` — burninate."
+        case .k14: return "`\(EggStrings.k14)` — 4 8 15 16 23 42."
+        case .k16: return "`\(EggStrings.k16)` — bread on the wing."
+        case .k17: return "`\(EggStrings.k17)` — please let it hit the corner."
+        case .k31: return "the corner. Finally."
+        case .k19: return "`\(EggStrings.k19)` — press any key to continue."
+        case .k99: return "Type `:` then ↑↑↓↓←→←→BA."
+        case .k20: return "`\(EggStrings.k20)` — eat. grow. wrap."
+        case .k21: return "`\(EggStrings.k21)` — shall we play a game?"
+        case .k22: return "`\(EggStrings.k22)` — yelled by a fry cook in Bikini Bottom."
+        case .k23: return "`\(EggStrings.k23)` — that little victory chime."
+        case .k24: return "`\(EggStrings.k24)` — welcome back, Wells."
+        case .k25: return "`\(EggStrings.k25)` — the cards cascade once more."
+        case .k27: return "`\(EggStrings.k27)` — you should know better."
+        case .k29: return "`\(EggStrings.k29)` — *thunk*. Lights out."
+        case .k30: return "`\(EggStrings.k30)` — good morning, Paul."
         }
     }
 
     /// Subtle nudge shown next to an *undiscovered* egg. Oblique by design.
     var hint: String {
         switch self {
-        case .mojito:          return "Rum, mint, lime, soda."
-        case .moof:            return "Clarus the dogcow goes..."
-        case .confetti:        return "Celebrate a little victory."
-        case .pride:           return "Castro Street, 1978."
-        case .sosumi:          return "Apple v. Apple"
-        case .floppy:          return "Don't copy."
-        case .dialup:          return "1000 hours free!"
-        case .wilhelm:         return "A painful film trope."
-        case .snow:            return "It won't be long before we'll all be there."
-        case .matrix:          return "Wake up."
-        case .fireworks:       return "The Fourth, indoors."
-        case .trogdor:         return "Consummate V's, and a beefy arm."
-        case .lost:            return "108 minutes."
-        case .toasters:        return "After dark, with wings."
-        case .dvd:             return "It has to hit the corner eventually."
-        case .perfectBounce:   return "Some things require patience."
-        case .bsod:            return "A Windows inevitability."
-        case .konami:          return "Up, up..."
-        case .snake:           return "AAA mobile gaming circa 1997."
-        case .thermonuclear:   return "How about a nice game of chess?"
-        case .myleg:           return "Ow!"
-        case .tada:            return "Welcome to 3.1!"
-        case .xp:              return "Bliss."
-        case .solitaire:       return "You're all alone on this one."
-        case .rickroll:        return "We're no strangers."
-        case .crt:             return "The tube."
-        case .celery:          return "I've got a BETA sequence I've been working on..."
+        case .k01: return "Rum, mint, lime, soda."
+        case .k03: return "Clarus the dogcow goes..."
+        case .k04: return "Celebrate a little victory."
+        case .k05: return "Castro Street, 1978."
+        case .k06: return "Apple v. Apple"
+        case .k07: return "Don't copy."
+        case .k08: return "1000 hours free!"
+        case .k09: return "A painful film trope."
+        case .k10: return "It won't be long before we'll all be there."
+        case .k11: return "Wake up."
+        case .k12: return "The Fourth, indoors."
+        case .k13: return "Consummate V's, and a beefy arm."
+        case .k14: return "108 minutes."
+        case .k16: return "After dark, with wings."
+        case .k17: return "It has to hit the corner eventually."
+        case .k31: return "Some things require patience."
+        case .k19: return "A Windows inevitability."
+        case .k99: return "Up, up..."
+        case .k20: return "AAA mobile gaming circa 1997."
+        case .k21: return "How about a nice game of chess?"
+        case .k22: return "Ow!"
+        case .k23: return "Welcome to 3.1!"
+        case .k24: return "Bliss."
+        case .k25: return "You're all alone on this one."
+        case .k27: return "We're no strangers."
+        case .k29: return "The tube."
+        case .k30: return "I've got a BETA sequence I've been working on..."
         }
     }
 
     var emojiGlyph: String? {
         switch self {
-        case .mojito:          return "🎁"
-        case .moof:            return nil
-        case .confetti:        return "🎊"
-        case .pride:           return "🏳️‍🌈"
-        case .sosumi:          return "🔔"
-        case .floppy:          return "💾"
-        case .dialup:          return "📞"
-        case .wilhelm:         return "🎬"
-        case .snow:            return "❄️"
-        case .matrix:          return "🟢"
-        case .fireworks:       return "🎆"
-        case .trogdor:         return "🐉"
-        case .lost:            return "🏝️"
-        case .toasters:        return "🍞"
-        case .dvd:             return "💿"
-        case .perfectBounce:   return "🎯"
-        case .bsod:            return "💙"
-        case .konami:          return "🕹️"
-        case .snake:           return "🐍"
-        case .thermonuclear:   return "☢️"
-        case .myleg:           return "🦵"
-        case .tada:            return "🎉"
-        case .xp:              return "🪟"
-        case .solitaire:       return "🃏"
-        case .rickroll:        return "🎤"
-        case .crt:             return "📺"
-        case .celery:          return "🥬"
+        case .k01: return "🎁"
+        case .k03: return nil
+        case .k04: return "🎊"
+        case .k05: return "🏳️‍🌈"
+        case .k06: return "🔔"
+        case .k07: return "💾"
+        case .k08: return "📞"
+        case .k09: return "🎬"
+        case .k10: return "❄️"
+        case .k11: return "🟢"
+        case .k12: return "🎆"
+        case .k13: return "🐉"
+        case .k14: return "🏝️"
+        case .k16: return "🍞"
+        case .k17: return "💿"
+        case .k31: return "🎯"
+        case .k19: return "💙"
+        case .k99: return "🕹️"
+        case .k20: return "🐍"
+        case .k21: return "☢️"
+        case .k22: return "🦵"
+        case .k23: return "🎉"
+        case .k24: return "🪟"
+        case .k25: return "🃏"
+        case .k27: return "🎤"
+        case .k29: return "📺"
+        case .k30: return "🥬"
         }
     }
 }

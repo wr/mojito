@@ -405,7 +405,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                     TextInserter.deleteBackward(deleteCount)
                 }
                 KonamiPayoff.start()
-                EasterEggTracker.record(.konami)
+                EasterEggTracker.record(.k99)
             }
         }
     }
@@ -515,7 +515,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
                 return
             }
-            if scored.emoji.hexcode == FuzzyMatcher.randomHexcode {
+            if scored.emoji.hexcode == FuzzyMatcher.k02Hex {
                 guard let pick = database.all.randomElement() else { return }
                 TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(pick))
                 return  // intentionally don't recordUsage — random rolls shouldn't bias future search
@@ -546,7 +546,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // appear in source or in the binary. The id it returns is the
             // same string that's already used as the hexcode constant.
             if let id = EggIndex.id(forExactQuery: key) {
-                if id == FuzzyMatcher.randomHexcode {
+                if id == FuzzyMatcher.k02Hex {
                     guard let pick = database.all.randomElement() else { return }
                     TextInserter.replace(charactersToDelete: charsToDelete, with: pick.character)
                     return
@@ -568,76 +568,76 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// (and the focused-app text was already deleted), false otherwise.
     private func triggerEasterEgg(hexcode: String, deleteCount: Int) -> Bool {
         switch hexcode {
-        case FuzzyMatcher.easterEggHexcode:
+        case FuzzyMatcher.k01Hex:
             TextInserter.deleteBackward(deleteCount)
             EmojiRain.start()
-            EasterEggTracker.record(.mojito)
-        case FuzzyMatcher.moofHexcode:
+            EasterEggTracker.record(.k01)
+        case FuzzyMatcher.k03Hex:
             TextInserter.deleteBackward(deleteCount)
             MoofSound.play()
-            EasterEggTracker.record(.moof)
-        case FuzzyMatcher.confettiHexcode:
+            EasterEggTracker.record(.k03)
+        case FuzzyMatcher.k04Hex:
             TextInserter.deleteBackward(deleteCount)
             ConfettiRain.start()
             ConfettiSound.play()
-            EasterEggTracker.record(.confetti)
-        case FuzzyMatcher.prideHexcode:
+            EasterEggTracker.record(.k04)
+        case FuzzyMatcher.k05Hex:
             TextInserter.deleteBackward(deleteCount)
             PrideWave.start()
-            EasterEggTracker.record(.pride)
-        case FuzzyMatcher.sosumiHexcode:
+            EasterEggTracker.record(.k05)
+        case FuzzyMatcher.k06Hex:
             TextInserter.deleteBackward(deleteCount)
             SosumiSound.play()
-            EasterEggTracker.record(.sosumi)
-        case FuzzyMatcher.floppyHexcode:
+            EasterEggTracker.record(.k06)
+        case FuzzyMatcher.k07Hex:
             TextInserter.deleteBackward(deleteCount)
             FloppySound.play()
-            EasterEggTracker.record(.floppy)
-        case FuzzyMatcher.dialupHexcode:
+            EasterEggTracker.record(.k07)
+        case FuzzyMatcher.k08Hex:
             TextInserter.deleteBackward(deleteCount)
             DialupSound.play()
-            EasterEggTracker.record(.dialup)
-        case FuzzyMatcher.wilhelmHexcode:
+            EasterEggTracker.record(.k08)
+        case FuzzyMatcher.k09Hex:
             TextInserter.deleteBackward(deleteCount)
             WilhelmScream.play()
-            EasterEggTracker.record(.wilhelm)
-        case FuzzyMatcher.snowHexcode:
+            EasterEggTracker.record(.k09)
+        case FuzzyMatcher.k10Hex:
             TextInserter.deleteBackward(deleteCount)
             Snowfall.start()
-            EasterEggTracker.record(.snow)
-        case FuzzyMatcher.matrixHexcode:
+            EasterEggTracker.record(.k10)
+        case FuzzyMatcher.k11Hex:
             TextInserter.deleteBackward(deleteCount)
             MatrixRain.start()
-            EasterEggTracker.record(.matrix)
-        case FuzzyMatcher.fireworksHexcode:
+            EasterEggTracker.record(.k11)
+        case FuzzyMatcher.k12Hex:
             TextInserter.deleteBackward(deleteCount)
             Fireworks.start()
-            EasterEggTracker.record(.fireworks)
-        case FuzzyMatcher.trogdorHexcode:
+            EasterEggTracker.record(.k12)
+        case FuzzyMatcher.k13Hex:
             TextInserter.deleteBackward(deleteCount)
             Trogdor.start()
-            EasterEggTracker.record(.trogdor)
-        case FuzzyMatcher.dontPanicHexcode:
+            EasterEggTracker.record(.k13)
+        case FuzzyMatcher.k14Hex:
             TextInserter.deleteBackward(deleteCount)
             HatchClock.start()
-            EasterEggTracker.record(.lost)
-        case FuzzyMatcher.toastersHexcode:
+            EasterEggTracker.record(.k14)
+        case FuzzyMatcher.k16Hex:
             TextInserter.deleteBackward(deleteCount)
             FlyingToasters.start()
-            EasterEggTracker.record(.toasters)
-        case FuzzyMatcher.dvdHexcode:
+            EasterEggTracker.record(.k16)
+        case FuzzyMatcher.k17Hex:
             TextInserter.deleteBackward(deleteCount)
             BouncingDVD.start()
-            EasterEggTracker.record(.dvd)
-        case FuzzyMatcher.bsodHexcode:
+            EasterEggTracker.record(.k17)
+        case FuzzyMatcher.k19Hex:
             TextInserter.deleteBackward(deleteCount)
             BlueScreen.start()
-            EasterEggTracker.record(.bsod)
-        case FuzzyMatcher.konamiHexcode:
+            EasterEggTracker.record(.k19)
+        case FuzzyMatcher.k99Hex:
             TextInserter.deleteBackward(deleteCount)
             KonamiPayoff.start()
-            EasterEggTracker.record(.konami)
-        case FuzzyMatcher.snakeHexcode:
+            EasterEggTracker.record(.k99)
+        case FuzzyMatcher.k20Hex:
             TextInserter.deleteBackward(deleteCount)
             // Wait for the synthetic backspaces above to drain into the
             // focused app — otherwise the new key window swallows them
@@ -646,50 +646,50 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                 MainActor.assumeIsolated {
                     SnakeGame.start()
-                    EasterEggTracker.record(.snake)
+                    EasterEggTracker.record(.k20)
                 }
             }
             return true
-        case FuzzyMatcher.thermonuclearHexcode:
+        case FuzzyMatcher.k21Hex:
             TextInserter.deleteBackward(deleteCount)
             // Same backspace-drain delay as Snake.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                 MainActor.assumeIsolated {
                     TicTacToeGame.start()
-                    EasterEggTracker.record(.thermonuclear)
+                    EasterEggTracker.record(.k21)
                 }
             }
             return true
-        case FuzzyMatcher.mylegHexcode:
+        case FuzzyMatcher.k22Hex:
             TextInserter.deleteBackward(deleteCount)
             MyLegSound.play()
-            EasterEggTracker.record(.myleg)
-        case FuzzyMatcher.tadaHexcode:
+            EasterEggTracker.record(.k22)
+        case FuzzyMatcher.k23Hex:
             TextInserter.deleteBackward(deleteCount)
             TadaSound.play()
-            EasterEggTracker.record(.tada)
-        case FuzzyMatcher.xpHexcode:
+            EasterEggTracker.record(.k23)
+        case FuzzyMatcher.k24Hex:
             TextInserter.deleteBackward(deleteCount)
             XPLogin.start()
-            EasterEggTracker.record(.xp)
-        case FuzzyMatcher.solitaireHexcode:
+            EasterEggTracker.record(.k24)
+        case FuzzyMatcher.k25Hex:
             TextInserter.deleteBackward(deleteCount)
             SolitaireWin.start()
-            EasterEggTracker.record(.solitaire)
-        case FuzzyMatcher.rickrollHexcode:
+            EasterEggTracker.record(.k25)
+        case FuzzyMatcher.k27Hex:
             TextInserter.deleteBackward(deleteCount)
-            EasterEggTracker.record(.rickroll)
+            EasterEggTracker.record(.k27)
             // Defer the browser open so the synthetic backspaces above
             // land in the user's text field before focus shifts to the
             // browser. Otherwise the deletes hit the browser's URL bar.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 Rickroll.go()
             }
-        case FuzzyMatcher.crtHexcode:
+        case FuzzyMatcher.k29Hex:
             TextInserter.deleteBackward(deleteCount)
             CRTPowerOff.start()
-            EasterEggTracker.record(.crt)
-        case FuzzyMatcher.celeryHexcode:
+            EasterEggTracker.record(.k29)
+        case FuzzyMatcher.k30Hex:
             TextInserter.deleteBackward(deleteCount)
             // Wait for the synthetic backspaces above to drain into the
             // focused app — celery man opens a key window (same pattern
@@ -698,7 +698,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                 MainActor.assumeIsolated {
                     CeleryMan.start()
-                    EasterEggTracker.record(.celery)
+                    EasterEggTracker.record(.k30)
                 }
             }
             return true

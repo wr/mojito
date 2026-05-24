@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Drifting snowflakes. Triggered by `:snow:`.
+/// Drifting snowflakes.
 ///
 /// Reuses ParticlePanel + Canvas + TimelineView. Slower terminal velocity than
 /// EmojiRain, sideways drift via per-particle sine wave, no bounce.

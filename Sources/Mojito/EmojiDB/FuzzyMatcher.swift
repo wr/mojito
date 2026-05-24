@@ -29,35 +29,35 @@ struct FuzzyMatcher {
     //
     // The Swift identifier names stay descriptive so the rest of the code
     // is readable; the *literal values* are what get embedded in the binary.
-    static let easterEggHexcode    = "k01"
-    static let randomHexcode       = "k02"
-    static let moofHexcode         = "k03"
-    static let confettiHexcode     = "k04"
-    static let prideHexcode        = "k05"
-    static let sosumiHexcode       = "k06"
-    static let floppyHexcode       = "k07"
-    static let dialupHexcode       = "k08"
-    static let wilhelmHexcode      = "k09"
-    static let snowHexcode         = "k10"
-    static let matrixHexcode       = "k11"
-    static let fireworksHexcode    = "k12"
-    static let trogdorHexcode      = "k13"
-    static let dontPanicHexcode    = "k14"
-    static let toastersHexcode     = "k16"
-    static let dvdHexcode          = "k17"
-    static let bsodHexcode         = "k19"
-    static let snakeHexcode        = "k20"
-    static let thermonuclearHexcode = "k21"
-    static let mylegHexcode        = "k22"
-    static let tadaHexcode         = "k23"
-    static let xpHexcode           = "k24"
-    static let solitaireHexcode    = "k25"
-    static let rickrollHexcode     = "k27"
-    static let crtHexcode          = "k29"
-    static let celeryHexcode       = "k30"
+    static let k01Hex    = "k01"
+    static let k02Hex       = "k02"
+    static let k03Hex         = "k03"
+    static let k04Hex     = "k04"
+    static let k05Hex        = "k05"
+    static let k06Hex       = "k06"
+    static let k07Hex       = "k07"
+    static let k08Hex       = "k08"
+    static let k09Hex      = "k09"
+    static let k10Hex         = "k10"
+    static let k11Hex       = "k11"
+    static let k12Hex    = "k12"
+    static let k13Hex      = "k13"
+    static let k14Hex    = "k14"
+    static let k16Hex     = "k16"
+    static let k17Hex          = "k17"
+    static let k19Hex         = "k19"
+    static let k20Hex        = "k20"
+    static let k21Hex = "k21"
+    static let k22Hex        = "k22"
+    static let k23Hex         = "k23"
+    static let k24Hex           = "k24"
+    static let k25Hex    = "k25"
+    static let k27Hex     = "k27"
+    static let k29Hex          = "k29"
+    static let k30Hex       = "k30"
     /// Konami code payoff — fires from the state machine, not the picker,
     /// so it has no entry in `EggIndex` and isn't typeable.
-    static let konamiHexcode       = "k99"
+    static let k99Hex       = "k99"
     /// Minimum query length before a special row surfaces. Below this we
     /// don't even hash — saves a round-trip on every keystroke. Shorter
     /// keywords (any of length 2) match at length 2 instead; `EggIndex`
@@ -73,39 +73,39 @@ struct FuzzyMatcher {
         let order: Int
     }
     private static let pinnedRows: [String: PinnedRow] = [
-        easterEggHexcode:     PinnedRow(hexcode: easterEggHexcode,     character: "🎁", label: "???",      order: 100),
-        randomHexcode:        PinnedRow(hexcode: randomHexcode,        character: "🎲", label: "random",   order: 99),
-        moofHexcode:          PinnedRow(hexcode: moofHexcode,          character: "🐮", label: "???",      order: 98),
-        confettiHexcode:      PinnedRow(hexcode: confettiHexcode,      character: "🎊", label: "confetti", order: 97),
-        prideHexcode:         PinnedRow(hexcode: prideHexcode,         character: "🏳️‍🌈", label: "pride",    order: 96),
-        sosumiHexcode:        PinnedRow(hexcode: sosumiHexcode,        character: "🔔", label: "???",      order: 95),
-        floppyHexcode:        PinnedRow(hexcode: floppyHexcode,        character: "💾", label: "???",      order: 94),
-        dialupHexcode:        PinnedRow(hexcode: dialupHexcode,        character: "📞", label: "???",      order: 93),
-        wilhelmHexcode:       PinnedRow(hexcode: wilhelmHexcode,       character: "🎬", label: "???",      order: 92),
-        snowHexcode:          PinnedRow(hexcode: snowHexcode,          character: "❄️", label: "???",      order: 91),
-        matrixHexcode:        PinnedRow(hexcode: matrixHexcode,        character: "🟢", label: "???",      order: 90),
-        fireworksHexcode:     PinnedRow(hexcode: fireworksHexcode,     character: "🎆", label: "???",      order: 89),
-        trogdorHexcode:       PinnedRow(hexcode: trogdorHexcode,       character: "🐉", label: "???",      order: 88),
-        dontPanicHexcode:     PinnedRow(hexcode: dontPanicHexcode,     character: "🏝️", label: "???",      order: 87),
-        toastersHexcode:      PinnedRow(hexcode: toastersHexcode,      character: "🍞", label: "???",      order: 86),
-        dvdHexcode:           PinnedRow(hexcode: dvdHexcode,           character: "💿", label: "???",      order: 85),
-        bsodHexcode:          PinnedRow(hexcode: bsodHexcode,          character: "💙", label: "???",      order: 84),
-        snakeHexcode:         PinnedRow(hexcode: snakeHexcode,         character: "🐍", label: "???",      order: 83),
-        thermonuclearHexcode: PinnedRow(hexcode: thermonuclearHexcode, character: "☢️", label: "???",      order: 82),
-        mylegHexcode:         PinnedRow(hexcode: mylegHexcode,         character: "🦵", label: "???",      order: 81),
-        tadaHexcode:          PinnedRow(hexcode: tadaHexcode,          character: "🎉", label: "???",      order: 80),
-        xpHexcode:            PinnedRow(hexcode: xpHexcode,            character: "🪟", label: "???",      order: 79),
-        solitaireHexcode:     PinnedRow(hexcode: solitaireHexcode,     character: "🃏", label: "???",      order: 78),
-        rickrollHexcode:      PinnedRow(hexcode: rickrollHexcode,      character: "🎤", label: "???",      order: 76),
-        crtHexcode:           PinnedRow(hexcode: crtHexcode,           character: "📺", label: "???",      order: 74),
-        celeryHexcode:        PinnedRow(hexcode: celeryHexcode,        character: "🥬", label: "???",      order: 73),
+        k01Hex:     PinnedRow(hexcode: k01Hex,     character: "🎁", label: "???",      order: 100),
+        k02Hex:        PinnedRow(hexcode: k02Hex,        character: "🎲", label: "random",   order: 99),
+        k03Hex:          PinnedRow(hexcode: k03Hex,          character: "🐮", label: "???",      order: 98),
+        k04Hex:      PinnedRow(hexcode: k04Hex,      character: "🎊", label: EggStrings.k04Label, order: 97),
+        k05Hex:         PinnedRow(hexcode: k05Hex,         character: "🏳️‍🌈", label: EggStrings.k05Label,    order: 96),
+        k06Hex:        PinnedRow(hexcode: k06Hex,        character: "🔔", label: "???",      order: 95),
+        k07Hex:        PinnedRow(hexcode: k07Hex,        character: "💾", label: "???",      order: 94),
+        k08Hex:        PinnedRow(hexcode: k08Hex,        character: "📞", label: "???",      order: 93),
+        k09Hex:       PinnedRow(hexcode: k09Hex,       character: "🎬", label: "???",      order: 92),
+        k10Hex:          PinnedRow(hexcode: k10Hex,          character: "❄️", label: "???",      order: 91),
+        k11Hex:        PinnedRow(hexcode: k11Hex,        character: "🟢", label: "???",      order: 90),
+        k12Hex:     PinnedRow(hexcode: k12Hex,     character: "🎆", label: "???",      order: 89),
+        k13Hex:       PinnedRow(hexcode: k13Hex,       character: "🐉", label: "???",      order: 88),
+        k14Hex:     PinnedRow(hexcode: k14Hex,     character: "🏝️", label: "???",      order: 87),
+        k16Hex:      PinnedRow(hexcode: k16Hex,      character: "🍞", label: "???",      order: 86),
+        k17Hex:           PinnedRow(hexcode: k17Hex,           character: "💿", label: "???",      order: 85),
+        k19Hex:          PinnedRow(hexcode: k19Hex,          character: "💙", label: "???",      order: 84),
+        k20Hex:         PinnedRow(hexcode: k20Hex,         character: "🐍", label: "???",      order: 83),
+        k21Hex: PinnedRow(hexcode: k21Hex, character: "☢️", label: "???",      order: 82),
+        k22Hex:         PinnedRow(hexcode: k22Hex,         character: "🦵", label: "???",      order: 81),
+        k23Hex:          PinnedRow(hexcode: k23Hex,          character: "🎉", label: "???",      order: 80),
+        k24Hex:            PinnedRow(hexcode: k24Hex,            character: "🪟", label: "???",      order: 79),
+        k25Hex:     PinnedRow(hexcode: k25Hex,     character: "🃏", label: "???",      order: 78),
+        k27Hex:      PinnedRow(hexcode: k27Hex,      character: "🎤", label: "???",      order: 76),
+        k29Hex:           PinnedRow(hexcode: k29Hex,           character: "📺", label: "???",      order: 74),
+        k30Hex:        PinnedRow(hexcode: k30Hex,        character: "🥬", label: "???",      order: 73),
     ]
 
     /// Hexcodes whose picker rows render with the playful rainbow gradient.
     /// Only the v0.1 named rows (random/confetti/pride). Everything else
     /// pinned shows the `???` mystery label.
     static let rainbowHexcodes: Set<String> = [
-        randomHexcode, confettiHexcode, prideHexcode
+        k02Hex, k04Hex, k05Hex
     ]
 
     /// Every pinned-row hexcode (used by PickerView to render the `???`

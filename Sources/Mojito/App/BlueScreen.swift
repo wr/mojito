@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Faithful Windows 9x "Blue Screen of Death". Triggered by `:bsod:`.
+/// Faithful Windows 9x "Blue Screen of Death".
 ///
 /// Full-screen blue panel with the canonical VGA-font message. The
 /// composition matches the reference screenshot: the message block sits

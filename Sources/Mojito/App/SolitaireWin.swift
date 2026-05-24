@@ -1,10 +1,10 @@
 import AppKit
 import SwiftUI
 
-/// Classic Windows Solitaire victory cascade. Triggered by `:solitaire:`.
-/// Cards launch from the top-right corner, fall under gravity, bounce off
-/// the bottom of the screen, and leave colored trails behind them. 52
-/// cards, ~8s total, click-through overlay.
+/// Classic Windows Solitaire victory cascade. Cards launch from the top-
+/// right corner, fall under gravity, bounce off the bottom of the screen,
+/// and leave colored trails behind them. 52 cards, ~8s total, click-through
+/// overlay.
 @MainActor
 enum SolitaireWin {
     private static var activeWindow: NSWindow?

@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Full-screen confetti shower. Triggered by the `:confetti:` easter egg.
+/// Full-screen confetti shower.
 ///
 /// Similar architecture to EmojiRain (transparent click-through panel, Canvas
 /// inside TimelineView, closed-form physics) but the particles are tilted

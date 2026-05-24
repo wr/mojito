@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 /// "Connecting To Mojito Online…" — what if Apple shipped a dial-up modem
-/// dialog in macOS Tahoe? Triggered by `:dialup:`.
+/// dialog in macOS Tahoe?
 ///
 /// Real titled NSWindow with system stoplights, behind-window glass, native
 /// SF Pro typography, the Mojito menubar mark, and SF Symbols animating

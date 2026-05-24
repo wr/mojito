@@ -2,8 +2,7 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
-/// "Shall we play a game?" — Tic-Tac-Toe in the WarGames style. Triggered by
-/// `:globalthermonuclearwar:`.
+/// "Shall we play a game?" — Tic-Tac-Toe in the WarGames style.
 ///
 /// 3×3 board, human plays X, computer plays O. The CPU runs full minimax —
 /// optimal play means the best the user can do is a draw. (That's exactly

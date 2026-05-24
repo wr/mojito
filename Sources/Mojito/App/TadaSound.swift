@@ -1,6 +1,8 @@
 import AppKit
 
-/// Plays the Windows tada chime. Triggered by `:tada:`. No visual.
+/// One of the discoverable effects. See `EasterEgg` for the
+/// (opaque) identity; the trigger keyword is decoded at runtime from
+/// `EggStrings` and not present in source.
 @MainActor
 enum TadaSound {
     private static var player: NSSound?

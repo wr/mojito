@@ -23,6 +23,7 @@
 		2B36C9A8EE648C8DC1836F33 /* EmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2009C3B36DF9228B873244 /* EmoticonTable.swift */; };
 		2B3FD6118D1C2D7AB0D24588 /* SymbolsDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6666150B793721D5095E72A8 /* SymbolsDatabase.swift */; };
 		2BF7E787E46AB243597A38CB /* VideoBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83366C0C02EF9F599EC2B65A /* VideoBlob.swift */; };
+		2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F7DB616A5940BE3DE17B77 /* EggStrings.swift */; };
 		304C8571D431917AC25596C3 /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3A3B5079FC9275F5947104 /* PickerView.swift */; };
 		30C268985E8FC43E95617345 /* OnboardingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1F4596F8DFA66A87D50D02 /* OnboardingWindowController.swift */; };
 		31277ED14E13ADDE2816BB69 /* PickerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B9E4C2183154C36F1883004 /* PickerViewModel.swift */; };
@@ -167,6 +168,7 @@
 		83366C0C02EF9F599EC2B65A /* VideoBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoBlob.swift; sourceTree = "<group>"; };
 		877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultExclusions.swift; sourceTree = "<group>"; };
 		8792D3A9CA964FE06B29F30F /* PrideWave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrideWave.swift; sourceTree = "<group>"; };
+		90F7DB616A5940BE3DE17B77 /* EggStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggStrings.swift; sourceTree = "<group>"; };
 		947CA35F448BC012E3F73860 /* CeleryMan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CeleryMan.swift; sourceTree = "<group>"; };
 		9528726096C90D6A0523B86F /* Emoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
 		9A52A0EFB2F81DFBE699AC6D /* v05.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v05.bin; sourceTree = "<group>"; };
@@ -381,6 +383,7 @@
 				C02F1996A3DED7A0A133E24C /* DockIconManager.swift */,
 				3188FF1FD6559BF8E64C19CC /* EasterEggTracker.swift */,
 				2D64E06BE48B822A5BA55952 /* EffectDismisser.swift */,
+				90F7DB616A5940BE3DE17B77 /* EggStrings.swift */,
 				36BF5C449E03B6F883693B87 /* EmojiRain.swift */,
 				ED0A255DD094B85EF7DC67D2 /* Engine.swift */,
 				9C81578D7A36FB7EA31D1985 /* Fireworks.swift */,
@@ -624,6 +627,7 @@
 				751B7D80FF9EA3BA8B30B8FC /* EasterEggsSettings.swift in Sources */,
 				F07DEA88DD7DFC70934988EF /* EffectDismisser.swift in Sources */,
 				42DC32C9130BAB5381534226 /* EggIndex.swift in Sources */,
+				2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */,
 				AC7748989CE2B7D96CBB21FE /* Emoji.swift in Sources */,
 				786D4AD196F221CD0F7887DA /* EmojiDatabase.swift in Sources */,
 				67560B8C0EC9028ED9659937 /* EmojiRain.swift in Sources */,

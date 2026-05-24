@@ -2,7 +2,7 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
-/// The Swan Station countdown clock. Triggered by `:lost:`.
+/// The Swan Station countdown clock.
 ///
 /// Architecture (rewritten — split-flap):
 ///   - Pure SwiftUI. Each digit cell is a `FlipCard` that owns its own

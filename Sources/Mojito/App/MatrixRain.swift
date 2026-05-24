@@ -2,7 +2,7 @@ import AppKit
 import CoreGraphics
 import CoreText
 
-/// Cascading green katakana/digits. Triggered by `:matrix:`.
+/// Cascading green katakana/digits.
 ///
 /// Implementation: a single layer-backed NSView that draws all columns in
 /// one `draw(_:)` pass per tick. We tried per-column CATextLayers in a

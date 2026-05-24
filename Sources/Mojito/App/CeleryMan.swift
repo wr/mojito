@@ -3,7 +3,7 @@ import AVFoundation
 import AVKit
 import SwiftUI
 
-/// Three-window Celery Man arrangement. Triggered by `:celery:`.
+/// Three-window Celery Man arrangement.
 ///
 /// Layout (Tim & Eric reference still):
 ///   - LEFT:  "Celery Man" — landscape clip (v04), starts as the original

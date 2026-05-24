@@ -2,8 +2,7 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
-/// Bursting fireworks across the upper half of the screen. Triggered by
-/// `:fireworks:`.
+/// Bursting fireworks across the upper half of the screen.
 ///
 /// Each burst is a colored shell rising from the bottom, then exploding into
 /// a sphere of sparks that fall with gravity and fade. Secondary "child"

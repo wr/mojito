@@ -1,8 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Centered rainbow ribbon that ripples across the screen. Triggered by the
-/// `:pride:` easter egg.
+/// Centered rainbow ribbon that ripples across the screen.
 ///
 /// All six pride-flag stripes share a single waveform — the bottom of stripe i
 /// is the top of stripe i+1, so adjacent colors meet on a perfect shared edge
