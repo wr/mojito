@@ -38,9 +38,33 @@ scripts/setup-dev-signing.sh
 
 # Rebuild the bundled emoji DB from emojibase (SHA-pinned; mismatched checksums abort)
 python3 scripts/build_emoji_db.py
+
+# Run the unit test suite (xcodegen + xcodebuild test). Also wired into the
+# pre-push hook below — activate once per clone with the line under it.
+scripts/run-tests.sh
+git config core.hooksPath .githooks
 ```
 
-There are no unit tests. `Tests/` is empty.
+## Testing
+
+Pure-logic unit tests live under `Tests/MojitoTests/` and use Apple's Swift
+Testing framework (`@Test` / `#expect`). `scripts/run-tests.sh` regenerates
+the Xcode project and runs `xcodebuild test`; the `.githooks/pre-push` hook
+calls it, so a failing test blocks `git push` once the hook is enabled.
+
+What's worth testing here: anything pure-logic with no AppKit / AX /
+CGEventTap dependency — `TriggerStateMachine`, `FzyScorer`, `FuzzyMatcher`,
+`EmojiDatabase`, `SkinTone`, `EmoticonTable`, `AmbientEmoticonTable`,
+`SymbolsDatabase`, the regex paths in `ExclusionStore`. What's NOT worth
+testing in this repo: anything that touches `AXUIElement`, `CGEventTap`,
+`NSPanel`, synthetic `CGEvent` posting, or the focused-element cache —
+those need a live AX-permitted environment and tend to break in ways unit
+tests don't catch anyway.
+
+`Sources/Mojito/App/main.swift` short-circuits into a bare runloop when
+`XCTestConfigurationFilePath` is set, so the test bundle can load into the
+host app without firing up the menubar / single-instance / event-tap
+machinery.
 
 ### Things that have bitten us repeatedly
 

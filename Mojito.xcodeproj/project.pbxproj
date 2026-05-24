@@ -67,9 +67,11 @@
 		89AB6401CC7F94BCBF0D3437 /* s16.bin in Resources */ = {isa = PBXBuildFile; fileRef = E87A9C3A9251B8908CFB056A /* s16.bin */; };
 		8E134BA69353865C487310E0 /* AppIconDev.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9E22F5735A6F6E1E450909B2 /* AppIconDev.icns */; };
 		8EE9F3A928A7AFDB16C6D9A2 /* OnboardingRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4512D76E20BD99269775200B /* OnboardingRoot.swift */; };
+		917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */; };
 		9234FF3040DB70F660567DCB /* v12.bin in Resources */ = {isa = PBXBuildFile; fileRef = 8616DAC09008096A70541CEE /* v12.bin */; };
 		9CB4AA2C8D9DE6B788068AA9 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = EB2F085FF2A8206D2905DF27 /* Sparkle */; };
 		9CCEA0B70EEB77F988521DDB /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DA7C9FD3286A7839BA642D /* AppInfo.swift */; };
+		9E9309E8AF1F9D8B44213729 /* EmoticonTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */; };
 		A9A15B339C05195BB45CC09F /* MyLegSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C4C16E01184684E33C3437 /* MyLegSound.swift */; };
 		A9CDDCEBAC41BF8676B8F2EC /* EasterEggTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3188FF1FD6559BF8E64C19CC /* EasterEggTracker.swift */; };
 		ABF54441D03140C8174E13A9 /* PrefsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C66984ECCB4DB6B1A018452 /* PrefsKey.swift */; };
@@ -77,6 +79,7 @@
 		AC7748989CE2B7D96CBB21FE /* Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9528726096C90D6A0523B86F /* Emoji.swift */; };
 		ADC91CB08A1B9AE8F767488D /* OnboardingScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489170955CD25EB1DE2E681C /* OnboardingScreens.swift */; };
 		B1A2CBCCBC3A23CDE4F032F4 /* v08.bin in Resources */ = {isa = PBXBuildFile; fileRef = B000574456AD1D158ED5C88B /* v08.bin */; };
+		B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CD38087938C1E258718C69 /* FzyScorerTests.swift */; };
 		B33E18A7CE2409FEE3367728 /* LaunchAtLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC763FD3C4773231C72CFDD /* LaunchAtLogin.swift */; };
 		B43E634B3FAB6B7FBF2CFC6C /* AboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100317FDEDAED8905256B964 /* AboutSettings.swift */; };
 		B520161A0B158BFFC5C33440 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6BDC5E636ADC61D8671950 /* main.swift */; };
@@ -89,6 +92,7 @@
 		BEB1C0A9AD31B883B9B4E884 /* CaretLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786373C2E5DE4642148857B1 /* CaretLocator.swift */; };
 		BF8DBC3E1BD0A9EA4720C6DD /* FloppySound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73A20EA050B0CD0E8FB1CA6 /* FloppySound.swift */; };
 		C7EAEBA38EE85743E109E1B4 /* AchievementBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A31DD44ACC90D6CAC3A486 /* AchievementBanner.swift */; };
+		C86E0BA1D69D1A6B33068221 /* TriggerStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */; };
 		C892E976ED36AA1810770521 /* CeleryMan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947CA35F448BC012E3F73860 /* CeleryMan.swift */; };
 		CA1857DDE9F106C6CCB3FD2F /* v09.bin in Resources */ = {isa = PBXBuildFile; fileRef = 4F4CFB098FFC29AB8C8B9855 /* v09.bin */; };
 		CA9FE651B042EFCC920407D5 /* ImageBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74DB9192DF20F83CAD8A820C /* ImageBlob.swift */; };
@@ -118,6 +122,16 @@
 		FE1196787A788B1187BD9934 /* s13.bin in Resources */ = {isa = PBXBuildFile; fileRef = C06E0C983CA81BD9B703651A /* s13.bin */; };
 		FEC590B7DADC53EF948E7677 /* FocusedElementCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0C43AE82D06A067585D3882 /* FocusedElementCache.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0252A9D560A4D6CE3273867B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6CEFBE5457EA28F21F01F19D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 314D574AC0650E4957C28C71;
+			remoteInfo = Mojito;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		019FC9E40B9630700D2106CE /* EmojiDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiDatabase.swift; sourceTree = "<group>"; };
@@ -160,6 +174,7 @@
 		5B9E4C2183154C36F1883004 /* PickerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewModel.swift; sourceTree = "<group>"; };
 		5FB7AB3DB0E63AF30880FE66 /* BrowserURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserURL.swift; sourceTree = "<group>"; };
 		6666150B793721D5095E72A8 /* SymbolsDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolsDatabase.swift; sourceTree = "<group>"; };
+		69CD38087938C1E258718C69 /* FzyScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FzyScorerTests.swift; sourceTree = "<group>"; };
 		6E2009C3B36DF9228B873244 /* EmoticonTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmoticonTable.swift; sourceTree = "<group>"; };
 		6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientEmoticonTable.swift; sourceTree = "<group>"; };
 		702AC2870CD686AB17CC518E /* UpdaterCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterCoordinator.swift; sourceTree = "<group>"; };
@@ -169,6 +184,7 @@
 		7CCBA41F4C17CC47E155A9BE /* v07.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v07.bin; sourceTree = "<group>"; };
 		7E63ABA27E65953D84162097 /* SolitaireWin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolitaireWin.swift; sourceTree = "<group>"; };
 		7EB589505841013FF5EF5500 /* ConfettiSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiSound.swift; sourceTree = "<group>"; };
+		7EE0400354B7B76C1E28F725 /* MojitoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MojitoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		83366C0C02EF9F599EC2B65A /* VideoBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoBlob.swift; sourceTree = "<group>"; };
 		8616DAC09008096A70541CEE /* v12.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v12.bin; sourceTree = "<group>"; };
 		877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultExclusions.swift; sourceTree = "<group>"; };
@@ -195,6 +211,7 @@
 		B000574456AD1D158ED5C88B /* v08.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v08.bin; sourceTree = "<group>"; };
 		B05F08FB28C8998B7F7075BB /* TicTacToeGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicTacToeGame.swift; sourceTree = "<group>"; };
 		B0953EA30C5D11ACF280D7A2 /* Trogdor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trogdor.swift; sourceTree = "<group>"; };
+		B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerStateMachineTests.swift; sourceTree = "<group>"; };
 		B3154DBEA72DA316E341C440 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		B375DE27AC0AE1D8DE965403 /* SkinTone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinTone.swift; sourceTree = "<group>"; };
 		BC79E6EAFAF655E0E63E78DC /* Shortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shortcuts.swift; sourceTree = "<group>"; };
@@ -210,6 +227,8 @@
 		D3C7F5A4189B7652C993C384 /* v11.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v11.bin; sourceTree = "<group>"; };
 		D69B54539CBE867AD7AEBC39 /* Rickroll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rickroll.swift; sourceTree = "<group>"; };
 		D73A20EA050B0CD0E8FB1CA6 /* FloppySound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloppySound.swift; sourceTree = "<group>"; };
+		D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinToneTests.swift; sourceTree = "<group>"; };
+		DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmoticonTableTests.swift; sourceTree = "<group>"; };
 		DC6BDC5E636ADC61D8671950 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		DD6171603CD5F5CC6ED9A636 /* ExclusionsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExclusionsSettings.swift; sourceTree = "<group>"; };
 		DF0A9FF25BC996BC640A35A0 /* s01.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s01.bin; sourceTree = "<group>"; };
@@ -244,6 +263,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		02F05DB5E7247E1AE700004A /* MojitoTests */ = {
+			isa = PBXGroup;
+			children = (
+				DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */,
+				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
+				D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */,
+				B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */,
+			);
+			path = MojitoTests;
+			sourceTree = "<group>";
+		};
 		080DE9B8A7167B77D26EC5FB /* Settings */ = {
 			isa = PBXGroup;
 			children = (
@@ -333,6 +363,14 @@
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
+		2D68C1C8F15DD084EBD749F9 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				02F05DB5E7247E1AE700004A /* MojitoTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 		4A24B87614BF02CF9976B336 /* KeyMonitor */ = {
 			isa = PBXGroup;
 			children = (
@@ -371,6 +409,7 @@
 			isa = PBXGroup;
 			children = (
 				EF96A1DA7100EFFEEEEF8B7D /* Mojito.app */,
+				7EE0400354B7B76C1E28F725 /* MojitoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -428,6 +467,7 @@
 			children = (
 				0DBA269A378EED2346D5C3BA /* Resources */,
 				65E49BD5A468F951A2A3E38E /* Sources */,
+				2D68C1C8F15DD084EBD749F9 /* Tests */,
 				AA6AB5050A8B05F84A3BB48A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -512,6 +552,24 @@
 			productReference = EF96A1DA7100EFFEEEEF8B7D /* Mojito.app */;
 			productType = "com.apple.product-type.application";
 		};
+		911ED71B85554C82F7623426 /* MojitoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E52CD5CE81F5EA8255A9C2A /* Build configuration list for PBXNativeTarget "MojitoTests" */;
+			buildPhases = (
+				FB7A911CF04D7A3015D98AB4 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1428945E63782830BA7C1289 /* PBXTargetDependency */,
+			);
+			name = MojitoTests;
+			packageProductDependencies = (
+			);
+			productName = MojitoTests;
+			productReference = 7EE0400354B7B76C1E28F725 /* MojitoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -522,6 +580,10 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					314D574AC0650E4957C28C71 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+					911ED71B85554C82F7623426 = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
 					};
@@ -546,6 +608,7 @@
 			projectRoot = "";
 			targets = (
 				314D574AC0650E4957C28C71 /* Mojito */,
+				911ED71B85554C82F7623426 /* MojitoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -698,7 +761,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FB7A911CF04D7A3015D98AB4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E9309E8AF1F9D8B44213729 /* EmoticonTableTests.swift in Sources */,
+				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
+				917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */,
+				C86E0BA1D69D1A6B33068221 /* TriggerStateMachineTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1428945E63782830BA7C1289 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 314D574AC0650E4957C28C71 /* Mojito */;
+			targetProxy = 0252A9D560A4D6CE3273867B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		24B56F556B33CED223200969 /* Release */ = {
@@ -763,6 +845,42 @@
 			};
 			name = Release;
 		};
+		2E23BAB92A09A2E73DA8CCE9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ee.wells.MojitoTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Mojito Dev.app/Contents/MacOS/Mojito Dev";
+			};
+			name = Release;
+		};
+		2FAFEE4E8B34A0A1737BA920 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ee.wells.MojitoTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Mojito Dev.app/Contents/MacOS/Mojito Dev";
+			};
+			name = Debug;
+		};
 		777764A2E73EF4D46005FD65 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -781,6 +899,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ee.wells.Mojito;
+				PRODUCT_MODULE_NAME = Mojito;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -872,6 +991,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ee.wells.Mojito.dev;
+				PRODUCT_MODULE_NAME = Mojito;
 				PRODUCT_NAME = "Mojito Dev";
 				SDKROOT = macosx;
 			};
@@ -880,6 +1000,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1E52CD5CE81F5EA8255A9C2A /* Build configuration list for PBXNativeTarget "MojitoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2FAFEE4E8B34A0A1737BA920 /* Debug */,
+				2E23BAB92A09A2E73DA8CCE9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		96237BF3777AF8480F9BDDF5 /* Build configuration list for PBXProject "Mojito" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
