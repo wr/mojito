@@ -3739,6 +3739,10 @@
       end++;
     }
     const query = value.slice(start + 1, end);
+    // Don't treat `:-)` / `:-(` / `:-D` as a shortcode — the leading hyphen
+    // means the user is typing an emoticon, not a shortcode. `:flag-us:` is
+    // still fine (hyphen is mid-query, not leading).
+    if (query.startsWith('-')) return null;
     return { start, end, query, exact };
   }
 
@@ -3827,21 +3831,33 @@
 
   document.addEventListener('focusin', (e) => {
     if (!isDemoInput(e.target)) return;
+    const prevInput = input;
     input = e.target;
     cancelResume();
     if (autoplay) {
       stopAutoplay();
       input.value = '';
       hidePicker();
+    } else if (input !== prevInput) {
+      // Moving focus between demo inputs drops any picker rendered for the
+      // previous input — otherwise the new input's aria-activedescendant
+      // would reference rows describing the old input's query.
+      hidePicker();
     }
+    // Each app's textarea may use a different font (terminal is monospace).
+    cachedFont = '';
     updateActiveDescendant();
   });
 
   document.addEventListener('focusout', (e) => {
     if (!isDemoInput(e.target)) return;
     cancelResume();
+    // Don't schedule a resume on a hidden tab — the timer would tick while
+    // invisible and start autoplay against a backgrounded page.
+    if (document.hidden) return;
     resumeTimer = setTimeout(() => {
       resumeTimer = null;
+      if (document.hidden) return;
       // Only resume if user hasn't returned to an input in the meantime.
       if (!inputs.some((el) => document.activeElement === el)) {
         autoplayLoop();
@@ -4020,7 +4036,12 @@
       // Also cancel any pending blur→resume timer so it doesn't fire while
       // the tab is hidden and kick off a new autoplayLoop on an invisible page.
       cancelResume();
-    } else if (autoplay && !inputs.some((el) => document.activeElement === el)) {
+    } else if (!inputs.some((el) => document.activeElement === el)) {
+      // Returning to the tab with no input focused: resume autoplay even if
+      // a prior interaction had flipped `autoplay` off. Otherwise a single
+      // click + blur + tab-switch leaves the demo permanently silent because
+      // the focusout resume timer was cancelled by the visibility-hidden
+      // branch above and never re-armed.
       autoplayLoop();
     }
   });
