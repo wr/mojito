@@ -109,7 +109,7 @@ code {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 30px;
 }
 
 .nav-links a {
@@ -1061,10 +1061,10 @@ footer {
 .footer-socials {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 4px;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
 }
 
 .footer-socials a {
@@ -1090,15 +1090,15 @@ footer {
   width: 0.5px;
   height: 18px;
   background: rgba(0, 0, 0, 0.12);
-  margin: 0 10px;
+  margin: 0 14px;
   flex-shrink: 0;
 }
 
 .footer-text-links {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 12px 0 4px;
+  gap: 20px;
+  padding: 0 14px 0 6px;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.005em;
@@ -1151,7 +1151,7 @@ footer {
 }
 
 @media (max-width: 520px) {
-  .nav-links { gap: 14px; }
+  .nav-links { gap: 18px; }
   .nav-links a { font-size: 13px; }
   .brand span { display: none; }
   .picker { left: 12px; }
