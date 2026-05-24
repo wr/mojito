@@ -1,0 +1,5 @@
+#!/bin/sh
+# Run the unit-test suite before pushing. Blocks the push on failure so
+# broken tests don't reach the remote (and therefore can't reach a PR).
+# Activate once: `git config core.hooksPath .githooks`
+exec scripts/run-tests.sh
