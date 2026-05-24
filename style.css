@@ -1,0 +1,1191 @@
+/*
+ * Picker dimensions/colors mirror the app:
+ *   Sources/Mojito/Picker/PickerView.swift + PickerWindow.swift (PickerLayout).
+ * Width 280, row height 30, 5pt corner on the selection pill,
+ * NSColor.unemphasizedSelectedContentBackgroundColor for the selected row,
+ * NSVisualEffectView .menu material for the panel chrome.
+ */
+
+:root {
+  --bg: #fbfbfa;
+  --text: #1d1d1f;
+  --text-soft: #6e6e73;
+  --border: rgba(0, 0, 0, 0.08);
+  --accent: #1e8c54;
+  --accent-hover: #176e41;
+
+  --menu-bg: rgba(246, 246, 246, 0.92);
+  --menu-border: rgba(0, 0, 0, 0.12);
+  --menu-shadow: 0 14px 36px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.10);
+  --menu-divider: rgba(0, 0, 0, 0.10);
+  --row-selected: rgba(0, 0, 0, 0.10);
+  --row-text: #000;
+  --row-text-soft: rgba(0, 0, 0, 0.55);
+  --kbd-bg: rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0c0d0d;
+    --text: #f5f5f7;
+    --text-soft: #98989f;
+    --border: rgba(255, 255, 255, 0.08);
+    --accent: #2db867;
+    --accent-hover: #46cd7d;
+
+    --menu-bg: rgba(40, 40, 42, 0.82);
+    --menu-border: rgba(255, 255, 255, 0.10);
+    /* Heavier shadow on the dark wallpaper so the picker floats rather than
+     blending into the dark background. */
+    --menu-shadow: 0 14px 36px rgba(0, 0, 0, 0.50), 0 1px 3px rgba(0, 0, 0, 0.40);
+    --menu-divider: rgba(255, 255, 255, 0.10);
+    --row-selected: rgba(255, 255, 255, 0.12);
+    --row-text: #fff;
+    --row-text-soft: rgba(255, 255, 255, 0.55);
+    --kbd-bg: rgba(255, 255, 255, 0.12);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); }
+
+code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.9em;
+}
+
+/* topbar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  font-size: 16px;
+}
+
+.brand img {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.nav-links a {
+  color: var(--text-soft);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(180deg, #2db867 0%, #1e8c54 100%);
+  color: #fff !important;
+  padding: 7px 14px 7px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    0 1px 0 rgba(0,0,0,0.06),
+    0 4px 12px rgba(30, 140, 84, 0.25);
+  transition: filter 0.12s ease, transform 0.06s ease, box-shadow 0.12s ease;
+}
+
+.nav-cta:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    0 2px 0 rgba(0,0,0,0.08),
+    0 6px 18px rgba(30, 140, 84, 0.34);
+}
+
+.nav-cta:active { transform: translateY(0.5px); filter: brightness(0.96); }
+
+.nav-cta svg { display: block; }
+
+/* hero — H1 + sub above, then wallpaper card */
+.hero {
+  width: 100%;
+  padding: 40px 20px 32px;
+}
+
+.hero-header {
+  max-width: 900px;          /* room for the H1 to stay on one line at full size */
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.hero-header h1 {
+  font-size: clamp(36px, 5vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
+  margin: 0 0 14px;
+  color: var(--text);
+  text-wrap: balance;        /* keep wrapping clean when the viewport forces it */
+}
+
+.hero-sub {
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--text-soft);
+  margin: 0 auto;
+  max-width: 520px;
+  letter-spacing: -0.005em;
+}
+
+/* Inline <code> in the hero sub gets a subtle key-cap chip so the trigger
+   character reads as a literal keystroke, not just monospace prose. */
+.hero-sub code {
+  font-size: 0.95em;
+  padding: 1px 7px 2px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text);
+  margin: 0 1px;
+}
+
+.hero-card {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  min-height: 640px;
+  border-radius: 24px;
+  background: #1a2244 url("wallpaper.jpg") center / cover no-repeat;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 30px rgba(0,0,0,0.10);
+  /* No overflow:hidden here — that's done by .stage. Picker can spill out. */
+}
+
+/* desktop icons — always BEHIND windows. z-index: 0 (below .stage at z:1) */
+.desktop-icons {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 84px;
+  text-align: center;
+}
+
+.folder-img {
+  width: 72px;
+  height: 72px;
+  display: block;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
+}
+
+.icon-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.005em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.55);
+}
+
+/* stage clips the carousel so apps slide off-screen cleanly within the hero
+   card. We only need to clip HORIZONTALLY (the slide direction) — clipping
+   vertically too would also lop off the bottom of every app's drop shadow.
+   `clip-path: inset(-9999px 0)` clips left/right tight, top/bottom loose. */
+.stage {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(-9999px 0);
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* carousel is just a positioning context; each app positions itself absolutely
+   and slides in/out via its own transform. This lets us always animate
+   right-to-left, including the wrap from the last app back to the first. */
+.carousel {
+  position: absolute;
+  inset: 0;
+}
+
+/* each app is a fixed-size card centered in the hero-card, with translateX
+   for its current slide position. JS controls translateX:
+     - active app: 0
+     - exiting app: -HUGE (slides off-screen left)
+     - waiting apps: +HUGE (off-screen right; default state)
+   Window corners use a 14px squircle (continuous-curvature superellipse,
+   applied via clip-path in picker.js — see SQUIRCLE_R). */
+.app {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateX(1200px);
+  transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  /* macOS NSWindow chrome: 0.5px hairline border + a soft, long-tailed
+     ambient drop shadow. macOS pushes most of the visual weight into a
+     big diffuse halo below the window (large y-offset, very large blur,
+     low alpha) so the window appears to float rather than sit on a dark
+     pad. box-shadow works here because we use border-radius, not clip-path. */
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.10),
+    0 48px 96px rgba(0, 0, 0, 0.18);
+  pointer-events: none; /* only the centered app receives clicks */
+}
+.app.is-active { pointer-events: auto; }
+
+/* distinct window dimensions — each shape reads as a different app */
+.app-textedit  { width: 600px; height: 440px; }
+.app-imessage  { width: 380px; height: 440px; }
+.app-terminal  { width: 680px; height: 320px; }
+.app-mastodon  { width: 540px; height: 460px; }
+.app-reminders { width: 440px; height: 420px; }
+
+.app .title-bar {
+  height: 50px;            /* macOS Tahoe: 18 + 14 + 18 = 50, in every app */
+  display: flex;
+  align-items: center;
+  padding: 0 18px;         /* 18px to the left of the leftmost stoplight */
+  gap: 9px;                /* 9px between each stoplight */
+  position: relative;
+  flex-shrink: 0;
+}
+
+.app .title-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: rgba(0,0,0,0.78);  /* Tahoe active title is much closer to body text */
+  white-space: nowrap;
+}
+
+/* Tahoe-style floating chrome pill — capsule of frosted glass that groups
+   toolbar controls (back/forward, URL, action icons). Sized for the 50px
+   bar: 34px pill leaves 8px of clearance top/bottom. */
+.tb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  height: 34px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border: 0.5px solid rgba(0, 0, 0, 0.07);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.85),
+    0 0.5px 1px rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.72);
+}
+.tb-pill svg { display: block; }
+.tb-pill .tb-divider {
+  width: 0.5px;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.10);
+}
+/* dark variant for Terminal */
+.app-terminal .tb-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.10),
+    0 1px 1.5px rgba(0, 0, 0, 0.30);
+  color: rgba(255, 255, 255, 0.70);
+}
+
+.app .app-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-input {
+  appearance: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  letter-spacing: -0.005em;
+  min-width: 0;
+}
+
+/* ===== 1. TextEdit ===== */
+.app-textedit {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: saturate(160%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+}
+/* Tahoe-style unified title bar — same material as the body, no divider. */
+.app-textedit .te-tb {
+  background: transparent;
+  border-bottom: none;
+}
+.app-textedit .te-body {
+  padding: 22px 28px;
+  flex: 1;
+  display: flex;
+}
+.app-textedit .demo-input {
+  width: 100%;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #1d1d1f;
+  caret-color: #1d1d1f;
+  flex: 1;          /* fill available body height */
+  min-height: 0;
+  resize: none;
+}
+
+/* ===== 2. iMessage (Tahoe) ===== */
+.app-imessage {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: saturate(160%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+}
+/* iMessage title bar is fully transparent in Tahoe — the contact header
+   below it sits "inside" the bar with the avatar overlapping. */
+.app-imessage .im-tb {
+  background: transparent;
+  border-bottom: none;
+}
+
+/* Contact header: avatar overlaps the title bar, name pill tucks below it
+   with the avatar bridging the title-bar/body boundary. Matches Tahoe
+   Messages: ~44px avatar, compact pill, very translucent fill + 0.5px ring. */
+.im-contact-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -34px; /* avatar starts ~16px from window top, sits across title bar */
+  padding-bottom: 12px;
+  position: relative;
+  z-index: 2;
+}
+.im-avatar-big {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff9aa2, #fab1c5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 2;     /* sits ON TOP of the contact pill */
+  /* No white ring — Tahoe Messages avatar is just the disc itself */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.im-contact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  /* extra top padding so the text clears the avatar's overlap zone */
+  padding: 10px 12px 4px;
+  background: rgba(0,0,0,0.05);
+  border: 0.5px solid rgba(0,0,0,0.08);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+  margin-top: -10px;        /* avatar overlaps the top of the pill */
+  justify-content: center;
+}
+.im-contact-pill svg { color: rgba(0,0,0,0.4); }
+
+/* Meta block under the contact pill — "iMessage" / "Today · 9:42 AM" */
+.im-meta-header {
+  text-align: center;
+  margin-top: 8px;
+  line-height: 1.35;
+}
+.im-meta-label { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.55); }
+.im-meta-time  { font-size: 12px; color: rgba(0,0,0,0.42); }
+
+.im-body { padding: 4px 14px 12px; display: flex; flex-direction: column; flex: 1; }
+
+.bubbles {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+  min-height: 0;
+  overflow-y: hidden;
+}
+.bubble {
+  font-size: 16px;
+  line-height: 1.32;
+  padding: 9px 15px;
+  border-radius: 22px;
+  max-width: 75%;
+  letter-spacing: -0.005em;
+}
+.bubble.received {
+  background: #e9e9eb;
+  color: #1d1d1f;
+  align-self: flex-start;
+  border-bottom-left-radius: 7px;
+}
+.bubble.sent {
+  background: linear-gradient(180deg, #2a9bff, #0e7eff);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 7px;
+}
+@keyframes bubble-slide-up {
+  from { transform: translateY(36px) scale(0.94); opacity: 0; }
+  to   { transform: translateY(0) scale(1);      opacity: 1; }
+}
+.bubble.sent.is-new {
+  animation: bubble-slide-up 0.42s cubic-bezier(0.18, 0.85, 0.30, 1.06);
+}
+
+/* Compose row: + circle | pill (with waveform inside) | emoji circle */
+.im-compose {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.im-circle {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fff;
+  border: 0.5px solid rgba(0,0,0,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0,0,0,0.55);
+  padding: 0;
+  box-shadow: 0 0.5px 1px rgba(0,0,0,0.05);
+  cursor: default;
+  pointer-events: none;
+}
+.im-circle svg { display: block; }
+.im-pill {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 0.5px solid rgba(0,0,0,0.10);
+  border-radius: 999px;
+  background: rgba(0,0,0,0.04);
+  min-width: 0;
+}
+.im-pill .demo-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 36px 8px 14px;
+  font-size: 15px;
+  line-height: 1.3;
+  color: #1d1d1f;
+  caret-color: #007aff;
+  min-height: 34px;
+}
+.im-pill .demo-input::placeholder { color: rgba(0,0,0,0.36); }
+.im-pill-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: rgba(0,0,0,0.40);
+  cursor: default;
+  pointer-events: none;
+}
+.im-pill-btn svg { display: block; }
+
+/* ===== 3. Terminal ===== */
+.app-terminal {
+  background: #1d1d1f;
+  color: #e3e3e3;
+}
+/* Tahoe Terminal: title bar is the same flat material as the body, no divider. */
+.app-terminal .term-tb {
+  background: transparent;
+  border-bottom: none;
+}
+.app-terminal .title-text { color: rgba(255,255,255,0.78); }
+.term-body {
+  padding: 16px 20px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.term-line   { white-space: pre; color: #e3e3e3; }
+.term-prompt { color: #4ec963; font-weight: 600; }
+.term-out    { color: #c4c4c4; margin: 2px 0 8px; white-space: pre-wrap; }
+.term-mod    { color: #e64a3b; }
+.term-login  { color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+/* gap = one monospace character so the textarea sits exactly where the
+   literal " git status" text on the rows above sits — anything smaller
+   reads as a tighter space than the other prompts. */
+.term-input-line { display: flex; align-items: baseline; gap: 1ch; }
+.term-textarea {
+  flex: 1;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #e3e3e3;
+  caret-color: #e3e3e3;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  vertical-align: baseline;
+  min-height: 1.45em;
+  white-space: pre;
+  overflow-x: hidden;
+}
+
+/* ===== 4. Mastodon (Safari + dark Mastodon site) ===== */
+.app-mastodon {
+  background: #16181c; /* dark site bg */
+}
+/* Safari title bar — pill-grouped Tahoe chrome. Real Tahoe Safari uses a
+   very light glass material that picks up tint from the page below; an
+   off-white near-#fafafa with a hint of warmth reads as glass at this size.
+   Explicit top corner radius so the backdrop-filter layer (which can escape
+   the parent's overflow:hidden clip) still respects the window corners. */
+.safari-tb {
+  background: rgba(248, 248, 250, 0.92);
+  backdrop-filter: saturate(160%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+  border-bottom: none;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+.safari-nav-pill { gap: 8px; padding: 0 9px; color: rgba(0, 0, 0, 0.55); }
+.safari-url-pill {
+  flex: 1;
+  max-width: 280px;
+  margin: 0 auto;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+}
+.safari-url-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.78);
+  letter-spacing: -0.005em;
+}
+.safari-url-pill svg { color: rgba(0, 0, 0, 0.42); }
+/* Single-icon pill: force a circle (width = height = pill height) so it
+   doesn't read as an oval/capsule like the multi-icon nav pills do. */
+.safari-action-pill {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin-left: 0;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.safari-ext-icon {
+  display: block;
+  width: 14px;
+  height: 14px;
+  /* menubar SVG is black on transparent — invert it for dark mode below */
+}
+
+/* Mastodon dark site */
+.mst-body {
+  padding: 22px 22px 20px;
+  color: #e7e9ec;
+  background: #16181c;
+  flex: 1;
+}
+.mst-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.mst-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.mst-name-block { display: flex; flex-direction: column; gap: 2px; }
+.mst-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.mst-handle {
+  font-size: 15px;
+  color: rgba(255,255,255,0.55);
+}
+
+.mst-compose {
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  padding: 14px;
+  background: rgba(255,255,255,0.02);
+}
+
+.mst-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.mst-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid #7857ff;
+  color: #a48bff;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  background: transparent;
+}
+.mst-option svg { color: #a48bff; }
+
+.mst-textarea {
+  width: 100%;
+  font-size: 18px;
+  line-height: 1.4;
+  color: #fff;
+  caret-color: #fff;
+  min-height: 90px;
+  background: transparent;
+  padding: 0;
+}
+.mst-textarea::placeholder { color: rgba(255,255,255,0.40); }
+.mst-textarea::selection { background: rgba(120, 87, 255, 0.45); }
+
+.mst-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.mst-tools {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: #a48bff;
+}
+.mst-tools svg { color: #a48bff; display: block; }
+.mst-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.mst-count {
+  font-size: 14px;
+  color: rgba(255,255,255,0.50);
+  font-variant-numeric: tabular-nums;
+}
+.mst-publish {
+  background: #7857ff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
+  letter-spacing: -0.005em;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* ===== 5. Reminders ===== */
+.app-reminders {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: saturate(160%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+}
+/* Tahoe Reminders has a unified toolbar — no flat off-white band, just the
+   body material continuing up through the title bar. */
+.app-reminders .rm-tb {
+  background: transparent;
+  border-bottom: none;
+}
+.rm-tb-left  { margin-left: 8px; gap: 10px; padding: 0 9px; color: rgba(0, 0, 0, 0.60); }
+.rm-tb-right { margin-left: auto; gap: 10px; padding: 0 9px; color: rgba(0, 0, 0, 0.60); }
+.rm-tb-left svg, .rm-tb-right svg { color: rgba(0, 0, 0, 0.60); }
+.rm-body { padding: 20px 26px; }
+.rm-list-title {
+  font-size: 34px;
+  font-weight: 800;
+  color: #af52de;        /* macOS Reminders default purple */
+  margin: 0 0 14px;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+.rm-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+}
+.rm-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.28);
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rm-check-done {
+  background: #af52de;   /* matches list title color */
+  border-color: #af52de;
+}
+.rm-check-done svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+.rm-text { font-size: 16px; color: #1d1d1f; }
+.rm-done .rm-text { color: rgba(0,0,0,0.4); }
+.rm-textarea {
+  flex: 1;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #1d1d1f;
+  caret-color: #1d1d1f;
+  background: transparent;
+  min-height: 22px;
+}
+.rm-textarea::placeholder { color: rgba(0,0,0,0.32); }
+.rm-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  background: none;
+  border: none;
+  color: #007aff;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  padding: 4px 0;
+  cursor: default;
+  pointer-events: none;
+}
+.rm-add svg { display: block; }
+
+/* stoplights — shared by all app title bars. macOS Tahoe uses 14px diameter
+   buttons (up from 12px in Sequoia) with 9px gap on all sides — see the
+   .title-bar padding/gap above. Inset highlight + soft bottom shadow
+   approximate the slight gloss real stoplights have. */
+.stoplight {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.18),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.20),
+    0 0.5px 0.5px rgba(0, 0, 0, 0.05);
+}
+
+.stop-red    { background: #ff5f57; }
+.stop-yellow { background: #febc2e; }
+.stop-green  { background: #28c840; }
+
+/* Dark-mode title bars (Terminal, Mastodon body) need a slightly heavier
+   inner ring so the buttons still read as crisp circles against dark glass. */
+.app-terminal .stoplight {
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.30),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.35),
+    0 0.5px 0.5px rgba(0, 0, 0, 0.18);
+}
+
+.demo-input::selection { background: rgba(30, 140, 84, 0.25); }
+
+/* picker-anchor overlays the entire hero-card so the picker can be positioned
+   in hero-card coordinates regardless of which app is currently centered. */
+.picker-anchor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.picker {
+  position: absolute;
+  /* top + left are set dynamically by positionPicker() — anchors under the `:` */
+  top: 0;
+  left: 16px;
+  width: 280px;
+  background: var(--menu-bg);
+  backdrop-filter: saturate(180%) blur(30px);
+  -webkit-backdrop-filter: saturate(180%) blur(30px);
+  border: 0.5px solid var(--menu-border);
+  border-radius: 10px;
+  box-shadow: var(--menu-shadow);
+  padding-top: 6px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.picker.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 3px;
+}
+
+.picker-row {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 4px;
+  padding: 0 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  color: #000;
+  cursor: pointer;
+}
+
+.picker-row.active { background: rgba(0, 0, 0, 0.10); }
+
+.px-emoji {
+  width: 24px;
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+}
+
+.px-code {
+  font-size: 13px;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.px-code .match {
+  color: #000;
+  font-weight: 600;
+}
+
+.picker-divider {
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.10);
+  opacity: 0.6;
+}
+
+.picker-footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.hint { display: inline-flex; align-items: center; gap: 5px; }
+
+kbd {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.08);
+  color: #000;
+}
+
+/* prose */
+main { max-width: 620px; margin: 0 auto; padding: 0 28px; }
+
+.prose {
+  margin: 0 auto;
+  padding: 48px 0;
+  max-width: 560px;
+}
+
+.prose + .prose { padding-top: 0; }
+
+.prose h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+}
+
+.prose p {
+  margin: 0 0 14px;
+  color: var(--text);
+}
+
+.prose p:last-child { margin-bottom: 0; }
+
+/* footer */
+footer {
+  max-width: 620px;
+  margin: 80px auto 0;
+  padding: 32px 28px 48px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-soft);
+  text-align: center;
+}
+
+footer a { color: var(--text-soft); }
+footer a:hover { color: var(--text); }
+footer span { margin: 0 8px; opacity: 0.5; }
+
+@media (max-width: 640px) {
+  /* On phones, the demo is autoplay-only — no tapping into the textarea,
+     so we don't trigger the on-screen keyboard or break the autoplay loop.
+     Match both the demo textareas (.demo-input) and anything inside .app-body
+     so future markup tweaks don't silently re-enable taps. */
+  .app-body textarea,
+  .demo-input {
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* App windows have fixed pixel widths (380–680px). On a narrow viewport
+     the wider ones (Terminal 680, TextEdit 600, Mastodon 540) overflow the
+     stage and get clipped. Shrink the whole carousel + picker proportionally
+     to fit the viewport while keeping the design ratio intact. */
+  .stage,
+  .picker-anchor { transform: scale(0.55); transform-origin: center center; }
+}
+
+@media (max-width: 520px) {
+  .nav-links { gap: 14px; }
+  .nav-links a { font-size: 13px; }
+  .brand span { display: none; }
+  .picker { left: 12px; }
+  .hero-card { min-height: 520px; }
+  .stage,
+  .picker-anchor { transform: scale(0.45); transform-origin: center center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Suppress not just the picker fade but every motion on the page:
+     - .picker  transition fade
+     - .app     carousel slide-in (the snap-and-animate dance is also bypassed
+                in picker.js's setActiveApp, so this just neutralizes residual
+                CSS-driven transforms)
+     - bubble   sent-bubble slide-up keyframe in iMessage scene
+     - hover    pill/nav button hover transitions */
+  .picker,
+  .app,
+  .nav-cta { transition: none !important; }
+  .bubble.sent.is-new { animation: none !important; }
+}
+
+/* ===========================================================================
+   Dark-mode overrides — placed LAST in the file so they win the cascade
+   against the per-app `background:` shorthand declarations above.
+   =========================================================================== */
+@media (prefers-color-scheme: dark) {
+
+  /* hero card uses the dark Tahoe wallpaper */
+  .hero-card {
+    background: #0b0c10 url("wallpaper-dark.jpg") center / cover no-repeat;
+  }
+
+  /* On the dark wallpaper a pure-black rim disappears — give the border a
+     touch of brightness for definition, and use a deeper but still soft
+     ambient shadow so the window floats without looking pasted-on. */
+  .app {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.20),
+      0 16px 32px rgba(0, 0, 0, 0.28),
+      0 48px 96px rgba(0, 0, 0, 0.40);
+  }
+
+  /* shared title-bar text on dark windows */
+  .app .title-text { color: rgba(255, 255, 255, 0.78); }
+
+  /* shared toolbar pill — dark glass variant */
+  .tb-pill {
+    background: rgba(60, 60, 64, 0.55);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.10),
+      0 0.5px 1px rgba(0, 0, 0, 0.25);
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* stoplight inset highlights tuned for dark backgrounds */
+  .stoplight {
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -0.5px 0 rgba(0, 0, 0, 0.28),
+      inset 0 0 0 0.5px rgba(0, 0, 0, 0.32),
+      0 0.5px 0.5px rgba(0, 0, 0, 0.18);
+  }
+
+  /* TextEdit — dark glass body */
+  .app-textedit {
+    background: rgba(38, 38, 40, 0.94);
+  }
+  .app-textedit .demo-input { color: #f2f2f5; caret-color: #f2f2f5; }
+
+  /* iMessage — dark glass body */
+  .app-imessage {
+    background: rgba(38, 38, 40, 0.94);
+  }
+  .im-avatar-big {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  }
+  .im-contact-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.10);
+    color: #f2f2f5;
+  }
+  .im-contact-pill svg { color: rgba(255, 255, 255, 0.55); }
+  .im-meta-label { color: rgba(255, 255, 255, 0.65); }
+  .im-meta-time  { color: rgba(255, 255, 255, 0.45); }
+  /* Bumped from #2a2a2c — was too close to the #262628 body bg, bubbles
+     disappeared. #3a3a3c sits where real Tahoe Messages received bubbles do. */
+  .bubble.received { background: #3a3a3c; color: #f2f2f5; }
+  .hero-sub code { background: rgba(255, 255, 255, 0.12); }
+  .im-circle {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.70);
+    box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.25);
+  }
+  .im-pill {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  .im-pill .demo-input { color: #f2f2f5; }
+  .im-pill .demo-input::placeholder { color: rgba(255, 255, 255, 0.38); }
+  .im-pill-btn { color: rgba(255, 255, 255, 0.45); }
+
+  /* Safari — dark glass chrome (page below is already Mastodon dark) */
+  .safari-tb { background: rgba(36, 36, 38, 0.92); }
+  .safari-url-text { color: rgba(255, 255, 255, 0.85); }
+  .safari-url-pill svg { color: rgba(255, 255, 255, 0.55); }
+  .safari-nav-pill { color: rgba(255, 255, 255, 0.65); }
+  /* Mojito menubar SVG is black-on-transparent — invert to white for dark */
+  .safari-ext-icon { filter: invert(1) brightness(1.6); }
+
+  /* Reminders — dark glass body */
+  .app-reminders {
+    background: rgba(38, 38, 40, 0.94);
+  }
+  .rm-tb-left,
+  .rm-tb-right,
+  .rm-tb-left svg,
+  .rm-tb-right svg { color: rgba(255, 255, 255, 0.72); }
+  .rm-text { color: #f2f2f5; }
+  .rm-done .rm-text { color: rgba(255, 255, 255, 0.42); }
+  .rm-textarea { color: #f2f2f5; caret-color: #f2f2f5; }
+  .rm-textarea::placeholder { color: rgba(255, 255, 255, 0.36); }
+  .rm-item { border-bottom-color: rgba(255, 255, 255, 0.08); }
+  .rm-check { border-color: rgba(255, 255, 255, 0.30); }
+
+  /* picker rows on the dark menu material */
+  .picker-row { color: #fff; }
+  .picker-row.active { background: rgba(255, 255, 255, 0.12); }
+  .px-code { color: rgba(255, 255, 255, 0.55); }
+  .px-code .match { color: #fff; }
+  .picker-divider { background: rgba(255, 255, 255, 0.12); }
+  .picker-footer { color: rgba(255, 255, 255, 0.55); }
+  kbd { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+  .demo-input::selection { background: rgba(46, 184, 103, 0.35); }
+}
