@@ -1,23 +1,12 @@
 import AppKit
 
-/// Loads scrambled audio assets from the bundle.
-///
-/// Each `sNN.bin` file in `Resources/` is the original .mp3/.wav with every
-/// byte XOR'd against a single key. The header magic (`FF FB …` for MP3,
-/// `RIFF…` for WAV) is destroyed by the scramble, so `file`, Quick Look,
-/// and double-clicking the file from Finder all refuse to play it. Our
-/// loader reads the bytes, undoes the XOR in memory, and feeds the result
-/// to `NSSound(data:)`, which decodes from header magic at runtime.
-///
-/// The scrambling is trivial to reverse for anyone who reads this comment —
-/// the point is to deter casual exploration, not to defeat a determined
-/// reverse engineer.
+/// `sNN.bin` are .mp3/.wav files XOR'd against a single key, scrambling
+/// the header magic so `file`, Quick Look, and Finder refuse to play them.
+/// Trivially reversible — the point is to deter casual exploration.
 enum AudioBlob {
     private static let key: UInt8 = 0x5A
 
-    /// Returns an `NSSound` decoded from the scrambled blob with the given
-    /// resource name (extension is always `.bin`). Caller is responsible for
-    /// retaining the returned sound — releasing it mid-playback stops it.
+    /// Caller must retain the returned sound — releasing stops playback.
     static func load(_ name: String) -> NSSound? {
         guard let url = Bundle.main.url(forResource: name, withExtension: "bin"),
               let raw = try? Data(contentsOf: url) else {

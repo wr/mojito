@@ -13,15 +13,15 @@ final class PermissionsCoordinator: ObservableObject {
 
     init() {
         refresh()
-        // System posts this distributed notification when an app's Accessibility status changes.
-        // Listening lets us react instantly instead of waiting for the next poll tick.
+        // System posts this when an app's Accessibility status changes —
+        // lets us react instantly instead of waiting for the next poll.
         distributedObserver = DistributedNotificationCenter.default().addObserver(
             forName: NSNotification.Name("com.apple.accessibility.api"),
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            // The TCC change is posted slightly before AXIsProcessTrusted() returns true, so
-            // refresh now AND a moment later.
+            // The notification fires slightly before AXIsProcessTrusted()
+            // flips, so refresh now AND a moment later.
             self?.refresh()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { self?.refresh() }
         }
@@ -33,20 +33,15 @@ final class PermissionsCoordinator: ObservableObject {
         }
     }
 
-    /// Default polling interval while permissions are missing. Slow enough that the
-    /// background `CGEvent.tapCreate` probe doesn't show up as constant IPC churn,
-    /// fast enough that the user sees a green checkmark within a few seconds of
-    /// granting permission. AX changes are picked up instantly via the
-    /// `com.apple.accessibility.api` distributed notification anyway, so the timer
-    /// is really only there to catch Input Monitoring toggles.
+    /// AX uses the distributed notification, so this timer is really
+    /// just for catching Input Monitoring toggles. 5s is slow enough not
+    /// to churn IPC but fast enough for a quick green checkmark.
     private static let slowPollInterval: TimeInterval = 5.0
 
     func startMonitoring(interval: TimeInterval = slowPollInterval) {
         refresh()
-        // Once both permissions are granted, stop polling entirely. AX flips arrive
-        // via the distributed notification; Input Monitoring revocation surfaces
-        // through the real KeyMonitor tap's `tapDisabledByUserInput` callback, which
-        // routes back into `handleInputMonitoringLost()` to restart polling.
+        // Stop polling once granted; revocation re-enters via
+        // `handleInputMonitoringLost()`.
         if allGranted {
             stopMonitoring()
             return
@@ -69,26 +64,20 @@ final class PermissionsCoordinator: ObservableObject {
         let im = checkInputMonitoring()
         if ax != accessibility { accessibility = ax }
         if im != inputMonitoring { inputMonitoring = im }
-        // Stop polling the moment both come back true — flip to event-driven mode.
-        // (`startMonitoring` is the entry point when we need to start polling again,
-        // e.g. on revocation.)
         if accessibility && inputMonitoring {
             stopMonitoring()
         }
     }
 
-    /// Cheap, idempotent Input Monitoring liveness check. Always uses
-    /// `IOHIDCheckAccess` — calling `CGEvent.tapCreate` as a probe on first launch
-    /// triggers the system Input Monitoring alert before onboarding has a chance to
-    /// introduce it (you see the OS dialog instead of our welcome screen).
-    /// `promptInputMonitoring()` is the only sanctioned entry point for the prompt.
+    /// `IOHIDCheckAccess` is cheap and idempotent. `CGEvent.tapCreate` as
+    /// a probe would fire the system Input Monitoring alert before our
+    /// onboarding can introduce it — `promptInputMonitoring()` is the
+    /// only sanctioned entry point.
     private func checkInputMonitoring() -> Bool {
         IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted
     }
 
-    /// Called by the engine when the real KeyMonitor's event tap gets disabled by the
-    /// system (revocation, user toggling Input Monitoring off, etc). Resumes polling
-    /// until permissions come back.
+    /// Called when the KeyMonitor tap dies (user revoked Input Monitoring).
     func handleInputMonitoringLost() {
         inputMonitoring = false
         startMonitoring()
@@ -96,8 +85,8 @@ final class PermissionsCoordinator: ObservableObject {
 
     var allGranted: Bool { accessibility && inputMonitoring }
 
-    /// Trigger the system "wants to control accessibility" prompt. Only fires the first time.
-    /// Returns true if already trusted, false if the prompt was shown (or had been dismissed before).
+    /// Fires the system prompt the first time. Returns true if already
+    /// trusted, false otherwise.
     @discardableResult
     func promptAccessibility() -> Bool {
         let key = "AXTrustedCheckOptionPrompt" as CFString
@@ -105,7 +94,6 @@ final class PermissionsCoordinator: ObservableObject {
         return AXIsProcessTrustedWithOptions(options)
     }
 
-    /// Trigger the system Input Monitoring prompt the first time it's called.
     @discardableResult
     func promptInputMonitoring() -> Bool {
         IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)

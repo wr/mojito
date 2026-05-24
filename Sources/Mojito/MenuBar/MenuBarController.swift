@@ -33,11 +33,8 @@ final class MenuBarController {
             .combineLatest(permissions.$accessibility, permissions.$inputMonitoring)
             .receive(on: RunLoop.main)
             .sink { [weak self] isActive, ax, im in
-                // Only treat missing permissions as a "warning" state AFTER the user
-                // has finished onboarding. Before onboarding completes, the missing
-                // permissions are expected — the onboarding flow is already on screen
-                // asking the user to grant them, so replacing the menu bar icon with
-                // a yellow triangle on top of that would be noisy and redundant.
+                // Only warn post-onboarding. During onboarding the missing
+                // permissions are expected and the flow already shows them.
                 let onboardingComplete = UserDefaults.standard.bool(forKey: PrefsKey.onboardingComplete)
                 let hasIssue = onboardingComplete && !(ax && im)
                 self?.refreshIcon(active: isActive && ax && im, hasIssue: hasIssue)
@@ -60,34 +57,27 @@ final class MenuBarController {
         applyIcon(to: button, active: active, hasIssue: hasIssue)
     }
 
-    /// Apply the menu-bar icon defensively. The active/idle states use a custom vector
-    /// asset (`MenuBarIcon` from the asset catalog) rendered as a template image so macOS
-    /// tints it for light/dark menu bars automatically. The error state uses the system
-    /// warning-triangle symbol (kept colored so it stands out). If any asset lookup fails
-    /// we fall back to a text glyph, since a `variableLength` status item with a `nil`
-    /// image renders at 0pt — i.e. completely invisible.
+    /// Text fallback because a `variableLength` status item with no image
+    /// renders at 0pt — completely invisible.
     private func applyIcon(to button: NSStatusBarButton, active: Bool, hasIssue: Bool) {
         if hasIssue, let image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: "\(AppInfo.displayName) needs permission") {
-            image.isTemplate = false  // keep the yellow tint
+            image.isTemplate = false  // keep yellow tint
             button.image = image
             button.title = ""
             return
         }
 
         if let image = NSImage(named: "MenuBarIcon") {
-            // Standard menu-bar icons are ~15–16pt to match Apple's own (Wi-Fi,
-            // Battery, etc.). Preserves the SVG's aspect ratio (128×119 → 16×14.9).
+            // ~15–16pt matches Apple's menu-bar icons. SVG is 128×119.
             image.size = NSSize(width: 16, height: 15)
             image.isTemplate = true
-            // Dim the icon a touch when paused — same logic as the old wineglass/wineglass.fill
-            // pairing. `appearsDisabled` softens the template tint.
+            // Softens template tint when paused.
             button.appearsDisabled = !active
             button.image = image
             button.title = ""
             return
         }
 
-        // Asset load failed — fall back to text so the item is at least clickable.
         button.image = nil
         button.title = hasIssue ? "⚠️" : "🍹"
     }
@@ -116,10 +106,8 @@ final class MenuBarController {
 
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Settings…", action: #selector(MenuActions.openSettings), keyEquivalent: ",").configured(target: MenuActions.shared))
-        // Hidden alternate revealed when the user holds Option while the
-        // menu is open — replaces "Settings…" in place. Discoverability is
-        // intentionally low; this is a backdoor for re-running the guided
-        // setup without resetting onboarding state.
+        // Option-held alternate — backdoor for re-running guided setup
+        // without resetting onboarding state. Discoverability intentionally low.
         let showOnboarding = NSMenuItem(title: "Show Onboarding", action: #selector(MenuActions.showOnboarding), keyEquivalent: ",").configured(target: MenuActions.shared)
         showOnboarding.keyEquivalentModifierMask = [.command, .option]
         showOnboarding.isAlternate = true
@@ -139,7 +127,6 @@ final class MenuBarController {
         guard let menu = statusItem?.menu, let statusRow = menu.item(at: 0) else { return }
         statusRow.attributedTitle = statusTitle()
 
-        // Pause/Resume are mutually exclusive — only show the one that's applicable.
         let isPaused = (engine?.pausedUntil.map { $0 > Date() } ?? false)
         pauseHourItem?.isHidden = isPaused
         pauseTomorrowItem?.isHidden = isPaused
@@ -150,7 +137,7 @@ final class MenuBarController {
         guard let item = checkForUpdatesItem else { return }
         item.title = "Check for Updates…"
         if hasError {
-            // Trailing yellow warning triangle — quieter than a modal, still discoverable.
+            // Quieter than a modal but still discoverable.
             item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: "Update check failed")
             item.image?.isTemplate = false
             item.toolTip = "\(AppInfo.displayName) couldn't reach the update server."
@@ -182,7 +169,6 @@ final class MenuBarController {
         ])
     }
 
-    // Internal access for MenuActions singleton callbacks
     fileprivate func performPauseHour() {
         engine?.pause(until: Date().addingTimeInterval(3600))
     }

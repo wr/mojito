@@ -49,9 +49,8 @@ struct SettingsRoot: View {
                 }
             }
             .frame(minWidth: 460, minHeight: 360)
-            // Hide the Form's opaque grouped background so the title bar's
-            // translucent material can blur the scrolling content beneath it
-            // (the "glass fade" macOS Settings has).
+            // Hide the Form bg so the title bar can blur scrolling
+            // content underneath (macOS Settings' glass fade).
             .scrollContentBackground(.hidden)
         }
         .frame(width: 700, height: 500)
@@ -65,9 +64,8 @@ struct SettingsRoot: View {
     }
 }
 
-/// Bridges SwiftUI → the hosting NSWindow so we can reach AppKit-only
-/// properties (window title, in our case). The wrapped view is invisible
-/// and zero-sized; its only job is to expose `view.window`.
+/// Zero-sized bridge to the hosting NSWindow for AppKit-only props
+/// (window title here).
 private struct WindowAccessor: NSViewRepresentable {
     let onResolve: (NSWindow?) -> Void
 

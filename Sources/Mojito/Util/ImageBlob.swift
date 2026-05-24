@@ -1,9 +1,6 @@
 import AppKit
 
-/// Loads scrambled image assets (`vNN.bin`) from the bundle. Same XOR
-/// scheme as `AudioBlob` — the on-disk files have their header magic
-/// destroyed so Quick Look / Finder won't open them; this loader undoes
-/// the scramble in memory and hands the bytes to `NSImage`.
+/// Same XOR scheme as `AudioBlob` for `vNN.bin` image assets.
 enum ImageBlob {
     private static let key: UInt8 = 0x5A
 

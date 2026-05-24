@@ -2,24 +2,13 @@ import AppKit
 import AVFoundation
 import SwiftUI
 
-/// "Shall we play a game?" — Tic-Tac-Toe in the WarGames style.
-///
-/// 3×3 board, human plays X, computer plays O. The CPU runs full minimax —
-/// optimal play means the best the user can do is a draw. (That's exactly
-/// the punchline of the movie: the only winning move is not to play.)
-///
-/// Visual treatment matches the 1983 film's WOPR display: thick glowing
-/// cyan X's and O's on a deep blue-black background, drawn with stroked
-/// shapes (not text) so they look like vector CRT graphics rather than
-/// terminal glyphs. After the stalemate the board clears and the famous
-/// "A STRANGE GAME..." monologue types out one character at a time.
+/// WarGames Tic-Tac-Toe. CPU runs full minimax — best case is a draw,
+/// which triggers Joshua's "A STRANGE GAME…" monologue.
 @MainActor
 enum TicTacToeGame {
     private static var window: NSWindow?
     private static var closeObserver: NSObjectProtocol?
 
-    /// Closes the active game window if one is up. Called from the view
-    /// once the monologue finishes typing and the hold elapses.
     static func dismiss() {
         window?.close()
     }
@@ -31,8 +20,7 @@ enum TicTacToeGame {
             return
         }
 
-        // Width sized to fit the widest monologue line at 22pt monospace
-        // + tracking 2 without forcing SwiftUI to wrap.
+        // Width fits the widest monologue line at 22pt mono + tracking 2.
         let size = NSSize(width: 640, height: 640)
         let w = NSWindow(
             contentRect: NSRect(origin: .zero, size: size),
@@ -87,23 +75,19 @@ private struct TicTacToeView: View {
     @State private var humanTurn = true
     @State private var status: String = "SHALL WE PLAY A GAME?"
     @State private var done = false
-    /// When non-nil the board hides and we display the typewriter monologue
-    /// instead. `typedCount` is how many characters of the full string have
-    /// been rendered so far.
+    /// Hides the board and shows the typewriter monologue.
     @State private var showMonologue = false
     @State private var typedCount: Int = 0
     @State private var typeTimer: Timer?
     @State private var speechSynth: NSSpeechSynthesizer?
     @State private var speechDelegate: SpeechDelegate?
-    /// Wall-clock time the typewriter is allowed to resume. Set whenever
-    /// we hit a paragraph break (`\n\n`) so the on-screen pause roughly
-    /// matches the narration's `[[slnc …]]` beat.
+    /// Set at each `\n\n` so the on-screen pause matches the narration's
+    /// `[[slnc …]]` beat.
     @State private var typeResumeAt: Date?
 
-    /// CRT cyan — the glowing WOPR screen color from the film.
+    /// Glowing WOPR-screen cyan from the film.
     private let crtCyan = Color(red: 0.55, green: 0.92, blue: 1.0)
     private let crtCyanDim = Color(red: 0.35, green: 0.62, blue: 0.78)
-    /// Deep blue-black background — slightly bluer than pure black.
     private let crtBg = Color(red: 0.01, green: 0.03, blue: 0.08)
 
     private let monologue = "A STRANGE GAME.\nTHE ONLY WINNING MOVE IS\nNOT TO PLAY.\n\nHOW ABOUT A NICE GAME OF CHESS?"
@@ -145,9 +129,8 @@ private struct TicTacToeView: View {
         }
     }
 
-    /// 3x3 WarGames grid. Like the film, the grid is drawn as four
-    /// freestanding lines (a `#` shape) — no cell borders, no outer frame.
-    /// Marks are stroked shapes (not text) for the chunky vector-CRT look.
+    /// `#`-shape grid — no cell borders, no outer frame. Marks are
+    /// stroked shapes for the chunky vector-CRT look.
     private var grid: some View {
         ZStack {
             VStack(spacing: 0) {
@@ -177,19 +160,14 @@ private struct TicTacToeView: View {
                             }
                             .buttonStyle(.plain)
                             .focusEffectDisabled()
-                            // No `.disabled` — it dims the placed mark via
-                            // SwiftUI's standard disabled-control treatment,
-                            // making X/O look paler than the grid lines.
-                            // `play(_:)` already no-ops if the cell isn't
-                            // available, so the gameplay guard is enough.
+                            // No `.disabled` — it dims the placed mark
+                            // paler than the grid lines. `play(_:)` already
+                            // guards against double-placement.
                         }
                     }
                 }
             }
 
-            // The # grid: two horizontals + two verticals, drawn over the
-            // cells so the lines clearly separate the squares without
-            // boxing them in.
             WOPRGrid()
                 .stroke(crtCyan, style: StrokeStyle(lineWidth: 5, lineCap: .round))
                 .shadow(color: crtCyan.opacity(0.7), radius: 5)
@@ -198,23 +176,17 @@ private struct TicTacToeView: View {
         }
     }
 
-    /// Monologue typed one character at a time with a blinking block
-    /// cursor. Layout stability comes from an *invisible* full-text
-    /// reservation underneath the visible typed-so-far text — that locks
-    /// the multi-line box at its final dimensions so growing the visible
-    /// string can't reflow it. The padded-spaces approach we used before
-    /// hit SwiftUI's trailing-whitespace stripping and made each line's
-    /// rendered width creep as more characters were typed.
+    /// Layout stability via an invisible full-text reservation
+    /// underneath the visible typed-so-far text — locks dimensions so
+    /// growing the visible string can't reflow it.
     private var monologueView: some View {
         VStack {
             Spacer()
             HStack {
                 Spacer()
                 ZStack(alignment: .topLeading) {
-                    // Append a trailing `_` so the reservation's last line
-                    // includes a cursor's worth of width. Without it, the
-                    // visible text grows 1 monospace char wider when the
-                    // blink cursor renders, and the centered HStack shifts.
+                    // Trailing `_` reserves a cursor's worth of width so
+                    // the visible text doesn't shift when the blink renders.
                     Text(monologue + "_")
                         .font(.system(size: 22, weight: .bold, design: .monospaced))
                         .tracking(2)
@@ -253,9 +225,8 @@ private struct TicTacToeView: View {
         let chars = Array(monologue)
         let n = min(typedCount, chars.count)
         let blink = Int(date.timeIntervalSinceReferenceDate * 2) % 2 == 0
-        // Always append one char so the visible width is constant —
-        // monospace `_` and ` ` are the same advance width, so toggling
-        // them on blink doesn't shift the centered text block.
+        // Mono `_` and ` ` share advance width, so blinking doesn't shift
+        // the centered block.
         return String(chars.prefix(n)) + (blink ? "_" : " ")
     }
 
@@ -267,24 +238,20 @@ private struct TicTacToeView: View {
         let chars = Array(monologue)
         typeTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { t in
             DispatchQueue.main.async {
-                // Honor any active paragraph-break hold.
                 if let resumeAt = typeResumeAt, Date() < resumeAt {
                     return
                 }
                 if typedCount >= chars.count {
                     t.invalidate()
-                    // Backup dismiss: 3s after typing finishes. The
-                    // narration delegate's 3s-delayed dismiss usually
-                    // wins; this fires when the voice isn't installed.
+                    // Backup dismiss for when the voice isn't installed;
+                    // otherwise the narration delegate dismisses first.
                     DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                         TicTacToeGame.dismiss()
                     }
                     return
                 }
                 typedCount += 1
-                // After typing the second `\n` of a paragraph break,
-                // hold for 700ms — matches the narration's
-                // `[[slnc 700]]` beat 1:1.
+                // Hold 700ms at a `\n\n` to match `[[slnc 700]]`.
                 if typedCount >= 2,
                    chars[typedCount - 1] == "\n",
                    chars[typedCount - 2] == "\n" {
@@ -294,26 +261,21 @@ private struct TicTacToeView: View {
         }
     }
 
-    /// Speak the monologue in the classic Junior robotic voice. Falls
-    /// back to the system default if Junior isn't installed. A 700ms
-    /// silence command is injected where the source has a blank line so
-    /// the narration takes the same dramatic beat the typewriter does
-    /// before "HOW ABOUT…".
+    /// Junior voice, falling back to system default. 700ms silence
+    /// injected at each blank line so the narration takes the same beat
+    /// as the typewriter.
     private func startNarration() {
         let juniorID = NSSpeechSynthesizer.VoiceName(rawValue: "com.apple.speech.synthesis.voice.Junior")
         let synth = NSSpeechSynthesizer(voice: juniorID) ?? NSSpeechSynthesizer()
-        // Roughly match the on-screen typing speed.
         synth.rate = 230
         let delegate = SpeechDelegate {
-            // Hold for 3s after the last syllable so the line lingers
-            // on screen before the window goes away.
+            // Linger 3s after the last syllable.
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 TicTacToeGame.dismiss()
             }
         }
         synth.delegate = delegate
-        // Convert the blank-line gap to an explicit 700ms silence; flatten
-        // remaining single newlines so the synth doesn't pause forever.
+        // Flatten single newlines so the synth doesn't pause forever.
         let spoken = monologue
             .replacingOccurrences(of: "\n\n", with: " [[slnc 700]] ")
             .replacingOccurrences(of: "\n", with: " ")
@@ -340,10 +302,8 @@ private struct TicTacToeView: View {
         }
     }
 
-    /// Wipe the board back to its initial state. Called after the CPU
-    /// wins, so the user can immediately try again without hunting for
-    /// a button. Doesn't touch monologue/typing state — that path is
-    /// reserved for stalemate.
+    /// Called after a CPU win so the user can try again. Stalemate
+    /// goes to the monologue path instead.
     private func resetBoard() {
         withAnimation(.easeInOut(duration: 0.25)) {
             board = Array(repeating: .empty, count: 9)
@@ -353,10 +313,7 @@ private struct TicTacToeView: View {
         }
     }
 
-    /// Minimax over the remaining game tree. With perfect play from both
-    /// sides tic-tac-toe is always a draw — and since the human can play
-    /// suboptimally, the CPU will *take* the win when offered. Best case
-    /// for the user is therefore a draw, never a win.
+    /// Minimax: perfect play draws, suboptimal play loses. Never wins.
     private func bestMove(for player: Mark) -> Int {
         var bestIdx = -1
         var bestScore = Int.min
@@ -406,8 +363,6 @@ private struct TicTacToeView: View {
         if wins(board, player) {
             status = player == .x ? "IMPOSSIBLE." : "GAME OVER."
             done = true
-            // Player just lost — auto-reset after a beat so they can
-            // try again without hunting for a button.
             if player == .o {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     MainActor.assumeIsolated { resetBoard() }
@@ -417,18 +372,14 @@ private struct TicTacToeView: View {
         }
         if !board.contains(.empty) {
             done = true
-            // Stalemate jumps straight to Joshua's monologue — that's
-            // the moment in the film when WOPR figures it out. Skip
-            // any "STALEMATE." status text; the closing scene is the
-            // payoff.
+            // Stalemate goes straight to the monologue — the closing
+            // scene is the payoff. No "STALEMATE." status.
             scheduleMonologue()
             return true
         }
         return false
     }
 
-    /// After the game ends, give the user a brief beat to see the final
-    /// move land, then clear the board and type out Joshua's monologue.
     private func scheduleMonologue() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             MainActor.assumeIsolated {
@@ -447,10 +398,8 @@ private struct TicTacToeView: View {
 
 }
 
-/// Pair of short sine-wave tones played on each move. Generated in code
-/// (a small WAV-encoded sine with a 5ms fade in/out to avoid clicks) so
-/// we don't have to bundle audio assets for two ~80ms beeps. `boop` (low)
-/// fires on the player's X, `beep` (high) on the CPU's O.
+/// In-code sine pair (5ms fades, no clicks): `boop` low for X,
+/// `beep` high for O. Saves bundling two 80ms WAVs.
 @MainActor
 enum TicTacToeSounds {
     private static let xPlayer: AVAudioPlayer? = makePlayer(frequency: 280, duration: 0.08)
@@ -474,9 +423,8 @@ enum TicTacToeSounds {
         return p
     }
 
-    /// Build a minimal mono 16-bit PCM WAV file containing `duration`
-    /// seconds of a `frequency` Hz sine wave, with a short triangular
-    /// envelope to avoid pops on attack/release.
+    /// Mono 16-bit PCM WAV: `frequency` Hz sine, triangular envelope
+    /// to avoid attack/release pops.
     private static func makeWaveData(frequency: Double, duration: Double) -> Data {
         let sampleRate: Double = 44100
         let numSamples = Int(duration * sampleRate)
@@ -532,9 +480,7 @@ enum TicTacToeSounds {
     }
 }
 
-/// Delegate that fires a callback when Fred finishes the monologue. The
-/// view stores an instance in `@State` so it survives long enough for
-/// `NSSpeechSynthesizer` (which holds the delegate weakly) to call it.
+/// Stored in `@State` to outlive NSSpeechSynthesizer's weak ref.
 @MainActor
 private final class SpeechDelegate: NSObject, NSSpeechSynthesizerDelegate {
     let onFinish: () -> Void
@@ -548,8 +494,7 @@ private final class SpeechDelegate: NSObject, NSSpeechSynthesizerDelegate {
     }
 }
 
-/// The X mark — two diagonal lines across the cell, drawn as a Shape so
-/// we can stroke it with the same thick CRT-cyan style as the O.
+/// Shape so it strokes with the same CRT-cyan style as the O.
 private struct WOPRMarkX: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()
@@ -561,20 +506,16 @@ private struct WOPRMarkX: Shape {
     }
 }
 
-/// The `#` grid — two horizontals + two verticals across a square frame.
-/// Drawn as freestanding lines (no outer border) to match the WarGames
-/// display.
+/// Freestanding `#` — two horizontals + two verticals, no outer border.
 private struct WOPRGrid: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()
         let third = rect.width / 3
         let twoThirds = third * 2
-        // Vertical lines.
         p.move(to: CGPoint(x: rect.minX + third, y: rect.minY))
         p.addLine(to: CGPoint(x: rect.minX + third, y: rect.maxY))
         p.move(to: CGPoint(x: rect.minX + twoThirds, y: rect.minY))
         p.addLine(to: CGPoint(x: rect.minX + twoThirds, y: rect.maxY))
-        // Horizontal lines.
         p.move(to: CGPoint(x: rect.minX, y: rect.minY + third))
         p.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + third))
         p.move(to: CGPoint(x: rect.minX, y: rect.minY + twoThirds))

@@ -24,10 +24,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         os_log("applicationDidFinishLaunching", log: log, type: .info)
-        // SingleInstanceCoordinator.enforce() already ran in main.swift.
-        // If it decided we should yield to a peer, the terminate() is
-        // queued for the next runloop tick — bail before doing anything
-        // expensive (engine wiring, AX permission polling, menu bar install).
+        // SingleInstanceCoordinator queued a terminate() in main.swift if
+        // we're yielding to a peer. Bail before doing anything expensive.
         if SingleInstanceCoordinator.shared.willQuitDueToPeer {
             os_log("Skipping launch setup; yielding to existing peer instance", log: log, type: .info)
             return
@@ -38,12 +36,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
         permissions.startMonitoring()
         engine.attach(permissions: permissions)
-        // Eagerly initialize the AX focus cache so we start observing focus
-        // changes immediately, before the user types their first `:`.
+        // Start observing focus changes before the user types their first `:`.
         _ = FocusedElementCache.shared
         UpdaterCoordinator.shared.start()
 
-        // Stamp the install date once; About → Stats reads this for "User since".
+        // About → Stats reads this for "User since".
         if UserDefaults.standard.object(forKey: PrefsKey.firstLaunchDate) == nil {
             UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: PrefsKey.firstLaunchDate)
         }
@@ -59,11 +56,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             if date > Date() { engine.pausedUntil = date }
         }
 
-        // Global pause/resume shortcuts. Uses Carbon hotkeys via KeyboardShortcuts,
-        // which is independent of our CGEventTap — so the hotkeys still work
-        // when Mojito is paused or when Input Monitoring is revoked. Pressing
-        // EITHER shortcut while paused resumes (regardless of how the pause
-        // was started); pressing while running pauses for the bound duration.
+        // Carbon hotkeys via KeyboardShortcuts — independent of our
+        // CGEventTap, so they still fire when Mojito is paused or Input
+        // Monitoring is revoked.
         KeyboardShortcuts.onKeyDown(for: .pauseHour) { [weak self] in
             self?.toggleOrPause(until: Date().addingTimeInterval(3600))
         }
@@ -71,9 +66,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             self?.toggleOrPause(until: Self.tomorrowMorning())
         }
 
-        // Force onboarding any time required permissions aren't granted — that way revoked
-        // permissions or a fresh macOS account always get the guided fix flow, not a
-        // silently-broken menu bar app.
+        // Force onboarding any time permissions aren't granted — revoked
+        // perms / fresh accounts get the guided fix, not a silent break.
         let needsOnboarding = !UserDefaults.standard.bool(forKey: PrefsKey.onboardingComplete)
             || !permissions.allGranted
         if needsOnboarding {
@@ -109,11 +103,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         false
     }
 
-    /// Called when the user re-launches the app from Finder / Dock / Spotlight
-    /// while it's already running. Without this, an `LSUIElement` app silently
-    /// no-ops — frustrating because clicking the .app feels broken. Open
-    /// Settings (or onboarding, if it hasn't completed) so the click does
-    /// something visible.
+    /// Without this an `LSUIElement` app silently no-ops on relaunch from
+    /// Finder/Dock/Spotlight, which feels broken. Show Settings (or
+    /// onboarding if incomplete) so the click does something visible.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         guard !flag else { return true }
         let onboardingComplete = UserDefaults.standard.bool(forKey: PrefsKey.onboardingComplete)
@@ -133,9 +125,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         settingsController.show(permissions: permissions, exclusions: exclusions, engine: engine)
     }
 
-    /// Assigns the bundle's on-disk icon to the running app. Bypasses
-    /// LaunchServices' icon cache, which can lag behind when the bundle's
-    /// icon changes (most visibly the dev build's `AppIconDev` swap).
+    /// Bypasses LaunchServices' icon cache (lags behind bundle changes,
+    /// most visible in the dev build's `AppIconDev` swap).
     private func applyAppIcon() {
         if let icon = AppInfo.appIcon {
             NSApp.applicationIconImage = icon
@@ -157,14 +148,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         return Calendar.current.date(from: components) ?? Date().addingTimeInterval(8 * 3600)
     }
 
-    /// `LSUIElement: true` apps don't get a default app menu, which means standard
-    /// keyboard shortcuts like ⌘Q don't fire when an app window (onboarding, settings)
-    /// has focus. We install a minimal menu so those windows respond to the usual
-    /// shortcuts; the menu bar itself stays hidden because of LSUIElement.
+    /// `LSUIElement: true` apps don't get a default menu, so ⌘Q etc.
+    /// won't fire from focused windows (onboarding, settings). Install a
+    /// minimal one; the bar itself stays hidden via LSUIElement.
     private func installMainMenu() {
         let mainMenu = NSMenu()
 
-        // App menu (the standard "Mojito" menu with Quit, Hide, etc.)
         let appMenuItem = NSMenuItem()
         let appMenu = NSMenu()
         let appName = AppInfo.displayName
@@ -179,8 +168,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         appMenuItem.submenu = appMenu
         mainMenu.addItem(appMenuItem)
 
-        // Edit menu — without ⌘C/⌘V/⌘A wired through, text fields in Settings and
-        // onboarding don't get standard copy/paste/select-all.
+        // Without these wired through, text fields don't get
+        // standard copy/paste/select-all.
         let editMenuItem = NSMenuItem()
         let editMenu = NSMenu(title: "Edit")
         editMenu.addItem(withTitle: "Cut",     action: #selector(NSText.cut(_:)),       keyEquivalent: "x")
@@ -190,7 +179,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         editMenuItem.submenu = editMenu
         mainMenu.addItem(editMenuItem)
 
-        // Window menu — so ⌘W closes the current window cleanly.
         let windowMenuItem = NSMenuItem()
         let windowMenu = NSMenu(title: "Window")
         windowMenu.addItem(withTitle: "Close Window", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")

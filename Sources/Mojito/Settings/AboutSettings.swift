@@ -159,9 +159,7 @@ struct AboutSettingsView: View {
 
 // MARK: - Clear stats button
 
-/// Destructive button + confirmation dialog used by the Easter Eggs and
-/// Privacy & Permissions panes. Owns its own confirmation state so the two
-/// callers don't have to duplicate it.
+/// Shared between Easter Eggs and Privacy panes; owns its own confirmation state.
 struct ClearStatsButton: View {
     @EnvironmentObject private var engine: Engine
     @State private var confirm = false

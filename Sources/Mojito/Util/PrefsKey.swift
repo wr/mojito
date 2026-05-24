@@ -8,25 +8,21 @@ enum PrefsKey {
     static let excludedBundleIDs     = "mojito.excludeBundleIDs"     // [String]
     static let excludedURLPatterns   = "mojito.excludeURLPatterns"   // [String]
     static let usageCounts           = "mojito.usageCounts"          // [String: Int]  (hexcode → count)
-    /// Unix timestamp the user first launched the app. Set once and never changed.
+    /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
-    /// User-reported "I donated" flag. Self-attestation only — no payment integration.
+    /// Self-attested; no payment integration.
     static let donated               = "mojito.donated"
-    /// Set of discovered easter-egg IDs (raw values from `EasterEgg`).
-    static let easterEggsDiscovered  = "mojito.easterEggs.discovered" // [String]
-    /// User's selected skin-tone modifier (raw value from `SkinTone`).
+    /// `[String]` of `EasterEgg` raw values.
+    static let easterEggsDiscovered  = "mojito.easterEggs.discovered"
+    /// Raw value from `SkinTone`.
     static let skinTone              = "mojito.skinTone"
-    /// Whether `:D` → 😃 style emoticon conversion is active.
+    /// `:D` → 😃 conversion.
     static let emoticonsEnabled      = "mojito.emoticonsEnabled"
-    /// Whether the experimental Symbols (★ ⌘ ⌥ ...) extension is included
-    /// in fuzzy search.
+    /// Experimental Symbols (★ ⌘ ⌥ …) included in fuzzy search.
     static let symbolsEnabled        = "mojito.symbolsEnabled"
-    /// When true (and symbols are enabled), `:foo` searches emoji only;
-    /// `::foo` is required to search symbols. Keeps the noisy symbols
-    /// corpus off the default `:` flow.
+    /// `:foo` = emoji only; `::foo` = symbols. Keeps the noisy symbols
+    /// corpus off the default flow.
     static let symbolsRequireDoubleColon = "mojito.symbols.requireDoubleColon"
-    /// Persistent counter for an opaque effect-progress milestone. Read by
-    /// `EasterEgg.k31`'s inline detail row. Storage key kept as-is for
-    /// backward compatibility with existing installs.
+    /// Key name kept for backward compatibility with existing installs.
     static let perfectBounceCount    = "mojito.perfectBounce.count"
 }

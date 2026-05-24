@@ -3,36 +3,23 @@ import AVFoundation
 import AVKit
 import SwiftUI
 
-/// Three-window Celery Man arrangement.
-///
-/// Layout (Tim & Eric reference still):
-///   - LEFT:  "Celery Man" — landscape clip (v04), starts as the original
-///   - RIGHT: "CINCO ID" — portrait clip (v03), starts as the original
-///   - BELOW (between/under): "Paul's COMPUTER" — fake file-panel mock,
-///                            inert until clicked once.
-///
-/// First click anywhere inside Paul's COMPUTER swaps the two video windows'
-/// sources to the alternates (v09 for Celery Man, v10 for CINCO ID). Further
-/// clicks do nothing. Audio loop (`s14`, the celery.wav) plays the whole time
-/// any window in the trio is open.
+/// Tim & Eric Celery Man trio: Celery Man (left, v04), CINCO ID (right,
+/// v03), Paul's COMPUTER (below, inert until clicked). First click on
+/// Paul swaps the two video sources to v10 / v09. Audio loop (`s14`)
+/// plays whenever any window is open.
 @MainActor
 enum CeleryMan {
     private static var windows: Set<NSWindow> = []
     private static var observers: [ObjectIdentifier: NSObjectProtocol] = [:]
     private static var audioPlayer: AVAudioPlayer?
-    /// One-shot player for the "4d3d3d3-engage" chant fired when Paul's
-    /// COMPUTER is clicked. Held statically so it doesn't get released
-    /// mid-playback.
+    /// Static so it isn't released mid-playback.
     private static var engagePlayer: NSSound?
-    /// Refs to the two video windows' SwiftUI host views so Paul's click can
-    /// swap them. Held weakly via the underlying NSWindow.
+    /// Weak via the underlying NSWindow.
     private static weak var celeryHost: SwappableVideoHostingView?
     private static weak var cincoHost: SwappableVideoHostingView?
-    /// One-shot guard for Paul's swap.
     private static var didSwap: Bool = false
 
     static func start() {
-        // If already open, bring forward.
         if !windows.isEmpty {
             for w in windows { w.makeKeyAndOrderFront(nil) }
             NSApp.activate(ignoringOtherApps: true)
@@ -43,10 +30,7 @@ enum CeleryMan {
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
         let visible = screen.visibleFrame
 
-        // Sizes — side-by-side arrangement, baseline-aligned.
-        //   - Celery Man (landscape): 0.91x the 320pt baseline height.
-        //   - CINCO ID (portrait):    1.56x the 320pt baseline height.
-        //   - Paul's COMPUTER:        small panel anchored under the videos.
+        // 320pt baseline; landscape × 0.91, portrait × 1.56, Paul under both.
         let celeryHeight: CGFloat = 320 * 0.91
         let celerySize = NSSize(width: celeryHeight * 300.0 / 206.0, height: celeryHeight)
         let cincoHeight: CGFloat = 320 * 1.56
@@ -58,15 +42,14 @@ enum CeleryMan {
         let videosWidth = celerySize.width + columnGap + cincoSize.width
         let videosX = visible.midX - videosWidth / 2
 
-        // Center the trio vertically using the tallest column (CINCO + Paul's).
+        // Center on the tallest column (CINCO + Paul's).
         let trioHeight = cincoSize.height + interGap + paulSize.height
         let trioBottom = visible.midY - trioHeight / 2
         let videoBaseline = trioBottom + paulSize.height + interGap
 
         let celeryX = videosX
         let cincoX  = videosX + celerySize.width + columnGap
-        // Both video windows share `videoBaseline` as their bottom edge —
-        // shorter Celery floats above, taller CINCO reaches higher up.
+        // Both share `videoBaseline` as their bottom; CINCO reaches higher.
         let celeryY = videoBaseline
         let cincoY  = videoBaseline
 
@@ -109,33 +92,25 @@ enum CeleryMan {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    /// Called by Paul's COMPUTER's click handler. One-shot: fire the
-    /// "4d3d3d3 engage" chant immediately and swap the two video sources
-    /// 2s into the audio so the visual change lands on cue with the
-    /// reference (Tim & Eric's Paul says the line *before* the new clips
-    /// appear).
+    /// Fire the chant, then swap 2s in — Paul says the line *before*
+    /// the new clips appear in the reference.
     private static func handlePaulClicked() {
         guard !didSwap else { return }
         didSwap = true
-        // Fire the engage chant first. AudioBlob is the standard scrambled
-        // loader; s16.bin is 4d3d3d3d.wav.
+        // s16.bin is 4d3d3d3d.wav.
         if let sound = AudioBlob.load("s16") {
             engagePlayer = sound
             sound.play()
         }
-        // Hold the videos on their original clips until the chant has been
-        // playing for ~2s, then swap (celery6/v09 → CINCO, celery9/v10 →
-        // Celery Man — flipped from the previous round on purpose).
+        // v09/v10 are swapped from the previous round on purpose.
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             celeryHost?.swap(to: "v10")
             cincoHost?.swap(to: "v09")
         }
     }
 
-    /// Common window setup + observer wiring. The two video windows now
-    /// keep a normal macOS titlebar (so the videos aren't headerless);
-    /// Paul's COMPUTER keeps the transparent style so its dark mock
-    /// terminal extends under the chrome.
+    /// Videos keep a normal titlebar; Paul's COMPUTER stays transparent
+    /// so its mock terminal extends under the chrome.
     private static func installWindow(title: String, origin: NSPoint, size: NSSize, content: NSView, transparentTitlebar: Bool = true) {
         let styleMask: NSWindow.StyleMask = transparentTitlebar
             ? [.titled, .closable, .fullSizeContentView]
@@ -186,7 +161,7 @@ enum CeleryMan {
         w.makeKeyAndOrderFront(nil)
     }
 
-    /// Esc-in-focused-window handler — closes the whole trio at once.
+    /// Esc handler — closes the whole trio.
     private static func closeAll() {
         for w in windows { w.close() }
     }
@@ -227,9 +202,8 @@ private final class CeleryWindow: NSWindow {
     }
 }
 
-/// AVPlayerLayer-hosting NSView whose video source can be swapped at runtime.
-/// Used by Celery Man / CINCO ID so Paul's COMPUTER's click can switch them
-/// over to the alternate clips in place.
+/// Video source can be swapped at runtime so Paul's click switches the
+/// Celery Man / CINCO ID windows over in place.
 @MainActor
 private final class SwappableVideoHostingView: NSView {
     private var player: AVQueuePlayer?
@@ -251,9 +225,8 @@ private final class SwappableVideoHostingView: NSView {
     }
 
     func swap(to clipName: String) {
-        // Stop and tear down the previous player + layer cleanly before
-        // installing the replacement. Avoids the looper continuing to drive
-        // a layer we just removed.
+        // Tear down cleanly so the looper doesn't keep driving a layer
+        // we just removed.
         player?.pause()
         looper = nil
         player = nil
@@ -279,9 +252,8 @@ private final class SwappableVideoHostingView: NSView {
     }
 }
 
-/// "Paul's COMPUTER" — an NSView (not SwiftUI) so the entire surface is
-/// click-capturable without fighting SwiftUI's hit testing. Single fire
-/// callback on the first mouseDown.
+/// NSView (not SwiftUI) so the whole surface is click-capturable
+/// without fighting SwiftUI's hit testing. One-shot mouseDown callback.
 @MainActor
 private final class PaulsComputerClickView: NSView {
     private let onClick: () -> Void
@@ -317,8 +289,7 @@ private final class PaulsComputerClickView: NSView {
     }
 }
 
-/// Observable shared between the click NSView and the SwiftUI contents so
-/// the typewriter "4d3d3d3 Engaged" reveal can kick off on mouseDown.
+/// Shared so the SwiftUI contents can kick off the typewriter on mouseDown.
 @MainActor
 private final class PaulsClickedModel: ObservableObject {
     @Published var clicked: Bool = false
@@ -342,8 +313,8 @@ private struct PaulsComputerContents: View {
                     .fill(Color.white.opacity(0.15))
                     .frame(height: 1)
 
-                // Cmdline / file row. Pre-click reads "Kick up 4d3d3d3";
-                // post-click types out "4d3d3d3 Engaged" one char at a time.
+                // Pre-click: "Kick up 4d3d3d3". Post-click: typewriter
+                // "4d3d3d3 Engaged".
                 HStack(spacing: 10) {
                     RoundedRectangle(cornerRadius: 1)
                         .fill(Color.white.opacity(0.85))

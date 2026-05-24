@@ -1,19 +1,15 @@
 import Foundation
 
-/// fzy-style fuzzy scorer. Produces a Double for each (needle, haystack) pair
-/// such that better matches score higher. Returns nil if needle isn't a
-/// subsequence of haystack.
+/// fzy-style fuzzy scorer. Higher = better; nil if needle isn't a
+/// subsequence of haystack. Adapted from John Hawthorn's fzy:
+/// https://github.com/jhawthorn/fzy/blob/master/SCORING.md
 ///
-/// Adapted from John Hawthorn's fzy: https://github.com/jhawthorn/fzy/blob/master/SCORING.md
+/// Bonuses tuned for emoji shortcodes: consecutive matches (+1.0) boost
+/// "tad" → "tada" over "tad" → "transgender_flag"; after-`_` matches
+/// (+0.8) boost "su" → "smile_unamused"; inner gaps are mildly penalized.
 ///
-/// Key bonuses for emoji shortcodes:
-///  - Consecutive matches score +1.0 (so "tad" against "tada" beats "tad" against "transgender_flag")
-///  - Match-after-`_` scores +0.8 (so "su" against "smile_unamused" boosts the `u` after the underscore)
-///  - Gaps in the middle of the match are mildly penalized (so "tu" against "thumbs_up" still wins
-///    over "tu" against "stutterer" because the latter has more inner gap).
-///
-/// Inputs are pre-lowercased Character arrays (random-access, no UTF-8 walks),
-/// so the hot loop is tight. Per-call cost on emoji-sized strings: a few µs.
+/// Inputs are pre-lowercased `[Character]` (random-access, no UTF-8
+/// walks) — per-call cost is a few µs.
 struct FzyScorer {
     static let scoreMin: Double = -.infinity
     static let scoreGapLeading: Double = -0.005
@@ -24,14 +20,12 @@ struct FzyScorer {
     static let scoreMatchSlash: Double = 0.9
     static let scoreMatchDot: Double = 0.6
 
-    /// Returns the best score for matching `needle` within `haystack`, or nil
-    /// if no subsequence match exists. Higher scores are better.
     static func score(needle: [Character], haystack: [Character]) -> Double? {
         let n = needle.count
         let m = haystack.count
         guard n > 0, m > 0, n <= m else { return nil }
 
-        // Subsequence rejection — runs in O(m) before we touch the DP arrays.
+        // Subsequence rejection — O(m), runs before the DP arrays allocate.
         var k = 0
         for c in haystack {
             if c == needle[k] {
@@ -41,13 +35,12 @@ struct FzyScorer {
         }
         guard k == n else { return nil }
 
-        // Exact match shortcut.
         if n == m { return scoreMatchConsecutive * Double(n) }
 
         let bonus = computeBonuses(haystack: haystack)
 
-        // Rolling two-row DP. D = best score ending at haystack[j] consuming
-        // needle[i]. M = best score using haystack[0..j] consuming needle[0..i].
+        // Two-row DP. D[j] = best score ending at haystack[j];
+        // M[j] = best score using haystack[0..j].
         var dCurr = [Double](repeating: scoreMin, count: m)
         var mCurr = [Double](repeating: scoreMin, count: m)
         var dPrev = [Double](repeating: scoreMin, count: m)
@@ -83,8 +76,7 @@ struct FzyScorer {
 
     private static func computeBonuses(haystack: [Character]) -> [Double] {
         var bonuses = [Double](repeating: 0, count: haystack.count)
-        // Treat the implicit prefix as a separator so the first char gets a
-        // word-boundary bonus.
+        // Implicit prefix is a separator so the first char gets a bonus.
         var prev: Character = "/"
         for i in 0..<haystack.count {
             bonuses[i] = bonus(prev: prev, current: haystack[i])

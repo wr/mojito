@@ -25,18 +25,14 @@ struct WelcomeStep: View {
     }
 }
 
-/// First-step onboarding animation. Uses a real `NSTextView` for the chat-bubble text
-/// and the production `PickerView` for the popup — so the demo is rendered through the
-/// same pipeline as the actual product. No fake caret, no replica picker, no baseline
-/// math: just programmatic text insertion + the real components reacting to it.
-///
-/// The state machine still drives timing, but each phase change pokes the NSTextView
-/// (via `replaceCharacters`) instead of swapping SwiftUI Text values.
+/// Real `NSTextView` + the production `PickerView` so the demo renders
+/// through the same pipeline as the real app. State changes poke the
+/// NSTextView programmatically.
 private struct WelcomeAnimation: View {
 
     fileprivate struct Snippet {
         let prefix: String
-        let query: String   // Partial shortcode typed after `:` (e.g. "tad")
+        let query: String  // partial after `:` (e.g. "tad")
         let emoji: String
     }
 
@@ -48,27 +44,20 @@ private struct WelcomeAnimation: View {
     ]
 
     @State private var snippetIndex: Int = 0
-    /// What's currently visible in the text view (excluding the typed `:query`).
+    /// Visible text excluding the typed `:query`.
     @State private var committedText: String = ""
-    /// The `:query` being typed (or empty if not in query phase).
     @State private var queryText: String = ""
-    /// Set to a non-nil emoji to trigger the replace-and-hold step.
+    /// Non-nil triggers the replace-and-hold step.
     @State private var pendingCommit: String? = nil
-    /// Single shared view model — reusing it across snippets prevents the cost of
-    /// constructing a new `@Published`-backed instance + tearing down/setting up
-    /// SwiftUI subscriptions on every snippet cycle. Visibility is controlled by
-    /// `pickerVisible` instead of nil-ing this out.
+    /// Shared across snippets — building a new `@Published`-backed VM and
+    /// SwiftUI subscriptions per cycle would be expensive.
     @StateObject private var pickerViewModel = PickerViewModel()
     @State private var pickerVisible: Bool = false
     @State private var caretRectInBubble: CGRect = .zero
-    /// Total snippet cycles run. After `maxCycles` the animation stops so it isn't
-    /// burning CPU + accumulating SwiftUI churn forever on the welcome screen.
     @State private var cyclesCompleted: Int = 0
-    /// Set to true once the animation has finished its cycles. Tells `BubbleTextView`
-    /// to release first-responder status so the OS-native caret stops blinking — a
-    /// blinking caret causes WindowServer to recomposite the entire onboarding window
-    /// every ~500ms, which is the main steady-state CPU cost while sitting on the
-    /// welcome screen.
+    /// True once cycles are done. Drops the text view's first-responder
+    /// status so the OS caret stops blinking — every blink invalidates
+    /// the bubble region and is the main steady-state CPU cost.
     @State private var animationStopped: Bool = false
     private let maxCycles: Int = 2
 
@@ -82,9 +71,8 @@ private struct WelcomeAnimation: View {
                 showCaret: !animationStopped
             )
             .frame(width: 460, height: 88)
-            // Solid bubble + a single shadow reads better than a translucent glass
-            // surface — translucent backgrounds sample through the onboarding window
-            // and pick up whatever's behind it (desktop, other apps).
+            // Solid bubble — translucent would sample whatever's behind
+            // the onboarding window (desktop, other apps).
             .shadow(color: Color.black.opacity(0.10), radius: 14, x: 0, y: 4)
 
             if pickerVisible && !pickerViewModel.results.isEmpty {
@@ -110,13 +98,11 @@ private struct WelcomeAnimation: View {
 
     @MainActor
     private func runAnimation() async {
-        // Bail if we've already run through the snippets enough times. The final
-        // state (committed emoji + bubble) stays on screen.
+        // Final state stays on screen after maxCycles.
         if cyclesCompleted >= maxCycles {
             return
         }
 
-        // Snap to initial state without animation.
         committedText = ""
         queryText = ""
         pendingCommit = nil
@@ -139,7 +125,6 @@ private struct WelcomeAnimation: View {
         queryText = ":"
         try? await Task.sleep(for: .milliseconds(100))
 
-        // First filter letter: show the (already-existing) picker view model.
         pickerVisible = true
         let queryChars = Array(snippet.query)
         for i in 1...queryChars.count {
@@ -151,7 +136,6 @@ private struct WelcomeAnimation: View {
 
         try? await Task.sleep(for: .milliseconds(220))
 
-        // Commit: replace `:query` with the emoji. Picker disappears.
         pendingCommit = snippet.emoji
         queryText = ""
         committedText = snippet.prefix + snippet.emoji
@@ -159,13 +143,11 @@ private struct WelcomeAnimation: View {
 
         try? await Task.sleep(for: .milliseconds(1100))
 
-        // Advance, or stop if this was the last snippet of the last cycle.
         let nextIndex = (snippetIndex + 1) % snippets.count
         if nextIndex == 0 {
             cyclesCompleted += 1
         }
         if cyclesCompleted >= maxCycles {
-            // Drop first responder so the caret stops blinking; final state stays.
             animationStopped = true
             return
         }
@@ -173,18 +155,12 @@ private struct WelcomeAnimation: View {
     }
 
     private func updatePicker(_ vm: PickerViewModel, query: String) {
-        // Look the results up via the shared cache so we don't re-score 3500 emoji
-        // on every keystroke during the demo. The cache lives outside SwiftUI state
-        // so reads/writes don't trigger view re-renders.
+        // Cache outside SwiftUI state so reads/writes don't trigger re-renders.
         let results = WelcomeFuzzyCache.shared.results(for: query)
         vm.update(query: query, results: results)
     }
 }
 
-/// Singleton cache for the onboarding demo's fuzzy results. Keeping this out of
-/// SwiftUI's `@State` is important: writing to a `@State` cache forces a view re-
-/// render on every keystroke, which compounds with the typing-driven re-renders
-/// and balloons memory.
 @MainActor
 private final class WelcomeFuzzyCache {
     static let shared = WelcomeFuzzyCache()
@@ -205,17 +181,15 @@ private final class WelcomeFuzzyCache {
     }
 }
 
-/// Wraps an `NSTextView` so we can drive the bubble's content programmatically while
-/// getting real native rendering — caret blink, font metrics, baseline alignment, and
-/// emoji presentation are all the OS's responsibility, not ours. We also read back the
-/// caret rect on every update so the SwiftUI picker overlay can anchor to it.
+/// `NSTextView` so caret blink, font metrics, and emoji presentation are
+/// the OS's job. Caret rect is read back on every update so the SwiftUI
+/// picker overlay can anchor to it.
 private struct BubbleTextView: NSViewRepresentable {
     let committedText: String
     let queryText: String
     let commitEmoji: String?
     @Binding var caretRect: CGRect
-    /// When false, the text view resigns first-responder so the OS-native blinking
-    /// caret stops, taking WindowServer compositing load with it.
+    /// False = resign first responder so the OS caret stops blinking.
     let showCaret: Bool
 
     final class Coordinator {
@@ -225,8 +199,8 @@ private struct BubbleTextView: NSViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator() }
 
     func makeNSView(context: Context) -> Container {
-        // Editable + first-responder so the OS draws and blinks the native caret;
-        // `NoTypingTextView` eats key events so user input can't disrupt the demo.
+        // Editable + first-responder for the native caret blink;
+        // `NoTypingTextView` eats key events so users can't disrupt the demo.
         let textView = NoTypingTextView()
         textView.isEditable = true
         textView.isSelectable = true
@@ -244,8 +218,7 @@ private struct BubbleTextView: NSViewRepresentable {
         let container = Container(textView: textView)
         container.translatesAutoresizingMaskIntoConstraints = false
 
-        // Solid (non-translucent) bubble — translucent backgrounds bleed through the
-        // window and pick up whatever's behind it. SwiftUI applies the shadow.
+        // Solid — translucent would bleed through the window.
         container.wantsLayer = true
         container.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
         container.layer?.cornerRadius = 14
@@ -263,8 +236,7 @@ private struct BubbleTextView: NSViewRepresentable {
             textView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
         ])
 
-        // Make the text view first responder so the native caret blinks. Retry on the
-        // next runloop tick because the window may not be set yet on first call.
+        // Deferred because the window may not be set on first call.
         DispatchQueue.main.async {
             container.window?.makeFirstResponder(textView)
         }
@@ -277,9 +249,8 @@ private struct BubbleTextView: NSViewRepresentable {
         let full = commitEmoji != nil ? committedText : combined
         let coord = context.coordinator
 
-        // First-responder gate. Releasing first responder when the animation is done
-        // is what actually drops WindowServer CPU back to ~zero — without it, the
-        // OS-native caret keeps blinking, invalidating the bubble region every blink.
+        // Releasing first responder is what drops WindowServer CPU back
+        // to ~zero — the caret blink invalidates the bubble region every tick.
         if coord.lastShowCaret != showCaret {
             coord.lastShowCaret = showCaret
             if showCaret {
@@ -291,10 +262,9 @@ private struct BubbleTextView: NSViewRepresentable {
             }
         }
 
-        // If the text hasn't changed, skip the rest. SwiftUI re-renders BubbleTextView
-        // on every parent state change (including changes to caretRect, which we write
-        // back from this method); without this guard, each re-render queues another
-        // caret-rect query and SwiftUI accumulates layout caches.
+        // Without this guard, every parent re-render (incl. our own
+        // caretRect writeback) queues another rect query and balloons
+        // layout caches.
         if coord.lastRenderedText == full {
             return
         }
@@ -309,7 +279,6 @@ private struct BubbleTextView: NSViewRepresentable {
             textView.textStorage?.setAttributes(attrs, range: NSRange(location: 0, length: (full as NSString).length))
         }
 
-        // Caret to end of text.
         let endIndex = (full as NSString).length
         textView.setSelectedRange(NSRange(location: endIndex, length: 0))
 
@@ -317,8 +286,8 @@ private struct BubbleTextView: NSViewRepresentable {
             container.window?.makeFirstResponder(textView)
         }
 
-        // Force layout so `firstRect(forCharacterRange:)` returns the post-update
-        // position synchronously, without needing a runloop tick.
+        // Force layout so `firstRect(forCharacterRange:)` returns the
+        // post-update position synchronously.
         textView.layoutManager?.ensureLayout(for: textView.textContainer!)
 
         let caretRange = NSRange(location: endIndex, length: 0)
@@ -326,15 +295,12 @@ private struct BubbleTextView: NSViewRepresentable {
         guard let window = textView.window else { return }
         let rectInWindow = window.convertFromScreen(rectInTextView)
         let rectInContainer = container.convert(rectInWindow, from: nil)
-        // Sub-pixel deltas from font metrics / layout rounding would otherwise
-        // re-enter updateNSView every animation tick, each time queuing another
-        // async SwiftUI state write. Only react to changes the eye can see.
+        // Sub-pixel rounding would re-enter every tick. Only react to
+        // changes the eye can see.
         let dx = abs(rectInContainer.minX - caretRect.minX)
         let dy = abs(rectInContainer.minY - caretRect.minY)
         if rectInContainer.maxY.isFinite, (dx > 0.5 || dy > 0.5) {
-            // Dispatch to next tick so we're not mutating SwiftUI state during view
-            // evaluation. (Synchronous write would trigger a "Modifying state during
-            // view update" warning.)
+            // Defer so we're not mutating state during view evaluation.
             DispatchQueue.main.async {
                 caretRect = rectInContainer
             }
@@ -348,41 +314,24 @@ private struct BubbleTextView: NSViewRepresentable {
             super.init(frame: .zero)
         }
         required init?(coder: NSCoder) { fatalError() }
-        // Flip so the container's coordinate system matches SwiftUI's (origin
-        // top-left). Without this, `convert(_, from: nil)` yields y values measured
-        // from the bottom — feeding those into SwiftUI's `.offset(y:)` puts the
-        // picker far below where the caret actually is.
+        // Match SwiftUI's top-left origin so `convert(_, from: nil)` y
+        // values feed into `.offset(y:)` correctly.
         override var isFlipped: Bool { true }
     }
 }
 
-/// NSTextView that's editable (so the OS draws the blinking caret when first responder)
-/// but silently drops every key event — the user can't actually disrupt the demo by
-/// typing into it. The system caret is the entire reason we keep `isEditable = true`.
+/// `isEditable = true` so the OS draws the native caret; key events are
+/// swallowed so the user can't disrupt the demo. textStorage edits still work.
 private final class NoTypingTextView: NSTextView {
-    override func keyDown(with event: NSEvent) {
-        // Swallow.
-    }
-    override func keyUp(with event: NSEvent) {
-        // Swallow.
-    }
-    override func insertText(_ string: Any, replacementRange: NSRange) {
-        // Programmatic edits via textStorage still work; user-driven inserts don't.
-    }
-    override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        false
-    }
-    /// Force the caret to always be drawn while we're the first responder, even when
-    /// no text has changed recently. The default blink behavior already kicks in for
-    /// editable first-responder text views; this is a belt-and-suspenders override.
+    override func keyDown(with event: NSEvent) {}
+    override func keyUp(with event: NSEvent) {}
+    override func insertText(_ string: Any, replacementRange: NSRange) {}
+    override func performKeyEquivalent(with event: NSEvent) -> Bool { false }
     override var shouldDrawInsertionPoint: Bool { true }
 }
 
-/// Solid, non-translucent picker chrome for the onboarding demo. The production
-/// picker uses Liquid Glass (`.menu` blending `.behindWindow`), but that material
-/// samples through the onboarding window and reads as wrong when there's nothing
-/// meaningful behind it. A solid surface + shadow is closer to what the user
-/// actually wants the demo to convey.
+/// Solid chrome — the production Liquid Glass picker samples through the
+/// onboarding window and reads as wrong with nothing meaningful behind it.
 private struct OnboardingPickerChrome: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -409,12 +358,9 @@ struct PermissionsStep: View {
     let openAccessibilitySettings: () -> Void
     let openInputMonitoringSettings: () -> Void
 
-    /// Each system prompt only opens its OS-level "Open Settings / Deny" alert the FIRST
-    /// time it's invoked per app launch. After that, subsequent calls are silent. To
-    /// avoid the awkward stuck-alert experience (the alert lingering after the user
-    /// has already granted in System Settings), we fire each prompt at most once: the
-    /// first click of "Allow" triggers the OS alert; subsequent clicks open Settings
-    /// directly so the user can toggle by hand.
+    /// Each system prompt only shows its OS alert the first time per
+    /// launch. Subsequent "Allow" clicks open Settings directly so the
+    /// user isn't stuck staring at a silent alert.
     @State private var axPromptFired: Bool = false
     @State private var imPromptFired: Bool = false
     @State private var showPrivacyDetails: Bool = false

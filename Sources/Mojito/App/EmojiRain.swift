@@ -1,36 +1,17 @@
 import AppKit
 import SwiftUI
 
-/// Borderless full-screen emoji rain.
-///
-/// Implementation: a transparent click-through `NSPanel` hosting a SwiftUI
-/// `Canvas` driven by `TimelineView(.animation)`. Particles are generated
-/// up-front with staggered launch times and random emoji from the full
-/// database. Position is a pure function of time:
-///
-///   Phase 1 (in-flight): y = y₀ + v·t + ½g·t²
-///   Phase 2 (post-bounce): y = groundY + v'·t' + ½g·t'², where
-///                          v' = -damping · (v + g·t_bounce)
-///
-/// Each particle bounces exactly once when it hits the bottom edge, with a
-/// damping factor in 0.4–0.7 (so the second arc is shorter than the first).
-/// After the second descent, the particle falls off-screen normally.
-///
-/// Perf notes:
-///  - Text is resolved per unique emoji per frame and reused across all
-///    particles of that emoji. Even with ~100 unique emoji this is cheap.
-///  - TimelineView is capped at 30 fps via `minimumInterval`.
-///  - Off-screen particles are skipped before any transform/draw work.
+/// Emoji rain. Particles are generated up-front; position is a pure
+/// function of time with one bounce: `y = y₀ + v·t + ½g·t²` until ground,
+/// then reflect velocity by `bounceDamping` and recompute.
 @MainActor
 enum EmojiRain {
     private static var activeWindow: NSWindow?
 
-    /// Acceleration in screen-pixels per second². Tuned so most particles
-    /// reach the bottom within ~1 second of launching — feels like real
-    /// gravity, not a slow fall.
+    /// px/s². Tuned so most particles hit the bottom in ~1s.
     private static let gravity: CGFloat = 1800
 
-    /// Spawn the rain. Re-trigger replaces any in-flight rain instead of being suppressed.
+    /// Re-trigger replaces any in-flight rain.
     static func start(emitFor emit: TimeInterval = 1.5, particleLifetime: TimeInterval = 4.0) {
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
         let frame = screen.frame
@@ -38,9 +19,6 @@ enum EmojiRain {
         activeWindow?.orderOut(nil)
         activeWindow = nil
 
-        // Pull random emoji from the full database. With ~1900 entries, most
-        // particles end up unique; that's fine — we dedupe before resolving
-        // Text glyphs each frame.
         let pool = EmojiDatabase.shared.all
         guard !pool.isEmpty else { return }
 
@@ -56,9 +34,7 @@ enum EmojiRain {
                 scale: .random(in: 0.75...1.25),
                 launchTime: .random(in: 0..<emit),
                 lifetime: particleLifetime,
-                // Lower damping = mushier landings. Particles bounce a short
-                // distance then fall off, instead of pinging back near the top.
-                bounceDamping: .random(in: 0.20...0.40)
+                bounceDamping: .random(in: 0.20...0.40)  // mushy landings
             )
         }
 
@@ -91,7 +67,6 @@ enum EmojiRain {
     }
 }
 
-/// One falling emoji.
 private struct Particle {
     let emoji: String
     let startX: CGFloat
@@ -101,7 +76,7 @@ private struct Particle {
     let scale: CGFloat
     let launchTime: TimeInterval
     let lifetime: TimeInterval
-    /// Energy retained after the single bounce. 1.0 = perfect bounce; 0 = no bounce.
+    /// Energy retained after the bounce. 1.0 = perfect, 0 = no bounce.
     let bounceDamping: CGFloat
 }
 
@@ -117,8 +92,7 @@ private struct RainView: View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { context in
             let elapsed = context.date.timeIntervalSince(startDate)
             Canvas { ctx, _ in
-                // Resolve once per unique emoji per frame, reuse across all
-                // particles of that emoji.
+                // Resolve once per unique emoji per frame, not per particle.
                 let uniqueEmojis = Set(particles.map(\.emoji))
                 var resolved: [String: GraphicsContext.ResolvedText] = [:]
                 resolved.reserveCapacity(uniqueEmojis.count)
@@ -126,7 +100,6 @@ private struct RainView: View {
                     resolved[emoji] = ctx.resolve(Text(emoji).font(.system(size: baseSize)))
                 }
 
-                // Bounce against the actual bottom of the screen.
                 let groundY = bounds.height
                 let offScreenY = bounds.height + baseSize * 2
 
@@ -139,8 +112,7 @@ private struct RainView: View {
 
                     guard y < offScreenY else { continue }
 
-                    // Linear fade-out over the last 30% of lifetime.
-                    let fadeStart = p.lifetime * 0.7
+                    let fadeStart = p.lifetime * 0.7  // fade over the last 30%
                     let fade: Double
                     if t < fadeStart {
                         fade = 1.0
@@ -163,21 +135,17 @@ private struct RainView: View {
         .ignoresSafeArea()
     }
 
-    /// Closed-form position with one bounce. Pre-bounce uses standard
-    /// kinematics; we solve for `t_bounce` (when the trajectory first hits
-    /// `groundY`) as a quadratic, then reflect velocity by `bounceDamping`
-    /// and recompute from there.
+    /// Closed-form with one bounce. Solve for `t_bounce` (first ground
+    /// hit) as a quadratic, reflect velocity by `bounceDamping`, continue.
     private func positionY(for p: Particle, t: TimeInterval, groundY: CGFloat) -> CGFloat {
         let y0 = -baseSize - 10
         let yFirst = y0 + p.vy * t + 0.5 * gravity * t * t
 
-        // Phase 1 — still in the first fall.
         if yFirst < groundY {
             return yFirst
         }
 
-        // Phase 2 — bounce time is the positive root of:
-        //   ½g·t² + vy·t + (y₀ - groundY) = 0
+        // Bounce time = positive root of ½g·t² + vy·t + (y₀ - groundY) = 0.
         let a = 0.5 * gravity
         let b = p.vy
         let c = y0 - groundY

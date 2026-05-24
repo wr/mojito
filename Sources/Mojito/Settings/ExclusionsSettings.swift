@@ -1,12 +1,9 @@
 import SwiftUI
 import AppKit
 
-/// Two bordered lists styled to match System Settings → Privacy & Security
-/// (Screen Recording, Accessibility, etc.) on macOS Tahoe. We render this
-/// from scratch in SwiftUI instead of via `List(.bordered)` because the
-/// native list expands to fill available height, and we want each card to
-/// be sized to its content (so two short lists stack instead of one
-/// stretching and clipping the other).
+/// Hand-rolled instead of `List(.bordered)` because the native list
+/// expands to fill height — we want each card sized to its content so
+/// two short lists can stack without clipping.
 struct ExclusionsSettingsView: View {
     @EnvironmentObject private var store: ExclusionStore
     @State private var selectedApp: String?
@@ -129,11 +126,7 @@ struct ExclusionsSettingsView: View {
 
 // MARK: - Boxed list
 
-/// Hand-rolled list card matching System Settings → Privacy & Security:
-/// rounded card on the secondary-background fill, 0.5pt hairline border,
-/// secondary-color header text at the top, faint inset row separators that
-/// don't run under the icon column, and an AppKit-style +/− toolbar at the
-/// bottom on a slightly darker background. Sizes to content vertically.
+/// Sizes to content vertically. Matches System Settings → Privacy.
 private struct BoxedList<ID: Hashable, RowContent: View>: View {
     let header: String
     let items: [ID]
@@ -143,13 +136,10 @@ private struct BoxedList<ID: Hashable, RowContent: View>: View {
     @ViewBuilder let row: (ID) -> RowContent
 
     private let cornerRadius: CGFloat = 10
-    /// Leading inset for the in-list row separators. Lines up just past the
-    /// 28pt icon + 10pt spacing + 12pt row padding so the hairline begins
-    /// where the row's text begins — matches System Settings.
+    /// Past the icon column so the hairline aligns with row text.
     private let separatorInset: CGFloat = 50
-    /// Faint inter-row separator. `separatorColor` is fine for the
-    /// header/footer boundaries, but inside the rows the system uses a
-    /// noticeably lighter hairline so the eye groups the rows together.
+    /// `separatorColor` is too dark for inside rows — the system uses
+    /// a lighter inner hairline.
     private let innerSeparator = Color.primary.opacity(0.08)
 
     var body: some View {
@@ -179,9 +169,7 @@ private struct BoxedList<ID: Hashable, RowContent: View>: View {
             .padding(.vertical, 10)
     }
 
-    /// Hairline between the header→rows and rows→footer section boundaries.
-    /// `Divider()` renders too dark for the system look; use the same
-    /// `innerSeparator` color as the inter-row hairlines but full-width.
+    /// `Divider()` renders too dark; reuse the inner-hairline color full-width.
     private var boundaryLine: some View {
         innerSeparator.frame(height: 0.5)
     }
@@ -218,9 +206,7 @@ private struct BoxedList<ID: Hashable, RowContent: View>: View {
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
 
-            // No height constraint → fills the HStack so the divider runs
-            // from the top of the toolbar to the bottom, matching the
-            // System Settings tool strip.
+            // Unconstrained so it fills the HStack — matches System Settings.
             Divider()
 
             Button(action: onRemove) {
@@ -235,9 +221,7 @@ private struct BoxedList<ID: Hashable, RowContent: View>: View {
 
             Spacer()
         }
-        // Subtle darker fill so the toolbar reads as a distinct strip at
-        // the bottom of the card. System Settings uses a similar tint
-        // between the last row's hairline and the card's bottom edge.
+        // Distinct strip at the card's bottom edge.
         .background(Color.primary.opacity(0.04))
     }
 }

@@ -2,12 +2,8 @@ import AppKit
 import SwiftUI
 import WebKit
 
-/// TROGDOR! Opens a small WKWebView window pointed at the homestarrunner.com
-/// Trogdor page, zoomed out to 60% so the whole flash-era game frame fits.
-///
-/// We deliberately do NOT make this fullscreen — it's a window with a real
-/// close button, sitting on top of the desktop. The user can drag it around,
-/// click the close button, or hit Esc (via EffectDismisser) to dismiss.
+/// TROGDOR! WKWebView window on homestarrunner.com/trogdor, zoomed so the
+/// flash-era game frame fits. Real close button + Esc dismisses.
 @MainActor
 enum Trogdor {
     private static var window: NSWindow?
@@ -20,12 +16,9 @@ enum Trogdor {
             NSApp.activate(ignoringOtherApps: true)
             return
         }
-        // Defer ~180ms so the synthetic backspaces firing from the trigger
-        // deletion finish landing in the user's text field BEFORE we steal
-        // focus via `NSApp.activate`. Without this delay the pending
-        // backspaces race the focus switch, get delivered to the WKWebView
-        // which doesn't know what to do with them, and AppKit plays the
-        // system "donk" alert beep.
+        // Defer ~180ms so synthetic backspaces from the trigger deletion land
+        // in the user's text field BEFORE we steal focus — otherwise they
+        // arrive at the WKWebView and AppKit plays the system "donk" beep.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             MainActor.assumeIsolated { openWindow() }
         }
@@ -40,26 +33,19 @@ enum Trogdor {
             defer: false
         )
         w.title = "TROGDOR!"
-        // Reverted to a regular top bar — invisible-titlebar trial broke
-        // window dragging (no chrome to grab) and triggered a system
-        // alert beep on first open.
         w.isReleasedWhenClosed = false
         w.backgroundColor = .black
         w.center()
         w.level = .floating
 
         let config = WKWebViewConfiguration()
-        // Block media autoplay — the page's embedded SWF/audio was
-        // triggering the system alert beep when the WKWebView tried to
-        // start audio before the user interacted with it.
+        // Block media autoplay — the page's SWF/audio fires the system
+        // alert beep before any user interaction.
         config.mediaTypesRequiringUserActionForPlayback = .all
         let webView = WKWebView(frame: NSRect(origin: .zero, size: size), configuration: config)
         webView.autoresizingMask = [.width, .height]
-        // pageZoom is the SwiftUI-friendly way to scale the page contents.
-        // 0.6 leaves room for the surrounding chrome.
         webView.pageZoom = 0.8
-        // Some WebKit versions expose `magnification` only via KVC — set
-        // both so we cover the base. Failures here are harmless.
+        // Some WebKit versions only expose `magnification` via KVC.
         webView.setValue(0.8, forKey: "magnification")
 
         if let url = URL(string: "https://homestarrunner.com/trogdor") {

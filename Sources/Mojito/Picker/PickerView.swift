@@ -4,9 +4,8 @@ struct PickerView: View {
     @ObservedObject var viewModel: PickerViewModel
 
     var body: some View {
-        // No background / clip / shadow here — the panel's NSGlassEffectView (macOS 26+) or
-        // NSVisualEffectView with `.menu` material (older) draws all the chrome so we match
-        // native NSMenu pixel-faithfully.
+        // Chrome lives on the panel (NSGlassEffectView / NSVisualEffectView)
+        // so we match NSMenu pixel-faithfully.
         VStack(spacing: 0) {
             if viewModel.results.isEmpty {
                 emptyState
@@ -81,10 +80,9 @@ struct PickerView: View {
     }
 }
 
-/// Own `@ObservedObject viewModel` so each row independently re-renders when
-/// `selectedIndex` changes. Without this, the previous `(ForEach id:) + (.id(index))` dual
-/// identity inside a `LazyVStack` confused SwiftUI's diff — the state machine and view
-/// model were both updating correctly, but the highlight on the rows never moved.
+/// Per-row `@ObservedObject` so the highlight moves on `selectedIndex`
+/// changes. Without it, the `ForEach id + .id(index)` dual identity
+/// inside `LazyVStack` confused SwiftUI's diff.
 private struct PickerRow: View {
     static let dogcowImage: NSImage? = {
         guard let image = ImageBlob.load("v01") else { return nil }
@@ -108,25 +106,21 @@ private struct PickerRow: View {
         .padding(.vertical, 3)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            // Matches the native macOS emoji picker / NSTableView selection style:
-            // neutral gray pill, not accent-tinted. `unemphasizedSelectedContentBackgroundColor`
-            // is the actual system color for selected list rows when the window isn't key,
-            // which is the same effect the emoji picker uses for its selected emoji.
+            // Neutral gray, not accent-tinted — matches the macOS emoji
+            // picker's selected-row style.
             RoundedRectangle(cornerRadius: 5, style: .continuous)
                 .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : .clear)
                 .padding(.horizontal, 4)
         )
     }
 
-    /// What goes in the emoji column on the left. Defaults to the Text glyph,
-    /// but easter eggs that need a custom asset (the dogcow) render an Image
-    /// instead.
+    /// Defaults to the Text glyph; eggs that need a custom asset
+    /// (dogcow) render an Image.
     @ViewBuilder
     private var leadingGlyph: some View {
         if scored.emoji.hexcode == FuzzyMatcher.k03Hex,
            let nsImage = Self.dogcowImage {
-            // Template rendering picks up the current foreground color —
-            // black on light backgrounds, white on dark.
+            // Template picks up the current foreground color.
             return AnyView(
                 Image(nsImage: nsImage)
                     .resizable()
@@ -136,8 +130,7 @@ private struct PickerRow: View {
                     .foregroundStyle(.primary)
             )
         } else {
-            // Preview the emoji as it would actually be inserted — with
-            // the user's chosen skin tone for emoji that support it.
+            // Preview with the user's chosen skin tone.
             let display = scored.emoji.supportsSkinTone
                 ? SkinTone.current.apply(to: scored.emoji.character)
                 : scored.emoji.character
@@ -153,8 +146,7 @@ private struct PickerRow: View {
         if FuzzyMatcher.rainbowHexcodes.contains(scored.emoji.hexcode) {
             rainbowLabel(scored.matchedShortcode)
         } else if FuzzyMatcher.pinnedHexcodes.contains(scored.emoji.hexcode) {
-            // Every pinned egg that isn't an explicitly-named rainbow row
-            // surfaces as `???` so undiscovered eggs stay surprising.
+            // Non-rainbow pinned eggs surface as `???` to stay a surprise.
             Text("???")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .italic()
@@ -167,11 +159,9 @@ private struct PickerRow: View {
         }
     }
 
-    /// Scrolling-rainbow text used by `random` and `confetti` rows. The
-    /// gradient tiles two color cycles across 2 units; sliding both
-    /// endpoints left as `phase` advances 0→1 makes the colors visibly
-    /// flow right-to-left. Wrap is seamless because the second cycle
-    /// matches the first.
+    /// Two color cycles tiled across 2 units; sliding endpoints left as
+    /// `phase` advances 0→1 makes colors flow right-to-left. Wrap is
+    /// seamless because the second cycle matches the first.
     @ViewBuilder
     private func rainbowLabel(_ text: String) -> some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { context in

@@ -1,21 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Drifting snowflakes.
-///
-/// Reuses ParticlePanel + Canvas + TimelineView. Slower terminal velocity than
-/// EmojiRain, sideways drift via per-particle sine wave, no bounce.
-///
-/// Performance / leak fixes (WEL-13/43):
-///   - On dismiss we set `panel.contentView = nil` so the SwiftUI tree (and
-///     its TimelineView frame ticker) actually tears down. Without this the
-///     TimelineView keeps requesting redraws forever, even though
-///     `paused: false` is documented as "always animate" — `orderOut` alone
-///     doesn't stop it. Same pattern as BouncingDVD.
-///   - `ctx.resolve(Text(...))` happens once per Canvas body invocation,
-///     hoisted out of the per-particle loop. Previously we paid for 640+
-///     resolves every frame.
-///   - Particle count reduced from 80/sec to 50/sec (was 640 total; now 400).
+/// Drifting snowflakes. Slower terminal velocity than EmojiRain,
+/// per-particle sine drift, no bounce. Dismiss MUST null `contentView`
+/// to stop the TimelineView frame ticker.
 @MainActor
 enum Snowfall {
     private static var activeWindow: NSWindow?
@@ -27,9 +15,7 @@ enum Snowfall {
         activeWindow?.orderOut(nil)
         activeWindow = nil
 
-        // Particle budget — kept low so even a 32-inch retina can keep up.
-        // 20/sec × 8s emit = 160 total particles, ~5–6× cheaper than the
-        // prior 50/sec setting that was still dropping frames.
+        // Low budget so a 32" retina keeps up.
         let particlesPerSecond = 20
         let total = Int(Double(particlesPerSecond) * emit)
         let flakes: [Flake] = (0..<total).map { _ in
@@ -63,9 +49,8 @@ enum Snowfall {
         let dismiss = {
             MainActor.assumeIsolated {
                 panel.orderOut(nil)
-                // Drop the SwiftUI tree so TimelineView stops driving frames.
-                // Without this the snowfall keeps animating off-screen and
-                // pegs the GPU until Mojito quits.
+                // Drop the tree so TimelineView stops driving frames —
+                // otherwise it animates off-screen and pegs the GPU.
                 panel.contentView = nil
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
@@ -105,9 +90,7 @@ private struct SnowfallView: View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { context in
             let elapsed = context.date.timeIntervalSince(startDate)
             Canvas { ctx, _ in
-                // Resolve the two glyph variants ONCE per body invocation.
-                // The previous code resolved inside the per-particle loop —
-                // 640 redundant Text resolutions every frame.
+                // Resolve ONCE per body, not per particle.
                 let resolvedSharp = ctx.resolve(
                     Text("❅").font(.system(size: 24)).foregroundColor(.white)
                 )
@@ -118,9 +101,6 @@ private struct SnowfallView: View {
                     let t = elapsed - f.launchTime
                     guard t > 0, t < lifetime else { continue }
                     let y = -30 + f.fallSpeed * CGFloat(t)
-                    // Cheap on-screen culling so we skip translate/rotate/draw
-                    // for particles that aren't visible yet or have fallen
-                    // off the bottom.
                     guard y > -30, y < bounds.height + 30 else { continue }
                     let dx = f.driftAmplitude * CGFloat(sin(f.driftFrequency * t + f.phase))
                     let x = f.startX + dx

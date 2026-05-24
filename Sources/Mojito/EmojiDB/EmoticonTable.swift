@@ -1,20 +1,17 @@
 import Foundation
 
-/// Maps text that follows the opening `:` to an emoji.
+/// Maps the suffix after `:` to an emoji.
 ///
-/// Two flavors of key:
-///  - Pure-punctuation emoticons (`:)`, `:|`) — the cancel char IS the
-///    full emoticon. Query is empty, terminator is the char itself.
-///    The terminator is consumed (removed along with the `:`).
-///  - Letter emoticons (`:D`, `:-D`) — query is the name-char run after `:`
-///    (e.g. "D" or "-D"). The terminator (space/period/etc.) is just a
-///    delimiter — it stays in the text after replacement.
+/// Two key flavors:
+///  - Pure-punctuation (`:)`, `:|`): empty query, terminator IS the
+///    emoticon's tail and gets consumed.
+///  - Letter (`:D`, `:-D`): query is the name-char run, terminator is
+///    just a delimiter and stays in the text.
 ///
-/// Matching strategy: try `query + terminator` first (catches the pure-
-/// punctuation form), then `query` alone.
+/// Match strategy: `query + terminator` first, then `query` alone.
 enum EmoticonTable {
     private static let map: [String: String] = [
-        // Pure punctuation — terminator is the emoticon's tail.
+        // Pure punctuation — terminator is the tail.
         ")":   "🙂",
         "(":   "🙁",
         "D":   "😃",
@@ -28,13 +25,11 @@ enum EmoticonTable {
         "3":   "😺",
         "*":   "😘",
 
-        // Apostrophe variants (`:'(`, `:')`) — query is "'", terminator is
-        // the closing paren. `'` is a name char (see `KeyMonitor.isNameChar`)
-        // so the apostrophe lands in the query rather than ending capture.
+        // `'` is a name char so it lands in the query, not the terminator.
         "'(":  "😢",
         "')":  "😂",
 
-        // Dash variants (`:-)`, `:-D`, …) — query is "-".
+        // Dash variants (`:-)`, `:-D`, …).
         "-)":  "🙂",
         "-(":  "🙁",
         "-D":  "😃",
@@ -62,8 +57,7 @@ enum EmoticonTable {
 
 struct EmoticonMatch {
     let emoji: String
-    /// True if the terminator was part of the emoticon (e.g. the `)` in `:)`).
-    /// False if the terminator was just a delimiter that should stay in the
-    /// text after replacement.
+    /// True if terminator was the emoticon's tail (the `)` in `:)`),
+    /// false if it was just a delimiter.
     let consumesTerminator: Bool
 }

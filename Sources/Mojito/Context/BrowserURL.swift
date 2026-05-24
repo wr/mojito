@@ -1,11 +1,8 @@
 import AppKit
 import ApplicationServices
 
-/// Best-effort URL detection for the active browser tab.
-///
-/// Uses Accessibility to walk the focused window's address bar / web area instead of
-/// AppleScript — AppleScript requires explicit per-app automation permission and
-/// brings up a system prompt for every browser the user hits, which is a poor first-run UX.
+/// AX walk of the active browser tab. AppleScript needs per-app
+/// automation permission and prompts on every browser — poor first-run UX.
 @MainActor
 enum BrowserURL {
     static func detect(bundleID: String?, pid: pid_t?) -> URL? {
@@ -14,10 +11,9 @@ enum BrowserURL {
 
         let app = AXUIElementCreateApplication(pid)
 
-        // Try the focused window's web area first (Safari exposes AXURL on the web area).
+        // Safari exposes AXURL on the web area.
         if let url = focusedWebAreaURL(in: app) { return url }
 
-        // Otherwise try to read the address bar value as a string.
         if let raw = focusedAddressBarValue(in: app), let url = normalizedURL(from: raw) {
             return url
         }
@@ -68,7 +64,6 @@ enum BrowserURL {
     }
 
     private static func findAddressField(under element: AXUIElement) -> AXUIElement? {
-        // Look for an AXTextField with role description matching common address-bar names.
         return findElement(under: element, depth: 4) { candidate in
             guard let role = copyAttribute(candidate, attribute: kAXRoleAttribute as String) as? String,
                   role == "AXTextField" else { return false }

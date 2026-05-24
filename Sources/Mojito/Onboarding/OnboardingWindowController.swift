@@ -22,8 +22,7 @@ final class OnboardingWindowController {
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.isMovableByWindowBackground = true
-        // Size first, THEN center — `center()` uses the current size to compute the origin,
-        // so calling it before `setContentSize` left the window off-center after the resize.
+        // Size THEN center — `center()` uses current size for the origin.
         window.setContentSize(NSSize(width: 600, height: 520))
         window.center()
         window.delegate = OnboardingWindowDelegate.shared
@@ -51,7 +50,7 @@ final class OnboardingWindowDelegate: NSObject, NSWindowDelegate {
     }
 
     func windowWillClose(_ notification: Notification) {
-        // Detach so `controller.close()` doesn't run `window.close()` recursively on the
+        // Detach so `controller.close()` doesn't recurse into the
         // already-closing window.
         let c = controller
         controller = nil

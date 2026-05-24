@@ -1,6 +1,5 @@
 import Foundation
 
-/// User-selectable skin tone for emoji that support tone modifiers.
 /// `default` = no modifier (Unicode emoji's default yellow rendering).
 enum SkinTone: String, CaseIterable, Identifiable {
     case `default`
@@ -12,8 +11,7 @@ enum SkinTone: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    /// The Unicode tone modifier codepoint, or empty for `default`.
-    /// Appending this to a tone-supporting emoji yields the toned variant.
+    /// Unicode tone modifier codepoint, empty for `default`.
     var modifier: String {
         switch self {
         case .default:     return ""
@@ -25,9 +23,8 @@ enum SkinTone: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Vulcan salute (🖖) at this tone — used as the picker swatch. Reads
-    /// the tone gradient more clearly than 👋 since the splayed fingers
-    /// show more skin.
+    /// Splayed fingers show more skin than 👋, so the tone gradient
+    /// reads more clearly.
     var swatchEmoji: String {
         "🖖" + modifier
     }
@@ -43,17 +40,14 @@ enum SkinTone: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Read the user's current selection from UserDefaults.
     static var current: SkinTone {
         let raw = UserDefaults.standard.string(forKey: PrefsKey.skinTone) ?? SkinTone.default.rawValue
         return SkinTone(rawValue: raw) ?? .default
     }
 
-    /// Apply this tone to an emoji's character. The modifier is inserted
-    /// AFTER the first scalar — which is correct for both single-scalar
-    /// emojis (👋 → 👋🏿) and ZWJ sequences (🧔‍♀️ → 🧔🏿‍♀️). Appending the
-    /// modifier at the end of a ZWJ sequence produces visually wrong
-    /// renderings like 🧔‍♀️🏿.
+    /// Insert the modifier AFTER the first scalar. Correct for both
+    /// single-scalar (👋 → 👋🏿) and ZWJ sequences (🧔‍♀️ → 🧔🏿‍♀️).
+    /// Appending at the end gives wrong renderings like 🧔‍♀️🏿.
     func apply(to character: String) -> String {
         guard self != .default else { return character }
         var scalars = Array(character.unicodeScalars)

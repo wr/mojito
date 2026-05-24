@@ -3,8 +3,7 @@ import SwiftUI
 
 @MainActor
 final class PickerWindow {
-    /// Fired when the user clicks anywhere outside the picker panel (inside or outside our
-    /// app). Engine resets the state machine + hides the picker in response.
+    /// Engine resets the state machine and hides the picker.
     var onClickAway: (() -> Void)?
 
     private let panel: NSPanel
@@ -28,15 +27,14 @@ final class PickerWindow {
         panel.level = .floating
         panel.isOpaque = false
         panel.backgroundColor = .clear
-        // Let AppKit draw the system menu shadow — matches NSMenu drop shadow exactly.
+        // System menu shadow matches NSMenu's drop shadow exactly.
         panel.hasShadow = true
         panel.hidesOnDeactivate = false
         panel.becomesKeyOnlyIfNeeded = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
 
-        // On Tahoe (macOS 26+) the public Liquid Glass primitive is `NSGlassEffectView` —
-        // this is what NSMenu / NSPopover render through internally. On older OSes fall
-        // back to NSVisualEffectView with `.menu` material so we still get the right blur.
+        // Tahoe's NSGlassEffectView matches NSMenu / NSPopover's Liquid
+        // Glass; pre-26 falls back to NSVisualEffectView `.menu`.
         panel.contentView = Self.makeChrome(hosting: hostingView)
     }
 
@@ -67,7 +65,7 @@ final class PickerWindow {
         }
     }
 
-    /// Show the picker, anchoring near the supplied caret rect (or mouse if nil).
+    /// Anchors near the caret rect, or the mouse if nil.
     func show(near caret: CGRect?) {
         let anchor = caret ?? mouseAnchor()
         let size = preferredSize()
@@ -97,7 +95,7 @@ final class PickerWindow {
         let types: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown]
 
         clickMonitorLocal = NSEvent.addLocalMonitorForEvents(matching: types) { [weak self] event in
-            // Ignore clicks that land on the picker panel itself; dismiss for any other window.
+            // Ignore clicks on the picker panel; dismiss otherwise.
             if let self, event.window !== self.panel {
                 self.onClickAway?()
             }
@@ -134,13 +132,12 @@ final class PickerWindow {
         let belowOriginY = anchor.minY - size.height - gap
         let aboveOriginY = anchor.maxY + gap
 
-        // Prefer below caret. Flip above if there isn't enough room downward.
+        // Prefer below; flip above if no room downward.
         var origin = CGPoint(
             x: anchor.minX,
             y: belowOriginY >= visible.minY ? belowOriginY : aboveOriginY
         )
 
-        // If even the flipped position would clip off the top, clamp down so we stay visible.
         if origin.y + size.height > visible.maxY {
             origin.y = visible.maxY - size.height - gap
         }
@@ -148,7 +145,6 @@ final class PickerWindow {
             origin.y = visible.minY + gap
         }
 
-        // Clip horizontally inside the visible frame.
         if origin.x + size.width > visible.maxX {
             origin.x = visible.maxX - size.width - 8
         }

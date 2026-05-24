@@ -75,8 +75,6 @@ struct GeneralSettingsView: View {
     }
 }
 
-/// A horizontal row of skin-tone swatches (👋 in each tone). Selected swatch
-/// is outlined; tapping a swatch persists the choice to `PrefsKey.skinTone`.
 private struct SkinToneSwatches: View {
     @Binding var selection: String
 

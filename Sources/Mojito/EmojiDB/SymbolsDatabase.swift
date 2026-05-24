@@ -1,23 +1,13 @@
 import Foundation
 
-/// Curated Unicode symbols plus everything else with a Unicode name in the
-/// common symbol blocks (arrows, math, misc technical, dingbats, mahjong,
-/// dominoes, playing cards, etc.). Opt-in via the experimental toggle.
-///
-/// Two layers:
-///   1. `curatedAliases` — hand-picked entries with short, memorable shortcodes
-///      ("cmd" for ⌘, "arrow_right" for →). These take precedence.
-///   2. Programmatic entries — every other named scalar in `symbolRanges`,
-///      with shortcodes derived from the official Unicode name ("PLACE OF
-///      INTEREST SIGN" → "place_of_interest_sign"). Long but searchable —
-///      typing `:domino` will fuzzy-match all 100 domino tiles.
+/// Two layers: hand-picked aliases (`cmd` → ⌘) take precedence over the
+/// programmatic sweep that derives shortcodes from Unicode names
+/// (`PLACE OF INTEREST SIGN` → `place_of_interest_sign`). Opt-in.
 enum SymbolsDatabase {
     static func indexed() -> [IndexedEmoji] {
         var seenCharacters = Set<String>()
         var result: [IndexedEmoji] = []
 
-        // 1. Curated entries first — short, memorable aliases override the
-        //    long Unicode names for chars we care about.
         for entry in curatedAliases {
             seenCharacters.insert(entry.character)
             let emoji = Emoji(
@@ -36,8 +26,7 @@ enum SymbolsDatabase {
             result.append(IndexedEmoji(emoji: emoji, haystacks: haystacks))
         }
 
-        // 2. Programmatic sweep — every named scalar in the symbol ranges,
-        //    skipping anything the curated set already covered.
+        // Programmatic sweep — every other named scalar in symbolRanges.
         for range in symbolRanges {
             for codepoint in range {
                 guard let scalar = Unicode.Scalar(codepoint) else { continue }
@@ -74,9 +63,7 @@ enum SymbolsDatabase {
         let shortcodes: [String]
     }
 
-    /// Unicode ranges to sweep for named symbols. Picked to cover the macOS
-    /// emoji picker's "Symbols" category and adjacent blocks. Skips letter,
-    /// CJK, and private-use ranges.
+    /// Covers the macOS emoji picker's "Symbols" category and adjacent blocks.
     private static let symbolRanges: [ClosedRange<Int>] = [
         0x2000...0x206F,    // General punctuation
         0x2070...0x209F,    // Super/subscripts
@@ -105,9 +92,8 @@ enum SymbolsDatabase {
         0x1F0A0...0x1F0FF,  // Playing cards
     ]
 
-    /// Hand-picked aliases — for chars where the Unicode name is awkward
-    /// ("PLACE OF INTEREST SIGN" is not what anyone types). These also act
-    /// as "secondary search terms" beyond the Unicode name.
+    /// Hand-picked aliases for chars where the Unicode name is awkward
+    /// (no one types "PLACE OF INTEREST SIGN"). Also adds search synonyms.
     private static let curatedAliases: [Alias] = [
         // Keyboard modifiers
         .init(character: "⌘",  shortcodes: ["cmd", "command"]),

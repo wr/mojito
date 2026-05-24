@@ -1,11 +1,9 @@
 import Foundation
 import UserNotifications
 
-/// Surfaces a macOS notification the first time an easter egg is discovered.
-///
-/// Permission is requested lazily — the very first discovery prompts the
-/// system permission sheet. If the user denies, subsequent discoveries are
-/// silent (the in-app visual effect still runs; this is purely additive).
+/// Notifies on first discovery of each egg. Permission requested lazily
+/// on the first call; denial silences future notifications (visual
+/// effect still runs — this is purely additive).
 @MainActor
 enum DiscoveryNotifier {
     static func notify(_ egg: EasterEgg) {
@@ -42,8 +40,6 @@ enum DiscoveryNotifier {
         } else {
             content.subtitle = "All \(total) found"
         }
-        // Use the system default sound — small celebratory cue without
-        // shipping our own asset just for this.
         content.sound = .default
         let req = UNNotificationRequest(
             identifier: "mojito.eggDiscovered.\(egg.rawValue)",

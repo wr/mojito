@@ -1,9 +1,8 @@
 import SwiftUI
 
 struct OnboardingRoot: View {
-    /// Ordered set of onboarding screens. Adding a screen here is the entire
-    /// change — the dot indicator, navigation guards, and content switch all
-    /// derive from this enum.
+    /// Adding a screen is a one-line change — dots, nav guards, and
+    /// content switch all derive from this enum.
     private enum Step: Int, CaseIterable {
         case welcome
         case permissions
@@ -15,8 +14,7 @@ struct OnboardingRoot: View {
 
     @EnvironmentObject private var permissions: PermissionsCoordinator
     @State private var step: Step = .welcome
-    /// Direction of the most recent step transition. Drives slide direction —
-    /// trailing for forward navigation, leading for back.
+    /// `.trailing` = forward, `.leading` = back.
     @State private var transitionEdge: Edge = .trailing
     @FocusState private var focused: Bool
 
@@ -26,10 +24,8 @@ struct OnboardingRoot: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Slide each step in/out: forward navigation slides the new step in
-                // from the trailing edge and the old one out to the leading edge;
-                // back navigation does the reverse. `.id(step)` is required so SwiftUI
-                // treats each step as a distinct view for transition matching.
+                // `.id(step)` is required so SwiftUI treats each step as
+                // a distinct view for transition matching.
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.horizontal, 36)
@@ -97,9 +93,8 @@ struct OnboardingRoot: View {
                     .controlSize(.large)
             }
 
-            // Final step gets a secondary "Open settings" action alongside
-            // "Done" — saves a trip to the menu bar for users who want to
-            // tweak prefs immediately after finishing setup.
+            // Saves a trip to the menu bar for users tweaking prefs
+            // right after setup.
             if step.isLast {
                 Button("Open settings") { finishAndOpenSettings() }
                     .buttonStyle(.bordered)
@@ -156,9 +151,8 @@ struct OnboardingRoot: View {
         withAnimation(.easeInOut(duration: 0.32)) { step = prev }
     }
 
-    /// If the user lands on the permissions step (manually, or from a forward-arrow click)
-    /// and both permissions are already granted, skip ahead. Same for the live-permission
-    /// transition — granting both should auto-advance without forcing a button press.
+    /// Auto-skip past the permissions step when both are already granted
+    /// (manual entry, or live grant during the step).
     private func advanceIfPermissionsSatisfied() {
         guard step == .permissions,
               permissions.accessibility,
@@ -178,11 +172,7 @@ struct OnboardingRoot: View {
 
 extension Notification.Name {
     static let mojitoOnboardingFinished = Notification.Name("mojitoOnboardingFinished")
-    /// Posted by the "Open settings" secondary action on the final onboarding
-    /// step, and by the menu-bar's Settings command. `AppDelegate` listens
-    /// and routes to its `SettingsWindowController`.
     static let mojitoShouldOpenSettings = Notification.Name("mojitoShouldOpenSettings")
-    /// Posted by the menu bar's Option-Settings… alternate item. Re-runs the
-    /// guided setup without resetting onboarding state.
+    /// Re-runs guided setup without resetting onboarding state.
     static let mojitoShouldShowOnboarding = Notification.Name("mojitoShouldShowOnboarding")
 }

@@ -1,18 +1,10 @@
 import AppKit
 import SwiftUI
 
-/// Classic Snake in a regular game window.
-///
-/// Arrow keys steer; Esc quits. Key handling lives on a custom NSWindow
-/// subclass — SwiftUI's NSHostingView doesn't put a child responder into
-/// the chain reliably, and global/local NSEvent monitors are unreliable
-/// for LSUIElement apps. Overriding `keyDown` on the window itself works
-/// because unhandled keys bubble up the responder chain and the window is
-/// the last stop.
-///
-/// Visual treatment is delightful instead of utilitarian: emoji snake
-/// (head distinct from body), apple food, retro arcade-style scoreboard,
-/// and a custom green border + title bar.
+/// Snake in a regular game window. Key handling lives on an NSWindow
+/// subclass — NSHostingView doesn't put a child responder in the chain
+/// reliably, and global/local NSEvent monitors are unreliable for
+/// LSUIElement apps. Window-level `keyDown` catches everything that bubbles.
 @MainActor
 enum SnakeGame {
     fileprivate static var window: SnakeWindow?
@@ -71,11 +63,8 @@ enum SnakeGame {
     }
 }
 
-/// NSWindow subclass that intercepts key events for Snake. Arrow keys steer;
-/// Esc closes the window. Other keys are ignored — we used to bail on any
-/// non-arrow key, but the synthetic backspace burst from the trigger
-/// deletion arrives at this window once it becomes key, which instantly
-/// closed the game before the user saw anything.
+/// Other keys are ignored — bailing on non-arrow keys caused the
+/// trigger's synth-backspace burst to instantly close the game.
 fileprivate final class SnakeWindow: NSWindow {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { true }
@@ -187,7 +176,7 @@ private struct SnakeGameView: View {
     private let cellSize: CGFloat = 22
     private let tickInterval: TimeInterval = 0.11
 
-    /// Phosphor-green palette — feels like a vintage arcade cabinet.
+    /// Vintage arcade cabinet phosphor green.
     private let bg = Color(red: 0.02, green: 0.05, blue: 0.02)
     private let panel = Color(red: 0.06, green: 0.12, blue: 0.06)
     private let phosphor = Color(red: 0.55, green: 1.0, blue: 0.55)
@@ -295,14 +284,10 @@ private struct SnakeGameView: View {
             .padding(.bottom, 4)
     }
 
-    /// Board renderer. Snake body uses 🟢, head is 🐲 (more distinct than
-    /// 🐍 at this size and reads as a "snake head"), food is 🍎. Drawing
-    /// emoji via `ctx.draw(ctx.resolve(Text(…)))` is cheap enough at 20x20
-    /// to stay smooth — and means we don't need any image assets.
+    /// Snake body is 🟢, head is 🐲 (reads better than 🐍 at this size),
+    /// food is 🍎. Resolved emoji is cheap enough at 20×20 to skip assets.
     private var board: some View {
         Canvas { ctx, size in
-            // Subtle grid lines so the field looks game-like instead of
-            // a blank well.
             let gridColor = Color(white: 1.0, opacity: 0.04)
             for i in 0...SnakeModel.gridSize {
                 let x = CGFloat(i) * cellSize
@@ -325,17 +310,13 @@ private struct SnakeGameView: View {
                 )
             }
 
-            // Food.
             drawEmoji(in: ctx, "🍎", at: model.food, size: cellSize * 0.95)
 
-            // Snake — head first, then body segments. Head is a dragon
-            // face so it visibly differs from the round body cells.
             for (i, seg) in model.snake.enumerated() {
                 let glyph = i == 0 ? "🐲" : "🟢"
                 drawEmoji(in: ctx, glyph, at: seg, size: cellSize * 0.95)
             }
 
-            // Overlay messages.
             if model.gameOver {
                 drawCenteredLabel(in: ctx, text: "GAME OVER", subtitle: "SPACE to restart", boardSize: size)
             } else if model.paused {
@@ -353,7 +334,6 @@ private struct SnakeGameView: View {
     }
 
     private func drawCenteredLabel(in ctx: GraphicsContext, text: String, subtitle: String, boardSize: CGSize) {
-        // Dim the playfield behind the overlay.
         ctx.fill(
             Path(CGRect(origin: .zero, size: boardSize)),
             with: .color(.black.opacity(0.55))

@@ -5,22 +5,16 @@ import CoreGraphics
 /// frontmost app, by posting synthetic key events.
 @MainActor
 enum TextInserter {
-    /// Sentinel stamped on `eventSourceUserData` of every event we post,
-    /// so `KeyMonitor` can tell our own synthetic events apart from real
-    /// keystrokes and drop them at the tap before they round-trip through
-    /// the state machine. Without this, the first synthetic backspace we
-    /// emit during an emoticon insert lands while `pendingEmoticonUndo`
-    /// is set, the undo path fires immediately, and `:)` ends up as `::)`.
+    /// Stamped on every event we post so `KeyMonitor` can drop them at
+    /// the tap. Without this, synth-backspaces round-trip through the
+    /// undo path and turn `:)` into `::)`.
     static let synthMarker: Int64 = 0x4D4F4A49544F  // ASCII "MOJITO"
 
     static func replace(charactersToDelete: Int, with string: String) {
-        // 1. Send N backspaces to delete the typed `:query[:]`.
         for _ in 0..<charactersToDelete {
             postKey(virtualKey: 0x33, flags: [])  // kVK_Delete
         }
 
-        // 2. Insert the unicode string. Splitting per emoji avoids edge cases in
-        //    apps that quietly drop combined ZWJ sequences in a single event.
         let downEvent = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: true)
         let upEvent   = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: false)
 
@@ -35,8 +29,7 @@ enum TextInserter {
         upEvent?.post(tap: .cghidEventTap)
     }
 
-    /// Just deletes — used by the easter-egg path where we erase the typed
-    /// `:mojito` from the focused app without putting any emoji back.
+    /// Easter-egg path: erase the typed `:keyword` without replacement.
     static func deleteBackward(_ count: Int) {
         for _ in 0..<count {
             postKey(virtualKey: 0x33, flags: [])  // kVK_Delete

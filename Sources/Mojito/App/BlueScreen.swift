@@ -1,17 +1,9 @@
 import AppKit
 import SwiftUI
 
-/// Faithful Windows 9x "Blue Screen of Death".
-///
-/// Full-screen blue panel with the canonical VGA-font message. The
-/// composition matches the reference screenshot: the message block sits
-/// roughly at vertical midpoint, the "Windows" pill is inverted (blue
-/// glyph on light-gray background) and centered above the message body,
-/// then a blank line and the "Press any key to continue _" prompt with a
-/// blinking caret.
-///
-/// Dismiss is click-only (the non-activating NSPanel can't reliably grab
-/// global key events) plus the global Esc handler in `EffectDismisser`.
+/// Windows 9x BSOD. Inverted "Mojito" pill + canonical VGA message,
+/// blinking "Press any key to continue _" prompt. Dismiss is click or
+/// Esc — a non-activating NSPanel can't grab global keys.
 @MainActor
 enum BlueScreen {
     private static var activeWindow: NSWindow?
@@ -57,10 +49,7 @@ enum BlueScreen {
         activeWindow = panel
         unregister = EffectDismisser.register(anyKey: true, dismiss)
 
-        // Compy 386 startup chirp (~1s) — fires the moment the screen
-        // appears for that authentic boot-failure vibe. Trimmed 20% on
-        // volume; full-loudness was too punchy when the panel is already
-        // taking the whole screen.
+        // Compy 386 startup chirp (~1s) — boot-failure vibe.
         if let sound = AudioBlob.load("s15") {
             sound.volume = 0.8
             startupSound = sound
@@ -73,31 +62,22 @@ private struct BlueScreenView: View {
     let bounds: CGSize
     let onDismiss: () -> Void
 
-    /// Period-correct VGA-ish foreground gray (not pure white).
+    /// VGA-ish gray, not pure white.
     private let bsodBlue = Color(red: 0.0, green: 0.0, blue: 0.66)
     private let bsodFG = Color(red: 0.85, green: 0.85, blue: 0.85)
     private let bsodHeaderBg = Color(red: 0.6, green: 0.6, blue: 0.6)
 
-    /// Drives the CRT power-on animation. Starts at 0 (image collapsed to a
-    /// thin horizontal slit on a black backdrop) and animates to 1 (full
-    /// image) on appear.
+    /// 0 = collapsed-to-slit; 1 = full image. Drives the CRT power-on.
     @State private var poweredOn: Bool = false
 
-    /// Body lines indented to match the reference image. `*` bullets,
-    /// continuation lines aligned with the text-after-bullet column.
-    /// The block is a single fixed-width VStack vertically and horizontally
-    /// centered on screen; the "Windows" pill is centered relative to the
-    /// body text block above it.
     var body: some View {
         ZStack {
-            // CRT "off" backdrop — the slit + blue image scales up against
-            // this. Without it, scaleY < 1 would leak the desktop through.
+            // Without this, scaleY < 1 leaks the desktop through.
             Color.black.ignoresSafeArea()
 
             ZStack {
                 bsodBlue
                 VStack(alignment: .leading, spacing: 0) {
-                    // Inverted "Windows" pill — centered above the body block.
                     HStack {
                         Spacer()
                         Text(" Mojito ")
@@ -109,7 +89,6 @@ private struct BlueScreenView: View {
                     }
                     .padding(.bottom, 20)
 
-                    // Body text — left-aligned monospace lines.
                     VStack(alignment: .leading, spacing: 6) {
                         Text("A fatal exception 0E has occurred at 0xDEADBEEF:0xCAFEBABE in VXD")
                         Text("MOJITO(01) + 0xC0FFEE42. The current application will be terminated.")
@@ -127,15 +106,10 @@ private struct BlueScreenView: View {
                     .font(.system(size: 22, weight: .regular, design: .monospaced))
                     .foregroundColor(bsodFG)
                 }
-                // The whole block — pill + body — is treated as one fixed-width
-                // unit and centered both axes. Using `.fixedSize` lets SwiftUI
-                // measure the natural width of the longest line so the pill
-                // really does center over the body block.
+                // Measure the longest line so the pill centers over it.
                 .fixedSize(horizontal: true, vertical: false)
             }
-            // CRT power-on: blue + content starts compressed (X 0.8, Y 0.6)
-            // and snaps to full size with an `easeOutBack` overshoot. Black
-            // backdrop fills the exposed margins during the snap.
+            // CRT power-on: starts (0.8, 0.6), easeOutBack overshoot.
             .scaleEffect(
                 x: poweredOn ? 1.0 : 0.8,
                 y: poweredOn ? 1.0 : 0.6,
@@ -145,9 +119,7 @@ private struct BlueScreenView: View {
         .contentShape(Rectangle())
         .onTapGesture { onDismiss() }
         .onAppear {
-            // CSS `easeOutBack` cubic-bezier(0.34, 1.56, 0.64, 1). The 1.56
-            // control on the Y axis is what produces the overshoot past 1.0
-            // before settling.
+            // CSS `easeOutBack` — 1.56 Y control causes the overshoot.
             withAnimation(.timingCurve(0.34, 1.56, 0.64, 1, duration: 0.22)) {
                 poweredOn = true
             }
