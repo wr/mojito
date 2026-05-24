@@ -22,6 +22,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case lost            = "k14"
     case toasters        = "k16"
     case dvd             = "k17"
+    case perfectBounce   = "k31"
     case bsod            = "k19"
     case konami          = "k99"
     case snake           = "k20"
@@ -33,7 +34,6 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case rickroll        = "k27"
     case crt             = "k29"
     case celery          = "k30"
-    case perfectBounce   = "k31"
 
     var id: String { rawValue }
 
@@ -55,6 +55,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .lost:            return "The Hatch"
         case .toasters:        return "Flying Toasters"
         case .dvd:             return "Bouncing DVD"
+        case .perfectBounce:   return "Perfect Bounce"
         case .bsod:            return "Blue Screen"
         case .konami:          return "Konami Code"
         case .snake:           return "Snake"
@@ -66,7 +67,6 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .rickroll:        return "Rickroll"
         case .crt:             return "CRT Power Off"
         case .celery:          return "Celery Man"
-        case .perfectBounce:   return "Perfect Bounce"
         }
     }
 
@@ -74,22 +74,23 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     /// out the trigger now that the user has found it.
     var detail: String {
         switch self {
-        case .mojito:          return "`:mojito:` — a downpour of emoji."
+        case .mojito:          return "`:mojito:` — the house special."
         case .moof:            return "`:moof:` — Clarus the dogcow."
-        case .confetti:        return "`:confetti:` — celebrate."
-        case .pride:           return "`:pride:` — raise the flag."
+        case .confetti:        return "`:confetti:` — small victories."
+        case .pride:           return "`:pride:` — every June, all year."
         case .sosumi:          return "`:sosumi:` — System 7's last word."
         case .floppy:          return "`:floppy:` — the sound of saving."
-        case .dialup:          return "`:dialup:` — log on."
-        case .wilhelm:         return "`:wilhelm:` — the scream."
+        case .dialup:          return "`:dialup:` — the handshake."
+        case .wilhelm:         return "`:wilhelm:` — Hollywood's loudest hand-me-down."
         case .snow:            return "`:snow:` — a quiet snowfall."
         case .matrix:          return "`:matrix:` — wake up, Neo."
-        case .fireworks:       return "`:fireworks:` — light the sky."
+        case .fireworks:       return "`:fireworks:` — Roman candles, indoors."
         case .trogdor:         return "`:trogdor:` — burninate."
-        case .lost:            return "`:lost:` — the numbers are bad."
-        case .toasters:        return "`:toasters:` — they're back."
+        case .lost:            return "`:lost:` — 4 8 15 16 23 42."
+        case .toasters:        return "`:toasters:` — bread on the wing."
         case .dvd:             return "`:dvd2:` — please let it hit the corner."
-        case .bsod:            return "`:bsod:` — kernel panic."
+        case .perfectBounce:   return "the corner. Finally."
+        case .bsod:            return "`:bsod:` — press any key to continue."
         case .konami:          return "Type `:` then ↑↑↓↓←→←→BA."
         case .snake:           return "`:snakegame:` — eat. grow. wrap."
         case .thermonuclear:   return "`:globalthermonuclearwar:` — shall we play a game?"
@@ -100,40 +101,39 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .rickroll:        return "`:rickroll:` — you should know better."
         case .crt:             return "`:crt:` — *thunk*. Lights out."
         case .celery:          return "`:celery:` — good morning, Paul."
-        case .perfectBounce:   return "Hit the corner."
         }
     }
 
     /// Subtle nudge shown next to an *undiscovered* egg. Oblique by design.
     var hint: String {
         switch self {
-        case .mojito:          return "The drink the app is named after."
-        case .moof:            return "He moos. He woofs. He's printed in the manual."
-        case .confetti:        return "Party in a can."
-        case .pride:           return "Six stripes."
-        case .sosumi:          return "Apple v. Apple, settled in a sound."
-        case .floppy:          return "1.44 MB of slow."
-        case .dialup:          return "You've got mail."
-        case .wilhelm:         return "The same scream, in every movie."
-        case .snow:            return "Three feet, overnight."
-        case .matrix:          return "Green rain."
+        case .mojito:          return "Rum, mint, lime, soda."
+        case .moof:            return "Clarus the dogcow goes..."
+        case .confetti:        return "Celebrate a little victory."
+        case .pride:           return "Castro Street, 1978."
+        case .sosumi:          return "Apple v. Apple"
+        case .floppy:          return "Don't copy."
+        case .dialup:          return "1000 hours free!"
+        case .wilhelm:         return "A painful film trope."
+        case .snow:            return "It won't be long before we'll all be there."
+        case .matrix:          return "Wake up."
         case .fireworks:       return "The Fourth, indoors."
         case .trogdor:         return "Consummate V's, and a beefy arm."
-        case .lost:            return "Push the button. Every 108 minutes."
+        case .lost:            return "108 minutes."
         case .toasters:        return "After dark, with wings."
         case .dvd:             return "It has to hit the corner eventually."
-        case .bsod:            return "A non-fatal error."
-        case .konami:          return "Up, up..."
-        case .snake:           return "Nokia, circa 1997."
-        case .thermonuclear:   return "How about a nice game of chess?"
-        case .myleg:           return "Anchor falls. Predictable lament."
-        case .tada:            return "Tiny brass fanfare, .wav format."
-        case .xp:              return "A hill, a sky, a single account."
-        case .solitaire:       return "Bouncing cards, victory."
-        case .rickroll:        return "Never gonna, well, you know."
-        case .crt:             return "Click. A dot. Gone."
-        case .celery:          return "Computer, load up a sequence."
         case .perfectBounce:   return "Some things require patience."
+        case .bsod:            return "A Windows inevitability."
+        case .konami:          return "Up, up..."
+        case .snake:           return "AAA mobile gaming circa 1997."
+        case .thermonuclear:   return "How about a nice game of chess?"
+        case .myleg:           return "Ow!"
+        case .tada:            return "Welcome to 3.1!"
+        case .xp:              return "Bliss."
+        case .solitaire:       return "You're all alone on this one."
+        case .rickroll:        return "We're no strangers."
+        case .crt:             return "The tube."
+        case .celery:          return "I've got a BETA sequence I've been working on..."
         }
     }
 
@@ -154,6 +154,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .lost:            return "🏝️"
         case .toasters:        return "🍞"
         case .dvd:             return "💿"
+        case .perfectBounce:   return "🎯"
         case .bsod:            return "💙"
         case .konami:          return "🕹️"
         case .snake:           return "🐍"
@@ -165,7 +166,6 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .rickroll:        return "🎤"
         case .crt:             return "📺"
         case .celery:          return "🥬"
-        case .perfectBounce:   return "🎯"
         }
     }
 }
@@ -215,6 +215,17 @@ enum EasterEggTracker {
 
     static var discoveredCount: Int { cache.count }
     static var totalCount: Int { EasterEgg.allCases.count }
+
+    /// Wipes both the discovered-set and Perfect Bounce counter. Writes an
+    /// empty array (not `removeObject`) for the same reason `clearUsageStats`
+    /// does — the dev build registers the release domain as a fallback layer,
+    /// so a removed key would resurrect from there.
+    static func reset() {
+        cache.removeAll()
+        UserDefaults.standard.set([String](), forKey: PrefsKey.easterEggsDiscovered)
+        UserDefaults.standard.removeObject(forKey: PrefsKey.perfectBounceCount)
+        NotificationCenter.default.post(name: .easterEggDiscovered, object: nil)
+    }
 }
 
 extension Notification.Name {

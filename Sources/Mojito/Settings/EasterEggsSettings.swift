@@ -76,6 +76,12 @@ struct EasterEggsSettingsView: View {
                 easterEggRow(egg, discovered: EasterEggTracker.isDiscovered(egg))
                     .padding(.vertical, rowPadding)
             }
+            HStack {
+                Text("Danger zone")
+                Spacer()
+                ResetEasterEggsButton(isDisabled: EasterEggTracker.discoveredCount == 0)
+            }
+            .padding(.vertical, rowPadding)
         } header: {
             HStack {
                 Text("Easter eggs")
@@ -207,5 +213,31 @@ struct EasterEggsSettingsView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             justCopied = false
         }
+    }
+}
+
+// MARK: - Reset eggs button
+
+/// Destructive button + confirmation for wiping easter-egg discovery progress.
+/// Parallels `ClearStatsButton` in `AboutSettings.swift`.
+struct ResetEasterEggsButton: View {
+    @State private var confirm = false
+    var isDisabled: Bool = false
+
+    var body: some View {
+        Button("Reset eggs...") { confirm = true }
+            .disabled(isDisabled)
+            .confirmationDialog(
+                "Reset all easter egg progress?",
+                isPresented: $confirm,
+                titleVisibility: .visible
+            ) {
+                Button("Reset eggs", role: .destructive) {
+                    EasterEggTracker.reset()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will erase your discovery progress and Perfect Bounce counter. The eggs themselves still work — you'll just need to find them again.")
+            }
     }
 }
