@@ -167,21 +167,22 @@ targets:
     dependencies:
       - package: Sparkle
       - package: KeyboardShortcuts
-    postBuildScripts:
-      # Debug builds: also install "Mojito Dev.app" into /Applications so it
-      # shows up in Spotlight / Finder / Launchpad consistently and can be
-      # launched from a stable path. Release builds skip this — those go
-      # through scripts/release.sh which handles signing + DMG separately.
-      - name: Install Mojito Dev to /Applications (Debug only)
-        script: |
-          if [ "$CONFIGURATION" = "Debug" ]; then
-            rsync -a --delete "$TARGET_BUILD_DIR/$WRAPPER_NAME/" "/Applications/$WRAPPER_NAME/"
-            echo "Copied $WRAPPER_NAME to /Applications/"
-          fi
-        basedOnDependencyAnalysis: false
     scheme:
       testTargets:
         - MojitoTests
+      postActions:
+        # Debug builds: install "Mojito Dev.app" into /Applications after the
+        # full build pipeline (compile → link → embed → code-sign) completes.
+        # Scheme post-actions run after code-sign, so the rsync captures the
+        # signed bundle — unlike a postBuildScript which fires before signing.
+        # Release builds skip this — those go through scripts/release.sh.
+        - name: Install Mojito Dev to /Applications (Debug only)
+          script: |
+            if [ "$CONFIGURATION" = "Debug" ]; then
+              rsync -a --delete "$TARGET_BUILD_DIR/$WRAPPER_NAME/" "/Applications/$WRAPPER_NAME/"
+              echo "Copied $WRAPPER_NAME to /Applications/"
+            fi
+          settingsTarget: Mojito
 
   MojitoTests:
     type: bundle.unit-test

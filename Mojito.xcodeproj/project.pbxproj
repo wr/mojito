@@ -537,7 +537,6 @@
 				7D6CE5B5A02283C4796414C4 /* Sources */,
 				15601F46DFE7F12B9FBCDA4F /* Resources */,
 				8D12BBB2D5095D17E64B4D0C /* Frameworks */,
-				F884B59CE84901BB69664608 /* Install Mojito Dev to /Applications (Debug only) */,
 			);
 			buildRules = (
 			);
@@ -652,27 +651,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		F884B59CE84901BB69664608 /* Install Mojito Dev to /Applications (Debug only) */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Install Mojito Dev to /Applications (Debug only)";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" = \"Debug\" ]; then\n  rsync -a --delete \"$TARGET_BUILD_DIR/$WRAPPER_NAME/\" \"/Applications/$WRAPPER_NAME/\"\n  echo \"Copied $WRAPPER_NAME to /Applications/\"\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		7D6CE5B5A02283C4796414C4 /* Sources */ = {

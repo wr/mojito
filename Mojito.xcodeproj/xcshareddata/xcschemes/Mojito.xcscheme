@@ -6,6 +6,24 @@
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       runPostActionsOnFailure = "NO">
+      <PostActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptExecutionAction">
+            <ActionContent
+               title = "Install Mojito Dev to /Applications (Debug only)"
+               scriptText = "if [ &quot;$CONFIGURATION&quot; = &quot;Debug&quot; ]; then&#10;  rsync -a --delete &quot;$TARGET_BUILD_DIR/$WRAPPER_NAME/&quot; &quot;/Applications/$WRAPPER_NAME/&quot;&#10;  echo &quot;Copied $WRAPPER_NAME to /Applications/&quot;&#10;fi&#10;">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "314D574AC0650E4957C28C71"
+                     BuildableName = "Mojito.app"
+                     BlueprintName = "Mojito"
+                     ReferencedContainer = "container:Mojito.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PostActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
