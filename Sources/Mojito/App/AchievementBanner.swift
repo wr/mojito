@@ -2,23 +2,25 @@ import AppKit
 import SwiftUI
 
 /// In-app achievement banner shown when an easter egg is first discovered.
-/// Visually mirrors a macOS notification banner: ~22pt squircle corners,
-/// `.hudWindow` glass, slides in from the right edge of the main screen.
-/// Sits just below the menu bar, in the same screen position macOS uses
-/// for notifications — so the OS chip can layer above it without overlap
-/// if it fires too.
+/// Top-center blue pill — deliberately distinct from the macOS notification
+/// banner (which slides in from the top-right with glass material). The
+/// system notification from `DiscoveryNotifier` still fires for
+/// Notification Center history.
 ///
 /// Rendered at `kCGPopUpMenuWindowLevel` (101) so it draws above the full-
-/// screen egg panels (`kCGStatusWindowLevel` = 25). The system notification
-/// from `DiscoveryNotifier` still fires for Notification Center history.
+/// screen egg panels (`kCGStatusWindowLevel` = 25).
 @MainActor
 enum AchievementBanner {
     private static var queue: [EasterEgg] = []
     private static var currentPanel: NSPanel?
-    private static let bannerSize = NSSize(width: 320, height: 64)
-    private static let margin: CGFloat = 12
-    private static let cornerRadius: CGFloat = 18
+    /// Panel is an oversized stage; the pill inside uses `.fixedSize()` so it
+    /// hugs its content. Mouse events are ignored, so the invisible area
+    /// doesn't block clicks.
+    private static let panelSize = NSSize(width: 600, height: 80)
+    private static let topMargin: CGFloat = 4
+    private static let exitOffsetY: CGFloat = 24
     private static let holdDuration: TimeInterval = 3.5
+    private static let exitDuration: TimeInterval = 0.18
 
     static func show(_ egg: EasterEgg) {
         queue.append(egg)
@@ -32,103 +34,83 @@ enum AchievementBanner {
 
         let visibleFrame = screen.visibleFrame
         let restingFrame = NSRect(
-            x: visibleFrame.maxX - bannerSize.width - margin,
-            y: visibleFrame.maxY - bannerSize.height - margin,
-            width: bannerSize.width,
-            height: bannerSize.height
+            x: visibleFrame.midX - panelSize.width / 2,
+            y: visibleFrame.maxY - panelSize.height - topMargin,
+            width: panelSize.width,
+            height: panelSize.height
         )
-        // Off-screen to the right of the main screen edge — matches the
-        // direction macOS notifications slide in from on Sonoma+.
-        let offscreenFrame = restingFrame.offsetBy(dx: bannerSize.width + margin + 40, dy: 0)
+        // Exit-only motion: panel slides up + fades out after the hold.
+        let exitFrame = restingFrame.offsetBy(dx: 0, dy: exitOffsetY)
 
         let panel = NSPanel(
-            contentRect: offscreenFrame,
+            contentRect: restingFrame,
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
         panel.isOpaque = false
         panel.backgroundColor = .clear
-        panel.hasShadow = true
-        panel.alphaValue = 0.8
+        panel.hasShadow = false  // SwiftUI draws its own shadow under the capsule
+        panel.alphaValue = 1.0  // no fade-in; the SwiftUI scale-pop is the entry
         panel.ignoresMouseEvents = true
         panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.popUpMenuWindow)))
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
 
-        // AppKit glass background. SwiftUI's `.regularMaterial` inside a
-        // borderless transparent NSPanel renders empty on macOS 14+;
-        // NSVisualEffectView as the actual contentView is reliable. Same
-        // pattern as DialupSound. `.popover` is a lighter, more subtle
-        // glass than `.hudWindow`.
-        let glass = NSVisualEffectView()
-        glass.material = .sidebar
-        glass.blendingMode = .behindWindow
-        glass.state = .active
-        glass.wantsLayer = true
-        glass.layer?.cornerRadius = cornerRadius
-        glass.layer?.cornerCurve = .continuous
-        glass.layer?.masksToBounds = true
-        glass.translatesAutoresizingMaskIntoConstraints = false
-
-        let host = NSHostingView(rootView: BannerView(
-            egg: egg,
-            discoveredCount: EasterEggTracker.discoveredCount,
-            totalCount: EasterEggTracker.totalCount
-        ))
+        let host = NSHostingView(rootView: BannerView(egg: egg))
         host.translatesAutoresizingMaskIntoConstraints = false
-        glass.addSubview(host)
+        let container = NSView(frame: NSRect(origin: .zero, size: panelSize))
+        container.addSubview(host)
         NSLayoutConstraint.activate([
-            host.leadingAnchor.constraint(equalTo: glass.leadingAnchor),
-            host.trailingAnchor.constraint(equalTo: glass.trailingAnchor),
-            host.topAnchor.constraint(equalTo: glass.topAnchor),
-            host.bottomAnchor.constraint(equalTo: glass.bottomAnchor),
+            host.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            host.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            host.topAnchor.constraint(equalTo: container.topAnchor),
+            host.bottomAnchor.constraint(equalTo: container.bottomAnchor),
         ])
-        panel.contentView = glass
+        panel.contentView = container
         panel.orderFrontRegardless()
         currentPanel = panel
 
-        // Slide in. We can't use `panel.setFrame(animate:)` — it blocks
-        // the main thread for the animation duration, which freezes the
-        // very easter-egg effect we're announcing. `animator().setFrame`
-        // silently no-ops on borderless panels. So we drive the slide
-        // ourselves with a non-blocking Timer; cheap (60 Hz × 0.35 s ≈
-        // 21 setFrameOrigin calls).
-        slide(panel: panel, from: offscreenFrame, to: restingFrame) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + holdDuration) {
-                MainActor.assumeIsolated {
-                    guard currentPanel === panel else { return }
-                    slide(panel: panel, from: restingFrame, to: offscreenFrame) {
-                        MainActor.assumeIsolated {
-                            panel.orderOut(nil)
-                            if currentPanel === panel { currentPanel = nil }
-                            showNext()
-                        }
+        // Entry is SwiftUI-driven (scale spring in BannerView). Schedule the
+        // fadeOutUp exit after the hold.
+        DispatchQueue.main.asyncAfter(deadline: .now() + holdDuration) {
+            MainActor.assumeIsolated {
+                guard currentPanel === panel else { return }
+                tween(panel: panel, from: restingFrame, to: exitFrame, startAlpha: 1, endAlpha: 0, duration: exitDuration) {
+                    MainActor.assumeIsolated {
+                        panel.orderOut(nil)
+                        if currentPanel === panel { currentPanel = nil }
+                        showNext()
                     }
                 }
             }
         }
     }
 
-    private static let slideDuration: TimeInterval = 0.35
-
-    /// Non-blocking timer-driven setFrameOrigin animation with ease-out.
-    private static func slide(
+    /// Non-blocking timer-driven frame + alpha tween with ease-out cubic.
+    /// `setFrame(animate:)` blocks the main thread (freezing the very
+    /// egg effect we're announcing) and `animator().setFrame` silently
+    /// no-ops on borderless panels, so we drive the animation by hand.
+    private static func tween(
         panel: NSPanel,
         from start: NSRect,
         to end: NSRect,
+        startAlpha: CGFloat,
+        endAlpha: CGFloat,
+        duration: TimeInterval,
         completion: @escaping () -> Void
     ) {
+        panel.setFrameOrigin(NSPoint(x: start.minX, y: start.minY))
+        panel.alphaValue = startAlpha
         let startTime = Date()
-        let dur = slideDuration
         let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { t in
             MainActor.assumeIsolated {
                 let elapsed = Date().timeIntervalSince(startTime)
-                let progress = min(1.0, elapsed / dur)
-                // Ease-out cubic: snappy entry, soft settle.
+                let progress = min(1.0, elapsed / duration)
                 let eased = 1 - pow(1 - progress, 3)
                 let x = start.minX + (end.minX - start.minX) * eased
                 let y = start.minY + (end.minY - start.minY) * eased
                 panel.setFrameOrigin(NSPoint(x: x, y: y))
+                panel.alphaValue = startAlpha + (endAlpha - startAlpha) * eased
                 if progress >= 1.0 {
                     t.invalidate()
                     completion()
@@ -141,28 +123,41 @@ enum AchievementBanner {
 
 private struct BannerView: View {
     let egg: EasterEgg
-    let discoveredCount: Int
-    let totalCount: Int
+    @State private var entered: Bool = false
 
     var body: some View {
-        HStack(alignment: .center, spacing: 10) {
+        HStack(spacing: 8) {
             Text(egg.emojiGlyph ?? "🎉")
-                .font(.system(size: 26))
-                .frame(width: 36, height: 36)
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Easter egg discovered")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                Text(egg.title)
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 0)
+                .font(.system(size: 20))
+            Text("Easter egg discovered")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white)
+            Text("·")
+                .font(.system(size: 13, weight: .regular))
+                .foregroundStyle(.white.opacity(0.55))
+            Text(egg.title)
+                .font(.system(size: 13, weight: .regular))
+                .foregroundStyle(.white.opacity(0.95))
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
-        .padding(.horizontal, 14)
+        .padding(.horizontal, 18)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(
+            Capsule()
+                .fill(Color(nsColor: .systemBlue))
+                .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
+        )
+        .fixedSize()  // pill width hugs content
+        // Horizontal scale-pop: starts at ~14% width (≈ pill height → circle)
+        // and snaps to 100% with a mild elastic overshoot (~peak 1.05).
+        // y stays at 1.0 so text height doesn't squash. Anchor defaults to .center.
+        .scaleEffect(x: entered ? 1.0 : 0.14, y: 1.0)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)  // center pill within the oversized panel stage
+        .onAppear {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.65)) {
+                entered = true
+            }
+        }
     }
 }
