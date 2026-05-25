@@ -32,6 +32,7 @@
 		3A290EFA4E50DE37FFEDF912 /* WarpSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9903710C7A46FB1BB47A47BA /* WarpSound.swift */; };
 		3D91FC131565306ABD82887E /* DiscoveryFanfare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520ABC6E5EB064A7DF4041D3 /* DiscoveryFanfare.swift */; };
 		3FDBEFA3636F345D917BE553 /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A891A50B1E32BC1A8B549268 /* AppContext.swift */; };
+		41765C78ED90EB005C04E63B /* SeasonalGates.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5C5BC5F015CABDD85262258 /* SeasonalGates.swift */; };
 		42DC32C9130BAB5381534226 /* EggIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB126DDBD153A051CDEF105B /* EggIndex.swift */; };
 		4949BE63FAD5A5FC2573CFE1 /* DefaultExclusions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */; };
 		4C024B6EA9665C5DFDB80CE7 /* WarpDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9658C9CF3396443D22FF4E28 /* WarpDrive.swift */; };
@@ -91,6 +92,7 @@
 		BE7285D962997851909C1498 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3154DBEA72DA316E341C440 /* GeneralSettings.swift */; };
 		BEB1C0A9AD31B883B9B4E884 /* CaretLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786373C2E5DE4642148857B1 /* CaretLocator.swift */; };
 		BF8DBC3E1BD0A9EA4720C6DD /* FloppySound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73A20EA050B0CD0E8FB1CA6 /* FloppySound.swift */; };
+		C025CD4AE30320C3FE69028A /* SeasonalGatesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */; };
 		C7EAEBA38EE85743E109E1B4 /* AchievementBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A31DD44ACC90D6CAC3A486 /* AchievementBanner.swift */; };
 		C86E0BA1D69D1A6B33068221 /* TriggerStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */; };
 		C892E976ED36AA1810770521 /* CeleryMan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947CA35F448BC012E3F73860 /* CeleryMan.swift */; };
@@ -200,6 +202,7 @@
 		9903710C7A46FB1BB47A47BA /* WarpSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarpSound.swift; sourceTree = "<group>"; };
 		9C81578D7A36FB7EA31D1985 /* Fireworks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fireworks.swift; sourceTree = "<group>"; };
 		9C90F0A490BC13D9CC5ADF90 /* s05.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s05.bin; sourceTree = "<group>"; };
+		9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonalGatesTests.swift; sourceTree = "<group>"; };
 		A0DE1B7DD5243E817418580C /* AudioBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioBlob.swift; sourceTree = "<group>"; };
 		A1DA7C9FD3286A7839BA642D /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		A3781043056BF9F399D00EDD /* s02.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s02.bin; sourceTree = "<group>"; };
@@ -248,6 +251,7 @@
 		ED8647D638A24D3741D78A59 /* s15.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s15.bin; sourceTree = "<group>"; };
 		EE4174E56EEBEA3423926E2A /* v10.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v10.bin; sourceTree = "<group>"; };
 		EF96A1DA7100EFFEEEEF8B7D /* Mojito.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mojito.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5C5BC5F015CABDD85262258 /* SeasonalGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonalGates.swift; sourceTree = "<group>"; };
 		F5C937DB8C91F3847F55D8A6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FACE9E8BAF08240551D5237A /* v06.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v06.bin; sourceTree = "<group>"; };
 		FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FzyScorer.swift; sourceTree = "<group>"; };
@@ -272,6 +276,7 @@
 			children = (
 				DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */,
 				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
+				9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */,
 				D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */,
 				B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */,
 			);
@@ -499,6 +504,7 @@
 				6E2009C3B36DF9228B873244 /* EmoticonTable.swift */,
 				5A8851906565F70B7815640F /* FuzzyMatcher.swift */,
 				FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */,
+				F5C5BC5F015CABDD85262258 /* SeasonalGates.swift */,
 				B375DE27AC0AE1D8DE965403 /* SkinTone.swift */,
 				6666150B793721D5095E72A8 /* SymbolsDatabase.swift */,
 			);
@@ -744,6 +750,7 @@
 				BA163217ADDEBAF751D5ABA2 /* PrideWave.swift in Sources */,
 				CEAF9DB89294B0652A8A16F7 /* PrivacyPermissionsSettings.swift in Sources */,
 				FD15928FE17F78588821135E /* Rickroll.swift in Sources */,
+				41765C78ED90EB005C04E63B /* SeasonalGates.swift in Sources */,
 				DCE52DEE8C9CEC354443E7DB /* SettingsRoot.swift in Sources */,
 				155360187C1F8C68452934E7 /* SettingsWindowController.swift in Sources */,
 				6607717F2E4D11B5563F8184 /* Shortcuts.swift in Sources */,
@@ -775,6 +782,7 @@
 			files = (
 				9E9309E8AF1F9D8B44213729 /* EmoticonTableTests.swift in Sources */,
 				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
+				C025CD4AE30320C3FE69028A /* SeasonalGatesTests.swift in Sources */,
 				917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */,
 				C86E0BA1D69D1A6B33068221 /* TriggerStateMachineTests.swift in Sources */,
 			);
