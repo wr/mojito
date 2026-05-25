@@ -15,7 +15,7 @@ The `gh-pages` branch of `wr/mojito`, served at <https://mojito.wells.ee> via Gi
 1. **Marketing site** — `index.html`, `style.css`, `picker.js`, and image assets. Static; no build, no tests, no package manager. To preview, open `index.html` directly or run `python3 -m http.server` in the repo root.
 2. **Sparkle update feed** — `appcast.xml`. **Do not hand-edit.** It's overwritten on every release by `scripts/release.sh` on the `main` branch, which then pushes the updated feed here. If you need to change feed format/structure, edit the template in the release script on `main`, not the generated XML here.
 
-The Swift app source lives on the `main` branch (sibling worktree at `/Users/wells/projects/mojito`). That repo has its own CLAUDE.md describing the app — don't duplicate that content here.
+The Swift app source lives on the `main` branch (sibling worktree at `../mojito`). That repo has its own CLAUDE.md describing the app — don't duplicate that content here.
 
 ## Architecture — `picker.js`
 
