@@ -488,6 +488,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
             TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(scored.emoji))
             recordUsage(emoji: scored.emoji)
+            SeasonalGates.fire(for: scored.emoji)
 
         case .exactMatch:
             // Typed text is `:query:` (or `::query:`). Delete only if
@@ -525,6 +526,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if let exact = database.exact(key) {
                 TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(exact))
                 recordUsage(emoji: exact)
+                SeasonalGates.fire(for: exact)
                 return
             }
         }

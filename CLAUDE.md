@@ -167,6 +167,28 @@ Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose(
 - `bin/` — vendored `generate_keys` and `sign_update` from Sparkle (committed so release doesn't depend on DerivedData being intact)
 - `Resources/` — Info.plist, entitlements, emoji.json, AppIcon.icns, easter-egg assets
 
+## Style guidelines
+
+### Code comments
+
+Be brief. Comment only when the *why* isn't obvious from the code itself —
+hidden constraints, subtle invariants, workarounds for specific bugs, behavior
+that would surprise a reader. Describe what the code *is*, not what you did or
+which user request prompted it. Don't reference tasks, fixes, or callers
+("added for X", "handles the case from W-NN") — that belongs in commit
+messages / PR descriptions and rots as the code evolves. If removing the
+comment wouldn't confuse a future reader, don't write it.
+
+### Easter eggs in user-visible text
+
+Don't mention easter eggs — even generically — in code comments, commit
+messages, PR titles/descriptions, or release notes when they'd tip off a
+reader. A bare "Added easter eggs" or "easter-egg polish" (non-specific, no
+keyword, no count, no description of what they do) is fine. Anything more
+specific — naming an egg, hinting at a trigger, listing what was added —
+goes against the obfuscation in [[easter-egg-keyword-obfuscation]] and the
+hashed-trigger design in `EggIndex.swift`. When in doubt, leave it out.
+
 ## Issue tracking & workflow
 
 Linear + Git workflow lives in `~/.claude/CLAUDE.md` (Linear SSOT + Git workflow sections). The `## Source of truth` block at the top of this file scopes those behaviors to this repo.
