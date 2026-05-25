@@ -198,7 +198,11 @@ code {
   margin: 0 auto;
   min-height: 640px;
   border-radius: 24px;
-  background: #1a2244 url("wallpaper.jpg") center / cover no-repeat;
+  background-color: #1a2244;
+  background-image: image-set(url("wallpaper.webp") type("image/webp"), url("wallpaper.jpg") type("image/jpeg"));
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 10px 30px rgba(0,0,0,0.10);
   /* No overflow:hidden here — that's done by .stage. Picker can spill out. */
 }
@@ -654,8 +658,8 @@ code {
   margin-top: 8px;
   line-height: 1.35;
 }
-.im-meta-label { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.55); }
-.im-meta-time  { font-size: 12px; color: rgba(0,0,0,0.42); }
+.im-meta-label { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.62); }
+.im-meta-time  { font-size: 12px; color: rgba(0,0,0,0.58); }
 
 .im-body { padding: 4px 14px 12px; display: flex; flex-direction: column; flex: 1; }
 
@@ -1016,7 +1020,7 @@ code {
   display: block;
 }
 .rm-text { font-size: 16px; color: #1d1d1f; }
-.rm-done .rm-text { color: rgba(0,0,0,0.4); }
+.rm-done .rm-text { color: rgba(0,0,0,0.56); }
 .rm-textarea {
   flex: 1;
   font-size: 16px;
@@ -1379,7 +1383,8 @@ footer {
 
   /* hero card uses the dark Tahoe wallpaper */
   .hero-card {
-    background: #0b0c10 url("wallpaper-dark.jpg") center / cover no-repeat;
+    background-color: #0b0c10;
+    background-image: image-set(url("wallpaper-dark.webp") type("image/webp"), url("wallpaper-dark.jpg") type("image/jpeg"));
   }
 
   /* On the dark wallpaper a pure-black rim disappears — give the border a
@@ -1434,8 +1439,8 @@ footer {
     color: #f2f2f5;
   }
   .im-contact-pill svg { color: rgba(255, 255, 255, 0.55); }
-  .im-meta-label { color: rgba(255, 255, 255, 0.65); }
-  .im-meta-time  { color: rgba(255, 255, 255, 0.45); }
+  .im-meta-label { color: rgba(255, 255, 255, 0.72); }
+  .im-meta-time  { color: rgba(255, 255, 255, 0.62); }
   /* Bumped from #2a2a2c — was too close to the #262628 body bg, bubbles
      disappeared. #3a3a3c sits where real Tahoe Messages received bubbles do. */
   .bubble.received { background: #3a3a3c; color: #f2f2f5; }
@@ -1471,7 +1476,7 @@ footer {
   .rm-tb-left svg,
   .rm-tb-right svg { color: rgba(255, 255, 255, 0.72); }
   .rm-text { color: #f2f2f5; }
-  .rm-done .rm-text { color: rgba(255, 255, 255, 0.42); }
+  .rm-done .rm-text { color: rgba(255, 255, 255, 0.58); }
   .rm-textarea { color: #f2f2f5; caret-color: #f2f2f5; }
   .rm-textarea::placeholder { color: rgba(255, 255, 255, 0.36); }
   .rm-item { border-bottom-color: rgba(255, 255, 255, 0.08); }
