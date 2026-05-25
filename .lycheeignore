@@ -1,0 +1,3 @@
+# One regex per line. Lines starting with # are comments.
+# Example: ignore links that 403 from CI but resolve fine in a browser.
+# https://www\.example\.com/.*

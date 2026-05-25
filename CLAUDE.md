@@ -37,3 +37,17 @@ The embedded shortcode `DB` (lines ~85–3530) is a JS-shaped subset of the app'
 ## Release / deploy
 
 GitHub Pages serves whatever is on `gh-pages`. Push to deploy. There is no CI step. The release flow that updates `appcast.xml` runs from `main` (`scripts/release.sh <version>` in the sibling repo) and pushes to `gh-pages` as its last step — so during a release window, expect commits to land here from that script, not by hand.
+
+## Pre-publish checks
+
+`scripts/check.sh` validates the site before push: image compression, html/css/js lint, OG/Twitter/SEO metadata, internal + external links (lychee), Lighthouse (perf/SEO/a11y/best-practices, mobile + desktop, against a local server). A `pre-push` hook runs it automatically.
+
+```bash
+brew bundle && npm install      # one-time: system + node deps
+./scripts/install-hooks.sh      # one-time: wire up the pre-push hook
+./scripts/check.sh              # run all checks manually
+```
+
+Flags: `--skip-{images,lint,meta,links,lighthouse}`, `--no-external` (offline link check), `--ci` (image script reports deltas instead of staging). Individual checks under `scripts/checks/` are standalone.
+
+The hook **self-skips when the only file in the push is `appcast.xml`** so the `main`-branch release script's auto-push isn't gated. Emergency bypass: `git push --no-verify`.

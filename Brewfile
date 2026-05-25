@@ -1,0 +1,6 @@
+brew "node"
+brew "lychee"
+brew "oxipng"
+brew "jpegoptim"
+brew "svgo"
+brew "gifsicle"
