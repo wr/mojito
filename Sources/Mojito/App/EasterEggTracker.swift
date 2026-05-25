@@ -31,8 +31,12 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case k24
     case k25
     case k27
+    case k28
     case k29
     case k30
+    case k32
+    case k33
+    case k34
 
     var id: String { rawValue }
 
@@ -65,8 +69,12 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k24: return "Bliss"
         case .k25: return "Solitaire Win"
         case .k27: return "Rickroll"
+        case .k28: return "Night Owl"
         case .k29: return "CRT Power Off"
         case .k30: return "Celery Man"
+        case .k32: return "Pi Day"
+        case .k33: return "Merry Mojito"
+        case .k34: return "Spooky Season"
         }
     }
 
@@ -101,8 +109,12 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k24: return "`\(EggStrings.k24)` — to begin, click your user name."
         case .k25: return "`\(EggStrings.k25)` — the cards cascade once more."
         case .k27: return "`\(EggStrings.k27)` — you should know better."
+        case .k28: return "`\(EggStrings.k28)` — only after dark."
         case .k29: return "`\(EggStrings.k29)` — *thunk*. Lights out."
         case .k30: return "`\(EggStrings.k30)` — good morning, Paul."
+        case .k32: return "`\(EggStrings.k32)` — 3.14, once a year."
+        case .k33: return "`\(EggStrings.k33)` — ho ho ho."
+        case .k34: return "`\(EggStrings.k34)` — trick or treat."
         }
     }
 
@@ -135,8 +147,12 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k24: return "Bliss."
         case .k25: return "You're all alone on this one."
         case .k27: return "We're no strangers."
+        case .k28: return "Up past your bedtime?"
         case .k29: return "The tube."
         case .k30: return "I've got a BETA sequence I've been working on..."
+        case .k32: return "March 14, the day of..."
+        case .k33: return "December's main event."
+        case .k34: return "October 31st only."
         }
     }
 
@@ -168,8 +184,12 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k24: return "🪟"
         case .k25: return "🃏"
         case .k27: return "🎤"
+        case .k28: return "🌙"
         case .k29: return "📺"
         case .k30: return "🥬"
+        case .k32: return "🥧"
+        case .k33: return "🎄"
+        case .k34: return "🎃"
         }
     }
 }
