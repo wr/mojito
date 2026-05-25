@@ -17,7 +17,6 @@
 		155360187C1F8C68452934E7 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF01308E9212227B8106776 /* SettingsWindowController.swift */; };
 		19F991C97D4BEC5232B710AF /* BrowserURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB7AB3DB0E63AF30880FE66 /* BrowserURL.swift */; };
 		1FAF192B04A61639E66B16C8 /* Trogdor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0953EA30C5D11ACF280D7A2 /* Trogdor.swift */; };
-		24E0EFA6E95D09A8F3887C68 /* v05.bin in Resources */ = {isa = PBXBuildFile; fileRef = 9A52A0EFB2F81DFBE699AC6D /* v05.bin */; };
 		29B4C683D96EE275A114B5FD /* SingleInstanceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137C5B7AB01C74DA68FE7B74 /* SingleInstanceCoordinator.swift */; };
 		29FCA4D30EFA3D817124178B /* FuzzyMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8851906565F70B7815640F /* FuzzyMatcher.swift */; };
 		2B36C9A8EE648C8DC1836F33 /* EmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2009C3B36DF9228B873244 /* EmoticonTable.swift */; };
@@ -30,10 +29,12 @@
 		340DAC1A3E1A94B6CB4C21D1 /* TextInserter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F34180D15CF8B53F58B2A2 /* TextInserter.swift */; };
 		368FCAE7AAA6BB9F89291A1D /* SosumiSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300590ABBE9E070A97FCFF92 /* SosumiSound.swift */; };
 		39B9D624EF57D466C90D82B6 /* FlyingToasters.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF44D58B49F923004BEED6E7 /* FlyingToasters.swift */; };
+		3A290EFA4E50DE37FFEDF912 /* WarpSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9903710C7A46FB1BB47A47BA /* WarpSound.swift */; };
+		3D91FC131565306ABD82887E /* DiscoveryFanfare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520ABC6E5EB064A7DF4041D3 /* DiscoveryFanfare.swift */; };
 		3FDBEFA3636F345D917BE553 /* AppContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A891A50B1E32BC1A8B549268 /* AppContext.swift */; };
 		42DC32C9130BAB5381534226 /* EggIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB126DDBD153A051CDEF105B /* EggIndex.swift */; };
-		472842A87E87653C92BA5224 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 0EB9F8A38C0AFE36E0541B57 /* AppIcon.icns */; };
 		4949BE63FAD5A5FC2573CFE1 /* DefaultExclusions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */; };
+		4C024B6EA9665C5DFDB80CE7 /* WarpDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9658C9CF3396443D22FF4E28 /* WarpDrive.swift */; };
 		505F6B7F84EC1D9EF7AB55C9 /* SolitaireWin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E63ABA27E65953D84162097 /* SolitaireWin.swift */; };
 		527E2FD4617302A4202C22E2 /* v04.bin in Resources */ = {isa = PBXBuildFile; fileRef = 127F100886742DCE05A171B4 /* v04.bin */; };
 		54BE766E1C8E447D04D3F02C /* ParticlePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F53545C34DF695F1B03CB2 /* ParticlePanel.swift */; };
@@ -65,7 +66,6 @@
 		87ACEE7E1331065BA81E0B52 /* KeyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 561D5F53503A9DDE7BE03430 /* KeyMonitor.swift */; };
 		87F16A28F58C4854576DD450 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B06D1C751C2161A7A99DA1 /* AppDelegate.swift */; };
 		89AB6401CC7F94BCBF0D3437 /* s16.bin in Resources */ = {isa = PBXBuildFile; fileRef = E87A9C3A9251B8908CFB056A /* s16.bin */; };
-		8E134BA69353865C487310E0 /* AppIconDev.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9E22F5735A6F6E1E450909B2 /* AppIconDev.icns */; };
 		8EE9F3A928A7AFDB16C6D9A2 /* OnboardingRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4512D76E20BD99269775200B /* OnboardingRoot.swift */; };
 		917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */; };
 		9234FF3040DB70F660567DCB /* v12.bin in Resources */ = {isa = PBXBuildFile; fileRef = 8616DAC09008096A70541CEE /* v12.bin */; };
@@ -94,6 +94,7 @@
 		C7EAEBA38EE85743E109E1B4 /* AchievementBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A31DD44ACC90D6CAC3A486 /* AchievementBanner.swift */; };
 		C86E0BA1D69D1A6B33068221 /* TriggerStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */; };
 		C892E976ED36AA1810770521 /* CeleryMan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947CA35F448BC012E3F73860 /* CeleryMan.swift */; };
+		C8F9762D99C984ABBB63A2BE /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 1BA5A32889912268FF08AB30 /* AppIcon.icon */; };
 		CA1857DDE9F106C6CCB3FD2F /* v09.bin in Resources */ = {isa = PBXBuildFile; fileRef = 4F4CFB098FFC29AB8C8B9855 /* v09.bin */; };
 		CA9FE651B042EFCC920407D5 /* ImageBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74DB9192DF20F83CAD8A820C /* ImageBlob.swift */; };
 		CEAF9DB89294B0652A8A16F7 /* PrivacyPermissionsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */; };
@@ -118,6 +119,7 @@
 		FB20006241210D1D36AB7EEF /* s06.bin in Resources */ = {isa = PBXBuildFile; fileRef = 2F21A9938263FE3EE577F03D /* s06.bin */; };
 		FB6F709623B1472B32490F1D /* KonamiPayoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = E229DD4E9239183CD578F665 /* KonamiPayoff.swift */; };
 		FBA7F794BE95BEC4E4D84AD8 /* v10.bin in Resources */ = {isa = PBXBuildFile; fileRef = EE4174E56EEBEA3423926E2A /* v10.bin */; };
+		FCC584110B97D56E2E7065FA /* AppIconDev.icon in Resources */ = {isa = PBXBuildFile; fileRef = CDB886D82441D68D2F815AD3 /* AppIconDev.icon */; };
 		FD15928FE17F78588821135E /* Rickroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69B54539CBE867AD7AEBC39 /* Rickroll.swift */; };
 		FE1196787A788B1187BD9934 /* s13.bin in Resources */ = {isa = PBXBuildFile; fileRef = C06E0C983CA81BD9B703651A /* s13.bin */; };
 		FEC590B7DADC53EF948E7677 /* FocusedElementCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0C43AE82D06A067585D3882 /* FocusedElementCache.swift */; };
@@ -137,13 +139,13 @@
 		019FC9E40B9630700D2106CE /* EmojiDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiDatabase.swift; sourceTree = "<group>"; };
 		0836B5ACF7E24509928DA7B0 /* BouncingDVD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BouncingDVD.swift; sourceTree = "<group>"; };
 		088608D6A2243D8E95953095 /* WilhelmScream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WilhelmScream.swift; sourceTree = "<group>"; };
-		0EB9F8A38C0AFE36E0541B57 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		100317FDEDAED8905256B964 /* AboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettings.swift; sourceTree = "<group>"; };
 		127F100886742DCE05A171B4 /* v04.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v04.bin; sourceTree = "<group>"; };
 		137C5B7AB01C74DA68FE7B74 /* SingleInstanceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleInstanceCoordinator.swift; sourceTree = "<group>"; };
 		151DC25F7CEE4F3BE8F23650 /* CRTPowerOff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRTPowerOff.swift; sourceTree = "<group>"; };
 		186ED6EF6F678E8C3F082FD8 /* MoofSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoofSound.swift; sourceTree = "<group>"; };
 		1A1F4596F8DFA66A87D50D02 /* OnboardingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindowController.swift; sourceTree = "<group>"; };
+		1BA5A32889912268FF08AB30 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppIcon.icon; path = Resources/AppIcon.icon; sourceTree = SOURCE_ROOT; };
 		1C7AACE4E2FA1FB07AB5083A /* XPLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPLogin.swift; sourceTree = "<group>"; };
 		2027256AFD59D65C41FAA2AD /* PermissionsCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsCoordinator.swift; sourceTree = "<group>"; };
 		22B06D1C751C2161A7A99DA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 		4F59A4077DA036DF99C272DC /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
 		5111A1AB2B4D546A7D073563 /* s08.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s08.bin; sourceTree = "<group>"; };
 		51A28AC761A1481017B493E0 /* v01.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v01.bin; sourceTree = "<group>"; };
+		520ABC6E5EB064A7DF4041D3 /* DiscoveryFanfare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryFanfare.swift; sourceTree = "<group>"; };
 		52DF280ABF42475053B4EB56 /* MatrixRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixRain.swift; sourceTree = "<group>"; };
 		54037341F6A92839A94F3408 /* s04.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s04.bin; sourceTree = "<group>"; };
 		561D5F53503A9DDE7BE03430 /* KeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMonitor.swift; sourceTree = "<group>"; };
@@ -193,10 +196,10 @@
 		947CA35F448BC012E3F73860 /* CeleryMan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CeleryMan.swift; sourceTree = "<group>"; };
 		94A31DD44ACC90D6CAC3A486 /* AchievementBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementBanner.swift; sourceTree = "<group>"; };
 		9528726096C90D6A0523B86F /* Emoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
-		9A52A0EFB2F81DFBE699AC6D /* v05.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v05.bin; sourceTree = "<group>"; };
+		9658C9CF3396443D22FF4E28 /* WarpDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarpDrive.swift; sourceTree = "<group>"; };
+		9903710C7A46FB1BB47A47BA /* WarpSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarpSound.swift; sourceTree = "<group>"; };
 		9C81578D7A36FB7EA31D1985 /* Fireworks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fireworks.swift; sourceTree = "<group>"; };
 		9C90F0A490BC13D9CC5ADF90 /* s05.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s05.bin; sourceTree = "<group>"; };
-		9E22F5735A6F6E1E450909B2 /* AppIconDev.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIconDev.icns; sourceTree = "<group>"; };
 		A0DE1B7DD5243E817418580C /* AudioBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioBlob.swift; sourceTree = "<group>"; };
 		A1DA7C9FD3286A7839BA642D /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		A3781043056BF9F399D00EDD /* s02.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s02.bin; sourceTree = "<group>"; };
@@ -221,6 +224,7 @@
 		C410F8B7AF8493C098EA2AF1 /* ConfettiRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiRain.swift; sourceTree = "<group>"; };
 		C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPermissionsSettings.swift; sourceTree = "<group>"; };
 		C876AD00FBA92A6CA56ABD95 /* s07.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s07.bin; sourceTree = "<group>"; };
+		CDB886D82441D68D2F815AD3 /* AppIconDev.icon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppIconDev.icon; path = Resources/AppIconDev.icon; sourceTree = SOURCE_ROOT; };
 		D05EB6710B1D2B6310DE45AC /* s14.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s14.bin; sourceTree = "<group>"; };
 		D2C4C16E01184684E33C3437 /* MyLegSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLegSound.swift; sourceTree = "<group>"; };
 		D2F34180D15CF8B53F58B2A2 /* TextInserter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInserter.swift; sourceTree = "<group>"; };
@@ -291,8 +295,8 @@
 		0DBA269A378EED2346D5C3BA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				0EB9F8A38C0AFE36E0541B57 /* AppIcon.icns */,
-				9E22F5735A6F6E1E450909B2 /* AppIconDev.icns */,
+				1BA5A32889912268FF08AB30 /* AppIcon.icon */,
+				CDB886D82441D68D2F815AD3 /* AppIconDev.icon */,
 				F5C937DB8C91F3847F55D8A6 /* Assets.xcassets */,
 				70F2866D3BE0CC5D08CF9AD1 /* Emoji */,
 				DF0A9FF25BC996BC640A35A0 /* s01.bin */,
@@ -312,7 +316,6 @@
 				E5E4119DFCFBCC4A92FEEB1C /* v02.bin */,
 				2C4CF18CE5AC46767EFCA557 /* v03.bin */,
 				127F100886742DCE05A171B4 /* v04.bin */,
-				9A52A0EFB2F81DFBE699AC6D /* v05.bin */,
 				FACE9E8BAF08240551D5237A /* v06.bin */,
 				7CCBA41F4C17CC47E155A9BE /* v07.bin */,
 				B000574456AD1D158ED5C88B /* v08.bin */,
@@ -426,6 +429,7 @@
 				7EB589505841013FF5EF5500 /* ConfettiSound.swift */,
 				151DC25F7CEE4F3BE8F23650 /* CRTPowerOff.swift */,
 				2361376F2801DB575F27B480 /* DialupSound.swift */,
+				520ABC6E5EB064A7DF4041D3 /* DiscoveryFanfare.swift */,
 				E6F0EF28CC67A6AB9FFF203F /* DiscoveryNotifier.swift */,
 				C02F1996A3DED7A0A133E24C /* DockIconManager.swift */,
 				3188FF1FD6559BF8E64C19CC /* EasterEggTracker.swift */,
@@ -456,6 +460,8 @@
 				B05F08FB28C8998B7F7075BB /* TicTacToeGame.swift */,
 				B0953EA30C5D11ACF280D7A2 /* Trogdor.swift */,
 				702AC2870CD686AB17CC518E /* UpdaterCoordinator.swift */,
+				9658C9CF3396443D22FF4E28 /* WarpDrive.swift */,
+				9903710C7A46FB1BB47A47BA /* WarpSound.swift */,
 				088608D6A2243D8E95953095 /* WilhelmScream.swift */,
 				1C7AACE4E2FA1FB07AB5083A /* XPLogin.swift */,
 			);
@@ -618,8 +624,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				472842A87E87653C92BA5224 /* AppIcon.icns in Resources */,
-				8E134BA69353865C487310E0 /* AppIconDev.icns in Resources */,
+				C8F9762D99C984ABBB63A2BE /* AppIcon.icon in Resources */,
+				FCC584110B97D56E2E7065FA /* AppIconDev.icon in Resources */,
 				8669DFC49B3F7DBE689337C0 /* Assets.xcassets in Resources */,
 				08B90EAE6DAD0198A743979E /* Emoji in Resources */,
 				06E493068FD409A2B795BC56 /* s01.bin in Resources */,
@@ -639,7 +645,6 @@
 				0821677DEC58AC2FCE0C3BBF /* v02.bin in Resources */,
 				67B986DB09F844C3688F3A31 /* v03.bin in Resources */,
 				527E2FD4617302A4202C22E2 /* v04.bin in Resources */,
-				24E0EFA6E95D09A8F3887C68 /* v05.bin in Resources */,
 				E3B84D347FB801B6A62E980D /* v06.bin in Resources */,
 				D57C0BA3F93C45531A439D89 /* v07.bin in Resources */,
 				B1A2CBCCBC3A23CDE4F032F4 /* v08.bin in Resources */,
@@ -696,6 +701,7 @@
 				6A8EC5B13FA4A0AC0F338875 /* ConfettiSound.swift in Sources */,
 				4949BE63FAD5A5FC2573CFE1 /* DefaultExclusions.swift in Sources */,
 				55C7BE736206664DE37166E2 /* DialupSound.swift in Sources */,
+				3D91FC131565306ABD82887E /* DiscoveryFanfare.swift in Sources */,
 				E62A74A5CA784B452A59CE00 /* DiscoveryNotifier.swift in Sources */,
 				E9340C650BD416393A44ACC3 /* DockIconManager.swift in Sources */,
 				A9CDDCEBAC41BF8676B8F2EC /* EasterEggTracker.swift in Sources */,
@@ -755,6 +761,8 @@
 				1FAF192B04A61639E66B16C8 /* Trogdor.swift in Sources */,
 				D69A33630F4FD6D6EB950C67 /* UpdaterCoordinator.swift in Sources */,
 				2BF7E787E46AB243597A38CB /* VideoBlob.swift in Sources */,
+				4C024B6EA9665C5DFDB80CE7 /* WarpDrive.swift in Sources */,
+				3A290EFA4E50DE37FFEDF912 /* WarpSound.swift in Sources */,
 				DF4F5EB36D764A99CAB8CADB /* WilhelmScream.swift in Sources */,
 				AC2B8E0C22D16F8CCEEAA185 /* XPLogin.swift in Sources */,
 				B520161A0B158BFFC5C33440 /* main.swift in Sources */,
@@ -888,7 +896,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = Resources/Mojito.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -897,7 +905,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ee.wells.Mojito;
 				PRODUCT_MODULE_NAME = Mojito;
 				SDKROOT = macosx;
@@ -980,7 +988,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = Resources/Mojito.dev.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Resources/Info.plist;
@@ -989,7 +997,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ee.wells.Mojito.dev;
 				PRODUCT_MODULE_NAME = Mojito;
 				PRODUCT_NAME = "Mojito Dev";

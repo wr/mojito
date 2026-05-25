@@ -58,7 +58,7 @@ struct AboutSettingsView: View {
                 .resizable()
                 .frame(width: 72, height: 72)
             Text(AppInfo.displayName)
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .font(.system(size: 22, weight: .semibold))
             Text("Version \(version) (\(build))")
                 .font(.callout)
                 .foregroundStyle(.secondary)

@@ -586,6 +586,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             TextInserter.deleteBackward(deleteCount)
             HatchClock.start()
             EasterEggTracker.record(.k14)
+        case FuzzyMatcher.k15Hex:
+            TextInserter.deleteBackward(deleteCount)
+            WarpDrive.start()
+            EasterEggTracker.record(.k15)
         case FuzzyMatcher.k16Hex:
             TextInserter.deleteBackward(deleteCount)
             FlyingToasters.start()

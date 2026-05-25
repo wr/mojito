@@ -5,5 +5,20 @@
       "mcp__plugin_linear_linear__list_issue_labels",
       "mcp__plugin_linear_linear__list_users"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "xcodebuild -project Mojito.xcodeproj -scheme Mojito -configuration Debug -destination 'platform=macOS' build > /tmp/mojito-build.log 2>&1",
+            "timeout": 300,
+            "async": true,
+            "statusMessage": "Rebuilding Mojito Dev → /Applications"
+          }
+        ]
+      }
+    ]
   }
 }

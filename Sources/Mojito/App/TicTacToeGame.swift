@@ -79,7 +79,7 @@ private struct TicTacToeView: View {
     @State private var showMonologue = false
     @State private var typedCount: Int = 0
     @State private var typeTimer: Timer?
-    @State private var speechSynth: NSSpeechSynthesizer?
+    @State private var speechSynth: AVSpeechSynthesizer?
     @State private var speechDelegate: SpeechDelegate?
     /// Set at each `\n\n` so the on-screen pause matches the narration's
     /// `[[slnc …]]` beat.
@@ -215,7 +215,7 @@ private struct TicTacToeView: View {
         .onDisappear {
             typeTimer?.invalidate()
             typeTimer = nil
-            speechSynth?.stopSpeaking()
+            speechSynth?.stopSpeaking(at: .immediate)
             speechSynth = nil
             speechDelegate = nil
         }
@@ -261,25 +261,39 @@ private struct TicTacToeView: View {
         }
     }
 
-    /// Junior voice, falling back to system default. 700ms silence
-    /// injected at each blank line so the narration takes the same beat
-    /// as the typewriter.
+    /// Junior voice, falling back to system default. The monologue is
+    /// split at `\n\n` into separate utterances; the second utterance's
+    /// `preUtteranceDelay` injects the 700ms beat that matches the
+    /// typewriter pause. (AVSpeechSynthesizer doesn't honor the
+    /// `[[slnc …]]` markup that NSSpeechSynthesizer did.)
     private func startNarration() {
-        let juniorID = NSSpeechSynthesizer.VoiceName(rawValue: "com.apple.speech.synthesis.voice.Junior")
-        let synth = NSSpeechSynthesizer(voice: juniorID) ?? NSSpeechSynthesizer()
-        synth.rate = 230
-        let delegate = SpeechDelegate {
+        let synth = AVSpeechSynthesizer()
+        let voice = AVSpeechSynthesisVoice(identifier: "com.apple.speech.synthesis.voice.Junior")
+            ?? AVSpeechSynthesisVoice(language: "en-US")
+
+        let parts = monologue.components(separatedBy: "\n\n").map {
+            $0.replacingOccurrences(of: "\n", with: " ")
+        }
+        var utterances: [AVSpeechUtterance] = []
+        for (i, part) in parts.enumerated() {
+            let u = AVSpeechUtterance(string: part)
+            u.voice = voice
+            // ~230 wpm in the NS API corresponded to a slightly fast Junior;
+            // 0.55 on the 0..1 AV scale lands in the same ballpark.
+            u.rate = 0.55
+            if i > 0 { u.preUtteranceDelay = 0.7 }
+            utterances.append(u)
+        }
+
+        let last = utterances.last
+        let delegate = SpeechDelegate(finalUtterance: last) {
             // Linger 3s after the last syllable.
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 TicTacToeGame.dismiss()
             }
         }
         synth.delegate = delegate
-        // Flatten single newlines so the synth doesn't pause forever.
-        let spoken = monologue
-            .replacingOccurrences(of: "\n\n", with: " [[slnc 700]] ")
-            .replacingOccurrences(of: "\n", with: " ")
-        synth.startSpeaking(spoken)
+        for u in utterances { synth.speak(u) }
         speechSynth = synth
         speechDelegate = delegate
     }
@@ -480,14 +494,28 @@ enum TicTacToeSounds {
     }
 }
 
-/// Stored in `@State` to outlive NSSpeechSynthesizer's weak ref.
+/// Stored in `@State` to outlive AVSpeechSynthesizer's weak ref. The
+/// monologue is queued as multiple utterances (so we can insert a
+/// preUtteranceDelay between them) — `onFinish` only fires on the very
+/// last one, identified by reference.
 @MainActor
-private final class SpeechDelegate: NSObject, NSSpeechSynthesizerDelegate {
+private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate {
+    // nonisolated(unsafe) because the delegate callback is nonisolated and
+    // only does `===` reference identity against this — that's atomic and
+    // the value never mutates after init, so no actual data race.
+    nonisolated(unsafe) let finalUtterance: AVSpeechUtterance?
     let onFinish: () -> Void
-    init(onFinish: @escaping () -> Void) { self.onFinish = onFinish }
+    init(finalUtterance: AVSpeechUtterance?, onFinish: @escaping () -> Void) {
+        self.finalUtterance = finalUtterance
+        self.onFinish = onFinish
+    }
 
-    nonisolated func speechSynthesizer(_ sender: NSSpeechSynthesizer,
-                                       didFinishSpeaking finishedSpeaking: Bool) {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer,
+                                       didFinish utterance: AVSpeechUtterance) {
+        // Compare here so the async closure never captures the non-Sendable
+        // utterance — only the resulting Bool flows across the queue hop.
+        let isFinal = utterance === finalUtterance
+        guard isFinal else { return }
         DispatchQueue.main.async {
             MainActor.assumeIsolated { self.onFinish() }
         }

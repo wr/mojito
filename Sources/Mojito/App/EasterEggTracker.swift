@@ -18,6 +18,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case k12
     case k13
     case k14
+    case k15
     case k16
     case k17
     case k31
@@ -51,6 +52,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k12: return "Fireworks"
         case .k13: return "Trogdor!"
         case .k14: return "The Hatch"
+        case .k15: return "Warp Drive"
         case .k16: return "Flying Toasters"
         case .k17: return "Bouncing DVD"
         case .k31: return "Perfect Bounce"
@@ -86,6 +88,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k12: return "`\(EggStrings.k12)` — Roman candles, indoors."
         case .k13: return "`\(EggStrings.k13)` — burninate."
         case .k14: return "`\(EggStrings.k14)` — 4 8 15 16 23 42."
+        case .k15: return "`\(EggStrings.k15)` — punch it."
         case .k16: return "`\(EggStrings.k16)` — bread on the wing."
         case .k17: return "`\(EggStrings.k17)` — please let it hit the corner."
         case .k31: return "the corner. Finally."
@@ -95,7 +98,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k21: return "`\(EggStrings.k21)` — shall we play a game?"
         case .k22: return "`\(EggStrings.k22)` — yelled by a fry cook in Bikini Bottom."
         case .k23: return "`\(EggStrings.k23)` — that little victory chime."
-        case .k24: return "`\(EggStrings.k24)` — welcome back, Wells."
+        case .k24: return "`\(EggStrings.k24)` — to begin, click your user name."
         case .k25: return "`\(EggStrings.k25)` — the cards cascade once more."
         case .k27: return "`\(EggStrings.k27)` — you should know better."
         case .k29: return "`\(EggStrings.k29)` — *thunk*. Lights out."
@@ -114,11 +117,12 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k07: return "Don't copy."
         case .k08: return "1000 hours free!"
         case .k09: return "A painful film trope."
-        case .k10: return "It won't be long before we'll all be there."
+        case .k10: return "There's a chill in the air..."
         case .k11: return "Wake up."
         case .k12: return "The Fourth, indoors."
         case .k13: return "Consummate V's, and a beefy arm."
         case .k14: return "108 minutes."
+        case .k15: return "Engage."
         case .k16: return "After dark, with wings."
         case .k17: return "It has to hit the corner eventually."
         case .k31: return "Some things require patience."
@@ -151,6 +155,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k12: return "🎆"
         case .k13: return "🐉"
         case .k14: return "🏝️"
+        case .k15: return "🛸"
         case .k16: return "🍞"
         case .k17: return "💿"
         case .k31: return "🎯"
@@ -206,6 +211,7 @@ enum EasterEggTracker {
         // UNUserNotification path (DiscoveryNotifier) is suppressed — it
         // doubled up with the in-app banner and required a permission grant.
         AchievementBanner.show(egg)
+        DiscoveryFanfare.play()
     }
 
     static func isDiscovered(_ egg: EasterEgg) -> Bool {

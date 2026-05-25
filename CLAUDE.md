@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Mojito is a macOS menu-bar utility (`ee.wells.Mojito`, deployment target 14.0) that expands `:emoji:` shortcodes into real emoji in any text field anywhere on macOS. It hooks `CGEventTap` to watch keystrokes globally, runs a state machine over the events, and uses synthetic keyboard events to delete the typed `:query:` and insert the chosen emoji. The original design doc lives at `PLAN.md` and is still mostly accurate.
+Mojito is a macOS menu-bar utility (`ee.wells.Mojito`, deployment target 14.0) that expands `:emoji:` shortcodes into real emoji in any text field anywhere on macOS. It hooks `CGEventTap` to watch keystrokes globally, runs a state machine over the events, and uses synthetic keyboard events to delete the typed `:query:` and insert the chosen emoji.
 
 ## Commands
 
@@ -73,7 +73,7 @@ machinery.
 - **Do not switch to ad-hoc signing (`-`).** The "Mojito Dev" self-signed identity is what keeps Accessibility / Input Monitoring TCC grants stable across rebuilds. Every ad-hoc rebuild gets a fresh cdhash and TCC treats it as a different app.
 - **Debug builds have their own bundle ID (`ee.wells.Mojito.dev`).** This is intentional — it keeps the dev build's TCC grants, login-item registration, and ⌘-Tab presence fully separate from any released `Mojito.app` on the same Mac. You'll need to grant Accessibility + Input Monitoring once to `Mojito Dev.app` (separately from `Mojito.app`); they'll persist across rebuilds because the "Mojito Dev" code-signing identity is stable. Sparkle is disabled in Debug so the dev build doesn't try to update itself to the release.
 - **Don't bump the emoji DB by re-running `build_emoji_db.py` alone.** The script pins SHA256 digests of upstream emojibase files in `EXPECTED_SHA256`. Bumping requires manual review + paste of new digests (the script explains the procedure in its header).
-- **`SUPublicEDKey` in `Resources/Info.plist` must be set before any release.** `scripts/release.sh` aborts if it's empty. Generate via `./bin/generate_keys` (Sparkle stashes the private key in the login keychain, prints the public key; paste public into `project.yml`).
+- **`SUPublicEDKey` in `project.yml` must be set before any release.** It's substituted into `Resources/Info.plist` at build time via the `info.properties` block, and `scripts/release.sh` aborts if it's empty. Generate via `./bin/generate_keys` (Sparkle stashes the private key in the login keychain, prints the public key; paste public into `project.yml`).
 
 ## Architecture
 
@@ -88,7 +88,7 @@ TriggerStateMachine (.idle / .capturing(query:))
    ↓ TriggerAction (+ consumesKey)
 Engine.apply(action:)
    ↓
-TextInserter (synthetic CGEvents) — or special effects (EmojiRain, ConfettiRain, MoofSound)
+TextInserter (synthetic CGEvents) — or one of the easter-egg effects under Sources/Mojito/App/
 ```
 
 `KeyMonitor.start()` is asserted to run on the main queue via `dispatchPrecondition`. This is load-bearing: the tap's runloop source is added to `CFRunLoopGetCurrent()`, which means the C callback fires on the main thread. The `Engine` delegate methods are declared `nonisolated` and use `MainActor.assumeIsolated` to dispatch synchronously — this is what lets the callback's return value (consume vs pass through) depend on state-machine output. Do not switch to `Task { @MainActor in … }` here; you lose the synchronous return semantics.
@@ -98,7 +98,7 @@ TextInserter (synthetic CGEvents) — or special effects (EmojiRain, ConfettiRai
 `TriggerAction.insertEmoji(query:mode:)` carries an `InsertMode`:
 
 - **`.fromPicker`** — user pressed Return / Tab. The terminating key was consumed (`consumesKey: true`), so the focused app has `:query` (no closing colon) when `Engine.insert` runs synchronously. Delete `query.count + 1` chars and replace.
-- **`.exactMatch`** — user typed the closing `:`. The colon was *not* consumed; it passes through. `Engine.apply` defers via `DispatchQueue.main.async` so the closing colon lands in the focused app first, then deletes `query.count + 2` chars. The exact-match path also handles the `:random:`, `:mojito:`, `:moof:`, `:confetti:` sentinel queries before falling through to `database.exact(key)` — if no shortcode matches, the typed `:query:` stays as-is (no surprise replacement).
+- **`.exactMatch`** — user typed the closing `:`. The colon was *not* consumed; it passes through. `Engine.apply` defers via `DispatchQueue.main.async` so the closing colon lands in the focused app first, then deletes `query.count + 2` chars. Before falling through to `database.exact(key)`, the exact-match path consults `EggIndex.id(forExactQuery:)` so a registered easter-egg trigger fires instead of inserting an emoji. If neither path matches, the typed `:query:` stays as-is (no surprise replacement). See the easter-egg section below for why those triggers are hashed instead of inlined.
 
 `TriggerAction.checkEmoticon(query:terminator:)` fires when a cancel char (space/punctuation) ends capture. `Engine.handleEmoticon` looks up the table in `EmoticonTable` and decides whether to consume the terminator (e.g. `:)` — terminator is part of the emoticon) or preserve it (e.g. `:D ` — space is just a delimiter).
 
@@ -112,11 +112,24 @@ TextInserter (synthetic CGEvents) — or special effects (EmojiRain, ConfettiRai
 
 `EmojiDatabase.indexed` is an array of `IndexedEmoji`, each carrying a real `Emoji` plus precomputed `EmojiHaystack` entries (lowercased `[Character]` arrays for every shortcode + label). This is built once at DB load. `FuzzyMatcher.search` iterates `database.indexed` and runs `FzyScorer.score(needle:haystack:)` — a Swift port of John Hawthorn's fzy scoring algorithm. Critically, the search loop **never allocates strings**, which keeps per-keystroke cost in the microseconds.
 
-Special "pinned" rows are appended after the fzy results when the query is a 3+ char prefix of `random`, `mojito`, `moof`, `confetti`. Each uses a sentinel hexcode (e.g. `FuzzyMatcher.randomHexcode`) so `Engine.insert` and `PickerView` can identify them without string-matching the label. Symbols (★ ⌘ ⌥ etc.) live in `SymbolsDatabase.indexed()` and get prepended to the corpus only when `PrefsKey.symbolsEnabled` is true.
+Special "pinned" rows are appended after the fzy results when the lowercased query hashes to an entry in `EggIndex.prefix` (which already covers 3+ char prefixes of every registered easter-egg trigger). The pinned hexcode is the opaque id (`k01`, `k02`, …) returned by `EggIndex`, so `Engine.insert` and `PickerView` route on that id without ever string-matching the keyword. Symbols (★ ⌘ ⌥ etc.) live in `SymbolsDatabase.indexed()` and get prepended to the corpus only when `PrefsKey.symbolsEnabled` is true.
 
 ### Skin tone
 
 `Emoji.supportsSkinTone` is decoded from `k: bool` in `emoji.json`, populated by `build_emoji_db.py` from emojibase's `skins` array. `SkinTone.apply(to:)` inserts the modifier **after the first scalar** of the emoji string — not appended at the end. This matters for ZWJ sequences: `🧔‍♀️` (U+1F9D4 ZWJ U+2640 FE0F) + dark modifier must become `🧔🏿‍♀️` ([1F9D4, 1F3FF, 200D, 2640, FE0F]), not `🧔‍♀️🏿`. The Engine and the picker preview both go through `SkinTone.apply(to:)`.
+
+### Easter eggs
+
+Mojito ships ~30 easter eggs (visual effects, sounds, mini-games) triggered by specific `:keyword:` shortcodes. The trigger keywords are *deliberately obfuscated* in source:
+
+- `Sources/Mojito/EmojiDB/EggIndex.swift` stores only SHA-256 hashes of the lowercased trigger words (and their 3+ char prefixes). Lookups go through `EggIndex.id(forExactQuery:)` / `.id(forPrefix:)`, which return opaque ids (`k01`, `k02`, …).
+- `Sources/Mojito/App/EggStrings.swift` carries the human-readable display strings (banner labels, picker pinned-row text) as XOR-masked bytes.
+
+Goal: `strings <binary>` and a casual repo skim won't surface the list. **Don't paste plaintext trigger keywords into source, comments, commit messages, PR titles/descriptions, Linear issues, or this file.** If you need to refer to a specific egg in writing, use its opaque id.
+
+`scripts/build_egg_strings.py` regenerates `EggStrings.swift` from a plaintext `label  text` list piped in via stdin. The plaintext list lives on your disk only — never commit it. The script header explains the XOR encoding and rotation procedure. To add a new egg, also add its hashed forms to `EggIndex.swift` (the script does not currently emit those — they're added by hand alongside the new effect's Swift file).
+
+`Sources/Mojito/App/EasterEggTracker.swift` keeps per-egg "discovered" state in `UserDefaults` and, on first discovery, fires the `AchievementBanner` overlay and the `DiscoveryFanfare` sound (a synthesized square-wave arpeggio — no asset blob). The individual effects each live in their own file under `Sources/Mojito/App/` (`BlueScreen`, `BouncingDVD`, `MatrixRain`, `SnakeGame`, etc.).
 
 ### Security / signing posture
 
@@ -137,10 +150,10 @@ Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose(
 
 ## File layout (where to look)
 
-- `Sources/Mojito/App/` — entry point, `Engine`, easter-egg effects, updater, dock-icon manager
+- `Sources/Mojito/App/` — entry point, `Engine`, ~30 easter-egg effects + `EasterEggTracker` / `AchievementBanner` / `DiscoveryFanfare` / `EggStrings` (see Easter eggs above), `Shortcuts.swift` (KeyboardShortcuts pause hotkeys), updater, dock-icon manager
 - `Sources/Mojito/KeyMonitor/` — `CGEventTap` wrapper + state machine
 - `Sources/Mojito/Picker/` — NSPanel + SwiftUI picker + caret positioning
-- `Sources/Mojito/EmojiDB/` — emoji/emoticon/symbol data + `FzyScorer`
+- `Sources/Mojito/EmojiDB/` — emoji/emoticon/symbol data + `FzyScorer` + `EggIndex` (hashed easter-egg lookups)
 - `Sources/Mojito/Context/` — frontmost-app/URL detection + focused-AX-element cache
 - `Sources/Mojito/Inserter/` — synthetic-keystroke insertion
 - `Sources/Mojito/Permissions/` — AX + Input Monitoring permission polling/prompting
@@ -148,7 +161,7 @@ Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose(
 - `Sources/Mojito/MenuBar/` — `NSStatusItem` controller
 - `Sources/Mojito/Onboarding/`, `Sources/Mojito/Settings/` — SwiftUI window content
 - `Sources/Mojito/Util/PrefsKey.swift` — every UserDefaults key in one place
-- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `build_emoji_db.py`, `update_appcast.py`
+- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `run-tests.sh`, `build_emoji_db.py`, `build_egg_strings.py`, `update_appcast.py`
 - `bin/` — vendored `generate_keys` and `sign_update` from Sparkle (committed so release doesn't depend on DerivedData being intact)
 - `Resources/` — Info.plist, entitlements, emoji.json, AppIcon.icns, easter-egg assets
 

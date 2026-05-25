@@ -9,25 +9,29 @@ enum FlyingToasters {
     private static var activeWindow: NSWindow?
     private static let sprite: NSImage? = ImageBlob.load("v12")
 
-    static func start(duration: TimeInterval = 8.0) {
+    static func start(duration: TimeInterval = 30.0) {
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
         let frame = screen.frame
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
 
-        let itemCount = 14
+        let itemCount = 36
         var items: [Toaster] = []
         items.reserveCapacity(itemCount)
         for _ in 0..<itemCount {
-            // Start above/right of bounds; travel down-left.
-            let startX = CGFloat.random(in: frame.width * 0.3...frame.width * 1.4)
-            let startY = CGFloat.random(in: -frame.height * 0.4...frame.height * 0.4)
+            // Cluster off the upper-right corner: startX from the right
+            // half through past the right edge, startY at least 250 px
+            // above the top edge. The minimum vertical offset guarantees
+            // a 3+ second descent before the sprite becomes visible at
+            // the slowest speed, so every toaster has a clear fly-in.
+            let startX = CGFloat.random(in: frame.width * 0.4...frame.width + 400)
+            let startY = CGFloat.random(in: -frame.height * 0.55 ... -250)
             items.append(Toaster(
                 startX: startX,
                 startY: startY,
                 speed: .random(in: 80...160),
-                launchTime: .random(in: 0..<(duration * 0.6))
+                launchTime: .random(in: 0..<(duration * 0.75))
             ))
         }
 

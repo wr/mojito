@@ -36,6 +36,7 @@ struct FuzzyMatcher {
     static let k12Hex    = "k12"
     static let k13Hex      = "k13"
     static let k14Hex    = "k14"
+    static let k15Hex          = "k15"
     static let k16Hex     = "k16"
     static let k17Hex          = "k17"
     static let k19Hex         = "k19"
@@ -74,6 +75,7 @@ struct FuzzyMatcher {
         k12Hex:     PinnedRow(hexcode: k12Hex,     character: "🎆", label: "???",      order: 89),
         k13Hex:       PinnedRow(hexcode: k13Hex,       character: "🐉", label: "???",      order: 88),
         k14Hex:     PinnedRow(hexcode: k14Hex,     character: "🏝️", label: "???",      order: 87),
+        k15Hex:           PinnedRow(hexcode: k15Hex,           character: "🛸", label: "???",      order: 86),
         k16Hex:      PinnedRow(hexcode: k16Hex,      character: "🍞", label: "???",      order: 86),
         k17Hex:           PinnedRow(hexcode: k17Hex,           character: "💿", label: "???",      order: 85),
         k19Hex:          PinnedRow(hexcode: k19Hex,          character: "💙", label: "???",      order: 84),

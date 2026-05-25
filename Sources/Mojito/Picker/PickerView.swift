@@ -148,7 +148,7 @@ private struct PickerRow: View {
         } else if FuzzyMatcher.pinnedHexcodes.contains(scored.emoji.hexcode) {
             // Non-rainbow pinned eggs surface as `???` to stay a surprise.
             Text("???")
-                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .font(.system(size: 13, weight: .medium))
                 .italic()
                 .foregroundStyle(.secondary)
         } else {
@@ -167,7 +167,7 @@ private struct PickerRow: View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { context in
             let phase = CGFloat(context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1.0))
             Text(text)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold))
                 .italic()
                 .foregroundStyle(
                     LinearGradient(

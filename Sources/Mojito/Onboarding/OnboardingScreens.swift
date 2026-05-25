@@ -6,9 +6,9 @@ struct WelcomeStep: View {
     var body: some View {
         VStack(spacing: 20) {
             VStack(spacing: 6) {
-                Text("Type :emoji: anywhere.")
-                    .font(.system(size: 28, weight: .semibold, design: .rounded))
-                Text("Slack-style shortcodes in any text field, anywhere on your Mac.")
+                Text("Autocomplete `:emoji:` everywhere.")
+                    .font(.system(size: 28, weight: .semibold))
+                Text("Type `:` to search for any emoji or symbol in seconds.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -36,11 +36,13 @@ private struct WelcomeAnimation: View {
         let emoji: String
     }
 
+    // Pulled from the homepage carousel (mojito-site/picker.js `scenes`).
     private let snippets: [Snippet] = [
-        Snippet(prefix: "Just shipped this ",       query: "tad",   emoji: "🎉"),
-        Snippet(prefix: "Pull request open ",       query: "eye",   emoji: "👀"),
-        Snippet(prefix: "Tests are green ",         query: "check", emoji: "✅"),
-        Snippet(prefix: "Side of fries with that ", query: "eggp",  emoji: "🍆"),
+        Snippet(prefix: "Hit deadline ",           query: "fire",   emoji: "🔥"),
+        Snippet(prefix: "see you soon ",           query: "wave",   emoji: "👋"),
+        Snippet(prefix: "fix the ",                query: "bug",    emoji: "🐛"),
+        Snippet(prefix: "Just shipped a new app ", query: "rocket", emoji: "🚀"),
+        Snippet(prefix: "Pick up ",                query: "gift",   emoji: "🎁"),
     ]
 
     @State private var snippetIndex: Int = 0
@@ -373,7 +375,7 @@ struct PermissionsStep: View {
 
             VStack(spacing: 6) {
                 Text("Grant accessibility permissions")
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .font(.system(size: 22, weight: .semibold))
                 Text("\(AppInfo.displayName) needs permission to work with your keyboard.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -465,8 +467,8 @@ struct DoneStep: View {
                     .foregroundStyle(.green)
 
                 VStack(spacing: 6) {
-                    Text("You're all set 🍋‍🟩")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
+                    Text("You're all set")
+                        .font(.system(size: 24, weight: .semibold))
                     Text("\(AppInfo.displayName) lives in your menu bar. Try typing `:tada:` in any text field.")
                         .font(.callout)
                         .foregroundStyle(.secondary)

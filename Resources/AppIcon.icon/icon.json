@@ -29,20 +29,6 @@
               0
             ]
           }
-        },
-        {
-          "fill" : "none",
-          "glass" : true,
-          "hidden" : true,
-          "image-name" : "Vector3a.svg",
-          "name" : "Vector3a",
-          "position" : {
-            "scale" : 6,
-            "translation-in-points" : [
-              0,
-              0
-            ]
-          }
         }
       ],
       "shadow" : {

@@ -234,7 +234,7 @@ private struct DialupView: View {
     /// Stage label, crossfading. The pulsing icon carries the in-flight feel.
     private func statusBlock(stage: DialStage) -> some View {
         Text(stage.label)
-            .font(.system(size: 18, weight: .semibold, design: .rounded))
+            .font(.system(size: 18, weight: .semibold))
             .foregroundStyle(.primary)
             .contentTransition(.opacity)
             .id(stage)
@@ -247,7 +247,7 @@ private struct DialupView: View {
                 Image(systemName: "phone.down.fill")
                     .font(.system(size: 11, weight: .semibold))
                 Text("Hang up")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .font(.system(size: 13, weight: .semibold))
             }
             .foregroundStyle(.white)
             .padding(.horizontal, 16)

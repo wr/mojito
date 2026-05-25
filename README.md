@@ -19,7 +19,7 @@ Other things it does:
 - Optional symbol insertion: `:cmd:` for ⌘, `:star:` for ★
 - Default skin tone
 - Stays out of apps and websites with native emoji input. Slack, Discord, Messages and friends are excluded out of the box.
-- Pause for an hour, until tomorrow, or indefinitely from the menu bar
+- Pause for an hour or until tomorrow from the menu bar
 
 ## Privacy
 

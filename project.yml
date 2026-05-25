@@ -37,18 +37,18 @@ targets:
       - path: Resources/Assets.xcassets
       - path: Resources/Emoji
         type: folder
-      # Ship AppIcon.icns as a direct bundle resource. actool's auto-generated
-      # icns (via .appiconset) on Xcode 26 drops the 64/512/1024 renditions,
-      # leaving macOS to fall back to the blueprint placeholder. The hand-built
-      # icns (iconutil from /tmp/AppIcon.iconset) carries all 10 macOS sizes.
-      - path: Resources/AppIcon.icns
+      # Xcode 26 Icon Composer `.icon` bundles. actool compiles each into
+      # the final .icns at build time. Folder-typed so xcodegen ships the
+      # whole bundle without descending into individual SVG/JSON files.
+      - path: Resources/AppIcon.icon
+        type: folder
         buildPhase: resources
       # Debug builds use this icon (selected via the per-config
       # APP_ICON_NAME build setting + $(APP_ICON_NAME) substitution in
-      # Info.plist). The extra 3 MB ships in Release too because xcodegen
-      # doesn't conditionalize resource sources per config — acceptable
-      # cost in exchange for a single source of truth.
-      - path: Resources/AppIconDev.icns
+      # Info.plist). The extra ~3 MB ships in Release too because xcodegen
+      # doesn't conditionalize resource sources per config.
+      - path: Resources/AppIconDev.icon
+        type: folder
         buildPhase: resources
       # Opaque-named effect assets. Names don't reveal their content; see
       # the Bundle.url(forResource:) call sites in Sources/Mojito/App/ for
@@ -86,8 +86,6 @@ targets:
       - path: Resources/v03.bin
         buildPhase: resources
       - path: Resources/v04.bin
-        buildPhase: resources
-      - path: Resources/v05.bin
         buildPhase: resources
       - path: Resources/v06.bin
         buildPhase: resources
@@ -135,8 +133,8 @@ targets:
         # works in Debug too — otherwise it'd derive from PRODUCT_NAME and
         # become "Mojito_Dev" for the dev build.
         PRODUCT_MODULE_NAME: Mojito
-        MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "5"
         ENABLE_USER_SCRIPT_SANDBOXING: NO
         GENERATE_INFOPLIST_FILE: NO
         COMBINE_HIDPI_IMAGES: YES

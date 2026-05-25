@@ -164,7 +164,7 @@ struct PrivacyDetailsSheet: View {
 
                 VStack(spacing: 6) {
                     Text("Privacy")
-                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .font(.system(size: 22, weight: .semibold))
                     Text("\(AppInfo.displayName) is built to respect your privacy. Here's how.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
