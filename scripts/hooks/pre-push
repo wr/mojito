@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Pre-push hook: runs scripts/check.sh before allowing a push.
+# Skips itself if the only file in the push diff is appcast.xml — that's the
+# release script on `main` (scripts/release.sh) pushing an auto-generated feed,
+# which should never be gated.
+#
+# Bypass: git push --no-verify
+
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+# stdin format: <local-ref> <local-sha> <remote-ref> <remote-sha>\n...
+# Collect all the diffs and union the changed file lists.
+zero="0000000000000000000000000000000000000000"
+changed=""
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [[ -z "$local_sha" ]] && continue
+  [[ "$local_sha" == "$zero" ]] && continue   # branch deletion
+  if [[ "$remote_sha" == "$zero" ]]; then
+    # New branch — diff against the default upstream if we can find one
+    base="$(git merge-base "$local_sha" origin/gh-pages 2>/dev/null || true)"
+    [[ -z "$base" ]] && base="$(git merge-base "$local_sha" origin/main 2>/dev/null || true)"
+    if [[ -n "$base" ]]; then
+      changed="$changed"$'\n'"$(git diff --name-only "$base" "$local_sha")"
+    else
+      # No common base — fall back to the commit's own files
+      changed="$changed"$'\n'"$(git show --pretty='' --name-only "$local_sha")"
+    fi
+  else
+    changed="$changed"$'\n'"$(git diff --name-only "$remote_sha" "$local_sha")"
+  fi
+done
+
+# Unique, non-empty
+files="$(printf '%s\n' "$changed" | sed '/^$/d' | sort -u)"
+
+if [[ -z "$files" ]]; then
+  exit 0
+fi
+
+# Release-script case: only appcast.xml changed.
+if [[ "$files" == "appcast.xml" ]]; then
+  printf '\033[90mpre-push: only appcast.xml changed — skipping checks (release script)\033[0m\n'
+  exit 0
+fi
+
+printf '\033[1m▸ pre-push: running ./scripts/check.sh\033[0m\n'
+printf '\033[90m  (bypass with: git push --no-verify)\033[0m\n'
+exec ./scripts/check.sh

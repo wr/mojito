@@ -1,1 +1,7 @@
 .DS_Store
+node_modules/
+.lighthouseci/
+.lycheecache
+.githooks/
+lighthouse-report.*
+/tmp/mojito-lh-*.json
