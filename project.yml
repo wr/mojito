@@ -35,21 +35,16 @@ targets:
     sources:
       - path: Sources/Mojito
       - path: Resources/Assets.xcassets
+      # Xcode 26 Icon Composer `.icon` bundles. xcodegen 2.45+ recognises
+      # the extension as `folder.iconcomposer.icon` so actool processes
+      # them as app-icon assets (do NOT set `type: folder` here — that
+      # downgrades them to opaque folders and they get copied raw, which
+      # is what broke the rendered app icon previously). The active icon
+      # per config is selected via ASSETCATALOG_COMPILER_APPICON_NAME.
+      - path: Resources/AppIcon.icon
+      - path: Resources/AppIconDev.icon
       - path: Resources/Emoji
         type: folder
-      # Xcode 26 Icon Composer `.icon` bundles. actool compiles each into
-      # the final .icns at build time. Folder-typed so xcodegen ships the
-      # whole bundle without descending into individual SVG/JSON files.
-      - path: Resources/AppIcon.icon
-        type: folder
-        buildPhase: resources
-      # Debug builds use this icon (selected via the per-config
-      # APP_ICON_NAME build setting + $(APP_ICON_NAME) substitution in
-      # Info.plist). The extra ~3 MB ships in Release too because xcodegen
-      # doesn't conditionalize resource sources per config.
-      - path: Resources/AppIconDev.icon
-        type: folder
-        buildPhase: resources
       # Opaque-named effect assets. Names don't reveal their content; see
       # the Bundle.url(forResource:) call sites in Sources/Mojito/App/ for
       # which file is which.
@@ -115,10 +110,13 @@ targets:
         # picks it up so the shipped bundle always reflects the released version.
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        # AppIcon.icns is shipped as a top-level Resources file (see sources
-        # block below). Tells LaunchServices / Finder / NSWorkspace.icon(forFile:)
-        # exactly which icon to use without round-tripping through actool.
+        # Both keys point at the active icon name. actool compiles the
+        # matching `.icon` bundle from Assets.xcassets into Assets.car and
+        # writes the right metadata into CFBundleIcons; the explicit name
+        # here keeps NSWorkspace.icon(forFile:) and older LaunchServices
+        # paths happy when they look for it by name.
         CFBundleIconFile: "$(APP_ICON_NAME)"
+        CFBundleIconName: "$(APP_ICON_NAME)"
         LSMinimumSystemVersion: "14.0"
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.utilities
@@ -138,9 +136,9 @@ targets:
         ENABLE_USER_SCRIPT_SANDBOXING: NO
         GENERATE_INFOPLIST_FILE: NO
         COMBINE_HIDPI_IMAGES: YES
-        # Empty string disables actool's AppIcon compilation. We ship our own
-        # hand-built AppIcon.icns as a resource (see sources block above).
-        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        # Per-config $(APP_ICON_NAME) selects AppIcon vs AppIconDev from the
+        # asset catalog so the dev build is visually distinct.
+        ASSETCATALOG_COMPILER_APPICON_NAME: "$(APP_ICON_NAME)"
       configs:
         Debug:
           # Dev entitlements include cs.disable-library-validation so the
@@ -173,8 +171,38 @@ targets:
       - name: Install Mojito Dev to /Applications (Debug only)
         script: |
           if [ "$CONFIGURATION" = "Debug" ]; then
+            # Xcode 26's build system schedules this script BEFORE the
+            # bundle's implicit codesign step (and serializes them — we
+            # can't poll-wait because codesign blocks on us finishing).
+            # So we sign the destination ourselves with the same identity
+            # Xcode uses (`EXPANDED_CODE_SIGN_IDENTITY` is the cert SHA-1).
+            # Sparkle.framework was signed earlier in the build and rsyncs
+            # over already-signed; we just need to (re)sign the dylibs and
+            # the bundle wrapper.
             rsync -a --delete "$TARGET_BUILD_DIR/$WRAPPER_NAME/" "/Applications/$WRAPPER_NAME/"
-            echo "Copied $WRAPPER_NAME to /Applications/"
+            DEST="/Applications/$WRAPPER_NAME"
+            for f in "$DEST/Contents/MacOS"/*.dylib; do
+              [ -f "$f" ] && codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" \
+                --options runtime --timestamp=none "$f" >/dev/null
+            done
+            codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" \
+              --entitlements "$SRCROOT/$CODE_SIGN_ENTITLEMENTS" \
+              --options runtime --timestamp=none "$DEST" >/dev/null
+            echo "Copied $WRAPPER_NAME to /Applications/ (signed in place)"
+            # If the app was already running, quit and relaunch from the new
+            # build. `pkill` returns 0 only when it actually signalled something,
+            # which doubles as our "was running" check — skip the relaunch on
+            # a cold build so we don't surprise-launch the app.
+            APP_NAME="${WRAPPER_NAME%.app}"
+            if pkill -x "$APP_NAME" 2>/dev/null; then
+              # Wait for clean exit so `open` picks up the freshly-copied bundle.
+              for _ in 1 2 3 4 5 6 7 8 9 10; do
+                pgrep -x "$APP_NAME" >/dev/null || break
+                sleep 0.1
+              done
+              open "/Applications/$WRAPPER_NAME"
+              echo "Relaunched $WRAPPER_NAME"
+            fi
           fi
         basedOnDependencyAnalysis: false
     scheme:

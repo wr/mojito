@@ -1,6 +1,11 @@
 import AppKit
 import SwiftUI
 
+@MainActor
+final class BannerController: ObservableObject {
+    @Published var visible: Bool = false
+}
+
 /// In-app achievement banner shown when an easter egg is first discovered.
 /// Top-center blue pill — deliberately distinct from the macOS notification
 /// banner (which slides in from the top-right with glass material). The
@@ -18,9 +23,8 @@ enum AchievementBanner {
     /// doesn't block clicks.
     private static let panelSize = NSSize(width: 600, height: 80)
     private static let topMargin: CGFloat = 4
-    private static let exitOffsetY: CGFloat = 24
     private static let holdDuration: TimeInterval = 3.5
-    private static let exitDuration: TimeInterval = 0.18
+    private static let exitDuration: TimeInterval = 0.3
 
     static func show(_ egg: EasterEgg) {
         queue.append(egg)
@@ -39,8 +43,6 @@ enum AchievementBanner {
             width: panelSize.width,
             height: panelSize.height
         )
-        // Exit-only motion: panel slides up + fades out after the hold.
-        let exitFrame = restingFrame.offsetBy(dx: 0, dy: exitOffsetY)
 
         let panel = NSPanel(
             contentRect: restingFrame,
@@ -51,12 +53,13 @@ enum AchievementBanner {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = false  // SwiftUI draws its own shadow under the capsule
-        panel.alphaValue = 1.0  // no fade-in; the SwiftUI scale-pop is the entry
+        panel.alphaValue = 1.0
         panel.ignoresMouseEvents = true
         panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.popUpMenuWindow)))
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
 
-        let host = NSHostingView(rootView: BannerView(egg: egg))
+        let controller = BannerController()
+        let host = NSHostingView(rootView: BannerView(egg: egg, controller: controller))
         host.translatesAutoresizingMaskIntoConstraints = false
         let container = NSView(frame: NSRect(origin: .zero, size: panelSize))
         container.addSubview(host)
@@ -70,12 +73,16 @@ enum AchievementBanner {
         panel.orderFrontRegardless()
         currentPanel = panel
 
-        // Entry is SwiftUI-driven (scale spring in BannerView). Schedule the
-        // fadeOutUp exit after the hold.
+        // Entry + exit are both SwiftUI-driven scale springs in BannerView.
+        // After the hold, flip `visible` to false to play the shrink-down,
+        // then order the panel out once the spring has settled.
         DispatchQueue.main.asyncAfter(deadline: .now() + holdDuration) {
             MainActor.assumeIsolated {
                 guard currentPanel === panel else { return }
-                tween(panel: panel, from: restingFrame, to: exitFrame, startAlpha: 1, endAlpha: 0, duration: exitDuration) {
+                withAnimation(.easeIn(duration: 0.22)) {
+                    controller.visible = false
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
                     MainActor.assumeIsolated {
                         panel.orderOut(nil)
                         if currentPanel === panel { currentPanel = nil }
@@ -85,45 +92,11 @@ enum AchievementBanner {
             }
         }
     }
-
-    /// Non-blocking timer-driven frame + alpha tween with ease-out cubic.
-    /// `setFrame(animate:)` blocks the main thread (freezing the very
-    /// egg effect we're announcing) and `animator().setFrame` silently
-    /// no-ops on borderless panels, so we drive the animation by hand.
-    private static func tween(
-        panel: NSPanel,
-        from start: NSRect,
-        to end: NSRect,
-        startAlpha: CGFloat,
-        endAlpha: CGFloat,
-        duration: TimeInterval,
-        completion: @escaping () -> Void
-    ) {
-        panel.setFrameOrigin(NSPoint(x: start.minX, y: start.minY))
-        panel.alphaValue = startAlpha
-        let startTime = Date()
-        let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { t in
-            MainActor.assumeIsolated {
-                let elapsed = Date().timeIntervalSince(startTime)
-                let progress = min(1.0, elapsed / duration)
-                let eased = 1 - pow(1 - progress, 3)
-                let x = start.minX + (end.minX - start.minX) * eased
-                let y = start.minY + (end.minY - start.minY) * eased
-                panel.setFrameOrigin(NSPoint(x: x, y: y))
-                panel.alphaValue = startAlpha + (endAlpha - startAlpha) * eased
-                if progress >= 1.0 {
-                    t.invalidate()
-                    completion()
-                }
-            }
-        }
-        RunLoop.main.add(timer, forMode: .common)
-    }
 }
 
 private struct BannerView: View {
     let egg: EasterEgg
-    @State private var entered: Bool = false
+    @ObservedObject var controller: BannerController
 
     var body: some View {
         HStack(spacing: 8) {
@@ -149,14 +122,15 @@ private struct BannerView: View {
                 .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
         )
         .fixedSize()  // pill width hugs content
-        // Horizontal scale-pop: starts at ~14% width (≈ pill height → circle)
-        // and snaps to 100% with a mild elastic overshoot (~peak 1.05).
-        // y stays at 1.0 so text height doesn't squash. Anchor defaults to .center.
-        .scaleEffect(x: entered ? 1.0 : 0.14, y: 1.0)
+        // Bouncy scale-pop in/out from center. Both axes scale together so
+        // the pill grows from a tiny dot into its resting size with an
+        // elastic overshoot, and shrinks back to a dot on dismiss.
+        .scaleEffect(controller.visible ? 1.0 : 0.0, anchor: .center)
+        .opacity(controller.visible ? 1.0 : 0.0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)  // center pill within the oversized panel stage
         .onAppear {
-            withAnimation(.spring(response: 0.28, dampingFraction: 0.65)) {
-                entered = true
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) {
+                controller.visible = true
             }
         }
     }

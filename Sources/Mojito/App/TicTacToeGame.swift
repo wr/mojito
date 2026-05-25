@@ -79,8 +79,7 @@ private struct TicTacToeView: View {
     @State private var showMonologue = false
     @State private var typedCount: Int = 0
     @State private var typeTimer: Timer?
-    @State private var speechSynth: AVSpeechSynthesizer?
-    @State private var speechDelegate: SpeechDelegate?
+    @State private var sayTask: Process?
     /// Set at each `\n\n` so the on-screen pause matches the narration's
     /// `[[slnc …]]` beat.
     @State private var typeResumeAt: Date?
@@ -215,9 +214,8 @@ private struct TicTacToeView: View {
         .onDisappear {
             typeTimer?.invalidate()
             typeTimer = nil
-            speechSynth?.stopSpeaking(at: .immediate)
-            speechSynth = nil
-            speechDelegate = nil
+            sayTask?.terminate()
+            sayTask = nil
         }
     }
 
@@ -236,7 +234,10 @@ private struct TicTacToeView: View {
         typeTimer?.invalidate()
         startNarration()
         let chars = Array(monologue)
-        typeTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { t in
+        // 0.085s/char keeps the typewriter roughly in sync with Fred at
+        // his default ~175 wpm pace; the 700ms pause below mirrors
+        // `[[slnc 700]]` so the mid-monologue beat lines up.
+        typeTimer = Timer.scheduledTimer(withTimeInterval: 0.085, repeats: true) { t in
             DispatchQueue.main.async {
                 if let resumeAt = typeResumeAt, Date() < resumeAt {
                     return
@@ -261,41 +262,36 @@ private struct TicTacToeView: View {
         }
     }
 
-    /// Junior voice, falling back to system default. The monologue is
-    /// split at `\n\n` into separate utterances; the second utterance's
-    /// `preUtteranceDelay` injects the 700ms beat that matches the
-    /// typewriter pause. (AVSpeechSynthesizer doesn't honor the
-    /// `[[slnc …]]` markup that NSSpeechSynthesizer did.)
+    /// Speaks the monologue via `/usr/bin/say -v Fred`, matching the
+    /// donation thank-you. No `-r` override so Fred speaks at his default
+    /// ~175 wpm — the WOPR monologue lands better at a measured pace than
+    /// at the donation's clipped 300 wpm. `[[slnc 700]]` injects the
+    /// mid-monologue beat. `terminationHandler` fires when `say` exits
+    /// (or is terminated on dismiss), so we linger 3s after the last
+    /// syllable like before.
     private func startNarration() {
-        let synth = AVSpeechSynthesizer()
-        let voice = AVSpeechSynthesisVoice(identifier: "com.apple.speech.synthesis.voice.Junior")
-            ?? AVSpeechSynthesisVoice(language: "en-US")
-
-        let parts = monologue.components(separatedBy: "\n\n").map {
-            $0.replacingOccurrences(of: "\n", with: " ")
-        }
-        var utterances: [AVSpeechUtterance] = []
-        for (i, part) in parts.enumerated() {
-            let u = AVSpeechUtterance(string: part)
-            u.voice = voice
-            // ~230 wpm in the NS API corresponded to a slightly fast Junior;
-            // 0.55 on the 0..1 AV scale lands in the same ballpark.
-            u.rate = 0.55
-            if i > 0 { u.preUtteranceDelay = 0.7 }
-            utterances.append(u)
-        }
-
-        let last = utterances.last
-        let delegate = SpeechDelegate(finalUtterance: last) {
-            // Linger 3s after the last syllable.
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/say")
+        let line = monologue
+            .replacingOccurrences(of: "\n\n", with: " [[slnc 700]] ")
+            .replacingOccurrences(of: "\n", with: " ")
+        task.arguments = ["-v", "Fred", line]
+        task.terminationHandler = { proc in
+            // `terminate()` on dismiss sends SIGTERM (non-zero status);
+            // skip the linger-and-dismiss in that case — we're already
+            // tearing down.
+            guard proc.terminationStatus == 0 else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                TicTacToeGame.dismiss()
+                MainActor.assumeIsolated { TicTacToeGame.dismiss() }
             }
         }
-        synth.delegate = delegate
-        for u in utterances { synth.speak(u) }
-        speechSynth = synth
-        speechDelegate = delegate
+        do {
+            try task.run()
+            sayTask = task
+        } catch {
+            // Voice unavailable: typewriter timer dismisses the window
+            // after its own 3s linger (see startTyping).
+        }
     }
 
     private func play(_ idx: Int) {
@@ -491,34 +487,6 @@ enum TicTacToeSounds {
             ))
         }
         return data
-    }
-}
-
-/// Stored in `@State` to outlive AVSpeechSynthesizer's weak ref. The
-/// monologue is queued as multiple utterances (so we can insert a
-/// preUtteranceDelay between them) — `onFinish` only fires on the very
-/// last one, identified by reference.
-@MainActor
-private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate {
-    // nonisolated(unsafe) because the delegate callback is nonisolated and
-    // only does `===` reference identity against this — that's atomic and
-    // the value never mutates after init, so no actual data race.
-    nonisolated(unsafe) let finalUtterance: AVSpeechUtterance?
-    let onFinish: () -> Void
-    init(finalUtterance: AVSpeechUtterance?, onFinish: @escaping () -> Void) {
-        self.finalUtterance = finalUtterance
-        self.onFinish = onFinish
-    }
-
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer,
-                                       didFinish utterance: AVSpeechUtterance) {
-        // Compare here so the async closure never captures the non-Sendable
-        // utterance — only the resulting Bool flows across the queue hop.
-        let isFinal = utterance === finalUtterance
-        guard isFinal else { return }
-        DispatchQueue.main.async {
-            MainActor.assumeIsolated { self.onFinish() }
-        }
     }
 }
 
