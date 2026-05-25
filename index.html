@@ -17,7 +17,9 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
-<link rel="stylesheet" href="style.css?v=56">
+<link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
+<link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="style.css?v=57">
 </head>
 <body>
 
@@ -97,7 +99,7 @@
           <div class="app-body te-body">
             <textarea class="demo-input" data-app="textedit" rows="6"
               autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-              aria-label="TextEdit document"></textarea>
+              aria-label="TextEdit document" inert tabindex="-1"></textarea>
           </div>
         </div>
 
@@ -136,7 +138,7 @@
                 <textarea class="demo-input" data-app="imessage" rows="1"
                   placeholder="iMessage"
                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                  aria-label="iMessage compose"></textarea>
+                  aria-label="iMessage compose" inert tabindex="-1"></textarea>
                 <button class="im-pill-btn" aria-label="Dictate" tabindex="-1">
                   <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                     <g fill="currentColor">
@@ -179,7 +181,7 @@ Changes not staged for commit:
               <span class="term-prompt">wells@mojito ~ %</span>
               <textarea class="demo-input term-textarea" data-app="terminal" rows="1"
                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                aria-label="Terminal input"></textarea>
+                aria-label="Terminal input" inert tabindex="-1"></textarea>
             </div>
           </div>
         </div>
@@ -228,7 +230,7 @@ Changes not staged for commit:
               <textarea class="demo-input mst-textarea" data-app="mastodon" rows="3"
                 placeholder="What's on your mind?"
                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                aria-label="Mastodon compose"></textarea>
+                aria-label="Mastodon compose" inert tabindex="-1"></textarea>
               <div class="mst-toolbar">
                 <div class="mst-tools">
                   <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" d="M3 4.5A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 3 13.5v-9Zm2 6 2-3 2.5 3.5 2-1.5 2.5 3"/></svg>
@@ -285,7 +287,7 @@ Changes not staged for commit:
               <textarea class="demo-input rm-textarea" data-app="reminders" rows="1"
                 placeholder="Add a reminder…"
                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                aria-label="Add reminder"></textarea>
+                aria-label="Add reminder" inert tabindex="-1"></textarea>
             </div>
             <button class="rm-add" aria-label="New reminder" tabindex="-1">
               <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
@@ -354,6 +356,6 @@ Changes not staged for commit:
   <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
 </footer>
 
-<script src="picker.js?v=43" defer></script>
+<script src="picker.js?v=44" defer></script>
 </body>
 </html>
