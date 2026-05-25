@@ -25,8 +25,10 @@ xcodegen generate
 # as a fallback layer (see Sources/Mojito/App/main.swift).
 xcodebuild -project Mojito.xcodeproj -scheme Mojito -configuration Debug -destination 'platform=macOS' build
 
-# Run a fresh Debug build (a post-build phase rsyncs Mojito Dev.app to /Applications)
-pkill -x "Mojito Dev"; open "/Applications/Mojito Dev.app"
+# A post-build phase rsyncs Mojito Dev.app to /Applications and — if the app
+# was already running — auto-kills + relaunches it so the new binary takes
+# over. Cold builds (app not running) don't auto-launch; start manually:
+open "/Applications/Mojito Dev.app"
 
 # Full release (Developer ID signing → notarize → staple → Sparkle-sign DMG → gh release → push gh-pages).
 # APPLE_TEAM_ID and GITHUB_REPO come from your shell env (e.g. ~/.zshrc or a local .envrc).
