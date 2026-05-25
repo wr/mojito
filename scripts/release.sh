@@ -85,7 +85,11 @@ fi
 BUILD_DIR="$REPO_ROOT/build/release"
 APP_NAME="Mojito"
 APP_PATH="$BUILD_DIR/Build/Products/Release/$APP_NAME.app"
-DMG_PATH="$REPO_ROOT/dist/$APP_NAME-$VERSION.dmg"
+# Single DMG per release, named without a version suffix. The version is
+# already encoded in the GitHub release tag (`/v$VERSION/Mojito.dmg`), so
+# Sparkle still resolves a unique URL per release while the marketing site
+# can keep linking to /releases/latest/download/Mojito.dmg.
+DMG_PATH="$REPO_ROOT/dist/$APP_NAME.dmg"
 
 mkdir -p "$BUILD_DIR" "$(dirname "$DMG_PATH")"
 
@@ -212,17 +216,12 @@ echo "## $APP_NAME $VERSION" > "$RELEASE_NOTES_FILE"
 echo "" >> "$RELEASE_NOTES_FILE"
 echo "TODO: paste release notes here, or wire this script to read CHANGELOG.md" >> "$RELEASE_NOTES_FILE"
 
-# Also publish a stable-named copy so the marketing site can link to
-# https://github.com/$GITHUB_REPO/releases/latest/download/Mojito.dmg permanently.
-STABLE_DMG_PATH="$REPO_ROOT/dist/$APP_NAME.dmg"
-cp "$DMG_PATH" "$STABLE_DMG_PATH"
-
-gh release create "v$VERSION" "$DMG_PATH" "$STABLE_DMG_PATH" \
+gh release create "v$VERSION" "$DMG_PATH" \
     --repo "$GITHUB_REPO" \
     --title "v$VERSION" \
     --notes-file "$RELEASE_NOTES_FILE"
 
-DOWNLOAD_URL="https://github.com/$GITHUB_REPO/releases/download/v$VERSION/$APP_NAME-$VERSION.dmg"
+DOWNLOAD_URL="https://github.com/$GITHUB_REPO/releases/download/v$VERSION/$APP_NAME.dmg"
 
 echo "→ Updating appcast.xml on gh-pages"
 GH_PAGES_DIR=$(mktemp -d)
