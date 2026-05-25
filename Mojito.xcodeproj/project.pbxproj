@@ -145,7 +145,7 @@
 		151DC25F7CEE4F3BE8F23650 /* CRTPowerOff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRTPowerOff.swift; sourceTree = "<group>"; };
 		186ED6EF6F678E8C3F082FD8 /* MoofSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoofSound.swift; sourceTree = "<group>"; };
 		1A1F4596F8DFA66A87D50D02 /* OnboardingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindowController.swift; sourceTree = "<group>"; };
-		1BA5A32889912268FF08AB30 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppIcon.icon; path = Resources/AppIcon.icon; sourceTree = SOURCE_ROOT; };
+		1BA5A32889912268FF08AB30 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		1C7AACE4E2FA1FB07AB5083A /* XPLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPLogin.swift; sourceTree = "<group>"; };
 		2027256AFD59D65C41FAA2AD /* PermissionsCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsCoordinator.swift; sourceTree = "<group>"; };
 		22B06D1C751C2161A7A99DA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -224,7 +224,7 @@
 		C410F8B7AF8493C098EA2AF1 /* ConfettiRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiRain.swift; sourceTree = "<group>"; };
 		C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPermissionsSettings.swift; sourceTree = "<group>"; };
 		C876AD00FBA92A6CA56ABD95 /* s07.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s07.bin; sourceTree = "<group>"; };
-		CDB886D82441D68D2F815AD3 /* AppIconDev.icon */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AppIconDev.icon; path = Resources/AppIconDev.icon; sourceTree = SOURCE_ROOT; };
+		CDB886D82441D68D2F815AD3 /* AppIconDev.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIconDev.icon; sourceTree = "<group>"; };
 		D05EB6710B1D2B6310DE45AC /* s14.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s14.bin; sourceTree = "<group>"; };
 		D2C4C16E01184684E33C3437 /* MyLegSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLegSound.swift; sourceTree = "<group>"; };
 		D2F34180D15CF8B53F58B2A2 /* TextInserter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInserter.swift; sourceTree = "<group>"; };
@@ -675,7 +675,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" = \"Debug\" ]; then\n  rsync -a --delete \"$TARGET_BUILD_DIR/$WRAPPER_NAME/\" \"/Applications/$WRAPPER_NAME/\"\n  echo \"Copied $WRAPPER_NAME to /Applications/\"\nfi\n";
+			shellScript = "if [ \"$CONFIGURATION\" = \"Debug\" ]; then\n  # Xcode 26's build system schedules this script BEFORE the\n  # bundle's implicit codesign step (and serializes them — we\n  # can't poll-wait because codesign blocks on us finishing).\n  # So we sign the destination ourselves with the same identity\n  # Xcode uses (`EXPANDED_CODE_SIGN_IDENTITY` is the cert SHA-1).\n  # Sparkle.framework was signed earlier in the build and rsyncs\n  # over already-signed; we just need to (re)sign the dylibs and\n  # the bundle wrapper.\n  rsync -a --delete \"$TARGET_BUILD_DIR/$WRAPPER_NAME/\" \"/Applications/$WRAPPER_NAME/\"\n  DEST=\"/Applications/$WRAPPER_NAME\"\n  for f in \"$DEST/Contents/MacOS\"/*.dylib; do\n    [ -f \"$f\" ] && codesign --force --sign \"$EXPANDED_CODE_SIGN_IDENTITY\" \\\n      --options runtime --timestamp=none \"$f\" >/dev/null\n  done\n  codesign --force --sign \"$EXPANDED_CODE_SIGN_IDENTITY\" \\\n    --entitlements \"$SRCROOT/$CODE_SIGN_ENTITLEMENTS\" \\\n    --options runtime --timestamp=none \"$DEST\" >/dev/null\n  echo \"Copied $WRAPPER_NAME to /Applications/ (signed in place)\"\n  # If the app was already running, quit and relaunch from the new\n  # build. `pkill` returns 0 only when it actually signalled something,\n  # which doubles as our \"was running\" check — skip the relaunch on\n  # a cold build so we don't surprise-launch the app.\n  APP_NAME=\"${WRAPPER_NAME%.app}\"\n  if pkill -x \"$APP_NAME\" 2>/dev/null; then\n    # Wait for clean exit so `open` picks up the freshly-copied bundle.\n    for _ in 1 2 3 4 5 6 7 8 9 10; do\n      pgrep -x \"$APP_NAME\" >/dev/null || break\n      sleep 0.1\n    done\n    open \"/Applications/$WRAPPER_NAME\"\n    echo \"Relaunched $WRAPPER_NAME\"\n  fi\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -893,7 +893,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APP_ICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APP_ICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = Resources/Mojito.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 5;
@@ -985,7 +985,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APP_ICON_NAME = AppIconDev;
-				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APP_ICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = Resources/Mojito.dev.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 5;
