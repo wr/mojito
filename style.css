@@ -1225,6 +1225,15 @@ main { max-width: 620px; margin: 0 auto; padding: 0 28px; }
   margin: 0;
   color: var(--text-soft);
 }
+/* In-prose links: darker accent (passes 4.5:1) + underline so they don't
+   rely on color alone. Lighthouse's a11y rules want both. */
+.prose a {
+  color: var(--accent-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.prose a:hover { color: var(--accent); }
 
 /* footer — a single Tahoe-style frosted pill, lifted right off the
    .tb-pill recipe used in the app windows above, with the copyright
