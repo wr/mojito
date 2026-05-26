@@ -4,6 +4,9 @@ enum PrefsKey {
     static let onboardingComplete    = "mojito.onboarding.complete"
     static let pausedUntil           = "mojito.paused.until"
     static let launchAtLogin         = "mojito.launchAtLogin"
+    /// When false, the menu-bar status item is suppressed; users reach
+    /// Settings by relaunching the app from Finder / Spotlight.
+    static let showMenuBarIcon       = "mojito.showMenuBarIcon"
     static let useFrequencyBoost     = "mojito.search.frequencyBoost"
     static let excludedBundleIDs     = "mojito.excludeBundleIDs"     // [String]
     static let excludedURLPatterns   = "mojito.excludeURLPatterns"   // [String]
