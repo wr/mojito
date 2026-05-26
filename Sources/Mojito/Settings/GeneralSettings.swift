@@ -24,11 +24,15 @@ struct GeneralSettingsView: View {
                         LaunchAtLogin.syncFromSystem()
                     }
 
-                Toggle("Show icon in menu bar", isOn: $showMenuBarIcon)
-                    .toggleStyle(.switch)
-
-                Toggle("Rank frequently used emoji higher", isOn: $useFrequencyBoost)
-                    .toggleStyle(.switch)
+                VStack(alignment: .leading, spacing: 4) {
+                    Toggle("Show icon in menu bar", isOn: $showMenuBarIcon)
+                        .toggleStyle(.switch)
+                    if !showMenuBarIcon {
+                        Text("When hidden, open Settings by launching \(AppInfo.displayName) from Finder or Spotlight.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
                 LabeledContent {
                     HStack(spacing: 8) {
@@ -45,12 +49,6 @@ struct GeneralSettingsView: View {
                 } label: {
                     Text("Automatic updates")
                 }
-            } footer: {
-                if !showMenuBarIcon {
-                    Text("When hidden, open Settings by launching \(AppInfo.displayName) from Finder or Spotlight.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
             }
 
             Section("Emoji") {
@@ -59,6 +57,8 @@ struct GeneralSettingsView: View {
                     Spacer()
                     SkinToneSwatches(selection: $skinToneRaw)
                 }
+                Toggle("Rank frequently used emoji higher", isOn: $useFrequencyBoost)
+                    .toggleStyle(.switch)
                 Toggle("Convert emoticons (`:D` → 😃)", isOn: $emoticonsEnabled)
                     .toggleStyle(.switch)
                 Toggle("Include symbols (experimental)", isOn: $symbolsEnabled)
