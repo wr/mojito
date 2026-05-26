@@ -5,8 +5,6 @@ enum DefaultExclusions {
     static let bundleIDs: [String] = [
         "com.tinyspeck.slackmacgap",          // Slack
         "com.hnc.Discord",                    // Discord
-        "com.apple.MobileSMS",                // Messages
-        "com.apple.iChat",                    // legacy Messages
         "notion.id",                          // Notion (mac)
         "com.linear",                         // Linear
         "com.figma.Desktop",                  // Figma
