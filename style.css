@@ -60,11 +60,9 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Off-screen carousel apps live at translateX(±1200px). .stage clip-path
-   hides them visually but doesn't stop them from contributing to body
-   scrollWidth, so the page scrolls sideways into empty space. `clip`
-   (not `hidden`) avoids creating a scroll container that would break
-   the sticky topbar. */
+/* Inactive carousel apps sit at opacity 0 with a small horizontal drift
+   (±60px). `clip` (not `hidden`) prevents any residual horizontal overflow
+   from creating a scroll container that would break the sticky topbar. */
 body { overflow-x: clip; }
 
 a { color: var(--accent); text-decoration: none; }
@@ -451,20 +449,20 @@ code {
   inset: 0;
 }
 
-/* each app is a fixed-size card centered in the hero-card, with translateX
-   for its current slide position. JS controls translateX:
-     - active app: 0
-     - exiting app: -HUGE (slides off-screen left)
-     - waiting apps: +HUGE (off-screen right; default state)
-   Window corners use a 14px squircle (continuous-curvature superellipse,
-   applied via clip-path in picker.js — see SQUIRCLE_R). */
+/* each app is a fixed-size card centered in the hero-card. JS controls
+   the slide-to-fade between states:
+     - active app: translateX(0), opacity 1
+     - exiting app: translateX(-SLIDE), opacity 0
+     - waiting apps: translateX(+SLIDE), opacity 0 (default state)
+   Window corners use a 14px border-radius. */
 .app {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) translateX(1200px);
-  transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
-  will-change: transform;
+  transform: translate(-50%, -50%) translateX(60px);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.4s ease;
+  will-change: transform, opacity;
   display: flex;
   flex-direction: column;
   border-radius: 14px;
@@ -1344,6 +1342,10 @@ footer {
      (e.g. the terminal shows the middle of each line, not the whole line). */
   .carousel,
   .picker-anchor { transform: scale(0.55); transform-origin: center center; }
+  /* hero-card min-height tracks the carousel scale so the wallpaper card
+     wraps the visible content instead of leaving a big empty pad below it.
+     Roughly 640px (full-size min-height) × scale factor. */
+  .hero-card { min-height: 380px; }
 }
 
 @media (max-width: 520px) {
@@ -1351,7 +1353,7 @@ footer {
   .nav-links a { font-size: 13px; }
   .brand span { display: none; }
   .picker { left: 12px; }
-  .hero-card { min-height: 520px; }
+  .hero-card { min-height: 320px; }
   .carousel,
   .picker-anchor { transform: scale(0.45); transform-origin: center center; }
   .desktop-icon { width: 48px; }

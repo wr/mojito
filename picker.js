@@ -17,7 +17,8 @@
   // advances or the user clicks into a different app's input.
   let input = inputs[0];
   const apps = Array.from(document.querySelectorAll('.app'));
-  const HUGE = 1400; // off-screen translateX distance, in px
+  // Small horizontal drift on enter/exit; opacity does the heavy lifting.
+  const SLIDE = 60;
 
   // Window corners use CSS border-radius (14px). We previously approximated
   // a real macOS squircle with a clip-path superellipse, but clip-path
@@ -36,45 +37,47 @@
 
   let currentAppIdx = -1;
 
-  // Every transition slides right-to-left: outgoing app exits left, incoming
-  // app snaps off-screen RIGHT (no transition) then animates back to 0.
-  // This means even the wrap (last → first) animates in the same direction.
+  // Every transition fades + drifts right-to-left: outgoing fades out drifting
+  // left, incoming snaps to the right at opacity 0 then fades in drifting to
+  // center. The fade carries most of the perceived motion; SLIDE just hints
+  // direction so the wrap (last → first) still reads as "next".
   function setActiveApp(idx) {
     if (idx === currentAppIdx) return;
     const prev = currentAppIdx;
     apps.forEach((app, i) => {
       if (i === idx) {
         if (reduceMotion) {
-          // Skip the off-screen snap + slide — appear instantly at center.
           app.style.transition = 'none';
           app.style.transform = transformAt(0);
+          app.style.opacity = '1';
           app.classList.add('is-active');
         } else {
-          // Snap to off-screen right, then animate to center.
+          // Snap to the right at opacity 0, then fade + drift to center.
           app.style.transition = 'none';
-          app.style.transform = transformAt(HUGE);
-          // Read a layout property to force the snap to commit before the
-          // animation starts. Then queue the final transform in the next frame.
+          app.style.transform = transformAt(SLIDE);
+          app.style.opacity = '0';
+          // Force the snap to commit before the animation starts.
           void app.offsetWidth;
           requestAnimationFrame(() => {
             app.style.transition = '';
             app.style.transform = transformAt(0);
+            app.style.opacity = '1';
             app.classList.add('is-active');
           });
         }
       } else if (i === prev) {
         if (reduceMotion) {
-          // Instant offscreen, no slide.
           app.style.transition = 'none';
-          app.style.transform = transformAt(-HUGE);
+          app.style.transform = transformAt(-SLIDE);
+          app.style.opacity = '0';
         } else {
-          // Animate off-screen left.
           app.style.transition = '';
-          app.style.transform = transformAt(-HUGE);
+          app.style.transform = transformAt(-SLIDE);
+          app.style.opacity = '0';
         }
         app.classList.remove('is-active');
       }
-      // Other apps: leave wherever they were (already off-screen).
+      // Other apps: leave wherever they were (already faded out).
     });
     currentAppIdx = idx;
     input = inputs[idx];
