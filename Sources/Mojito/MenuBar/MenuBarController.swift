@@ -8,6 +8,7 @@ final class MenuBarController {
     private weak var permissions: PermissionsCoordinator?
     private var openSettings: (() -> Void)?
     private var observers = Set<AnyCancellable>()
+    private var showPrefCancellable: AnyCancellable?
     private weak var checkForUpdatesItem: NSMenuItem?
     private weak var resumeItem: NSMenuItem?
     private weak var pauseHourItem: NSMenuItem?
@@ -18,16 +19,16 @@ final class MenuBarController {
         permissions: PermissionsCoordinator,
         openSettings: @escaping () -> Void
     ) {
+        // Re-entrant guard: pref-flip toggles call back into install() to
+        // recreate the status item without re-registering Combine observers.
+        guard self.engine == nil else {
+            createStatusItemIfNeeded()
+            return
+        }
+
         self.engine = engine
         self.permissions = permissions
         self.openSettings = openSettings
-
-        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = item.button {
-            applyIcon(to: button, active: true, hasIssue: false)
-        }
-        item.menu = buildMenu()
-        statusItem = item
 
         engine.$isActive
             .combineLatest(permissions.$accessibility, permissions.$inputMonitoring)
@@ -48,6 +49,44 @@ final class MenuBarController {
                 self?.refreshUpdatesItem(hasError: hasError)
             }
             .store(in: &observers)
+
+        showPrefCancellable = NotificationCenter.default
+            .publisher(for: UserDefaults.didChangeNotification, object: UserDefaults.standard)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                if Self.shouldShowMenuBarIcon {
+                    self.createStatusItemIfNeeded()
+                } else {
+                    self.remove()
+                }
+            }
+
+        if Self.shouldShowMenuBarIcon {
+            createStatusItemIfNeeded()
+        }
+    }
+
+    func remove() {
+        guard let item = statusItem else { return }
+        NSStatusBar.system.removeStatusItem(item)
+        statusItem = nil
+    }
+
+    private static var shouldShowMenuBarIcon: Bool {
+        (UserDefaults.standard.object(forKey: PrefsKey.showMenuBarIcon) as? Bool) ?? true
+    }
+
+    private func createStatusItemIfNeeded() {
+        guard statusItem == nil else { return }
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = item.button {
+            applyIcon(to: button, active: engine?.isActive ?? true, hasIssue: false)
+        }
+        item.menu = buildMenu()
+        statusItem = item
+        refreshMenu()
+        refreshUpdatesItem(hasError: UpdaterCoordinator.shared.hasUpdateError)
     }
 
     // MARK: - Icon

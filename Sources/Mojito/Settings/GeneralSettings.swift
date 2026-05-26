@@ -3,6 +3,7 @@ import KeyboardShortcuts
 
 struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.launchAtLogin) private var launchAtLogin: Bool = false
+    @AppStorage(PrefsKey.showMenuBarIcon) private var showMenuBarIcon: Bool = true
     @AppStorage(PrefsKey.useFrequencyBoost) private var useFrequencyBoost: Bool = true
     @AppStorage(PrefsKey.skinTone) private var skinToneRaw: String = SkinTone.default.rawValue
     @AppStorage(PrefsKey.emoticonsEnabled) private var emoticonsEnabled: Bool = true
@@ -23,6 +24,9 @@ struct GeneralSettingsView: View {
                         LaunchAtLogin.syncFromSystem()
                     }
 
+                Toggle("Show icon in menu bar", isOn: $showMenuBarIcon)
+                    .toggleStyle(.switch)
+
                 Toggle("Rank frequently used emoji higher", isOn: $useFrequencyBoost)
                     .toggleStyle(.switch)
 
@@ -40,6 +44,12 @@ struct GeneralSettingsView: View {
                     }
                 } label: {
                     Text("Automatic updates")
+                }
+            } footer: {
+                if !showMenuBarIcon {
+                    Text("When hidden, open Settings by launching \(AppInfo.displayName) from Finder or Spotlight.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
             }
 
