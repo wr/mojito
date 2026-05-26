@@ -1209,6 +1209,23 @@ main { max-width: 620px; margin: 0 auto; padding: 0 28px; }
 
 .prose p:last-child { margin-bottom: 0; }
 
+/* FAQ — always-visible Q&A list. Q sits tight above its answer,
+   with breathing room between pairs to separate them visually. */
+.faq-item { padding: 20px 0; }
+.faq-item:first-of-type { padding-top: 0; }
+.faq-item:last-of-type { padding-bottom: 0; }
+.faq-item h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+.faq-item p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
 /* footer — a single Tahoe-style frosted pill, lifted right off the
    .tb-pill recipe used in the app windows above, with the copyright
    sitting quietly below it. The top hairline is a gradient that fades

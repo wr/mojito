@@ -19,7 +19,7 @@
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="style.css?v=59">
+<link rel="stylesheet" href="style.css?v=64">
 </head>
 <body>
 
@@ -324,7 +324,51 @@ Changes not staged for commit:
 
 <section id="about" class="prose">
   <h2>About</h2>
-  <p>Slack and a few other apps have this — type <code>:heart:</code> and you get ❤️. It makes finding emoji easy. I wanted it everywhere on my Mac, so I built Mojito. It works just like you'd expect, and it's smart enough to ignore apps and sites that already support it. And it's free, open-source donationware.</p>
+  <p>I built Mojito because Slack's <code>:tada:</code> → 🎉 should work everywhere on macOS, not just in Slack. It's free and open source.</p>
+</section>
+
+<section id="faq" class="prose">
+  <h2>FAQ</h2>
+
+  <div class="faq-item">
+    <h3>How is this different from macOS's built-in emoji picker?</h3>
+    <p>The macOS picker (⌃⌘Space) is a separate window — open it, search, click, switch back. Mojito just appears next to your cursor as you type. Hit a colon, type a couple letters, arrow keys + Return to insert. No window, no mouse, no context switch.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>Which apps does it work in?</h3>
+    <p>Anywhere you can type — TextEdit, Terminal, Mail, Notes, browsers, Notion. It stays out of apps and sites that already do shortcode emoji natively (Slack, Discord, Messages, GitHub) so you don't get double-handling.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>Can I customize it?</h3>
+    <p>A few knobs in the menu bar: default skin tone, an optional symbol mode (<code>:cmd:</code> → ⌘, <code>:star:</code> → ★), and pause for an hour or until tomorrow. Results re-rank by how often you use them, and common emoticons like <code>:)</code> and <code>&lt;3</code> are recognized.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>What are the system requirements?</h3>
+    <p>macOS 14 (Sonoma) or later. Native on Apple Silicon and Intel.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>How do updates and uninstall work?</h3>
+    <p>Updates arrive automatically through Sparkle, the standard macOS update framework. To uninstall, quit Mojito from the menu bar and drag it from Applications to the Trash.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>Is it open source?</h3>
+    <p>Full source on <a href="https://github.com/wr/mojito">GitHub</a>, AGPL-3.0.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>Is it really free? How can I support it?</h3>
+    <p>Yes — no trial, no ads, no upsells. If you'd like to chip in, <a href="https://buymeacoffee.com/wellsriley">Buy Me a Coffee</a> is much appreciated.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>Is the app full of easter eggs for me to find?</h3>
+    <p>Yes — unlike most software built today, Mojito is both useful <em>and</em> soulful. Have fun with it.</p>
+  </div>
 </section>
 
 <section id="privacy" class="prose">
