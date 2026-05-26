@@ -3,7 +3,6 @@ import Foundation
 struct ScoredEmoji {
     let emoji: Emoji
     let matchedShortcode: String
-    let score: Int
 }
 
 /// Built lazily so apps that never enable Symbols don't pay for it.
@@ -112,7 +111,15 @@ struct FuzzyMatcher {
         let needle = Array(query.lowercased())
         guard !needle.isEmpty else { return [] }
 
-        var results: [ScoredEmoji] = []
+        // Internal carrier so the sort can rank by (isPrefix, score) without
+        // baking a magic tier offset into a single Int.
+        struct Candidate {
+            let emoji: Emoji
+            let display: String
+            let isPrefix: Bool
+            let score: Double
+        }
+        var results: [Candidate] = []
         results.reserveCapacity(64)
 
         let pool: [IndexedEmoji]
@@ -125,36 +132,60 @@ struct FuzzyMatcher {
         for indexed in pool {
             var bestScore: Double = -.infinity
             var bestDisplay: String?
+            var prefixBestScore: Double = -.infinity
+            var prefixBestDisplay: String?
             for haystack in indexed.haystacks {
                 guard let score = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
-                if score > bestScore {
+                if haystack.chars.starts(with: needle) {
+                    if score > prefixBestScore {
+                        prefixBestScore = score
+                        prefixBestDisplay = haystack.display
+                    }
+                } else if score > bestScore {
                     bestScore = score
                     bestDisplay = haystack.display
                 }
             }
-            guard let bestDisplay else { continue }
 
-            var finalScore = bestScore
+            // Prefer a prefix-matching haystack's display so the highlight
+            // sits at the start of the visible shortcode.
+            let isPrefix = prefixBestDisplay != nil
+            let display: String
+            let baseScore: Double
+            if let prefixBestDisplay {
+                display = prefixBestDisplay
+                baseScore = prefixBestScore
+            } else if let bestDisplay {
+                display = bestDisplay
+                baseScore = bestScore
+            } else {
+                continue
+            }
+
+            var finalScore = baseScore
             if useFrequencyBoost, let count = usage[indexed.emoji.hexcode], count > 0 {
                 // Cap at +5.0 (~ one extra strong-bonus match) so popular
                 // emoji can't dominate unrelated queries.
                 finalScore += min(5.0, Double(count) * 0.2)
             }
 
-            // × 1000 preserves fzy's ~0.01 gap penalties as an Int.
-            let intScore = Int(finalScore * 1000)
-            results.append(ScoredEmoji(
+            results.append(Candidate(
                 emoji: indexed.emoji,
-                matchedShortcode: bestDisplay,
-                score: intScore
+                display: display,
+                isPrefix: isPrefix,
+                score: finalScore
             ))
         }
 
+        // Prefix-tier first, then by score, then by stable emoji order.
         results.sort { lhs, rhs in
+            if lhs.isPrefix != rhs.isPrefix { return lhs.isPrefix }
             if lhs.score != rhs.score { return lhs.score > rhs.score }
             return lhs.emoji.order < rhs.emoji.order
         }
-        var trimmed = Array(results.prefix(limit))
+        var trimmed = results.prefix(limit).map {
+            ScoredEmoji(emoji: $0.emoji, matchedShortcode: $0.display)
+        }
 
         let lowercased = query.lowercased()
 
@@ -188,6 +219,6 @@ struct FuzzyMatcher {
             group: -1,
             order: order
         )
-        return ScoredEmoji(emoji: emoji, matchedShortcode: label, score: order)
+        return ScoredEmoji(emoji: emoji, matchedShortcode: label)
     }
 }
