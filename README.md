@@ -25,6 +25,18 @@ Other things it does:
 
 Mojito reads keystrokes to recognize shortcodes. Nothing is logged or sent anywhere. Password fields are skipped. The only outbound request is the update check.
 
+## Translations
+
+Available in English (US + UK), German, Spanish (Spain + Latin America), French, Italian, Brazilian Portuguese, Japanese, Simplified and Traditional Chinese, Korean, Hindi, Russian, Polish, Dutch, Arabic, Farsi, and Hebrew. The non-English strings start as LLM drafts and improve as native speakers review them — corrections are very welcome.
+
+To contribute, edit `Resources/Localizable.xcstrings` (open it in Xcode for the catalog editor, or edit the JSON directly), then open a pull request. Preserve `%@` / `%lld` placeholders, Markdown like `**bold**`, and backticked code samples like `` `:tada:` `` exactly as they appear in the source string.
+
+To preview a locale without changing your Mac's system language:
+
+```bash
+scripts/run-locale.sh fr   # or de, ja, ar, zh-Hans, etc.
+```
+
 ## Credits
 
 emojibase, Sparkle, KeyboardShortcuts, and a Swift port of fzy.
