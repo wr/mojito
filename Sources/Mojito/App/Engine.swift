@@ -78,6 +78,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
 
         gifPickerWindow.onGifInserted = { [weak self] in
+            DebugRecorder.record(.gif, "insert")
             self?.recordGifInserted()
         }
 
@@ -167,6 +168,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         captureFocusSnapshot = nil
         captureFocusPID = nil
         captureIsExcluded = false
+        DebugRecorder.record(.picker, "cancel")
     }
 
     func attach(permissions: PermissionsCoordinator) {
@@ -195,12 +197,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     func pause(until date: Date) {
         pausedUntil = date
         UserDefaults.standard.set(date.timeIntervalSince1970, forKey: PrefsKey.pausedUntil)
+        DebugRecorder.record(.engine, "pause")
         reconcile()
     }
 
     func resume() {
         pausedUntil = nil
         UserDefaults.standard.removeObject(forKey: PrefsKey.pausedUntil)
+        DebugRecorder.record(.engine, "resume")
         reconcile()
     }
 
@@ -472,6 +476,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 let anchor = CaretLocator.caretRect()
+                PickerContextStore.capture(caretOutcome: CaretLocator.lastOutcome, resolvedCaret: anchor)
+                DebugRecorder.record(.gif, "open", ["outcome": CaretLocator.lastOutcome])
                 self.gifPickerWindow.show(near: anchor)
             }
 
@@ -521,6 +527,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 return
             }
             let anchor = CaretLocator.caretRect()
+            PickerContextStore.capture(caretOutcome: CaretLocator.lastOutcome, resolvedCaret: anchor)
+            DebugRecorder.record(.picker, "open", [
+                "outcome": CaretLocator.lastOutcome,
+                "resultCount": "\(self.viewModel.results.count)",
+            ])
             self.pickerWindow.show(near: anchor)
         }
     }
@@ -591,6 +602,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // focused app. User explicitly picked a row, including special
             // rows (🎁 ???, 🎲).
             guard let scored = viewModel.topResult else { return }
+            DebugRecorder.record(.insert, "fromPicker", ["scope": "\(scope)"])
             let charsToDelete = query.count + leadingColons
             if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
                 return
@@ -608,6 +620,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // Typed text is `:query:` (or `::query:`). Delete only if
             // something resolves; otherwise leave the text alone.
             let key = query.lowercased()
+            DebugRecorder.record(.insert, "exactMatch", ["scope": "\(scope)"])
             let charsToDelete = query.count + leadingColons + 1  // + trailing colon
 
             // `::query:`: top-1 fuzzy against symbols, exact label only.
@@ -865,6 +878,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             pendingEmoticonUndo = nil
             return
         }
+        DebugRecorder.record(.emoticon, "convert", ["consumesTerminator": "\(match.consumesTerminator)"])
         // App reads `:<query><terminator>` — delete all three. Restore the
         // terminator after the emoji unless it was part of the emoticon.
         let charsToDelete = 1 + query.count + 1
@@ -890,6 +904,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             pendingEmoticonUndo = nil
             return
         }
+        DebugRecorder.record(.emoticon, "ambientImmediate")
         TextInserter.replace(charactersToDelete: word.count, with: emoji)
 
         pendingEmoticonUndo = EmoticonUndo(
@@ -908,6 +923,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             pendingEmoticonUndo = nil
             return
         }
+        DebugRecorder.record(.emoticon, "ambient")
         // Ambient entries are letter/punct sequences with no trailing
         // whitespace, so the terminator always survives the conversion.
         let charsToDelete = word.count + 1

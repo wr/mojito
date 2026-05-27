@@ -5,6 +5,10 @@ import os.log
 @MainActor
 enum CaretLocator {
     private static let log = OSLog(subsystem: "ee.wells.Mojito", category: "CaretLocator")
+    /// Set by `caretRect()` so the debug-report snapshot can record which
+    /// branch resolved this call. Values: `axBounds`, `elementTopLeft`,
+    /// `unavailable`.
+    private(set) static var lastOutcome: String = "unavailable"
 
     /// Screen-space (bottom-left origin) caret rect, or nil.
     ///
@@ -26,6 +30,7 @@ enum CaretLocator {
 
         if let rect = caretBounds(of: focused), isPlausibleCaret(rect, withinElementFrame: elementFrame) {
             os_log("caret via AX bounds: %{public}@", log: log, type: .info, "\(rect)")
+            lastOutcome = "axBounds"
             return rect
         }
 
@@ -38,6 +43,7 @@ enum CaretLocator {
             // callers fall back to mouse position instead.
             guard frame.height <= 160 else {
                 os_log("caret unavailable — element too tall for top-left estimate (%{public}.0f pt)", log: log, type: .info, frame.height)
+                lastOutcome = "elementTooTall"
                 return nil
             }
             let caretHeight: CGFloat = max(16, min(frame.height, 22))
@@ -48,10 +54,12 @@ enum CaretLocator {
                 height: caretHeight
             )
             os_log("caret via element fallback: %{public}@ (frame %{public}@)", log: log, type: .info, "\(rect)", "\(frame)")
+            lastOutcome = "elementTopLeft"
             return rect
         }
 
         os_log("caret unavailable — no AX bounds and no usable element frame", log: log, type: .info)
+        lastOutcome = "unavailable"
         return nil
     }
 

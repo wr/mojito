@@ -4,6 +4,7 @@ import AVFoundation
 
 struct AboutSettingsView: View {
     @AppStorage(PrefsKey.donated) private var donated: Bool = false
+    @State private var debugCopied: Bool = false
 
     private let rowPadding: CGFloat = 2
 
@@ -119,6 +120,10 @@ struct AboutSettingsView: View {
                 NSWorkspace.shared.open(URL(string: "https://github.com/wr/mojito/issues/new")!)
             }
 
+            Button(debugCopied ? "Copied!" : "Copy debug info") {
+                copyDebugInfo()
+            }
+
             Link("Website", destination: URL(string: "https://github.com/wr/mojito")!)
                 .font(.callout)
 
@@ -148,6 +153,15 @@ struct AboutSettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+
+    private func copyDebugInfo() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(DebugReport.markdown(), forType: .string)
+        debugCopied = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            debugCopied = false
+        }
     }
 
     private func sayThankYou() {

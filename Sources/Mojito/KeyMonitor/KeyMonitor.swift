@@ -49,6 +49,7 @@ final class KeyMonitor {
         self.eventTap = tap
         self.runLoopSource = source
         self.isRunning = true
+        DebugRecorder.record(.keyMonitor, "tapStart")
         return true
     }
 
@@ -64,6 +65,7 @@ final class KeyMonitor {
         eventTap = nil
         runLoopSource = nil
         isRunning = false
+        DebugRecorder.record(.keyMonitor, "tapStop")
     }
 
     private func handle(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
@@ -76,6 +78,7 @@ final class KeyMonitor {
         // The system auto-disables the tap if it takes too long.
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let tap = eventTap { CGEvent.tapEnable(tap: tap, enable: true) }
+            DebugRecorder.record(.keyMonitor, "tapLost", ["reason": type == .tapDisabledByTimeout ? "timeout" : "userInput"])
             delegate?.keyMonitorDidLoseTap(self)
             return Unmanaged.passUnretained(event)
         }
