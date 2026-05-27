@@ -37,6 +37,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case k32
     case k33
     case k34
+    case k35
 
     var id: String { rawValue }
 
@@ -75,6 +76,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k32: return "Pi Day"
         case .k33: return "Merry Mojito"
         case .k34: return "Spooky Season"
+        case .k35: return "Train Game"
         }
     }
 
@@ -115,6 +117,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k32: return "`\(EggStrings.k32)` — 3.14, once a year."
         case .k33: return "`\(EggStrings.k33)` — ho ho ho."
         case .k34: return "`\(EggStrings.k34)` — trick or treat."
+        case .k35: return "`\(EggStrings.k35)` — MY train goes from here... to here?"
         }
     }
 
@@ -153,6 +156,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k32: return "March 14, the day of..."
         case .k33: return "December's main event."
         case .k34: return "October 31st only."
+        case .k35: return "MY train..."
         }
     }
 
@@ -175,7 +179,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k16: return "🍞"
         case .k17: return "💿"
         case .k31: return "🎯"
-        case .k19: return "💙"
+        case .k19: return "🟦"
         case .k99: return "🕹️"
         case .k20: return "🐍"
         case .k21: return "☢️"
@@ -190,6 +194,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k32: return "🥧"
         case .k33: return "🎄"
         case .k34: return "🎃"
+        case .k35: return "🚋"
         }
     }
 }

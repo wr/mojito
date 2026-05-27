@@ -66,6 +66,8 @@ targets:
         buildPhase: resources
       - path: Resources/s09.bin
         buildPhase: resources
+      - path: Resources/s10.bin
+        buildPhase: resources
       - path: Resources/s13.bin
         buildPhase: resources
       - path: Resources/s14.bin
