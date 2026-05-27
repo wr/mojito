@@ -13,6 +13,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private let exclusions: ExclusionStore
     private let viewModel = PickerViewModel()
     private let pickerWindow: PickerWindow
+    private let gifPickerWindow = GifPickerWindow()
     private let monitor = KeyMonitor()
 
     private var stateMachine = TriggerStateMachine()
@@ -58,6 +59,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
             self?.cancelCapture()
+        }
+
+        gifPickerWindow.onClickAway = { [weak self] in
+            self?.gifPickerWindow.hide()
+            self?.stateMachine.reset()
         }
 
         // Per-keystroke polling raced the picker's `orderFrontRegardless()`,
@@ -224,6 +230,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
     private func process(input: TriggerInput) -> Bool {
         inputSeq &+= 1
+        // GIF picker owns the keyboard while visible — its SwiftUI TextField
+        // is the first responder and gets the keystrokes through normal AppKit
+        // routing. Don't double-process here.
+        if gifPickerWindow.isVisible {
+            return false
+        }
+
         // BSOD-style "press any key" effects pre-empt everything; the key is
         // consumed so it doesn't leak into the focused app underneath.
         if case .idle = stateMachine.state, EffectDismisser.topWantsAnyKey() {
@@ -389,6 +402,24 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 }
                 KonamiPayoff.start()
                 EasterEggTracker.record(.k99)
+            }
+
+        case .openGifPicker(let deleteCount):
+            // The three colons already passed through to the focused app —
+            // delete them on the next runloop tick (so the last one has
+            // landed) before showing the picker.
+            viewModel.reset()
+            pickerWindow.hide()
+            captureContext = nil
+            captureFocusSnapshot = nil
+            captureFocusPID = nil
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                if deleteCount > 0 {
+                    TextInserter.deleteBackward(deleteCount)
+                }
+                let anchor = CaretLocator.caretRect()
+                self.gifPickerWindow.show(near: anchor)
             }
         }
     }

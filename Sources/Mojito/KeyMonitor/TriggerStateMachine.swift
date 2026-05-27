@@ -80,6 +80,10 @@ enum TriggerAction: Equatable {
     /// Ambient match that doesn't need a terminator (e.g. `<3`, `>:)`).
     /// Engine deletes `word.count` and replaces with the emoji.
     case insertAmbientEmoticon(word: String)
+    /// User typed `:::` (three colons within `gifTripleColonWindow`).
+    /// Engine deletes `deleteCount` chars (the 3 colons already typed)
+    /// and opens the GIF search panel.
+    case openGifPicker(deleteCount: Int)
 }
 
 struct TriggerStateMachine {
@@ -130,6 +134,11 @@ struct TriggerStateMachine {
 
     private var lastIdleKeystrokeAt: Date? = nil
 
+    /// Sliding window of recent colon timestamps used to detect `:::`
+    /// (the GIF-search trigger) regardless of the current capture state.
+    private var recentColonTimes: [Date] = []
+    private static let gifTripleColonWindow: TimeInterval = 0.6
+
     /// Closing brackets like `)` are deliberately absent — they're part of
     /// emoticons (`B)`, `>:)`).
     private static let ambientTerminators: Set<Character> = [
@@ -166,6 +175,29 @@ struct TriggerStateMachine {
     }
 
     private mutating func process(_ input: TriggerInput) -> TriggerOutput {
+        // `:::` within `gifTripleColonWindow` opens the GIF picker no
+        // matter what the capture state is. Runs before everything else
+        // so it overrides the normal colon flow.
+        if case .colon = input {
+            let now = Date()
+            recentColonTimes.append(now)
+            recentColonTimes = recentColonTimes.filter {
+                now.timeIntervalSince($0) <= Self.gifTripleColonWindow
+            }
+            if recentColonTimes.count >= 3 {
+                recentColonTimes.removeAll()
+                state = .idle
+                currentScope = .normal
+                konamiProgress = 0
+                idleWord = ""
+                lastIdleKeystrokeAt = nil
+                revivableQuery = nil
+                return TriggerOutput(action: .openGifPicker(deleteCount: 3), consumesKey: false)
+            }
+        } else {
+            recentColonTimes.removeAll()
+        }
+
         // Konami only runs in `.capturing(query: "")` (right after `:`).
         // Tracking it from idle would eat arrow keys globally and break
         // caret navigation. Fires on the final `A` — no closing `:`.
@@ -428,6 +460,7 @@ struct TriggerStateMachine {
         idleWord = ""
         lastIdleKeystrokeAt = nil
         lastCaptureKeystrokeAt = nil
+        recentColonTimes.removeAll()
     }
 
     /// 2 chars so `:D` / `:s` don't briefly flash the picker. Symbols
