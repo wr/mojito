@@ -328,6 +328,82 @@ code {
   filter: drop-shadow(0 6px 14px rgba(0,0,0,0.20)) brightness(0.55);
 }
 
+/* Achievement banner — top-center systemBlue capsule that scale-pops in
+   when the easter egg fires, sits above the Sad Mac overlay (z-index >
+   .sadmac's 9999), and is click-through so the overlay still receives
+   the click-to-reboot. Geometry/typography mirrors the in-app
+   AchievementBanner (`Sources/Mojito/App/AchievementBanner.swift` on
+   `main`): 18px/10px padding, 13px text, 20px glyph, capsule, drop
+   shadow. Entry uses a bouncy cubic-bezier to approximate the SwiftUI
+   spring (response 0.42, damping 0.55); exit is a quick ease-in. */
+.achievement {
+  position: fixed;
+  top: 4px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.achievement-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  background: #007aff;
+  color: #fff;
+  font: 13px / 1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  transform: scale(0);
+  opacity: 0;
+  transition:
+    transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.18s ease-out;
+  transform-origin: center;
+}
+
+.achievement.is-on .achievement-pill {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.achievement.is-off .achievement-pill {
+  transform: scale(0);
+  opacity: 0;
+  transition:
+    transform 0.22s ease-in,
+    opacity 0.22s ease-in;
+}
+
+.achievement-glyph {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.achievement-lead {
+  font-weight: 600;
+}
+
+.achievement-sep {
+  font-weight: 400;
+  opacity: 0.55;
+}
+
+.achievement-detail {
+  font-weight: 400;
+  opacity: 0.95;
+}
+
+@media (prefers-color-scheme: dark) {
+  .achievement-pill { background: #0a84ff; }
+}
+
 /* Sad Mac crash overlay — full-viewport black screen with a tiny pixelated
    sad face centered in the middle, classic Mac OS bomb-style hex codes
    below, and a cursor hint. Click anywhere reloads the page. */

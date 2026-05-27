@@ -4161,6 +4161,8 @@
     // Hide the active app + picker instantly so the "crash" feels abrupt
     // — even before the overlay fades in.
     if (picker) picker.classList.remove('show');
+    // Crash half first: death chime + Sad Mac overlay. The chime runs
+    // ~1s end-to-end (440 → 277 → 130 Hz square pulses).
     playDeathChime();
     if (sadmac) {
       sadmac.setAttribute('aria-hidden', 'false');
@@ -4170,6 +4172,70 @@
         window.location.reload();
       }, { once: true });
     }
+    // Discovery half: once the chime has cleared, the banner scale-pops in
+    // and the cheerful fanfare plays on its own. Sequencing this way keeps
+    // the two sound effects from stepping on each other and lets the
+    // "you found an egg" reveal land after the joke crash.
+    const CHIME_MS = 1100;
+    setTimeout(() => {
+      showAchievementBanner();
+      playDiscoveryFanfare();
+    }, CHIME_MS);
+  }
+
+  // Ascending C-major arpeggio (C5 → E5 → G5) played as short square-wave
+  // pulses with tiny attack/release envelopes to de-click the edges.
+  // Mirrors `Sources/Mojito/App/DiscoveryFanfare.swift` — same notes,
+  // durations, and master gain so the web "discovery" sounds the same as
+  // the app's.
+  function playDiscoveryFanfare() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      const ctx = new Ctx();
+      const now = ctx.currentTime;
+      const notes = [
+        { f: 523.25, t: 0.000, d: 0.09 },
+        { f: 659.25, t: 0.115, d: 0.09 },
+        { f: 783.99, t: 0.230, d: 0.16 },
+      ];
+      const master = ctx.createGain();
+      master.gain.value = 0.06;
+      master.connect(ctx.destination);
+      notes.forEach((n) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(n.f, now + n.t);
+        g.gain.setValueAtTime(0, now + n.t);
+        g.gain.linearRampToValueAtTime(1, now + n.t + 0.005);
+        g.gain.setValueAtTime(1, now + n.t + n.d - 0.020);
+        g.gain.linearRampToValueAtTime(0, now + n.t + n.d);
+        osc.connect(g).connect(master);
+        osc.start(now + n.t);
+        osc.stop(now + n.t + n.d + 0.02);
+      });
+      setTimeout(() => { try { ctx.close(); } catch (_) {} }, 1200);
+    } catch (_) { /* no audio, no problem */ }
+  }
+
+  // Scale-pop the banner in, hold for 3.5s, then scale it back out. Times
+  // match the in-app AchievementBanner (3.5s hold, ~0.3s exit). The CSS
+  // does the actual animation; this just toggles classes.
+  function showAchievementBanner() {
+    const el = document.getElementById('achievement');
+    if (!el) return;
+    el.setAttribute('aria-hidden', 'false');
+    el.classList.remove('is-off');
+    requestAnimationFrame(() => el.classList.add('is-on'));
+    setTimeout(() => {
+      el.classList.remove('is-on');
+      el.classList.add('is-off');
+      setTimeout(() => {
+        el.setAttribute('aria-hidden', 'true');
+        el.classList.remove('is-off');
+      }, 300);
+    }, 3500);
   }
 
   // Classic-Mac-style death chime — a short, harsh descending square-wave
