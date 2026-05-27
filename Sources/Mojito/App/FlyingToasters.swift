@@ -20,18 +20,21 @@ enum FlyingToasters {
         var items: [Toaster] = []
         items.reserveCapacity(itemCount)
         for _ in 0..<itemCount {
-            // Cluster off the upper-right corner: startX from the right
-            // half through past the right edge, startY at least 250 px
-            // above the top edge. The minimum vertical offset guarantees
-            // a 3+ second descent before the sprite becomes visible at
-            // the slowest speed, so every toaster has a clear fly-in.
+            // Cluster just above the upper-right corner: startX from the
+            // right half through past the right edge, startY 40–200 px
+            // above the top edge. Vertical descent is `speed * sin(30°)`,
+            // so even the slowest-speed / farthest-offset sprite enters
+            // the visible area inside ~5 s — fast enough that the field
+            // starts filling within a second of trigger.
             let startX = CGFloat.random(in: frame.width * 0.4...frame.width + 400)
-            let startY = CGFloat.random(in: -frame.height * 0.55 ... -250)
+            let startY = CGFloat.random(in: -200 ... -40)
             items.append(Toaster(
                 startX: startX,
                 startY: startY,
                 speed: .random(in: 80...160),
-                launchTime: .random(in: 0..<(duration * 0.75))
+                // Capped at 50% of duration so late-launchers still have
+                // a full on-screen pass before the trailing fade.
+                launchTime: .random(in: 0..<(duration * 0.5))
             ))
         }
 
