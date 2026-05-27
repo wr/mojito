@@ -10,10 +10,8 @@ struct Emoji: Decodable, Identifiable, Hashable {
     let order: Int
     /// From emojibase's `skins` array. Sentinel/egg entries default to false.
     let supportsSkinTone: Bool
-    /// CLDR-derived locale shortcodes, keyed by language code (`fr`/`de`/`es`).
-    /// Each list mixes diacritic-preserving (`cœur_rouge`) and ASCII-
-    /// transliterated (`coeur_rouge`) flavors so typing either form matches.
-    /// Empty dict for emoji without locale data.
+    /// Per-locale shortcodes mix both diacritic-preserving (`cœur_rouge`)
+    /// and ASCII (`coeur_rouge`) flavors so either form matches.
     let localizedShortcodes: [String: [String]]
 
     var id: String { hexcode }

@@ -45,7 +45,9 @@ final class EmojiDatabase: ObservableObject {
         "ko":      "ko",
         "nl":      "nl",
         "pl":      "pl",
+        "pt":      "pt",
         "pt-BR":   "pt",
+        "pt-PT":   "pt",
         "ru":      "ru",
         "zh-Hans": "zh",
         "zh-Hant": "zh-hant",
@@ -115,10 +117,6 @@ final class EmojiDatabase: ObservableObject {
                     display: labelKey,
                     chars: Array(labelKey.lowercased())
                 ))
-                // CLDR locale shortcodes — added as PARALLEL haystacks so
-                // they're matchable but never replace the English primaries.
-                // Also feed into byShortcode so `:cœur_rouge:` (exact-match)
-                // resolves on the closing colon.
                 for locale in activeLocales {
                     guard let localCodes = emoji.localizedShortcodes[locale] else { continue }
                     for code in localCodes {

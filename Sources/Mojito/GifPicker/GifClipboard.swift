@@ -23,11 +23,9 @@ enum GifClipboard {
     static func write(data: Data) -> Bool {
         let pb = NSPasteboard.general
         pb.clearContents()
-        var ok = pb.setData(data, forType: NSPasteboard.PasteboardType("com.compuserve.gif"))
-        // Still fallback for receivers that don't sniff the GIF UTI.
+        let ok = pb.setData(data, forType: NSPasteboard.PasteboardType("com.compuserve.gif"))
         if let image = NSImage(data: data), let tiff = image.tiffRepresentation {
             _ = pb.setData(tiff, forType: .tiff)
-            ok = ok || true
         }
         return ok
     }
