@@ -13,6 +13,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private let exclusions: ExclusionStore
     private let viewModel = PickerViewModel()
     private let pickerWindow: PickerWindow
+    private let gifPickerWindow = GifPickerWindow()
     private let monitor = KeyMonitor()
 
     private var stateMachine = TriggerStateMachine()
@@ -58,6 +59,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
             self?.cancelCapture()
+        }
+
+        gifPickerWindow.onClickAway = { [weak self] in
+            self?.gifPickerWindow.hide()
+            self?.stateMachine.reset()
         }
 
         // Per-keystroke polling raced the picker's `orderFrontRegardless()`,
@@ -390,6 +396,36 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 KonamiPayoff.start()
                 EasterEggTracker.record(.k99)
             }
+
+        case .openGifPicker(let deleteCount):
+            // The three colons already passed through to the focused app —
+            // delete them on the next runloop tick (so the last one has
+            // landed) before showing the picker.
+            viewModel.reset()
+            pickerWindow.hide()
+            captureContext = nil
+            captureFocusSnapshot = nil
+            captureFocusPID = nil
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                if deleteCount > 0 {
+                    TextInserter.deleteBackward(deleteCount)
+                }
+                let anchor = CaretLocator.caretRect()
+                self.gifPickerWindow.show(near: anchor)
+            }
+
+        case .refreshGifPicker(let q):
+            gifPickerWindow.setQuery(q)
+
+        case .closeGifPicker:
+            gifPickerWindow.hide()
+
+        case .pickGif:
+            gifPickerWindow.pickSelected()
+
+        case .moveGifSelection(let direction):
+            gifPickerWindow.move(direction)
         }
     }
 
