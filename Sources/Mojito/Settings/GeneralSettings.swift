@@ -39,7 +39,7 @@ struct GeneralSettingsView: View {
                         Button("Check now") {
                             UpdaterCoordinator.shared.checkForUpdates()
                         }
-                        Toggle("", isOn: $autoUpdates)
+                        Toggle("Automatic updates", isOn: $autoUpdates)
                             .labelsHidden()
                             .toggleStyle(.switch)
                             .onChange(of: autoUpdates) { _, newValue in

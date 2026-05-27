@@ -40,8 +40,8 @@ struct PrivacyPermissionsSettingsView: View {
     // MARK: - Rows
 
     private func permissionRow(
-        title: String,
-        detail: String,
+        title: LocalizedStringKey,
+        detail: LocalizedStringKey,
         granted: Bool,
         onAction: @escaping () -> Void
     ) -> some View {
@@ -121,14 +121,14 @@ struct PrivacyDetailsRows: View {
         }
     }
 
-    private func privacyRow(icon: String, title: String, detail: String) -> some View {
+    private func privacyRow(icon: String, title: LocalizedStringKey, detail: LocalizedStringKey) -> some View {
         privacyRow(icon: icon, title: title, detail: detail) { EmptyView() }
     }
 
     private func privacyRow<Accessory: View>(
         icon: String,
-        title: String,
-        detail: String,
+        title: LocalizedStringKey,
+        detail: LocalizedStringKey,
         @ViewBuilder accessory: () -> Accessory
     ) -> some View {
         HStack(alignment: .center, spacing: 12) {

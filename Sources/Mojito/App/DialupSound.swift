@@ -246,7 +246,7 @@ private struct DialupView: View {
             HStack(spacing: 6) {
                 Image(systemName: "phone.down.fill")
                     .font(.system(size: 11, weight: .semibold))
-                Text("Hang up")
+                Text(verbatim: "Hang up")
                     .font(.system(size: 13, weight: .semibold))
             }
             .foregroundStyle(.white)

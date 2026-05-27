@@ -8,11 +8,11 @@ struct SettingsRoot: View {
 
         var title: String {
             switch self {
-            case .general:    return "General"
-            case .exclusions: return "Exclusions"
-            case .easterEggs: return "Easter eggs"
-            case .privacy:    return "Privacy"
-            case .about:      return "About"
+            case .general:    return String(localized: "General")
+            case .exclusions: return String(localized: "Exclusions")
+            case .easterEggs: return String(localized: "Easter eggs")
+            case .privacy:    return String(localized: "Privacy")
+            case .about:      return String(localized: "About")
             }
         }
 

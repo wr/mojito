@@ -108,7 +108,7 @@ private struct TicTacToeView: View {
         VStack(spacing: 22) {
             Spacer().frame(height: 12)
 
-            Text("MJTO — STRATEGIC COMMAND")
+            Text(verbatim: "MJTO — STRATEGIC COMMAND")
                 .font(.system(size: 12, weight: .bold, design: .monospaced))
                 .foregroundColor(crtCyanDim)
                 .tracking(4)
