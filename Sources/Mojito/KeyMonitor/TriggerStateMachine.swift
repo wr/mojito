@@ -372,7 +372,7 @@ struct TriggerStateMachine {
         case (.capturing(let q), .nameChar(let c)):
             let next = q + String(c)
             state = .capturing(query: next)
-            let threshold = pickerThreshold(for: currentScope)
+            let threshold = pickerThreshold(for: currentScope, query: next)
             let action: TriggerAction
             if next.count < threshold {
                 // Keep capturing silently so a terminator can still fire
@@ -400,7 +400,7 @@ struct TriggerStateMachine {
             }
             let next = String(q.dropLast())
             state = .capturing(query: next)
-            let threshold = pickerThreshold(for: currentScope)
+            let threshold = pickerThreshold(for: currentScope, query: next)
             let action: TriggerAction = next.count < threshold
                 ? .closePicker
                 : .refreshPicker(query: next, scope: currentScope)
@@ -490,10 +490,16 @@ struct TriggerStateMachine {
         recentColonTimes.removeAll()
     }
 
-    /// 2 chars so `:D` / `:s` don't briefly flash the picker. Symbols
-    /// scope stays at 1 because its corpus is mostly single-char entries.
-    private func pickerThreshold(for scope: CaptureScope) -> Int {
-        scope == .symbolsOnly ? 1 : 2
+    /// 2 chars in the normal corpus so `:D` / `:s` don't briefly flash the
+    /// picker. Symbols scope stays at 1 because its corpus is mostly single-
+    /// char entries. A single non-ASCII char (`愛` / `心` / `सूर्य` / `कक्षा`)
+    /// is a complete CJK / Devanagari / Cyrillic / Arabic word — drop to 1
+    /// there too, since those aren't candidates for English-emoticon false
+    /// positives.
+    private func pickerThreshold(for scope: CaptureScope, query: String) -> Int {
+        if scope == .symbolsOnly { return 1 }
+        if query.unicodeScalars.contains(where: { $0.value > 0x7F }) { return 1 }
+        return 2
     }
 
     /// Routes keystrokes into the GIF picker's view model. Every input is
