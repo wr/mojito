@@ -122,16 +122,16 @@ Special "pinned" rows are appended after the fzy results when the lowercased que
 
 ### Easter eggs
 
-Mojito ships ~30 easter eggs (visual effects, sounds, mini-games) triggered by specific `:keyword:` shortcodes. The trigger keywords are *deliberately obfuscated* in source:
+Mojito ships a handful of hidden effects triggered by specific `:keyword:` shortcodes. The triggers and display strings are *deliberately obfuscated* in source:
 
-- `Sources/Mojito/EmojiDB/EggIndex.swift` stores only SHA-256 hashes of the lowercased trigger words (and their 3+ char prefixes). Lookups go through `EggIndex.id(forExactQuery:)` / `.id(forPrefix:)`, which return opaque ids (`k01`, `k02`, …).
+- `Sources/Mojito/EmojiDB/EggIndex.swift` stores only SHA-256 hashes of the lowercased trigger words (and their 3+ char prefixes). Lookups go through `EggIndex.id(forExactQuery:)` / `.id(forPrefix:)`, which return opaque ids.
 - `Sources/Mojito/App/EggStrings.swift` carries the human-readable display strings (banner labels, picker pinned-row text) as XOR-masked bytes.
 
-Goal: `strings <binary>` and a casual repo skim won't surface the list. **Don't paste plaintext trigger keywords into source, comments, commit messages, PR titles/descriptions, Linear issues, or this file.** If you need to refer to a specific egg in writing, use its opaque id.
+Goal: `strings <binary>` and a casual repo skim won't surface the list. The hard rule in [Style guidelines → Easter eggs in writing](#easter-eggs-in-writing--hard-rule) below governs how (and how little) to talk about them outside the obfuscated source.
 
 `scripts/build_egg_strings.py` regenerates `EggStrings.swift` from a plaintext `label  text` list piped in via stdin. The plaintext list lives on your disk only — never commit it. The script header explains the XOR encoding and rotation procedure. To add a new egg, also add its hashed forms to `EggIndex.swift` (the script does not currently emit those — they're added by hand alongside the new effect's Swift file).
 
-`Sources/Mojito/App/EasterEggTracker.swift` keeps per-egg "discovered" state in `UserDefaults` and, on first discovery, fires the `AchievementBanner` overlay and the `DiscoveryFanfare` sound (a synthesized square-wave arpeggio — no asset blob). The individual effects each live in their own file under `Sources/Mojito/App/` (`BlueScreen`, `BouncingDVD`, `MatrixRain`, `SnakeGame`, etc.).
+`Sources/Mojito/App/EasterEggTracker.swift` keeps per-egg "discovered" state in `UserDefaults` and, on first discovery, fires the `AchievementBanner` overlay and the `DiscoveryFanfare` sound (a synthesized square-wave arpeggio — no asset blob). The individual effects each live in their own Swift file under `Sources/Mojito/App/`; the file list is intentionally not enumerated here — see the directory if you need to find one.
 
 ### Security / signing posture
 
@@ -152,7 +152,7 @@ Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose(
 
 ## File layout (where to look)
 
-- `Sources/Mojito/App/` — entry point, `Engine`, ~30 easter-egg effects + `EasterEggTracker` / `AchievementBanner` / `DiscoveryFanfare` / `EggStrings` (see Easter eggs above), `Shortcuts.swift` (KeyboardShortcuts pause hotkeys), updater, dock-icon manager
+- `Sources/Mojito/App/` — entry point, `Engine`, easter-egg effects + `EasterEggTracker` / `AchievementBanner` / `DiscoveryFanfare` / `EggStrings` (see Easter eggs above), `Shortcuts.swift` (KeyboardShortcuts pause hotkeys), updater, dock-icon manager
 - `Sources/Mojito/KeyMonitor/` — `CGEventTap` wrapper + state machine
 - `Sources/Mojito/Picker/` — NSPanel + SwiftUI picker + caret positioning
 - `Sources/Mojito/EmojiDB/` — emoji/emoticon/symbol data + `FzyScorer` + `EggIndex` (hashed easter-egg lookups)
@@ -179,15 +179,38 @@ which user request prompted it. Don't reference tasks, fixes, or callers
 messages / PR descriptions and rots as the code evolves. If removing the
 comment wouldn't confuse a future reader, don't write it.
 
-### Easter eggs in user-visible text
+### Easter eggs in writing — hard rule
 
-Don't mention easter eggs — even generically — in code comments, commit
-messages, PR titles/descriptions, or release notes when they'd tip off a
-reader. A bare "Added easter eggs" or "easter-egg polish" (non-specific, no
-keyword, no count, no description of what they do) is fine. Anything more
-specific — naming an egg, hinting at a trigger, listing what was added —
-goes against the obfuscation in [[easter-egg-keyword-obfuscation]] and the
-hashed-trigger design in `EggIndex.swift`. When in doubt, leave it out.
+**Easter-egg specifics never leak outside the obfuscated source.**
+A reader of the GitHub repo, issue tracker, branch list, PR list, or
+release page should be unable to enumerate the eggs or work out what any
+of them does. This is load-bearing for the discovery design implemented
+in `EggIndex.swift` (hashed triggers) and `EggStrings.swift` (XOR-masked
+display strings) — see [[easter-egg-keyword-obfuscation]].
+
+**Allowed**, anywhere — a bare CRUD acknowledgment and nothing else:
+
+> *added easter eggs* · *fixed easter eggs* · *updated easter eggs* ·
+> *removed easter eggs* · *easter-egg polish*
+
+**Forbidden** in commit messages, PR titles/descriptions, branch names,
+release notes, tag annotations, Linear issues/comments, GitHub issues,
+and code comments:
+
+- The trigger keyword (or any substring or partial spelling of it).
+- The egg's display title (e.g. the name shown in About after discovery).
+- The opaque id (`kNN`).
+- The count of eggs added / changed / removed.
+- A description of what the egg does — visual, sound, game, etc.
+- A glyph, emoji, or icon associated with it.
+- Hints, themes, references, allusions, category, era, or source material.
+- The filename of the effect's Swift file (the names spoil the egg).
+
+In short: if a curious onlooker could use what you wrote to narrow down
+*which* egg or *what* it does, don't write it. When in doubt, leave it
+out. If you need to discuss a specific egg in a place that will be
+visible outside the source, *don't* — refactor the discussion into the
+code itself (where the obfuscation already lives) or skip it.
 
 ## Issue tracking & workflow
 
