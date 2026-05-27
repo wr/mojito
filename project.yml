@@ -22,6 +22,15 @@ options:
     - zh-Hans
     - zh-Hant
     - ko
+    - hi
+    - ru
+    - pl
+    - nl
+    # RTL — SwiftUI auto-mirrors layout via Environment(\.layoutDirection),
+    # but the picker positioning + AppKit overlays may need spot-checks.
+    - ar
+    - fa
+    - he
 
 settings:
   base:
