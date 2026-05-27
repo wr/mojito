@@ -68,6 +68,7 @@ final class FocusedElementCache {
         )
         element = status == .success ? (ref as! AXUIElement) : nil
         focusedPID = pid
+        DebugRecorder.record(.focus, "app", ["bundleID": app.bundleIdentifier ?? "—"])
         onFocusChange?()
 
         // C function pointer — no captures allowed, route via refcon.

@@ -62,8 +62,14 @@ final class PermissionsCoordinator: ObservableObject {
     func refresh() {
         let ax = AXIsProcessTrusted()
         let im = checkInputMonitoring()
-        if ax != accessibility { accessibility = ax }
-        if im != inputMonitoring { inputMonitoring = im }
+        if ax != accessibility {
+            accessibility = ax
+            DebugRecorder.record(.permissions, ax ? "axGranted" : "axRevoked")
+        }
+        if im != inputMonitoring {
+            inputMonitoring = im
+            DebugRecorder.record(.permissions, im ? "inputGranted" : "inputRevoked")
+        }
         if accessibility && inputMonitoring {
             stopMonitoring()
         }
