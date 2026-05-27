@@ -197,9 +197,9 @@ private struct SnakeGameView: View {
 
     private var titleBar: some View {
         HStack(spacing: 8) {
-            Text("🐍")
+            Text(verbatim: "🐍")
                 .font(.system(size: 24))
-            Text("SNAKE")
+            Text(verbatim: "SNAKE")
                 .font(.system(size: 22, weight: .heavy, design: .monospaced))
                 .foregroundColor(phosphor)
                 .tracking(8)
@@ -242,14 +242,14 @@ private struct SnakeGameView: View {
     private var statePill: some View {
         Group {
             if model.gameOver {
-                Text("GAME OVER")
+                Text(verbatim: "GAME OVER")
                     .foregroundColor(Color.red)
                     .shadow(color: .red.opacity(0.7), radius: 5)
             } else if model.paused {
-                Text("PAUSED")
+                Text(verbatim: "PAUSED")
                     .foregroundColor(.yellow)
             } else {
-                Text("PLAYING")
+                Text(verbatim: "PLAYING")
                     .foregroundColor(phosphorDim)
             }
         }
@@ -277,7 +277,7 @@ private struct SnakeGameView: View {
     }
 
     private var hintBar: some View {
-        Text("← ↑ ↓ →  steer    SPACE  pause / restart    ESC  quit")
+        Text(verbatim: "← ↑ ↓ →  steer    SPACE  pause / restart    ESC  quit")
             .font(.system(size: 11, weight: .regular, design: .monospaced))
             .foregroundColor(phosphorDim)
             .tracking(1)

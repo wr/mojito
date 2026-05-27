@@ -92,10 +92,10 @@ private struct SnowfallView: View {
             Canvas { ctx, _ in
                 // Resolve ONCE per body, not per particle.
                 let resolvedSharp = ctx.resolve(
-                    Text("❅").font(.system(size: 24)).foregroundColor(.white)
+                    Text(verbatim: "❅").font(.system(size: 24)).foregroundColor(.white)
                 )
                 let resolvedRound = ctx.resolve(
-                    Text("❆").font(.system(size: 24)).foregroundColor(.white)
+                    Text(verbatim: "❆").font(.system(size: 24)).foregroundColor(.white)
                 )
                 for (i, f) in flakes.enumerated() {
                     let t = elapsed - f.launchTime

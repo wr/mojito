@@ -231,7 +231,7 @@ struct ResetEasterEggsButton: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This will erase your discovery progress and Perfect Bounce counter. The eggs themselves still work — you'll just need to find them again.")
+                Text("This will erase your discovery progress and any per-egg counters. The eggs themselves still work — you'll just need to find them again.")
             }
     }
 }

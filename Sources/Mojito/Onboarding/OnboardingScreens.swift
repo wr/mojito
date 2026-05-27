@@ -386,7 +386,7 @@ struct PermissionsStep: View {
             VStack(spacing: 10) {
                 permissionRow(
                     title: "Accessibility",
-                    detail: "Lets Mojito anchor the picker next to your text cursor.",
+                    detail: "Lets \(AppInfo.displayName) anchor the picker next to your text cursor.",
                     granted: accessibilityGranted,
                     onAllow: {
                         if axPromptFired {
@@ -399,7 +399,7 @@ struct PermissionsStep: View {
                 )
                 permissionRow(
                     title: "Input Monitoring",
-                    detail: "Lets Mojito watch keystrokes for `:` triggers. Nothing is logged.",
+                    detail: "Lets \(AppInfo.displayName) watch keystrokes for `:` triggers. Nothing is logged.",
                     granted: inputMonitoringGranted,
                     onAllow: {
                         if imPromptFired {
@@ -423,7 +423,7 @@ struct PermissionsStep: View {
         }
     }
 
-    private func permissionRow(title: String, detail: String, granted: Bool, onAllow: @escaping () -> Void) -> some View {
+    private func permissionRow(title: LocalizedStringKey, detail: LocalizedStringKey, granted: Bool, onAllow: @escaping () -> Void) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)

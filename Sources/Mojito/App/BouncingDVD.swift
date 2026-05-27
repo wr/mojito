@@ -136,7 +136,7 @@ private struct BouncingDVDView: View {
                 .aspectRatio(contentMode: .fit)
                 .foregroundStyle(color)
         } else {
-            Text("DVD")
+            Text(verbatim: "DVD")
                 .font(.system(size: 96, weight: .black, design: .serif))
                 .italic()
                 .foregroundColor(color)

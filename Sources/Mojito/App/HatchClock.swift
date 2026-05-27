@@ -307,7 +307,7 @@ private struct Colon: View {
     let cellH: CGFloat
     var body: some View {
         // monospacedDigit keeps columns aligned without SF Mono's slashed-zero.
-        Text(":")
+        Text(verbatim: ":")
             .font(.system(size: 130, weight: .bold).monospacedDigit())
             .foregroundColor(color)
             .frame(width: 60, height: cellH)

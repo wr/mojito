@@ -57,7 +57,7 @@ private struct KonamiPayoffView: View {
 
             ZStack {
                 Canvas { ctx, _ in
-                    let title = Text("+30 LIVES")
+                    let title = Text(verbatim: "+30 LIVES")
                         .font(.system(size: 96, weight: .black, design: .monospaced))
                         .foregroundColor(.yellow)
                     let resolved = ctx.resolve(title)
@@ -69,7 +69,7 @@ private struct KonamiPayoffView: View {
                         y: bounds.height / 2 - size.height / 2
                     ))
 
-                    let sub = Text("↑ ↑ ↓ ↓ ← → ← → B A")
+                    let sub = Text(verbatim: "↑ ↑ ↓ ↓ ← → ← → B A")
                         .font(.system(size: 28, weight: .semibold, design: .monospaced))
                         .foregroundColor(.white)
                     let rSub = ctx.resolve(sub)

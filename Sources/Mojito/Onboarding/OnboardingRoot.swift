@@ -116,9 +116,9 @@ struct OnboardingRoot: View {
 
     private var primaryLabel: String {
         switch step {
-        case .welcome: return "Get started"
-        case .done:    return "Done"
-        default:       return "Continue"
+        case .welcome: return String(localized: "Get started")
+        case .done:    return String(localized: "Done")
+        default:       return String(localized: "Continue")
         }
     }
 

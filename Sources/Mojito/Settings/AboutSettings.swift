@@ -192,7 +192,7 @@ private struct HeartConfetti: View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { context in
             let elapsed = context.date.timeIntervalSinceReferenceDate
             Canvas { ctx, size in
-                let base = ctx.resolve(Text("❤️").font(.system(size: 10)))
+                let base = ctx.resolve(Text(verbatim: "❤️").font(.system(size: 10)))
                 for config in configs {
                     let t = (elapsed + config.phaseOffset).truncatingRemainder(dividingBy: config.cycle)
                     guard t > 0, t < config.visibleDuration else { continue }

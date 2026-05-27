@@ -185,17 +185,17 @@ private struct PickerRow: View {
     private func highlightedShortcode(_ shortcode: String, query: String) -> Text {
         let q = query.lowercased()
         guard !q.isEmpty, let range = shortcode.lowercased().range(of: q) else {
-            return Text(":\(shortcode):").foregroundStyle(.secondary)
+            return Text(verbatim: ":\(shortcode):").foregroundStyle(.secondary)
         }
         let prefix = String(shortcode[shortcode.startIndex..<range.lowerBound])
         let middle = String(shortcode[range])
         let suffix = String(shortcode[range.upperBound..<shortcode.endIndex])
         return (
-            Text(":").foregroundStyle(.secondary)
+            Text(verbatim: ":").foregroundStyle(.secondary)
             + Text(prefix).foregroundStyle(.secondary)
             + Text(middle).foregroundStyle(.primary).bold()
             + Text(suffix).foregroundStyle(.secondary)
-            + Text(":").foregroundStyle(.secondary)
+            + Text(verbatim: ":").foregroundStyle(.secondary)
         )
     }
 }
