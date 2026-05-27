@@ -80,7 +80,7 @@ private struct BlueScreenView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
                         Spacer()
-                        Text(" Mojito ")
+                        Text(verbatim: " Mojito ")
                             .font(.system(size: 22, weight: .regular, design: .monospaced))
                             .foregroundColor(bsodBlue)
                             .padding(.horizontal, 2)
@@ -90,13 +90,13 @@ private struct BlueScreenView: View {
                     .padding(.bottom, 20)
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("A fatal exception 0E has occurred at 0xDEADBEEF:0xCAFEBABE in VXD")
-                        Text("MOJITO(01) + 0xC0FFEE42. The current application will be terminated.")
-                        Text(" ")
-                        Text("*   Press any key to terminate the current application.")
-                        Text("*   Press  CTRL+ALT+DEL  again to restart your computer. You will")
-                        Text("    lose any unsaved information in all applications.")
-                        Text(" ")
+                        Text(verbatim: "A fatal exception 0E has occurred at 0xDEADBEEF:0xCAFEBABE in VXD")
+                        Text(verbatim: "MOJITO(01) + 0xC0FFEE42. The current application will be terminated.")
+                        Text(verbatim: " ")
+                        Text(verbatim: "*   Press any key to terminate the current application.")
+                        Text(verbatim: "*   Press  CTRL+ALT+DEL  again to restart your computer. You will")
+                        Text(verbatim: "    lose any unsaved information in all applications.")
+                        Text(verbatim: " ")
                         HStack {
                             Spacer()
                             blinkingPrompt
@@ -130,8 +130,8 @@ private struct BlueScreenView: View {
         TimelineView(.periodic(from: Date(), by: 0.45)) { context in
             let blink = Int(context.date.timeIntervalSinceReferenceDate / 0.45) % 2 == 0
             HStack(spacing: 0) {
-                Text("Press any key to continue ")
-                Text("_").opacity(blink ? 1 : 0)
+                Text(verbatim: "Press any key to continue ")
+                Text(verbatim: "_").opacity(blink ? 1 : 0)
             }
         }
     }

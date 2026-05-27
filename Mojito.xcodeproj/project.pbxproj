@@ -38,6 +38,7 @@
 		4949BE63FAD5A5FC2573CFE1 /* DefaultExclusions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */; };
 		4C024B6EA9665C5DFDB80CE7 /* WarpDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9658C9CF3396443D22FF4E28 /* WarpDrive.swift */; };
 		505F6B7F84EC1D9EF7AB55C9 /* SolitaireWin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E63ABA27E65953D84162097 /* SolitaireWin.swift */; };
+		510035EDB98F94AD6098C122 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FDE7F8DEA98F385943A30B78 /* Localizable.xcstrings */; };
 		527E2FD4617302A4202C22E2 /* v04.bin in Resources */ = {isa = PBXBuildFile; fileRef = 127F100886742DCE05A171B4 /* v04.bin */; };
 		54BE766E1C8E447D04D3F02C /* ParticlePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F53545C34DF695F1B03CB2 /* ParticlePanel.swift */; };
 		55C7BE736206664DE37166E2 /* DialupSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2361376F2801DB575F27B480 /* DialupSound.swift */; };
@@ -260,6 +261,7 @@
 		F5C5BC5F015CABDD85262258 /* SeasonalGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonalGates.swift; sourceTree = "<group>"; };
 		F5C937DB8C91F3847F55D8A6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FACE9E8BAF08240551D5237A /* v06.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v06.bin; sourceTree = "<group>"; };
+		FDE7F8DEA98F385943A30B78 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FzyScorer.swift; sourceTree = "<group>"; };
 		FFC142D2205F1C089F7524D2 /* SettingsRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRoot.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -310,6 +312,7 @@
 				CDB886D82441D68D2F815AD3 /* AppIconDev.icon */,
 				F5C937DB8C91F3847F55D8A6 /* Assets.xcassets */,
 				70F2866D3BE0CC5D08CF9AD1 /* Emoji */,
+				FDE7F8DEA98F385943A30B78 /* Localizable.xcstrings */,
 				DF0A9FF25BC996BC640A35A0 /* s01.bin */,
 				A3781043056BF9F399D00EDD /* s02.bin */,
 				392847FD44ED870B7154ED09 /* s03.bin */,
@@ -643,6 +646,7 @@
 				FCC584110B97D56E2E7065FA /* AppIconDev.icon in Resources */,
 				8669DFC49B3F7DBE689337C0 /* Assets.xcassets in Resources */,
 				08B90EAE6DAD0198A743979E /* Emoji in Resources */,
+				510035EDB98F94AD6098C122 /* Localizable.xcstrings in Resources */,
 				06E493068FD409A2B795BC56 /* s01.bin in Resources */,
 				0A4AAE2AE35D2C90AB9735B7 /* s02.bin in Resources */,
 				7655329BF3B69EE157875660 /* s03.bin in Resources */,
@@ -860,6 +864,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZED_STRING_SWIFTUI_SUPPORT = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -867,6 +872,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = minimal;
 				SWIFT_VERSION = 5.10;
@@ -987,6 +993,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZED_STRING_SWIFTUI_SUPPORT = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -995,6 +1002,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = minimal;
 				SWIFT_VERSION = 5.10;

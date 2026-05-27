@@ -99,7 +99,7 @@ final class MenuBarController {
     /// Text fallback because a `variableLength` status item with no image
     /// renders at 0pt — completely invisible.
     private func applyIcon(to button: NSStatusBarButton, active: Bool, hasIssue: Bool) {
-        if hasIssue, let image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: "\(AppInfo.displayName) needs permission") {
+        if hasIssue, let image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: String(localized: "\(AppInfo.displayName) needs permission")) {
             image.isTemplate = false  // keep yellow tint
             button.image = image
             button.title = ""
@@ -131,32 +131,32 @@ final class MenuBarController {
         menu.addItem(makeStatusItem())
         menu.addItem(.separator())
 
-        let pauseHour = NSMenuItem(title: "Pause for 1 hour", action: #selector(MenuActions.pauseHour), keyEquivalent: "").configured(target: MenuActions.shared)
+        let pauseHour = NSMenuItem(title: String(localized: "Pause for 1 hour"), action: #selector(MenuActions.pauseHour), keyEquivalent: "").configured(target: MenuActions.shared)
         menu.addItem(pauseHour)
         pauseHourItem = pauseHour
 
-        let pauseTomorrow = NSMenuItem(title: "Pause until tomorrow", action: #selector(MenuActions.pauseUntilTomorrow), keyEquivalent: "").configured(target: MenuActions.shared)
+        let pauseTomorrow = NSMenuItem(title: String(localized: "Pause until tomorrow"), action: #selector(MenuActions.pauseUntilTomorrow), keyEquivalent: "").configured(target: MenuActions.shared)
         menu.addItem(pauseTomorrow)
         pauseTomorrowItem = pauseTomorrow
 
-        let resume = NSMenuItem(title: "Resume", action: #selector(MenuActions.resume), keyEquivalent: "").configured(target: MenuActions.shared)
+        let resume = NSMenuItem(title: String(localized: "Resume"), action: #selector(MenuActions.resume), keyEquivalent: "").configured(target: MenuActions.shared)
         menu.addItem(resume)
         resumeItem = resume
 
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Settings…", action: #selector(MenuActions.openSettings), keyEquivalent: ",").configured(target: MenuActions.shared))
+        menu.addItem(NSMenuItem(title: String(localized: "Settings…"), action: #selector(MenuActions.openSettings), keyEquivalent: ",").configured(target: MenuActions.shared))
         // Option-held alternate — backdoor for re-running guided setup
         // without resetting onboarding state. Discoverability intentionally low.
-        let showOnboarding = NSMenuItem(title: "Show Onboarding", action: #selector(MenuActions.showOnboarding), keyEquivalent: ",").configured(target: MenuActions.shared)
+        let showOnboarding = NSMenuItem(title: String(localized: "Show Onboarding"), action: #selector(MenuActions.showOnboarding), keyEquivalent: ",").configured(target: MenuActions.shared)
         showOnboarding.keyEquivalentModifierMask = [.command, .option]
         showOnboarding.isAlternate = true
         menu.addItem(showOnboarding)
-        let updatesItem = NSMenuItem(title: "Check for Updates…", action: #selector(MenuActions.checkForUpdates), keyEquivalent: "").configured(target: MenuActions.shared)
+        let updatesItem = NSMenuItem(title: String(localized: "Check for Updates…"), action: #selector(MenuActions.checkForUpdates), keyEquivalent: "").configured(target: MenuActions.shared)
         menu.addItem(updatesItem)
         checkForUpdatesItem = updatesItem
         refreshUpdatesItem(hasError: UpdaterCoordinator.shared.hasUpdateError)
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Quit \(AppInfo.displayName)", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: String(localized: "Quit \(AppInfo.displayName)"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
         MenuActions.shared.bind(self)
         return menu
@@ -174,12 +174,12 @@ final class MenuBarController {
 
     private func refreshUpdatesItem(hasError: Bool) {
         guard let item = checkForUpdatesItem else { return }
-        item.title = "Check for Updates…"
+        item.title = String(localized: "Check for Updates…")
         if hasError {
             // Quieter than a modal but still discoverable.
-            item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: "Update check failed")
+            item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: String(localized: "Update check failed"))
             item.image?.isTemplate = false
-            item.toolTip = "\(AppInfo.displayName) couldn't reach the update server."
+            item.toolTip = String(localized: "\(AppInfo.displayName) couldn't reach the update server.")
         } else {
             item.image = nil
             item.toolTip = nil
@@ -187,7 +187,7 @@ final class MenuBarController {
     }
 
     private func makeStatusItem() -> NSMenuItem {
-        let item = NSMenuItem(title: "\(AppInfo.displayName) is on", action: nil, keyEquivalent: "")
+        let item = NSMenuItem(title: String(localized: "\(AppInfo.displayName) is on"), action: nil, keyEquivalent: "")
         item.isEnabled = false
         item.attributedTitle = statusTitle()
         return item
@@ -196,11 +196,13 @@ final class MenuBarController {
     private func statusTitle() -> NSAttributedString {
         let active = engine?.isActive ?? false
         let permissionsOK = (permissions?.allGranted) ?? false
+        let name = AppInfo.displayName
         let title: String = {
-            let name = AppInfo.displayName
-            if !permissionsOK { return "\(name) needs permission" }
-            if let until = engine?.pausedUntil, until > Date() { return "\(name) is paused" }
-            return active ? "\(name) is running 🏃‍♂️" : "\(name) is off"
+            if !permissionsOK { return String(localized: "\(name) needs permission") }
+            if let until = engine?.pausedUntil, until > Date() { return String(localized: "\(name) is paused") }
+            return active
+                ? String(localized: "\(name) is running 🏃‍♂️")
+                : String(localized: "\(name) is off")
         }()
         return NSAttributedString(string: title, attributes: [
             .font: NSFont.menuFont(ofSize: 0),

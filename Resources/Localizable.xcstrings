@@ -1,0 +1,302 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ couldn't reach the update server." : {
+
+    },
+    "%@ is built to respect your privacy. Here's how." : {
+
+    },
+    "%@ is forever free, but your support helps fund future projects. Thank you!" : {
+
+    },
+    "%@ is off" : {
+
+    },
+    "%@ is on" : {
+
+    },
+    "%@ is paused" : {
+
+    },
+    "%@ is running 🏃‍♂️" : {
+
+    },
+    "%@ lives in your menu bar. Try typing `:tada:` in any text field." : {
+
+    },
+    "%@ needs permission" : {
+
+    },
+    "%@ needs permission to work with your keyboard." : {
+
+    },
+    "%lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "???" : {
+      "comment" : "Placeholder shown in About → Easter eggs for an entry the user hasn't discovered yet. Should stay short and visually act as 'three unknowns'."
+    },
+    "About" : {
+
+    },
+    "Accessibility" : {
+
+    },
+    "Acknowledgements" : {
+
+    },
+    "Add" : {
+
+    },
+    "Add website" : {
+
+    },
+    "All the code is on GitHub. Read it, build it, fork it." : {
+
+    },
+    "Allow" : {
+
+    },
+    "Anchors the picker next to your text cursor." : {
+
+    },
+    "Autocomplete `:emoji:` everywhere." : {
+
+    },
+    "Automatic updates" : {
+
+    },
+    "Back" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Check for Updates…" : {
+
+    },
+    "Check now" : {
+
+    },
+    "Clear all emoji usage stats?" : {
+
+    },
+    "Clear stats" : {
+
+    },
+    "Clear stats..." : {
+
+    },
+    "Continue" : {
+
+    },
+    "Convert emoticons (`:D` → 😃)" : {
+
+    },
+    "Copied!" : {
+
+    },
+    "Copy" : {
+
+    },
+    "Danger zone" : {
+
+    },
+    "Donate" : {
+
+    },
+    "Done" : {
+
+    },
+    "Easter egg discovered" : {
+
+    },
+    "Easter eggs" : {
+
+    },
+    "Emoji" : {
+
+    },
+    "Emoji autocompleted" : {
+
+    },
+    "Exclusions" : {
+
+    },
+    "Funded by donations" : {
+
+    },
+    "General" : {
+
+    },
+    "Get started" : {
+
+    },
+    "Grant accessibility permissions" : {
+
+    },
+    "I donated" : {
+
+    },
+    "If the icon doesn't appear in the menu bar, check **System Settings → Menu Bar → \"Allow in the Menu Bar\"**." : {
+
+    },
+    "Include symbols (experimental)" : {
+
+    },
+    "Input Monitoring" : {
+
+    },
+    "Keyboard shortcuts" : {
+
+    },
+    "Keystrokes aren't logged" : {
+
+    },
+    "Lets %@ anchor the picker next to your text cursor." : {
+
+    },
+    "Lets %@ watch keystrokes for `:` triggers. Nothing is logged." : {
+
+    },
+    "No ads, tracking, or subscriptions." : {
+
+    },
+    "No emoji for :%@:" : {
+
+    },
+    "Open settings" : {
+
+    },
+    "Open source and auditable" : {
+
+    },
+    "Pause for 1 hour" : {
+
+    },
+    "Pause until tomorrow" : {
+
+    },
+    "Permissions" : {
+
+    },
+    "Press the same shortcut again while paused to resume." : {
+
+    },
+    "Privacy" : {
+
+    },
+    "Privacy details…" : {
+
+    },
+    "Quit %@" : {
+
+    },
+    "Rank frequently used emoji higher" : {
+
+    },
+    "Report an issue" : {
+
+    },
+    "Require `::` to search symbols" : {
+
+    },
+    "Reset all easter egg progress?" : {
+
+    },
+    "Reset eggs" : {
+
+    },
+    "Reset eggs..." : {
+
+    },
+    "Resume" : {
+
+    },
+    "Settings…" : {
+
+    },
+    "Show Onboarding" : {
+
+    },
+    "Show icon in menu bar" : {
+
+    },
+    "Skin tone" : {
+
+    },
+    "Start at login" : {
+
+    },
+    "Stats" : {
+
+    },
+    "Support Wells" : {
+
+    },
+    "This will erase your autocomplete stats and Top 8. Settings and exclusions won't be changed." : {
+
+    },
+    "This will erase your discovery progress and any per-egg counters. The eggs themselves still work — you'll just need to find them again." : {
+
+    },
+    "Type `:` to search for any emoji or symbol in seconds." : {
+
+    },
+    "Type some emoji and they'll show up here." : {
+
+    },
+    "Update check failed" : {
+
+    },
+    "Usage counts, settings, and your exclusion list are stored locally. %@ doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂" : {
+
+    },
+    "Used to detect `:` triggers. Nothing else." : {
+
+    },
+    "User since" : {
+
+    },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Version %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "View source" : {
+
+    },
+    "Watches keystrokes for the `:` trigger." : {
+
+    },
+    "Website" : {
+
+    },
+    "You're all set" : {
+
+    },
+    "Your data stays on this Mac" : {
+
+    },
+    "Your top 8" : {
+
+    },
+    "e.g. mail.google.com or *.notion.so" : {
+
+    }
+  },
+  "version" : "1.0"
+}

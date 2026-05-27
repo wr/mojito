@@ -105,7 +105,7 @@ private struct BannerView: View {
             Text("Easter egg discovered")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(.white)
-            Text("·")
+            Text(verbatim: "·")
                 .font(.system(size: 13, weight: .regular))
                 .foregroundStyle(.white.opacity(0.55))
             Text(egg.title)

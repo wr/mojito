@@ -183,7 +183,7 @@ private struct XPLoginView: View {
         HStack(spacing: 0) {
             turnOffControl
             Spacer()
-            Text("After you log on, you can add or change accounts.\nJust go to Control Panel and click User Accounts.")
+            Text(verbatim: "After you log on, you can add or change accounts.\nJust go to Control Panel and click User Accounts.")
                 .font(.system(size: 14))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.trailing)
@@ -228,7 +228,7 @@ private struct XPLoginView: View {
             }
             .frame(width: 28, height: 28)
 
-            Text("Turn off computer")
+            Text(verbatim: "Turn off computer")
                 .font(.system(size: 15))
                 .foregroundColor(.white)
         }
@@ -250,7 +250,7 @@ private struct XPLoginView: View {
                 } else {
                     VStack(alignment: .trailing, spacing: 26) {
                         windowsXPWordmark
-                        Text("To begin, click your user name")
+                        Text(verbatim: "To begin, click your user name")
                             .font(.system(size: 22, weight: .regular))
                             .foregroundColor(.white)
                             .shadow(color: .black.opacity(0.35), radius: 1, x: 1, y: 1)
@@ -348,7 +348,7 @@ private struct XPLoginView: View {
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.45), radius: 1, x: 1, y: 1)
                 if loadingTextVisible {
-                    Text("Loading your personal settings…")
+                    Text(verbatim: "Loading your personal settings…")
                         .font(.system(size: 15, weight: .semibold))
                         // Midnight blue per the reference, not light blue.
                         .foregroundColor(Color(red: 0.06, green: 0.18, blue: 0.50))

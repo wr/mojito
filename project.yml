@@ -5,6 +5,32 @@ options:
     macOS: "14.0"
   createIntermediateGroups: true
   generateEmptyDirectories: true
+  developmentLanguage: en
+  # Locales we ship UI translations for. Xcode derives CFBundleLocalizations
+  # from this list. Adding a code here is necessary for the corresponding
+  # column to appear in Localizable.xcstrings.
+  knownRegions:
+    - en
+    - en-GB
+    - de
+    - es
+    - es-419
+    - fr
+    - it
+    - pt-BR
+    - ja
+    - zh-Hans
+    - zh-Hant
+    - ko
+    - hi
+    - ru
+    - pl
+    - nl
+    # RTL — SwiftUI auto-mirrors layout via Environment(\.layoutDirection),
+    # but the picker positioning + AppKit overlays may need spot-checks.
+    - ar
+    - fa
+    - he
 
 settings:
   base:
@@ -18,6 +44,11 @@ settings:
     ENABLE_HARDENED_RUNTIME: YES
     OTHER_SWIFT_FLAGS: "$(inherited)"
     SWIFT_STRICT_CONCURRENCY: minimal
+    # Tell the Swift compiler to emit .stringsdata for every SwiftUI Text("…")
+    # / LocalizedStringKey / String(localized:) call so Xcode can sync them
+    # into Localizable.xcstrings on build.
+    SWIFT_EMIT_LOC_STRINGS: YES
+    LOCALIZED_STRING_SWIFTUI_SUPPORT: YES
 
 packages:
   Sparkle:
@@ -45,6 +76,10 @@ targets:
       - path: Resources/AppIconDev.icon
       - path: Resources/Emoji
         type: folder
+      # UI string catalog. Xcode auto-extracts every String(localized:) /
+      # Text("…") literal into this on build.
+      - path: Resources/Localizable.xcstrings
+        buildPhase: resources
       # Opaque-named effect assets. Names don't reveal their content; see
       # the Bundle.url(forResource:) call sites in Sources/Mojito/App/ for
       # which file is which.

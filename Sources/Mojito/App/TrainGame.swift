@@ -88,14 +88,14 @@ private struct TrainGameView: View {
                 // Subtle dim so it reads as a moment, not an overlay bug.
                 Color.black.opacity(0.18)
 
-                Text("👆")
+                Text(verbatim: "👆")
                     .font(.system(size: fingerSize))
                     .position(x: leftX, y: baseY)
-                Text("👆")
+                Text(verbatim: "👆")
                     .font(.system(size: fingerSize))
                     .position(x: rightX, y: baseY)
 
-                Text("🚋")
+                Text(verbatim: "🚋")
                     .font(.system(size: trainSize))
                     .position(x: trainX, y: trainY)
             }

@@ -306,7 +306,7 @@ private struct PaulsComputerContents: View {
         ZStack {
             Color.black
             VStack(alignment: .leading, spacing: 8) {
-                Text("C:\\")
+                Text(verbatim: "C:\\")
                     .font(.system(size: 13, weight: .semibold, design: .monospaced))
                     .foregroundColor(.white.opacity(0.55))
                 Rectangle()
