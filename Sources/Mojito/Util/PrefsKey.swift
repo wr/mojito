@@ -28,4 +28,7 @@ enum PrefsKey {
     static let symbolsRequireDoubleColon = "mojito.symbols.requireDoubleColon"
     /// Key name kept for backward compatibility with existing installs.
     static let perfectBounceCount    = "mojito.perfectBounce.count"
+    /// User-provided Giphy beta API key for GIF search (`:::` trigger).
+    /// `defaults write ee.wells.Mojito.dev mojito.giphyApiKey "<key>"`.
+    static let giphyApiKey           = "mojito.giphyApiKey"
 }
