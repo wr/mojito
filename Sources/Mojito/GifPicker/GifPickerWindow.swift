@@ -121,15 +121,17 @@ final class GifPickerWindow {
     /// search hasn't returned anything yet.
     func pickSelected() {
         guard let asset = viewModel.selectedAsset() else { return }
-        handlePick(asset, paste: false)
+        handlePick(asset, paste: false, deleteCount: 0)
     }
 
     /// Like `pickSelected()` but synthesizes a ⌘V into the focused app once
     /// the clipboard write completes, so the GIF lands inline rather than
-    /// just sitting on the clipboard.
-    func pickSelectedAndPaste() {
+    /// just sitting on the clipboard. `deleteCount` chars are erased from
+    /// the focused app first — but only *after* the GIF download succeeds,
+    /// so a network failure doesn't silently wipe the user's typed query.
+    func pickSelectedAndPaste(deleteCount: Int) {
         guard let asset = viewModel.selectedAsset() else { return }
-        handlePick(asset, paste: true)
+        handlePick(asset, paste: true, deleteCount: deleteCount)
     }
 
     /// Returns true when Enter was consumed by the "Load more" affordance
@@ -147,15 +149,14 @@ final class GifPickerWindow {
     var currentQuery: String { viewModel.query }
 
     /// Click path mirrors the Enter path: delete `:::query` from the
-    /// focused app, then paste the GIF inline. Engine resets state via
+    /// focused app and paste the GIF inline. Engine resets state via
     /// the `onPickClicked` callback.
     private func handleClickPick(_ asset: GifAsset) {
-        TextInserter.deleteBackward(viewModel.query.count + 3)
-        handlePick(asset, paste: true)
+        handlePick(asset, paste: true, deleteCount: viewModel.query.count + 3)
         onPickClicked?()
     }
 
-    private func handlePick(_ asset: GifAsset, paste: Bool) {
+    private func handlePick(_ asset: GifAsset, paste: Bool, deleteCount: Int) {
         copyTask?.cancel()
         let url = asset.originalURL
         hide()
@@ -163,6 +164,12 @@ final class GifPickerWindow {
             let copied = await GifClipboard.copy(from: url)
             await MainActor.run {
                 guard copied, paste else { return }
+                // Delete the typed `:::query` only after the GIF actually
+                // made it to the clipboard. Earlier deletion would silently
+                // wipe the user's text on a network failure.
+                if deleteCount > 0 {
+                    TextInserter.deleteBackward(deleteCount)
+                }
                 // The download is async — by the time it completes the user
                 // could have switched to a password field or another app.
                 // Bail on paste rather than synthesizing ⌘V into the wrong

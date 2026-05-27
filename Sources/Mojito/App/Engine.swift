@@ -356,7 +356,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureFocusSnapshot = nil
             captureFocusPID = nil
             captureIsExcluded = false
-            captureIsExcluded = false
             if wasExcluded { break }
             // 80ms gives the passed-through terminator time to land in slow
             // text fields before synth-backspaces fire. One-tick wasn't
@@ -474,10 +473,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             gifPickerWindow.hide()
 
         case .pickGif(let deleteCount):
-            // `:::query` was typed through to the focused app; delete the
-            // span so the GIF replaces it rather than landing after it.
-            // Skip both delete and paste when Enter is the "Load more"
-            // affordance — picker stays open for further navigation.
+            // `:::query` is sitting in the focused app. The window owns the
+            // delete + paste sequence and only fires deletion once the GIF
+            // download succeeds, so a network failure doesn't wipe the
+            // user's typed text without inserting a replacement.
+            //
+            // When Enter is the "Load more" affordance, picker stays open
+            // and we skip the paste path entirely.
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
                 if self.gifPickerWindow.consumeEnterAsLoadMore() {
@@ -487,10 +489,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                     self.stateMachine.resumeGifSearching(query: self.gifPickerWindow.currentQuery)
                     return
                 }
-                if deleteCount > 0 {
-                    TextInserter.deleteBackward(deleteCount)
-                }
-                self.gifPickerWindow.pickSelectedAndPaste()
+                self.gifPickerWindow.pickSelectedAndPaste(deleteCount: deleteCount)
             }
 
         case .moveGifSelection(let direction):
