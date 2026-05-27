@@ -6,6 +6,12 @@ options:
   createIntermediateGroups: true
   generateEmptyDirectories: true
   developmentLanguage: en
+  # Bootstrap the build-time-generated Sources/Mojito/GifPicker/EmbeddedGiphyKey.swift
+  # before xcodegen scans the source tree, so a fresh clone (where the gitignored
+  # file doesn't yet exist) still picks it up as a project source. The per-build
+  # phase below re-runs the same script so .env edits flow through without an
+  # explicit `xcodegen generate`.
+  preGenCommand: python3 scripts/build_giphy_key.py
   # Locales we ship UI translations for. Xcode derives CFBundleLocalizations
   # from this list. Adding a code here is necessary for the corresponding
   # column to appear in Localizable.xcstrings.
@@ -200,6 +206,15 @@ targets:
     dependencies:
       - package: Sparkle
       - package: KeyboardShortcuts
+    preBuildScripts:
+      # Bake the Giphy API key into Sources/Mojito/GifPicker/EmbeddedGiphyKey.swift
+      # from $GIPHY_API_KEY (env var) or `.env` at repo root. The generated file
+      # is gitignored; the script no-ops when contents are unchanged so this
+      # doesn't churn rebuilds. See scripts/build_giphy_key.py for the format.
+      - name: Embed Giphy API key
+        script: |
+          cd "$SRCROOT" && python3 scripts/build_giphy_key.py
+        basedOnDependencyAnalysis: false
     postBuildScripts:
       # Debug builds: also install "Mojito Dev.app" into /Applications so it
       # shows up in Spotlight / Finder / Launchpad consistently and can be

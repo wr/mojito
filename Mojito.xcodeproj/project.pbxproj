@@ -70,6 +70,7 @@
 		84EDC215BBA74C168E6E96B2 /* MatrixRain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DF280ABF42475053B4EB56 /* MatrixRain.swift */; };
 		8669DFC49B3F7DBE689337C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F5C937DB8C91F3847F55D8A6 /* Assets.xcassets */; };
 		87092993DA5EF300593E8021 /* s07.bin in Resources */ = {isa = PBXBuildFile; fileRef = C876AD00FBA92A6CA56ABD95 /* s07.bin */; };
+		87514A922406A1535D7BCB42 /* EmbeddedGiphyKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7292DF1A52CC009F5780BB22 /* EmbeddedGiphyKey.swift */; };
 		8766D3C09A87866098D979B0 /* TicTacToeGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05F08FB28C8998B7F7075BB /* TicTacToeGame.swift */; };
 		87ACEE7E1331065BA81E0B52 /* KeyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 561D5F53503A9DDE7BE03430 /* KeyMonitor.swift */; };
 		87F16A28F58C4854576DD450 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B06D1C751C2161A7A99DA1 /* AppDelegate.swift */; };
@@ -199,6 +200,7 @@
 		6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientEmoticonTable.swift; sourceTree = "<group>"; };
 		702AC2870CD686AB17CC518E /* UpdaterCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterCoordinator.swift; sourceTree = "<group>"; };
 		70F2866D3BE0CC5D08CF9AD1 /* Emoji */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Emoji; path = Resources/Emoji; sourceTree = SOURCE_ROOT; };
+		7292DF1A52CC009F5780BB22 /* EmbeddedGiphyKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedGiphyKey.swift; sourceTree = "<group>"; };
 		73FCCFD6A9499FB84B690194 /* s10.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s10.bin; sourceTree = "<group>"; };
 		74DB9192DF20F83CAD8A820C /* ImageBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBlob.swift; sourceTree = "<group>"; };
 		786373C2E5DE4642148857B1 /* CaretLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaretLocator.swift; sourceTree = "<group>"; };
@@ -514,6 +516,7 @@
 			isa = PBXGroup;
 			children = (
 				C31E41F813A67872400E4942 /* AnimatedGifView.swift */,
+				7292DF1A52CC009F5780BB22 /* EmbeddedGiphyKey.swift */,
 				1B02E1E7C31A388F8B220B6B /* GifAsset.swift */,
 				19FC0DC96883A143602E6668 /* GifClipboard.swift */,
 				C02399494F4CF5825B0401CD /* GifPickerView.swift */,
@@ -587,6 +590,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B22E14D9C07C47B848B746C5 /* Build configuration list for PBXNativeTarget "Mojito" */;
 			buildPhases = (
+				FFBF4DE46DB4DBF9742F2CE1 /* Embed Giphy API key */,
 				7D6CE5B5A02283C4796414C4 /* Sources */,
 				15601F46DFE7F12B9FBCDA4F /* Resources */,
 				8D12BBB2D5095D17E64B4D0C /* Frameworks */,
@@ -726,6 +730,25 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"$CONFIGURATION\" = \"Debug\" ]; then\n  # Xcode 26's build system schedules this script BEFORE the\n  # bundle's implicit codesign step (and serializes them — we\n  # can't poll-wait because codesign blocks on us finishing).\n  # So we sign the destination ourselves with the same identity\n  # Xcode uses (`EXPANDED_CODE_SIGN_IDENTITY` is the cert SHA-1).\n  # Sparkle.framework was signed earlier in the build and rsyncs\n  # over already-signed; we just need to (re)sign the dylibs and\n  # the bundle wrapper.\n  rsync -a --delete \"$TARGET_BUILD_DIR/$WRAPPER_NAME/\" \"/Applications/$WRAPPER_NAME/\"\n  DEST=\"/Applications/$WRAPPER_NAME\"\n  for f in \"$DEST/Contents/MacOS\"/*.dylib; do\n    [ -f \"$f\" ] && codesign --force --sign \"$EXPANDED_CODE_SIGN_IDENTITY\" \\\n      --options runtime --timestamp=none \"$f\" >/dev/null\n  done\n  codesign --force --sign \"$EXPANDED_CODE_SIGN_IDENTITY\" \\\n    --entitlements \"$SRCROOT/$CODE_SIGN_ENTITLEMENTS\" \\\n    --options runtime --timestamp=none \"$DEST\" >/dev/null\n  echo \"Copied $WRAPPER_NAME to /Applications/ (signed in place)\"\n  # If the app was already running, quit and relaunch from the new\n  # build. `pkill` returns 0 only when it actually signalled something,\n  # which doubles as our \"was running\" check — skip the relaunch on\n  # a cold build so we don't surprise-launch the app.\n  APP_NAME=\"${WRAPPER_NAME%.app}\"\n  if pkill -x \"$APP_NAME\" 2>/dev/null; then\n    # Wait for clean exit so `open` picks up the freshly-copied bundle.\n    for _ in $(seq 1 10); do\n      pgrep -x \"$APP_NAME\" >/dev/null || break\n      sleep 0.1\n    done\n    open \"/Applications/$WRAPPER_NAME\"\n    echo \"Relaunched $WRAPPER_NAME\"\n  fi\nfi\n";
 		};
+		FFBF4DE46DB4DBF9742F2CE1 /* Embed Giphy API key */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Giphy API key";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$SRCROOT\" && python3 scripts/build_giphy_key.py\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -760,6 +783,7 @@
 				F07DEA88DD7DFC70934988EF /* EffectDismisser.swift in Sources */,
 				42DC32C9130BAB5381534226 /* EggIndex.swift in Sources */,
 				2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */,
+				87514A922406A1535D7BCB42 /* EmbeddedGiphyKey.swift in Sources */,
 				AC7748989CE2B7D96CBB21FE /* Emoji.swift in Sources */,
 				786D4AD196F221CD0F7887DA /* EmojiDatabase.swift in Sources */,
 				67560B8C0EC9028ED9659937 /* EmojiRain.swift in Sources */,
