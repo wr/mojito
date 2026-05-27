@@ -667,6 +667,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 }
             }
             return true
+        case FuzzyMatcher.k35Hex:
+            TextInserter.deleteBackward(deleteCount)
+            TrainGame.start()
+            ChooChooSound.play()
+            EasterEggTracker.record(.k35)
         default:
             return false
         }

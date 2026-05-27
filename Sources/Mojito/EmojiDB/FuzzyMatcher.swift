@@ -48,6 +48,7 @@ struct FuzzyMatcher {
     static let k27Hex     = "k27"
     static let k29Hex          = "k29"
     static let k30Hex       = "k30"
+    static let k35Hex     = "k35"
     /// Fires from the state machine, not the picker — no `EggIndex` entry.
     static let k99Hex       = "k99"
     /// Below this we skip the hash lookup. 2-char keywords still match at 2.
@@ -77,7 +78,7 @@ struct FuzzyMatcher {
         k15Hex:           PinnedRow(hexcode: k15Hex,           character: "🛸", label: "???",      order: 86),
         k16Hex:      PinnedRow(hexcode: k16Hex,      character: "🍞", label: "???",      order: 86),
         k17Hex:           PinnedRow(hexcode: k17Hex,           character: "💿", label: "???",      order: 85),
-        k19Hex:          PinnedRow(hexcode: k19Hex,          character: "💙", label: "???",      order: 84),
+        k19Hex:          PinnedRow(hexcode: k19Hex,          character: "🟦", label: "???",      order: 84),
         k20Hex:         PinnedRow(hexcode: k20Hex,         character: "🐍", label: "???",      order: 83),
         k21Hex: PinnedRow(hexcode: k21Hex, character: "☢️", label: "???",      order: 82),
         k22Hex:         PinnedRow(hexcode: k22Hex,         character: "🦵", label: "???",      order: 81),
@@ -87,12 +88,13 @@ struct FuzzyMatcher {
         k27Hex:      PinnedRow(hexcode: k27Hex,      character: "🎤", label: "???",      order: 76),
         k29Hex:           PinnedRow(hexcode: k29Hex,           character: "📺", label: "???",      order: 74),
         k30Hex:        PinnedRow(hexcode: k30Hex,        character: "🥬", label: "???",      order: 73),
+        k35Hex:        PinnedRow(hexcode: k35Hex,        character: "🚋", label: "???",      order: 72),
     ]
 
-    /// Named pinned rows that get the rainbow gradient instead of `???`.
-    static let rainbowHexcodes: Set<String> = [
-        k02Hex, k04Hex, k05Hex
-    ]
+    /// Every pinned row renders with the rainbow gradient. (Used to mark
+    /// only the named/spoiler-light ones, but the gradient is the visual
+    /// "this is special" cue we want on all hidden picks.)
+    static var rainbowHexcodes: Set<String> { pinnedHexcodes }
 
     static let pinnedHexcodes: Set<String> = Set(pinnedRows.keys)
 

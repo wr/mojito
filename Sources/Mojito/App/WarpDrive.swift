@@ -73,14 +73,18 @@ private final class WarpHostView: NSView {
     private let startDate = Date()
     private var lastFrameDate = Date()
 
-    // Phase boundaries (seconds).
-    private let impulseEnd: Double = 2.0
+    // Phase boundaries (seconds). No impulse drift; accel runs 0→3.0 then decel 3.0→3.5.
+    private let impulseEnd: Double = 0.0
     private let accelPeak: Double  = 3.0
-    private let accelEnd: Double   = 4.0
+    private let accelEnd: Double   = 3.5
+    /// Full-screen flash at the snap, landing just after peak velocity.
+    private let flashStart: Double  = 3.15
+    private let flashPeak: Double   = 3.2
+    private let flashEnd: Double    = 3.7
 
     // Warp-rate set points (world-z per second).
     private let driftRate: CGFloat  = 0.04
-    private let peakRate: CGFloat   = 13.0
+    private let peakRate: CGFloat   = 22.0
     private let cruiseRate: CGFloat = 0.9
 
     // Single constant star count across all phases — splitting extras in
@@ -168,7 +172,8 @@ private final class WarpHostView: NSView {
         if t < impulseEnd { return driftRate }
         if t < accelPeak {
             let p = CGFloat((t - impulseEnd) / (accelPeak - impulseEnd))
-            let eased = p * p * p
+            // Quintic ease-in: barely moves at first, hockey-sticks into the snap.
+            let eased = pow(p, 5)
             return driftRate + (peakRate - driftRate) * eased
         }
         if t < accelEnd {
@@ -177,6 +182,17 @@ private final class WarpHostView: NSView {
             return peakRate - (peakRate - cruiseRate) * eased
         }
         return cruiseRate
+    }
+
+    /// Brief white-out at the snap. Triangle envelope, 50ms in / 500ms out.
+    private func flashAlpha(at t: Double) -> CGFloat {
+        if t < flashStart || t > flashEnd { return 0 }
+        if t < flashPeak {
+            return CGFloat((t - flashStart) / (flashPeak - flashStart))
+        }
+        let p = CGFloat((t - flashPeak) / (flashEnd - flashPeak))
+        // Quadratic ease-out for the fade so it doesn't linger.
+        return 1.0 - p * p
     }
 
     /// Halo intensity. 0 during impulse and cruise; ramps in over the first
@@ -274,6 +290,14 @@ private final class WarpHostView: NSView {
                 ctx.addLine(to: CGPoint(x: sx, y: sy))
                 ctx.strokePath()
             }
+        }
+
+        let flash = flashAlpha(at: elapsed) * globalFade
+        if flash > 0.001 {
+            // Cool-tinted wipe at sub-peak alpha — transitions without dazzling.
+            let tinted = NSColor(red: 0.88, green: 0.94, blue: 1.0, alpha: flash * 0.85)
+            ctx.setFillColor(tinted.cgColor)
+            ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
         }
     }
 }

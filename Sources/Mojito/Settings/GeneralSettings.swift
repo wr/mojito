@@ -24,15 +24,15 @@ struct GeneralSettingsView: View {
                         LaunchAtLogin.syncFromSystem()
                     }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Toggle("Show icon in menu bar", isOn: $showMenuBarIcon)
-                        .toggleStyle(.switch)
-                    if !showMenuBarIcon {
-                        Text("When hidden, open Settings by launching \(AppInfo.displayName) from Finder or Spotlight.")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
+                Toggle(isOn: $showMenuBarIcon) {
+                    HStack(spacing: 4) {
+                        Text("Show icon in menu bar")
+                        if #available(macOS 26.0, *) {
+                            MenuBarHelpButton()
+                        }
                     }
                 }
+                .toggleStyle(.switch)
 
                 LabeledContent {
                     HStack(spacing: 8) {
@@ -82,6 +82,26 @@ struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+@available(macOS 26.0, *)
+private struct MenuBarHelpButton: View {
+    @State private var isShown = false
+
+    var body: some View {
+        Button {
+            isShown.toggle()
+        } label: {
+            Image(systemName: "questionmark.circle")
+                .foregroundStyle(.secondary)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $isShown, arrowEdge: .top) {
+            Text("If the icon doesn't appear in the menu bar, check **System Settings → Menu Bar → \"Allow in the Menu Bar\"**.")
+                .padding(12)
+                .frame(width: 280)
+        }
     }
 }
 
