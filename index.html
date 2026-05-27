@@ -19,7 +19,7 @@
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="style.css?v=64">
+<link rel="stylesheet" href="style.css?v=65">
 </head>
 <body>
 
@@ -61,6 +61,17 @@
            src="trash.png?v=1"
            srcset="trash.png?v=1 1x, trash@2x.png?v=1 2x"
            alt="" width="104" height="128" draggable="false">
+    </div>
+
+    <!-- Achievement banner — top-center blue pill that scale-pops in over the
+         crash overlay. Mirrors the in-app AchievementBanner discovery signal. -->
+    <div class="achievement" id="achievement" aria-hidden="true">
+      <div class="achievement-pill">
+        <span class="achievement-glyph" aria-hidden="true">💣</span>
+        <span class="achievement-lead">Your first easter egg!</span>
+        <span class="achievement-sep" aria-hidden="true">·</span>
+        <span class="achievement-detail">One down, 100 to go</span>
+      </div>
     </div>
 
     <!-- Sad Mac crash overlay, shown when the Website folder is dragged to trash. -->
@@ -411,6 +422,6 @@ Changes not staged for commit:
   <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
 </footer>
 
-<script src="picker.js?v=45" defer></script>
+<script src="picker.js?v=48" defer></script>
 </body>
 </html>
