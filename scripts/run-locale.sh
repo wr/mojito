@@ -55,15 +55,28 @@ case "$LOCALE" in
 esac
 
 APP="/Applications/Mojito Dev.app"
+BIN="$APP/Contents/MacOS/Mojito Dev"
 if [[ ! -d "$APP" ]]; then
     echo "Mojito Dev.app not found at $APP — build a Debug config first." >&2
     exit 1
 fi
 
-pkill -f "Mojito Dev" || true
-# Brief pause so the old instance's resources release before launchd
-# tries to fire the new one.
-sleep 0.3
+# Graceful quit first so applicationWillTerminate runs cleanly.
+osascript -e 'tell application "Mojito Dev" to quit' 2>/dev/null || true
+
+# Poll until the process is fully gone — launchd refuses a relaunch
+# (RBSRequestErrorDomain code=5 "Launch failed", errno 163) if the
+# previous instance hasn't released its launchd state yet.
+for _ in {1..50}; do
+    pgrep -f "$BIN" >/dev/null 2>&1 || break
+    sleep 0.1
+done
+
+# Force-kill anything that's still hanging on.
+if pgrep -f "$BIN" >/dev/null 2>&1; then
+    pkill -9 -f "$BIN" 2>/dev/null || true
+    sleep 0.5
+fi
 
 echo "Launching Mojito Dev with AppleLanguages=($LOCALE), AppleLocale=$APPLE_LOCALE"
 open -n "$APP" --args -AppleLanguages "($LOCALE)" -AppleLocale "$APPLE_LOCALE"
