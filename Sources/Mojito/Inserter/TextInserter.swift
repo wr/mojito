@@ -36,6 +36,13 @@ enum TextInserter {
         }
     }
 
+    /// Synth ⌘V into the focused app — used by the GIF picker to paste the
+    /// selected GIF inline after writing it to the clipboard. Works in any
+    /// text field that accepts the standard "paste" action.
+    static func pasteFromClipboard() {
+        postKey(virtualKey: 0x09, flags: .maskCommand)  // kVK_ANSI_V
+    }
+
     private static func postKey(virtualKey: CGKeyCode, flags: CGEventFlags) {
         let down = CGEvent(keyboardEventSource: nil, virtualKey: virtualKey, keyDown: true)
         let up   = CGEvent(keyboardEventSource: nil, virtualKey: virtualKey, keyDown: false)

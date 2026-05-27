@@ -31,4 +31,11 @@ enum PrefsKey {
     /// User-provided Giphy beta API key for GIF search (`:::` trigger).
     /// `defaults write ee.wells.Mojito.dev mojito.giphyApiKey "<key>"`.
     static let giphyApiKey           = "mojito.giphyApiKey"
+    /// Master switch for the `:::` GIF picker. When off, `:::` is just
+    /// three colons in your text — no network call, no panel.
+    static let gifSearchEnabled      = "mojito.gifSearch.enabled"
+    /// When true, the GIF picker fires even in apps/URLs listed in the
+    /// exclusion list. Default true: users tend to exclude apps that
+    /// have their own emoji UI (Slack, Discord), not their own GIF UI.
+    static let gifBypassExclusions   = "mojito.gifSearch.bypassExclusions"
 }

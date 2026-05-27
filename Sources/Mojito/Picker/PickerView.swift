@@ -27,8 +27,8 @@ struct PickerView: View {
                             .id(index)
                     }
                 }
-                .padding(.top, 6)
-                .padding(.bottom, 3)
+                .padding(.top, 8)
+                .padding(.bottom, 6)
             }
             .scrollIndicators(.never)
             .frame(

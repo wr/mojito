@@ -10,7 +10,7 @@ struct AnimatedGifView: NSViewRepresentable {
     let cornerRadius: CGFloat
 
     func makeNSView(context: Context) -> NSImageView {
-        let view = NSImageView()
+        let view = FittedImageView()
         view.animates = true
         view.imageScaling = .scaleProportionallyUpOrDown
         view.imageAlignment = .alignCenter
@@ -33,6 +33,16 @@ struct AnimatedGifView: NSViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator { Coordinator() }
+
+    /// Without this, NSImageView reports the source image's native size as
+    /// its intrinsic content size, and a 480×270 GIF muscles past the
+    /// SwiftUI-imposed square cell. `noIntrinsicMetric` defers to the
+    /// frame given by SwiftUI.
+    final class FittedImageView: NSImageView {
+        override var intrinsicContentSize: NSSize {
+            NSSize(width: NSView.noIntrinsicMetric, height: NSView.noIntrinsicMetric)
+        }
+    }
 
     @MainActor
     final class Coordinator {

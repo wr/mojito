@@ -1,76 +1,26 @@
 import SwiftUI
 
 struct GifPickerView: View {
+    /// Scroll anchor id used by `ScrollViewReader` to bring the "Load
+    /// more" affordance into view when it owns the keyboard focus.
+    static let loadMoreScrollID = "gif-picker-load-more"
+
     @ObservedObject var viewModel: GifPickerViewModel
     /// Called when the user picks a GIF (Enter / click).
     let onPick: (GifAsset) -> Void
     /// Called when the user dismisses (Esc / click-away).
     let onDismiss: () -> Void
 
-    @FocusState private var fieldFocused: Bool
-
     var body: some View {
         VStack(spacing: 0) {
-            searchField
-                .padding(.horizontal, 12)
-                .padding(.top, 10)
-                .padding(.bottom, 8)
-            Divider().opacity(0.4)
             content
-                .frame(height: 320)
+                .frame(height: GifPickerLayout.contentHeight)
             Divider().opacity(0.4)
             footer
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
         }
         .frame(width: GifPickerLayout.width)
-        .onAppear { fieldFocused = true }
-        .onExitCommand { onDismiss() }
-    }
-
-    private var searchField: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-            TextField(
-                "Search GIFs…",
-                text: $viewModel.query
-            )
-            .textFieldStyle(.plain)
-            .focused($fieldFocused)
-            .font(.system(size: 14))
-            .onKeyPress(.return) {
-                if let asset = viewModel.selectedAsset() {
-                    onPick(asset)
-                    return .handled
-                }
-                return .ignored
-            }
-            .onKeyPress(.upArrow) {
-                viewModel.moveSelection(.up)
-                return .handled
-            }
-            .onKeyPress(.downArrow) {
-                viewModel.moveSelection(.down)
-                return .handled
-            }
-            .onKeyPress(.leftArrow) {
-                guard !viewModel.query.isEmpty else { return .ignored }
-                // Only intercept when results are showing AND caret isn't
-                // mid-edit — but the simple form here always navigates.
-                // If the user wants to edit, they'll click in the field.
-                viewModel.moveSelection(.left)
-                return .handled
-            }
-            .onKeyPress(.rightArrow) {
-                guard !viewModel.query.isEmpty else { return .ignored }
-                viewModel.moveSelection(.right)
-                return .handled
-            }
-            if viewModel.isLoading {
-                ProgressView().controlSize(.small)
-            }
-        }
     }
 
     @ViewBuilder
@@ -87,25 +37,81 @@ struct GifPickerView: View {
     }
 
     private var grid: some View {
-        ScrollView {
-            LazyVGrid(
-                columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: viewModel.columns),
-                spacing: 8
-            ) {
-                ForEach(Array(viewModel.results.enumerated()), id: \.element.id) { index, asset in
-                    GifThumb(
-                        asset: asset,
-                        isSelected: index == viewModel.selectedIndex
-                    )
-                    .onTapGesture {
-                        viewModel.selectedIndex = index
-                        onPick(asset)
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: viewModel.columns),
+                    spacing: 8
+                ) {
+                    ForEach(Array(viewModel.results.enumerated()), id: \.element.id) { index, asset in
+                        GifThumb(
+                            asset: asset,
+                            isSelected: index == viewModel.selectedIndex
+                        )
+                        .id(index)
+                        .onTapGesture {
+                            viewModel.selectedIndex = index
+                            onPick(asset)
+                        }
+                        .onAppear {
+                            // Lazy-paginate: when one of the last few cells
+                            // becomes visible, kick the next page request.
+                            if index >= viewModel.results.count - 3 {
+                                viewModel.loadMoreIfNeeded()
+                            }
+                        }
                     }
                 }
+                .padding(.horizontal, 10)
+                .padding(.top, 12)
+                .padding(.bottom, viewModel.canLoadMore ? 4 : 10)
+
+                if viewModel.canLoadMore {
+                    Button {
+                        viewModel.loadMore()
+                    } label: {
+                        Text("Load more")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .controlSize(.regular)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .strokeBorder(
+                                viewModel.isLoadMoreFocused ? Color.accentColor : Color.clear,
+                                lineWidth: 2
+                            )
+                            // Bordered button has its own inset corner — the
+                            // ring sits just outside it, matching cell rings.
+                            .padding(-2)
+                    )
+                    .id(GifPickerView.loadMoreScrollID)
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 10)
+                }
             }
-            .padding(10)
+            .scrollIndicators(.never)
+            // Minimal scroll: no anchor → SwiftUI only scrolls if the cell
+            // is offscreen, and stops as soon as it's visible. Wrapping in
+            // `withAnimation` also captured the selection-ring transition
+            // and made it lag behind the scroll.
+            .onChange(of: viewModel.selectedIndex) { _, new in
+                if viewModel.isLoadMoreFocused {
+                    proxy.scrollTo(GifPickerView.loadMoreScrollID)
+                } else {
+                    proxy.scrollTo(new)
+                }
+            }
+            // After a pagination append, selectedIndex's numeric value
+            // didn't change (it sat at the old `results.count`, which is
+            // now the first new GIF), so `onChange(of: selectedIndex)`
+            // doesn't fire. Watch the count instead and nudge focus into
+            // view so the user sees the new selection.
+            .onChange(of: viewModel.results.count) { _, _ in
+                if !viewModel.isLoadMoreFocused {
+                    proxy.scrollTo(viewModel.selectedIndex)
+                }
+            }
         }
-        .scrollIndicators(.never)
     }
 
     private func placeholder(text: String) -> some View {
@@ -122,20 +128,24 @@ struct GifPickerView: View {
     }
 
     private var footer: some View {
-        HStack(spacing: 12) {
-            footerHint(key: "↑↓←→", label: "navigate")
-            footerHint(key: "↵", label: "copy")
+        HStack(spacing: 8) {
+            footerHint(key: "↑↓", label: nil)
+            footerHint(key: "←→", label: nil)
+            footerHint(key: "↵", label: "insert")
             footerHint(key: "esc", label: "dismiss")
-            Spacer()
-            Text(verbatim: "Powered by GIPHY")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(.secondary)
+            Spacer(minLength: 6)
+            (
+                Text(verbatim: "Powered by ").font(.system(size: 10))
+                + Text(verbatim: "GIPHY").font(.system(size: 12, weight: .bold)).tracking(-0.4)
+            )
+            .foregroundStyle(.secondary)
+            .fixedSize()
         }
         .font(.system(size: 11))
         .foregroundStyle(.secondary)
     }
 
-    private func footerHint(key: String, label: LocalizedStringKey) -> some View {
+    private func footerHint(key: String, label: LocalizedStringKey?) -> some View {
         HStack(spacing: 4) {
             Text(verbatim: key)
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
@@ -145,8 +155,9 @@ struct GifPickerView: View {
                     RoundedRectangle(cornerRadius: 3, style: .continuous)
                         .fill(Color.primary.opacity(0.08))
                 )
-            Text(label)
+            if let label { Text(label).fixedSize() }
         }
+        .fixedSize()
     }
 }
 
@@ -154,18 +165,37 @@ private struct GifThumb: View {
     let asset: GifAsset
     let isSelected: Bool
 
+    @State private var isHovered = false
+
     var body: some View {
+        // Square cells keep the selection ring flush against the cell
+        // extent. The GIF inside still uses its natural aspect ratio,
+        // letterboxed into the square — symmetric margins read as
+        // intentional even when the source GIF is portrait/landscape.
         AnimatedGifView(url: asset.thumbURL, cornerRadius: 6)
-            .frame(height: 90)
+            .aspectRatio(1, contentMode: .fit)
             .overlay(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .strokeBorder(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
+                    .strokeBorder(borderColor, lineWidth: 2)
             )
+            .onHover { isHovered = $0 }
             .accessibilityLabel(Text(verbatim: asset.title))
+    }
+
+    private var borderColor: Color {
+        if isSelected { return .accentColor }
+        // Match the emoji picker's row highlight so hover feels consistent.
+        if isHovered { return Color(nsColor: .unemphasizedSelectedContentBackgroundColor) }
+        return .clear
     }
 }
 
 enum GifPickerLayout {
     static let width: CGFloat = 360
     static let cornerRadius: CGFloat = 12
+    /// Sized to show ~3.5 rows of the 3-col grid — a partial 4th row
+    /// hints at scrollability without dominating screen real estate.
+    static let contentHeight: CGFloat = 400
+    /// Total panel height: contentHeight + divider + footer + chrome.
+    static let panelHeight: CGFloat = 440
 }

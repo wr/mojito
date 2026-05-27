@@ -1,6 +1,7 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "": {},
     "%@ couldn't reach the update server.": {
       "localizations": {
         "ar": {
@@ -1802,16 +1803,22 @@
     },
     "Add a Giphy API key to enable GIF search.": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add a Giphy API key to enable GIF search."
+            "value": "أضف مفتاح Giphy API لتفعيل البحث عن GIF."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Füge einen Giphy-API-Schlüssel hinzu, um die GIF-Suche zu aktivieren."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a Giphy API key to enable GIF search."
           }
         },
         "es": {
@@ -1826,10 +1833,28 @@
             "value": "Agregá una clave de la API de Giphy para activar la búsqueda de GIF."
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "برای فعال‌سازی جست‌وجوی GIF، یک کلید API Giphy اضافه کنید."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Ajoute une clé d'API Giphy pour activer la recherche de GIF."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הוסף מפתח Giphy API כדי להפעיל חיפוש GIF."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF खोज सक्षम करने के लिए Giphy API कुंजी जोड़ें।"
           }
         },
         "it": {
@@ -1838,16 +1863,40 @@
             "value": "Aggiungi una chiave API di Giphy per attivare la ricerca di GIF."
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 検索を有効にするには、Giphy の API キーを追加してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 검색을 사용하려면 Giphy API 키를 추가하세요."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voeg een Giphy API-sleutel toe om GIF-zoeken aan te zetten."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj klucz API Giphy, aby włączyć wyszukiwanie GIF-ów."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Adicione uma chave da API do Giphy para ativar a busca de GIF."
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF 検索を有効にするには、Giphy の API キーを追加してください。"
+            "value": "Добавьте ключ API Giphy, чтобы включить поиск GIF."
           }
         },
         "zh-Hans": {
@@ -1860,54 +1909,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "新增 Giphy API 金鑰以啟用 GIF 搜尋。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GIF 검색을 사용하려면 Giphy API 키를 추가하세요."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GIF खोज सक्षम करने के लिए Giphy API कुंजी जोड़ें।"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Добавьте ключ API Giphy, чтобы включить поиск GIF."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dodaj klucz API Giphy, aby włączyć wyszukiwanie GIF-ów."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voeg een Giphy API-sleutel toe om GIF-zoeken aan te zetten."
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أضف مفتاح Giphy API لتفعيل البحث عن GIF."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "برای فعال‌سازی جست‌وجوی GIF، یک کلید API Giphy اضافه کنید."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הוסף מפתח Giphy API כדי להפעיל חיפוש GIF."
           }
         }
       }
@@ -3818,16 +3819,22 @@
     },
     "Couldn't reach Giphy.": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Couldn't reach Giphy."
+            "value": "تعذّر الوصول إلى Giphy."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Giphy nicht erreichbar."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't reach Giphy."
           }
         },
         "es": {
@@ -3842,10 +3849,28 @@
             "value": "No se pudo conectar con Giphy."
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اتصال به Giphy ممکن نشد."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Impossible de joindre Giphy."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לא ניתן להתחבר ל-Giphy."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy तक नहीं पहुँचा जा सका।"
           }
         },
         "it": {
@@ -3854,16 +3879,40 @@
             "value": "Impossibile raggiungere Giphy."
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy に接続できませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy에 연결할 수 없습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kon Giphy niet bereiken."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się połączyć z Giphy."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Não foi possível acessar o Giphy."
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy に接続できませんでした。"
+            "value": "Не удалось связаться с Giphy."
           }
         },
         "zh-Hans": {
@@ -3876,54 +3925,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "無法連線到 Giphy。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy에 연결할 수 없습니다."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy तक नहीं पहुँचा जा सका।"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не удалось связаться с Giphy."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nie udało się połączyć z Giphy."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kon Giphy niet bereiken."
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تعذّر الوصول إلى Giphy."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "اتصال به Giphy ممکن نشد."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לא ניתן להתחבר ל-Giphy."
           }
         }
       }
@@ -4936,6 +4937,342 @@
         }
       }
     },
+    "GIF search": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF search"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF-Suche"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Búsqueda de GIF"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Búsqueda de GIF"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche de GIF"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ricerca GIF"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busca de GIF"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 検索"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 搜索"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 搜尋"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 검색"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF खोज"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поиск GIF"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyszukiwanie GIF-ów"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF-zoeken"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "البحث عن GIF"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جست‌وجوی GIF"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חיפוש GIF"
+          }
+        }
+      }
+    },
+    "GIF search bypass": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF search bypass"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF-Suche ohne Ausschlüsse"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excepción para búsqueda de GIF"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excepción para búsqueda de GIF"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exception pour la recherche de GIF"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eccezione per la ricerca di GIF"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exceção para a busca de GIF"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 検索の例外"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 搜索例外"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 搜尋例外"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 검색 예외"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF खोज अपवाद"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Исключение для поиска GIF"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyjątek dla wyszukiwania GIF"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF-zoeken uitzondering"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استثناء البحث عن GIF"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استثنای جست‌وجوی GIF"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חריגה לחיפוש GIF"
+          }
+        }
+      }
+    },
+    "GIFs and Symbols": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIFs and Symbols"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIFs und Symbole"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF y símbolos"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF y símbolos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF et symboles"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF e simboli"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIFs e símbolos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF と記号"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 和符号"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 與符號"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 및 기호"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF और प्रतीक"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF и символы"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF-y i symbole"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIFs en symbolen"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صور GIF والرموز"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گیف‌ها و نمادها"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF-ים וסמלים"
+          }
+        }
+      }
+    },
     "General": {
       "localizations": {
         "ar": {
@@ -5162,16 +5499,22 @@
     },
     "Giphy rejected the API key.": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy rejected the API key."
+            "value": "رفض Giphy مفتاح API."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Giphy hat den API-Schlüssel abgelehnt."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy rejected the API key."
           }
         },
         "es": {
@@ -5186,10 +5529,28 @@
             "value": "Giphy rechazó la clave de la API."
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏Giphy کلید API را رد کرد."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Giphy a refusé la clé d'API."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏Giphy דחתה את מפתח ה-API."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy ने API कुंजी अस्वीकार कर दी।"
           }
         },
         "it": {
@@ -5198,16 +5559,40 @@
             "value": "Giphy ha rifiutato la chiave API."
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy が API キーを拒否しました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy가 API 키를 거부했습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy weigerde de API-sleutel."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy odrzuciło klucz API."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "O Giphy rejeitou a chave da API."
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy が API キーを拒否しました。"
+            "value": "Giphy отклонил ключ API."
           }
         },
         "zh-Hans": {
@@ -5221,69 +5606,27 @@
             "state": "translated",
             "value": "Giphy 拒絕了 API 金鑰。"
           }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy가 API 키를 거부했습니다."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy ने API कुंजी अस्वीकार कर दी।"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy отклонил ключ API."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy odrzuciło klucz API."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy weigerde de API-sleutel."
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "رفض Giphy مفتاح API."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "‏Giphy کلید API را رد کرد."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "‏Giphy דחתה את מפתח ה-API."
-          }
         }
       }
     },
     "Giphy responded with an unexpected result.": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy responded with an unexpected result."
+            "value": "ردّ Giphy بنتيجة غير متوقعة."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Giphy hat unerwartet geantwortet."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy responded with an unexpected result."
           }
         },
         "es": {
@@ -5298,10 +5641,28 @@
             "value": "Giphy respondió con un resultado inesperado."
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏Giphy پاسخی غیرمنتظره برگرداند."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Giphy a répondu avec un résultat inattendu."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏Giphy החזירה תוצאה לא צפויה."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy से अप्रत्याशित प्रतिक्रिया मिली।"
           }
         },
         "it": {
@@ -5310,16 +5671,40 @@
             "value": "Giphy ha risposto con un risultato inatteso."
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy から予期しない応答が返されました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy가 예상치 못한 응답을 보냈습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy gaf een onverwacht resultaat."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy zwróciło nieoczekiwany wynik."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "O Giphy retornou um resultado inesperado."
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy から予期しない応答が返されました。"
+            "value": "Giphy вернул неожиданный ответ."
           }
         },
         "zh-Hans": {
@@ -5332,54 +5717,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Giphy 回傳了預期外的結果。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy가 예상치 못한 응답을 보냈습니다."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy से अप्रत्याशित प्रतिक्रिया मिली।"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy вернул неожиданный ответ."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy zwróciło nieoczekiwany wynik."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giphy gaf een onverwacht resultaat."
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ردّ Giphy بنتيجة غير متوقعة."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "‏Giphy پاسخی غیرمنتظره برگرداند."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "‏Giphy החזירה תוצאה לא צפויה."
           }
         }
       }
@@ -5721,6 +6058,7 @@
       }
     },
     "Include symbols (experimental)": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -5828,6 +6166,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "包含符號(實驗性)"
+          }
+        }
+      }
+    },
+    "Include ★ ⌘ ⌥ and similar characters in results (experimental).": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include ★ ⌘ ⌥ and similar characters in results (experimental)."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "★ ⌘ ⌥ und ähnliche Zeichen in den Ergebnissen anzeigen (experimentell)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incluir ★ ⌘ ⌥ y caracteres similares en los resultados (experimental)."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incluir ★ ⌘ ⌥ y caracteres similares en los resultados (experimental)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inclure ★ ⌘ ⌥ et caractères similaires dans les résultats (expérimental)."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Includi ★ ⌘ ⌥ e caratteri simili nei risultati (sperimentale)."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incluir ★ ⌘ ⌥ e caracteres semelhantes nos resultados (experimental)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "★ ⌘ ⌥ などの記号を結果に含めます(実験的)。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在结果中包含 ★ ⌘ ⌥ 等字符(实验性)。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在結果中包含 ★ ⌘ ⌥ 等字元(實驗性)。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "★ ⌘ ⌥ 등 유사 문자를 결과에 포함합니다(실험적)."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "परिणामों में ★ ⌘ ⌥ और मिलते-जुलते वर्ण शामिल करें (प्रयोगात्मक)।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включать ★ ⌘ ⌥ и подобные символы в результаты (экспериментально)."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uwzględniaj ★ ⌘ ⌥ i podobne znaki w wynikach (eksperymentalne)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon ★ ⌘ ⌥ en vergelijkbare tekens in resultaten (experimenteel)."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تضمين ★ ⌘ ⌥ والأحرف المشابهة في النتائج (تجريبي)."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گنجاندن ★ ⌘ ⌥ و کاراکترهای مشابه در نتایج (آزمایشی)."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כלול את ★ ⌘ ⌥ ותווים דומים בתוצאות (ניסיוני)."
           }
         }
       }
@@ -6168,6 +6618,118 @@
         }
       }
     },
+    "Let GIF search work in excluded apps": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let GIF search work in excluded apps"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF-Suche auch in ausgeschlossenen Apps zulassen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir la búsqueda de GIF en apps excluidas"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir la búsqueda de GIF en apps excluidas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser la recherche de GIF dans les apps exclues"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consenti la ricerca di GIF nelle app escluse"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir busca de GIF em apps excluídos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "除外したアプリでも GIF 検索を有効にする"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在已排除的应用中也启用 GIF 搜索"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在已排除的 App 中仍允許 GIF 搜尋"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제외된 앱에서도 GIF 검색 허용"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बहिष्कृत ऐप्स में भी GIF खोज की अनुमति दें"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешать поиск GIF в исключённых приложениях"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zezwalaj na wyszukiwanie GIF-ów w wykluczonych aplikacjach"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF-zoeken toestaan in uitgesloten apps"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "السماح بالبحث عن GIF في التطبيقات المستثناة"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اجازه دادن جست‌وجوی GIF در برنامه‌های مستثنا"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אפשר חיפוש GIF גם באפליקציות מוחרגות"
+          }
+        }
+      }
+    },
     "Lets %@ anchor the picker next to your text cursor.": {
       "localizations": {
         "ar": {
@@ -6392,18 +6954,136 @@
         }
       }
     },
-    "No GIFs found.": {
+    "Load more": {
       "localizations": {
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "No GIFs found."
+            "value": "Load more"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr laden"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargar más"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cargar más"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charger plus"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carica altri"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carregar mais"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "さらに読み込む"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加载更多"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "載入更多"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "더 불러오기"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "और लोड करें"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузить ещё"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Załaduj więcej"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meer laden"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحميل المزيد"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بارگذاری بیشتر"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "טען עוד"
+          }
+        }
+      }
+    },
+    "No GIFs found.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يُعثر على أي GIF."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Keine GIFs gefunden."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No GIFs found."
           }
         },
         "es": {
@@ -6418,10 +7098,28 @@
             "value": "No se encontraron GIF."
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هیچ GIF‌ای پیدا نشد."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Aucun GIF trouvé."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לא נמצאו GIF-ים."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कोई GIF नहीं मिला।"
           }
         },
         "it": {
@@ -6430,16 +7128,40 @@
             "value": "Nessun GIF trovato."
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF が見つかりませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF를 찾을 수 없습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen GIFs gevonden."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie znaleziono GIF-ów."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Nenhum GIF encontrado."
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF が見つかりませんでした。"
+            "value": "GIF не найдены."
           }
         },
         "zh-Hans": {
@@ -6452,54 +7174,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "找不到 GIF。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GIF를 찾을 수 없습니다."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "कोई GIF नहीं मिला।"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GIF не найдены."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nie znaleziono GIF-ów."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen GIFs gevonden."
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "لم يُعثر على أي GIF."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "هیچ GIF‌ای پیدا نشد."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לא נמצאו GIF-ים."
           }
         }
       }
@@ -8745,17 +9419,24 @@
       }
     },
     "Search GIFs…": {
+      "extractionState": "stale",
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Search GIFs…"
+            "value": "البحث عن GIF…"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "GIFs suchen…"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search GIFs…"
           }
         },
         "es": {
@@ -8770,10 +9451,28 @@
             "value": "Buscar GIF…"
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جست‌وجوی GIF…"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Rechercher des GIF…"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חפש GIF…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF खोजें…"
           }
         },
         "it": {
@@ -8782,16 +9481,40 @@
             "value": "Cerca GIF…"
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF を検索…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF 검색…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek GIFs…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szukaj GIF-ów…"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Buscar GIF…"
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF を検索…"
+            "value": "Найти GIF…"
           }
         },
         "zh-Hans": {
@@ -8805,69 +9528,27 @@
             "state": "translated",
             "value": "搜尋 GIF…"
           }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GIF 검색…"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GIF खोजें…"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Найти GIF…"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Szukaj GIF-ów…"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zoek GIFs…"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "البحث عن GIF…"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "جست‌وجوی GIF…"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חפש GIF…"
-          }
         }
       }
     },
     "Searching…": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Searching…"
+            "value": "جارٍ البحث…"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Suche läuft…"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Searching…"
           }
         },
         "es": {
@@ -8882,10 +9563,28 @@
             "value": "Buscando…"
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "در حال جست‌وجو…"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Recherche…"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מחפש…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खोजा जा रहा है…"
           }
         },
         "it": {
@@ -8894,16 +9593,40 @@
             "value": "Ricerca in corso…"
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "検索中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "검색 중…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoeken…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wyszukiwanie…"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Buscando…"
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "検索中…"
+            "value": "Идёт поиск…"
           }
         },
         "zh-Hans": {
@@ -8916,54 +9639,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "搜尋中…"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "검색 중…"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "खोजा जा रहा है…"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Идёт поиск…"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wyszukiwanie…"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zoeken…"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "جارٍ البحث…"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "در حال جست‌وجو…"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מחפש…"
           }
         }
       }
@@ -9752,6 +10427,118 @@
         }
       }
     },
+    "Symbols": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbols"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbole"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Símbolos"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Símbolos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symboles"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simboli"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Símbolos"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記号"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "符号"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "符號"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기호"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "प्रतीक"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Символы"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbole"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbolen"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الرموز"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نمادها"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "סמלים"
+          }
+        }
+      }
+    },
     "Thank you": {
       "localizations": {
         "ar": {
@@ -10088,6 +10875,118 @@
         }
       }
     },
+    "Type `:::` then a search term to insert a GIF from Giphy.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type `:::` then a search term to insert a GIF from Giphy."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippe `:::` und dann einen Suchbegriff, um ein GIF von Giphy einzufügen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escribe `:::` seguido de un término de búsqueda para insertar un GIF de Giphy."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escribí `:::` seguido de un término de búsqueda para insertar un GIF de Giphy."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tape `:::` puis un terme de recherche pour insérer un GIF depuis Giphy."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digita `:::` seguito da un termine di ricerca per inserire un GIF da Giphy."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digite `:::` e depois um termo de busca para inserir um GIF do Giphy."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` の後に検索語を入力すると、Giphy から GIF を挿入できます。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入 `:::` 后跟搜索词,从 Giphy 插入 GIF。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輸入 `:::` 後接搜尋字詞,即可從 Giphy 插入 GIF。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` 다음에 검색어를 입력하면 Giphy에서 GIF를 삽입합니다."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy से GIF डालने के लिए `:::` के बाद कोई खोज शब्द टाइप करें।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите `:::` и поисковый запрос, чтобы вставить GIF из Giphy."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wpisz `:::`, a następnie szukane hasło, aby wstawić GIF z Giphy."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typ `:::` gevolgd door een zoekterm om een GIF van Giphy in te voegen."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اكتب `:::` ثم كلمة بحث لإدراج صورة GIF من Giphy."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏`:::` و سپس یک عبارت جست‌وجو تایپ کنید تا یک GIF از Giphy درج شود."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הקלד `:::` ואז ביטוי חיפוש כדי להוסיף GIF מ-Giphy."
+          }
+        }
+      }
+    },
     "Type `:` to search for any emoji or symbol in seconds.": {
       "localizations": {
         "ar": {
@@ -10314,16 +11213,22 @@
     },
     "Type to search GIFs.": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Type to search GIFs."
+            "value": "اكتب للبحث عن GIF."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Tippe, um GIFs zu suchen."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type to search GIFs."
           }
         },
         "es": {
@@ -10338,10 +11243,28 @@
             "value": "Escribí para buscar GIF."
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "برای جست‌وجوی GIF تایپ کنید."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Tape pour rechercher des GIF."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הקלד כדי לחפש GIF-ים."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF खोजने के लिए टाइप करें।"
           }
         },
         "it": {
@@ -10350,16 +11273,40 @@
             "value": "Digita per cercare GIF."
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF を検索するには入力してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIF를 검색하려면 입력하세요."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typ om GIFs te zoeken."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wpisz, aby wyszukać GIF-y."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Digite para buscar GIF."
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF を検索するには入力してください。"
+            "value": "Введите запрос для поиска GIF."
           }
         },
         "zh-Hans": {
@@ -10372,54 +11319,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "輸入以搜尋 GIF。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GIF를 검색하려면 입력하세요."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GIF खोजने के लिए टाइप करें।"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Введите запрос для поиска GIF."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wpisz, aby wyszukać GIF-y."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Typ om GIFs te zoeken."
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "اكتب للبحث عن GIF."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "برای جست‌وجوی GIF تایپ کنید."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הקלד כדי לחפש GIF-ים."
           }
         }
       }
@@ -10537,6 +11436,7 @@
       }
     },
     "Usage counts, settings, and your exclusion list are stored locally. %@ doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -10648,6 +11548,7 @@
         }
       }
     },
+    "Usage counts, settings, and your exclusion list are stored locally. %@ doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to Giphy.": {},
     "Used to detect `:` triggers. Nothing else.": {
       "localizations": {
         "ar": {
@@ -11662,18 +12563,137 @@
         }
       }
     },
-    "copy": {
+    "`:::` overrides the exclusion list.": {
       "localizations": {
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "copy"
+            "value": "`:::` overrides the exclusion list."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` umgeht die Ausschlussliste."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` ignora la lista de exclusiones."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` ignora la lista de exclusiones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` ignore la liste d'exclusions."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` ignora l'elenco delle esclusioni."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` ignora a lista de exclusões."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` は除外リストを無視します。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` 会忽略排除列表。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` 會略過排除清單。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::`은(는) 제외 목록을 무시합니다."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` बहिष्कार सूची को नज़रअंदाज़ करता है।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` обходит список исключений."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` pomija listę wykluczeń."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::` negeert de uitsluitingslijst."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏`:::` يتجاوز قائمة الاستثناءات."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏`:::` فهرست استثناها را نادیده می‌گیرد."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏`:::` עוקף את רשימת ההחרגות."
+          }
+        }
+      }
+    },
+    "copy": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسخ"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "kopieren"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "copy"
           }
         },
         "es": {
@@ -11688,10 +12708,28 @@
             "value": "copiar"
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کپی"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "copier"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "העתק"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कॉपी"
           }
         },
         "it": {
@@ -11700,16 +12738,40 @@
             "value": "copia"
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コピー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "복사"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kopieer"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kopiuj"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "copiar"
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "コピー"
+            "value": "копировать"
           }
         },
         "zh-Hans": {
@@ -11722,54 +12784,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "複製"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "복사"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "कॉपी"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "копировать"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "kopiuj"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "kopieer"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "نسخ"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "کپی"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "העתק"
           }
         }
       }
@@ -11887,18 +12901,26 @@
         }
       }
     },
+    "insert": {},
     "navigate": {
+      "extractionState": "stale",
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "navigate"
+            "value": "تنقّل"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "navigieren"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "navigate"
           }
         },
         "es": {
@@ -11913,10 +12935,28 @@
             "value": "navegar"
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حرکت"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "naviguer"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ניווט"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "नेविगेट"
           }
         },
         "it": {
@@ -11925,16 +12965,40 @@
             "value": "naviga"
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移動"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이동"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "navigeer"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nawiguj"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "navegar"
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "移動"
+            "value": "перемещение"
           }
         },
         "zh-Hans": {
@@ -11947,54 +13011,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "移動"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "이동"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "नेविगेट"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "перемещение"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "nawiguj"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "navigeer"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تنقّل"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حرکت"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ניווט"
           }
         }
       }

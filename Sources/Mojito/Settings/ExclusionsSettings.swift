@@ -6,6 +6,7 @@ import AppKit
 /// two short lists can stack without clipping.
 struct ExclusionsSettingsView: View {
     @EnvironmentObject private var store: ExclusionStore
+    @AppStorage(PrefsKey.gifBypassExclusions) private var gifBypassExclusions: Bool = true
     @State private var selectedApp: String?
     @State private var selectedPattern: String?
     @State private var showAddSheet = false
@@ -50,6 +51,13 @@ struct ExclusionsSettingsView: View {
                         }
                     },
                     row: siteRow
+                )
+
+                BoxedToggle(
+                    header: "GIF search bypass",
+                    title: "Let GIF search work in excluded apps",
+                    caption: "`:::` overrides the exclusion list.",
+                    isOn: $gifBypassExclusions
                 )
             }
             .padding(20)
@@ -127,6 +135,57 @@ struct ExclusionsSettingsView: View {
 // MARK: - Boxed list
 
 /// Sizes to content vertically. Matches System Settings → Privacy.
+/// Single-row card that visually matches `BoxedList`'s chrome (rounded
+/// secondary background + hairline border + same header/divider/body
+/// layout), so feature toggles sit alongside the exclusion lists at the
+/// same width without floating.
+private struct BoxedToggle: View {
+    let header: LocalizedStringKey
+    let title: LocalizedStringKey
+    let caption: LocalizedStringKey
+    @Binding var isOn: Bool
+
+    private let cornerRadius: CGFloat = 10
+    private let innerSeparator = Color.primary.opacity(0.08)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(header)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+            innerSeparator.frame(height: 0.5)
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                    Text(caption)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Toggle("", isOn: $isOn)
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+                    .labelsHidden()
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+        }
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(.background.secondary)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .strokeBorder(Color(nsColor: .separatorColor), lineWidth: 0.5)
+        )
+    }
+}
+
 private struct BoxedList<ID: Hashable, RowContent: View>: View {
     let header: LocalizedStringKey
     let items: [ID]

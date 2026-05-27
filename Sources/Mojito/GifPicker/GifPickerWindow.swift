@@ -9,6 +9,11 @@ import SwiftUI
 final class GifPickerWindow {
     /// Engine resets the trigger state machine + dismisses the panel.
     var onClickAway: (() -> Void)?
+    /// Click-to-pick fires this so Engine can reset its trigger state. The
+    /// state machine doesn't observe SwiftUI taps, so without this it would
+    /// stay in `.gifSearching` and keep mirroring typed chars after the
+    /// picker is already gone.
+    var onPickClicked: (() -> Void)?
 
     private let panel: NSPanel
     private let viewModel: GifPickerViewModel
@@ -20,7 +25,7 @@ final class GifPickerWindow {
         self.viewModel = GifPickerViewModel()
 
         self.panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: GifPickerLayout.width, height: 420),
+            contentRect: NSRect(x: 0, y: 0, width: GifPickerLayout.width, height: GifPickerLayout.panelHeight),
             // Non-activating + becomesKeyOnlyIfNeeded = false lets the
             // panel take keyboard focus for the search field without
             // stealing app activation from whatever was front before.
@@ -39,7 +44,7 @@ final class GifPickerWindow {
 
         let view = GifPickerView(
             viewModel: viewModel,
-            onPick: { [weak self] asset in self?.handlePick(asset) },
+            onPick: { [weak self] asset in self?.handleClickPick(asset) },
             onDismiss: { [weak self] in self?.onClickAway?() }
         )
         let hosting = NSHostingView(rootView: view)
@@ -79,7 +84,7 @@ final class GifPickerWindow {
 
     func show(near caret: CGRect?) {
         let anchor = caret ?? mouseAnchor()
-        let size = NSSize(width: GifPickerLayout.width, height: 420)
+        let size = NSSize(width: GifPickerLayout.width, height: GifPickerLayout.panelHeight)
         let frame = positionedFrame(anchor: anchor, size: size)
 
         viewModel.reset()
@@ -116,16 +121,55 @@ final class GifPickerWindow {
     /// search hasn't returned anything yet.
     func pickSelected() {
         guard let asset = viewModel.selectedAsset() else { return }
-        handlePick(asset)
+        handlePick(asset, paste: false)
     }
 
-    private func handlePick(_ asset: GifAsset) {
+    /// Like `pickSelected()` but synthesizes a ⌘V into the focused app once
+    /// the clipboard write completes, so the GIF lands inline rather than
+    /// just sitting on the clipboard.
+    func pickSelectedAndPaste() {
+        guard let asset = viewModel.selectedAsset() else { return }
+        handlePick(asset, paste: true)
+    }
+
+    /// Returns true when Enter was consumed by the "Load more" affordance
+    /// (so Engine knows to skip the delete + paste flow and keep the
+    /// picker open). False otherwise — caller proceeds with the normal
+    /// pick-and-paste path.
+    func consumeEnterAsLoadMore() -> Bool {
+        guard viewModel.isLoadMoreFocused else { return false }
+        viewModel.loadMore()
+        return true
+    }
+
+    /// Engine reads this after a load-more Enter so it can re-arm the
+    /// state machine with the still-active query — picker stays open.
+    var currentQuery: String { viewModel.query }
+
+    /// Click path mirrors the Enter path: delete `:::query` from the
+    /// focused app, then paste the GIF inline. Engine resets state via
+    /// the `onPickClicked` callback.
+    private func handleClickPick(_ asset: GifAsset) {
+        TextInserter.deleteBackward(viewModel.query.count + 3)
+        handlePick(asset, paste: true)
+        onPickClicked?()
+    }
+
+    private func handlePick(_ asset: GifAsset, paste: Bool) {
         copyTask?.cancel()
         let url = asset.originalURL
-        copyTask = Task { [weak self] in
-            _ = await GifClipboard.copy(from: url)
+        hide()
+        copyTask = Task {
+            let copied = await GifClipboard.copy(from: url)
             await MainActor.run {
-                self?.hide()
+                guard copied, paste else { return }
+                // The download is async — by the time it completes the user
+                // could have switched to a password field or another app.
+                // Bail on paste rather than synthesizing ⌘V into the wrong
+                // place; the GIF still sits on the clipboard so they can
+                // paste manually if they want it.
+                if AppContextDetector.current().focusedFieldIsSecure { return }
+                TextInserter.pasteFromClipboard()
             }
         }
     }

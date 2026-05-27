@@ -99,7 +99,7 @@ struct PrivacyDetailsRows: View {
         privacyRow(
             icon: "internaldrive",
             title: "Your data stays on this Mac",
-            detail: "Usage counts, settings, and your exclusion list are stored locally. \(AppInfo.displayName) doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂"
+            detail: "Usage counts, settings, and your exclusion list are stored locally. \(AppInfo.displayName) doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to Giphy."
         )
         privacyRow(
             icon: "dollarsign.circle",

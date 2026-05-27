@@ -27,6 +27,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var captureFocusSnapshot: AXUIElement?
     /// Fallback for when AX element identity can't be compared.
     private var captureFocusPID: pid_t?
+    /// True if the current capture's app/URL is in the exclusion list.
+    /// Emoji-related actions get suppressed; GIF picker still fires.
+    private var captureIsExcluded: Bool = false
     private var usage: [String: Int]
     private var workspaceObserver: NSObjectProtocol?
     private var prefsObserver: NSObjectProtocol?
@@ -35,6 +38,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var useFrequencyBoost: Bool
     private var symbolsEnabled: Bool
     private var symbolsRequireDoubleColon: Bool
+    private var gifSearchEnabled: Bool
+    private var gifBypassExclusions: Bool
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -54,6 +59,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.useFrequencyBoost = (UserDefaults.standard.object(forKey: PrefsKey.useFrequencyBoost) as? Bool) ?? true
         self.symbolsEnabled = (UserDefaults.standard.object(forKey: PrefsKey.symbolsEnabled) as? Bool) ?? false
         self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
+        self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
+        self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
 
         // Click-away behaves like Esc but doesn't consume the click.
@@ -63,6 +70,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         gifPickerWindow.onClickAway = { [weak self] in
             self?.gifPickerWindow.hide()
+            self?.stateMachine.reset()
+        }
+
+        gifPickerWindow.onPickClicked = { [weak self] in
             self?.stateMachine.reset()
         }
 
@@ -96,6 +107,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.useFrequencyBoost = (UserDefaults.standard.object(forKey: PrefsKey.useFrequencyBoost) as? Bool) ?? true
                 self.symbolsEnabled = (UserDefaults.standard.object(forKey: PrefsKey.symbolsEnabled) as? Bool) ?? false
                 self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
+                self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
+                self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
             }
         }
@@ -149,6 +162,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         captureContext = nil
         captureFocusSnapshot = nil
         captureFocusPID = nil
+        captureIsExcluded = false
     }
 
     func attach(permissions: PermissionsCoordinator) {
@@ -267,18 +281,18 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // (`🙂 ` → `🙂:)`).
         pendingEmoticonUndo = nil
 
-        // Exclusion + secure-field check must short-circuit BEFORE we leave
-        // `.idle`, else the state machine buffers chars and the picker
-        // renders password fragments in the empty-state row.
+        // Secure-field check short-circuits — we never want to inspect a
+        // password field. The exclusion list is honored per-action: emoji
+        // picker / emoticon conversion are suppressed in excluded apps,
+        // but the GIF picker (`:::`) still fires so a user can excise
+        // Slack's native emoji UI without losing GIF search there.
         if case .idle = stateMachine.state, case .colon = input {
             let context = AppContextDetector.current()
             if context.focusedFieldIsSecure {
                 return false
             }
-            if exclusions.isExcluded(bundleID: context.bundleID, url: context.url) {
-                return false
-            }
             captureContext = context
+            captureIsExcluded = exclusions.isExcluded(bundleID: context.bundleID, url: context.url)
             // Snapshot now so the deferred picker show and any focus-change
             // notifications can detect movement out from under us.
             captureFocusSnapshot = FocusedElementCache.shared.element
@@ -301,8 +315,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
+            captureIsExcluded = false
 
         case .openPicker(let q, let scope):
+            if captureIsExcluded { break }
             updateResults(query: q, scope: scope)
             // Defer one tick: the keystroke moves the caret in the focused
             // app after the tap callback returns. AX returns stale coords if
@@ -310,6 +326,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             scheduleRepositionAndShow()
 
         case .refreshPicker(let q, let scope):
+            if captureIsExcluded { break }
             updateResults(query: q, scope: scope)
             scheduleRepositionAndShow()
 
@@ -317,6 +334,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if delta > 0 { viewModel.selectNext() } else { viewModel.selectPrevious() }
 
         case .insertEmoji(let q, let mode, let scope):
+            if captureIsExcluded { break }
             // `.exactMatch` passed the closing `:` through to the focused
             // app — wait one tick for it to land before deleting `:query:`.
             // `.fromPicker` consumed the key, so we can act immediately.
@@ -333,9 +351,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             viewModel.reset()
             pickerWindow.hide()
             stateMachine.reset()
+            let wasExcluded = captureIsExcluded
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
+            captureIsExcluded = false
+            captureIsExcluded = false
+            if wasExcluded { break }
             // 80ms gives the passed-through terminator time to land in slow
             // text fields before synth-backspaces fire. One-tick wasn't
             // enough — terminator could end up stranded after the emoji
@@ -348,6 +370,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
 
         case .checkAmbientEmoticon(let word, let term):
+            // Ambient emoticons aren't colon-triggered, so the per-capture
+            // exclusion flag isn't set here. Check fresh against the active
+            // app instead.
+            let context = AppContextDetector.current()
+            if exclusions.isExcluded(bundleID: context.bundleID, url: context.url) { break }
             let seqAtDispatch = inputSeq
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
                 guard let self else { return }
@@ -356,6 +383,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
 
         case .insertAmbientEmoticon(let word):
+            let context = AppContextDetector.current()
+            if exclusions.isExcluded(bundleID: context.bundleID, url: context.url) { break }
             // No terminator; the last char of `word` was the trigger and
             // was passed through. Same 80ms wait as above.
             let seqAtDispatch = inputSeq
@@ -374,6 +403,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
+            captureIsExcluded = false
             pendingEmoticonUndo = nil
 
         case .maybeUndoEmoticon:
@@ -387,6 +417,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
+            captureIsExcluded = false
             // Sequence chars are all consumed today so deleteCount is 0;
             // honor non-zero defensively in case that changes.
             DispatchQueue.main.async {
@@ -397,20 +428,41 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 EasterEggTracker.record(.k99)
             }
 
-        case .openGifPicker(let deleteCount):
-            // The three colons already passed through to the focused app —
-            // delete them on the next runloop tick (so the last one has
-            // landed) before showing the picker.
+        case .openGifPicker:
+            // `:::` stays in the focused app and is deleted later (with the
+            // typed query) when the user picks a GIF. Defer to the next
+            // runloop tick so the third colon has landed before we anchor
+            // the panel to the caret.
             viewModel.reset()
             pickerWindow.hide()
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
+            captureIsExcluded = false
+            // Toggle off → `:::` is just three colons in text.
+            if !gifSearchEnabled {
+                stateMachine.reset()
+                break
+            }
+            // Re-evaluate the focused field. The state-machine `:::` path
+            // is tracked across any state, so the secure-field guard at
+            // the first-colon site (which only fires in `.idle`) does not
+            // cover this case — without this check, keystrokes after
+            // `:::` typed in a password field would leak to Giphy.
+            let liveGifContext = AppContextDetector.current()
+            if liveGifContext.focusedFieldIsSecure {
+                stateMachine.reset()
+                break
+            }
+            // Exclusion list applies to GIF search too when the user
+            // hasn't opted into the bypass.
+            if !gifBypassExclusions,
+               exclusions.isExcluded(bundleID: liveGifContext.bundleID, url: liveGifContext.url) {
+                stateMachine.reset()
+                break
+            }
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
-                if deleteCount > 0 {
-                    TextInserter.deleteBackward(deleteCount)
-                }
                 let anchor = CaretLocator.caretRect()
                 self.gifPickerWindow.show(near: anchor)
             }
@@ -421,8 +473,25 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .closeGifPicker:
             gifPickerWindow.hide()
 
-        case .pickGif:
-            gifPickerWindow.pickSelected()
+        case .pickGif(let deleteCount):
+            // `:::query` was typed through to the focused app; delete the
+            // span so the GIF replaces it rather than landing after it.
+            // Skip both delete and paste when Enter is the "Load more"
+            // affordance — picker stays open for further navigation.
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                if self.gifPickerWindow.consumeEnterAsLoadMore() {
+                    // Picker stays open — re-arm the state machine so
+                    // further typing / arrows / Esc keep routing here
+                    // instead of leaking into the focused app.
+                    self.stateMachine.resumeGifSearching(query: self.gifPickerWindow.currentQuery)
+                    return
+                }
+                if deleteCount > 0 {
+                    TextInserter.deleteBackward(deleteCount)
+                }
+                self.gifPickerWindow.pickSelectedAndPaste()
+            }
 
         case .moveGifSelection(let direction):
             gifPickerWindow.move(direction)
@@ -500,6 +569,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
+            captureIsExcluded = false
             // Any text-modifying action drops the pending emoticon undo.
             pendingEmoticonUndo = nil
         }
