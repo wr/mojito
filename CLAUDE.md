@@ -45,6 +45,11 @@ python3 scripts/build_emoji_db.py
 # Xcode IDE syncs on build; this is the headless equivalent.
 scripts/sync-localizable.sh
 
+# Launch Mojito Dev in a specific locale to spot-check translations
+# without changing your system language. Kills any running dev instance
+# first so SingleInstanceCoordinator doesn't terminate the new launch.
+scripts/run-locale.sh fr   # or ja, ar, zh-Hans, etc.
+
 # Run the unit test suite (xcodegen + xcodebuild test). Also wired into the
 # pre-push hook below — activate once per clone with the line under it.
 scripts/run-tests.sh
@@ -167,7 +172,7 @@ Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose(
 - `Sources/Mojito/MenuBar/` — `NSStatusItem` controller
 - `Sources/Mojito/Onboarding/`, `Sources/Mojito/Settings/` — SwiftUI window content
 - `Sources/Mojito/Util/PrefsKey.swift` — every UserDefaults key in one place
-- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `run-tests.sh`, `build_emoji_db.py`, `build_egg_strings.py`, `update_appcast.py`, `sync-localizable.sh`
+- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `run-tests.sh`, `build_emoji_db.py`, `build_egg_strings.py`, `update_appcast.py`, `sync-localizable.sh`, `translate-localizable.py`, `run-locale.sh`
 - `bin/` — vendored `generate_keys` and `sign_update` from Sparkle (committed so release doesn't depend on DerivedData being intact)
 - `Resources/` — Info.plist, entitlements, emoji.json, AppIcon.icns, easter-egg assets
 
