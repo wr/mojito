@@ -42,7 +42,7 @@
       }
     },
     "???" : {
-
+      "comment" : "Placeholder shown in About → Easter eggs for an entry the user hasn't discovered yet. Should stay short and visually act as 'three unknowns'."
     },
     "About" : {
 
