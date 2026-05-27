@@ -1,24 +1,15 @@
 import Foundation
 import os.log
 
-/// Thin Giphy search client. Reads the API key from (in priority order)
-/// `UserDefaults[PrefsKey.giphyApiKey]`, the `GIPHY_API_KEY` environment
-/// variable, or the bundled placeholder constant `defaultBetaKey`.
-///
-/// Get a beta key (free, 100 req/hr) at https://developers.giphy.com — then
-/// either paste it below, set it as an env var when launching, or write it
-/// to defaults:
-///     defaults write ee.wells.Mojito.dev mojito.giphyApiKey "<your key>"
-///
-/// The bundled placeholder will not authenticate; the panel will show an
-/// "API key required" message until a real key is configured.
+/// Thin Giphy search client. Resolves the API key in priority order:
+///   1. `UserDefaults[PrefsKey.giphyApiKey]` — user override.
+///   2. `GIPHY_API_KEY` environment variable — developer override at launch.
+///   3. `EmbeddedGiphyKey.value` — the key baked into the binary at build
+///      time from `$GIPHY_API_KEY` or the gitignored `.env`. This is what
+///      released builds use; fresh clones with no `.env` get an empty
+///      string here and the panel shows "API key required".
 @MainActor
 final class GifSearcher {
-    /// Replace with your own Giphy beta key, or leave blank and provide via
-    /// UserDefaults / env var. Public-shared keys aren't a thing on Giphy
-    /// anymore — every developer gets their own.
-    private static let defaultBetaKey: String = ""
-
     private let log = OSLog(subsystem: "ee.wells.Mojito", category: "GifSearcher")
     private let session: URLSession
     private var inFlight: URLSessionDataTask?
@@ -36,7 +27,7 @@ final class GifSearcher {
     var apiKey: String {
         if let k = UserDefaults.standard.string(forKey: PrefsKey.giphyApiKey), !k.isEmpty { return k }
         if let k = ProcessInfo.processInfo.environment["GIPHY_API_KEY"], !k.isEmpty { return k }
-        return Self.defaultBetaKey
+        return EmbeddedGiphyKey.value
     }
 
     var hasKey: Bool { !apiKey.isEmpty }

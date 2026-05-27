@@ -142,6 +142,14 @@ Goal: `strings <binary>` and a casual repo skim won't surface the list. The hard
 
 `Sources/Mojito/App/EasterEggTracker.swift` keeps per-egg "discovered" state in `UserDefaults` and, on first discovery, fires the `AchievementBanner` overlay and the `DiscoveryFanfare` sound (a synthesized square-wave arpeggio — no asset blob). The individual effects each live in their own Swift file under `Sources/Mojito/App/`; the file list is intentionally not enumerated here — see the directory if you need to find one.
 
+### GIF search (Giphy) — embedded key
+
+`:::` opens the GIF picker (`Sources/Mojito/GifPicker/`). The Giphy API key gets baked into the binary at build time and resolves at runtime via `GifSearcher.apiKey` in this priority order: `UserDefaults[mojito.giphyApiKey]` → `GIPHY_API_KEY` env var → `EmbeddedGiphyKey.value` (compiled-in). Empty string at all three → picker shows "API key required".
+
+`scripts/build_giphy_key.py` writes `Sources/Mojito/GifPicker/EmbeddedGiphyKey.swift` from `$GIPHY_API_KEY` or `GIPHY_API_KEY=...` in the gitignored `.env`. Bytes are XOR-masked (rolling key starting at `0x5C`) — same shape as `EggStrings.swift`, so `strings <binary>` won't surface the key and a casual repo skim turns up nothing. This is obfuscation, not encryption — a determined reverser can recover it; the bar is "not visible to anyone scrolling through the binary". The generated .swift file is gitignored.
+
+Wiring lives in `project.yml`: `options.preGenCommand` runs the script before xcodegen scans `Sources/Mojito` (so fresh clones bootstrap correctly), and `targets.Mojito.preBuildScripts` re-runs it per build so editing `.env` flows through without an explicit `xcodegen generate`. The script no-ops when content is unchanged, so builds aren't churned.
+
 ### Security / signing posture
 
 - Dev (`Resources/Mojito.dev.entitlements`) carries `cs.disable-library-validation` so the self-signed identity can load Xcode-signed SwiftPM dylibs.
@@ -172,7 +180,7 @@ Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose(
 - `Sources/Mojito/MenuBar/` — `NSStatusItem` controller
 - `Sources/Mojito/Onboarding/`, `Sources/Mojito/Settings/` — SwiftUI window content
 - `Sources/Mojito/Util/PrefsKey.swift` — every UserDefaults key in one place
-- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `run-tests.sh`, `build_emoji_db.py`, `build_egg_strings.py`, `update_appcast.py`, `sync-localizable.sh`, `translate-localizable.py`, `run-locale.sh`
+- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `run-tests.sh`, `build_emoji_db.py`, `build_egg_strings.py`, `build_giphy_key.py`, `update_appcast.py`, `sync-localizable.sh`, `translate-localizable.py`, `run-locale.sh`
 - `bin/` — vendored `generate_keys` and `sign_update` from Sparkle (committed so release doesn't depend on DerivedData being intact)
 - `Resources/` — Info.plist, entitlements, emoji.json, AppIcon.icns, easter-egg assets
 
