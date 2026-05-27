@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import AVFoundation
 
 struct AboutSettingsView: View {
     @AppStorage(PrefsKey.donated) private var donated: Bool = false
@@ -150,10 +151,25 @@ struct AboutSettingsView: View {
     }
 
     private func sayThankYou() {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/say")
-        task.arguments = ["-v", "Fred", "-r", "300", "Thank you"]
-        try? task.run()
+        ThankYouSpeaker.shared.say()
+    }
+}
+
+/// Singleton so the synthesizer outlives the toggle callback —
+/// the utterance is cancelled if the synth instance dies mid-speech.
+@MainActor
+private final class ThankYouSpeaker {
+    static let shared = ThankYouSpeaker()
+    private let synth = AVSpeechSynthesizer()
+
+    func say() {
+        let utterance = AVSpeechUtterance(string: String(localized: "Thank you"))
+        // Skip if no TTS voice is installed for this locale, rather than
+        // fall back to an English-accented mispronunciation.
+        let lang = Bundle.main.preferredLocalizations.first ?? "en-US"
+        guard let voice = AVSpeechSynthesisVoice(language: lang) else { return }
+        utterance.voice = voice
+        synth.speak(utterance)
     }
 }
 
