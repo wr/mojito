@@ -9,6 +9,7 @@ struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.emoticonsEnabled) private var emoticonsEnabled: Bool = true
     @AppStorage(PrefsKey.symbolsEnabled) private var symbolsEnabled: Bool = false
     @AppStorage(PrefsKey.symbolsRequireDoubleColon) private var symbolsRequireDoubleColon: Bool = false
+    @AppStorage(PrefsKey.gifSearchEnabled) private var gifSearchEnabled: Bool = true
     @State private var autoUpdates: Bool = UpdaterCoordinator.shared.automaticUpdates
 
     var body: some View {
@@ -61,8 +62,23 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
                 Toggle("Convert emoticons (`:D` → 😃)", isOn: $emoticonsEnabled)
                     .toggleStyle(.switch)
-                Toggle("Include symbols (experimental)", isOn: $symbolsEnabled)
-                    .toggleStyle(.switch)
+            }
+
+            Section("GIFs and Symbols") {
+                Toggle(isOn: $gifSearchEnabled) {
+                    TitleAndCaption(
+                        title: "GIF search",
+                        caption: "Type `:::` then a search term to insert a GIF from Giphy."
+                    )
+                }
+                .toggleStyle(.switch)
+                Toggle(isOn: $symbolsEnabled) {
+                    TitleAndCaption(
+                        title: "Symbols",
+                        caption: "Include ★ ⌘ ⌥ and similar characters in results (experimental)."
+                    )
+                }
+                .toggleStyle(.switch)
                 if symbolsEnabled {
                     Toggle("Require `::` to search symbols", isOn: $symbolsRequireDoubleColon)
                         .toggleStyle(.switch)
@@ -82,6 +98,21 @@ struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+private struct TitleAndCaption: View {
+    let title: LocalizedStringKey
+    let caption: LocalizedStringKey
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+            Text(caption)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

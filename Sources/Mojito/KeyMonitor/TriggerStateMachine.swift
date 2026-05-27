@@ -85,15 +85,18 @@ enum TriggerAction: Equatable {
     /// Engine deletes `word.count` and replaces with the emoji.
     case insertAmbientEmoticon(word: String)
     /// User typed `:::` (three colons within `gifTripleColonWindow`).
-    /// Engine deletes `deleteCount` chars (the 3 colons already typed)
-    /// and opens the GIF search panel.
-    case openGifPicker(deleteCount: Int)
+    /// The colons stay in the focused app — they're deleted alongside
+    /// the query only when the user picks a GIF. Backspacing through
+    /// the colons gradually peels the picker shut, matching emoji UX.
+    case openGifPicker
     /// Updated GIF search query — Engine writes to the picker's view model.
     case refreshGifPicker(query: String)
     /// Close the GIF picker (esc, click-away, focus change).
     case closeGifPicker
-    /// Enter pressed inside the GIF picker — copy the selected GIF.
-    case pickGif
+    /// Enter pressed inside the GIF picker — delete `deleteCount` chars
+    /// (the post-`:::` query that was typed through to the focused app),
+    /// then copy the selected GIF and synthesize a ⌘V paste.
+    case pickGif(deleteCount: Int)
     /// Arrow-key navigation across the GIF grid.
     case moveGifSelection(direction: GifMoveDirection)
 }
@@ -151,7 +154,10 @@ struct TriggerStateMachine {
     /// Sliding window of recent colon timestamps used to detect `:::`
     /// (the GIF-search trigger) regardless of the current capture state.
     private var recentColonTimes: [Date] = []
-    private static let gifTripleColonWindow: TimeInterval = 0.6
+    /// Generous window so "comfortably-fast" three-colon typing still
+    /// counts. Tight enough that a stray `:` from earlier in the sentence
+    /// doesn't combine with a normal `::` later.
+    private static let gifTripleColonWindow: TimeInterval = 1.5
 
     /// Closing brackets like `)` are deliberately absent — they're part of
     /// emoticons (`B)`, `>:)`).
@@ -214,7 +220,7 @@ struct TriggerStateMachine {
                 idleWord = ""
                 lastIdleKeystrokeAt = nil
                 revivableQuery = nil
-                return TriggerOutput(action: .openGifPicker(deleteCount: 3), consumesKey: false)
+                return TriggerOutput(action: .openGifPicker, consumesKey: false)
             }
         } else {
             recentColonTimes.removeAll()
@@ -478,6 +484,14 @@ struct TriggerStateMachine {
         }
     }
 
+    /// Engine calls this when an Enter on the GIF picker was consumed by
+    /// the "Load more" affordance — the picker stays open, so the state
+    /// machine needs to stay in `.gifSearching` rather than the `.idle`
+    /// state the Enter handler just transitioned it to.
+    mutating func resumeGifSearching(query: String) {
+        state = .gifSearching(query: query)
+    }
+
     mutating func reset() {
         state = .idle
         currentScope = .normal
@@ -502,41 +516,44 @@ struct TriggerStateMachine {
         return 2
     }
 
-    /// Routes keystrokes into the GIF picker's view model. Every input is
-    /// `consumesKey: true` so nothing leaks into the focused app while the
-    /// picker has the floor.
+    /// Mirrors the user's typing into the GIF picker's view model while
+    /// letting the characters fall through to the focused app. Mirrors how
+    /// the emoji picker works (`:foo` is visible in the app's text field
+    /// while the picker is showing). Arrows / Enter / Esc are consumed.
     private mutating func handleGifSearching(_ input: TriggerInput) -> TriggerOutput {
         guard case .gifSearching(let q) = state else { return .passthrough }
         switch input {
         case .nameChar(let c):
             let next = q + String(c)
             state = .gifSearching(query: next)
-            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: true)
+            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: false)
         case .colon:
-            // Allow as a query char so quirky searches still go through.
+            // Treat as part of the query — quirky searches still go through.
             let next = q + ":"
             state = .gifSearching(query: next)
-            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: true)
+            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: false)
         case .cancelChar(let c):
             // Space + punctuation are valid in GIF queries
             // ("spongebob imagination", "you're welcome").
             let next = q + String(c)
             state = .gifSearching(query: next)
-            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: true)
+            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: false)
         case .backspace:
             if q.isEmpty {
                 state = .idle
-                return TriggerOutput(action: .closeGifPicker, consumesKey: true)
+                return TriggerOutput(action: .closeGifPicker, consumesKey: false)
             }
             let next = String(q.dropLast())
             state = .gifSearching(query: next)
-            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: true)
+            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: false)
         case .escape:
             state = .idle
             return TriggerOutput(action: .closeGifPicker, consumesKey: true)
         case .returnKey, .tabKey:
             state = .idle
-            return TriggerOutput(action: .pickGif, consumesKey: true)
+            // `:::` + query are all sitting in the focused app — delete the
+            // full span so the GIF replaces the typed trigger.
+            return TriggerOutput(action: .pickGif(deleteCount: q.count + 3), consumesKey: true)
         case .arrowUp:
             return TriggerOutput(action: .moveGifSelection(direction: .up), consumesKey: true)
         case .arrowDown:

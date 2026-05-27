@@ -42,8 +42,10 @@ final class GifSearcher {
     var hasKey: Bool { !apiKey.isEmpty }
 
     /// Cancels any in-flight request and starts a new one. Result handler
-    /// fires on the main actor.
-    func search(query: String, limit: Int = 9, completion: @escaping (Result<[GifAsset], GifSearchError>) -> Void) {
+    /// fires on the main actor. `offset` drives pagination — the viewmodel
+    /// bumps it to fetch successive pages as the user scrolls.
+    func search(query: String, limit: Int = 24, offset: Int = 0,
+                completion: @escaping (Result<[GifAsset], GifSearchError>) -> Void) {
         inFlight?.cancel()
         inFlight = nil
 
@@ -64,6 +66,7 @@ final class GifSearcher {
             URLQueryItem(name: "api_key", value: key),
             URLQueryItem(name: "q", value: trimmed),
             URLQueryItem(name: "limit", value: String(limit)),
+            URLQueryItem(name: "offset", value: String(offset)),
             URLQueryItem(name: "rating", value: "pg-13"),
             URLQueryItem(name: "bundle", value: "messaging_non_clips"),
         ]
