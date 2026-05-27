@@ -38,6 +38,19 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case k33
     case k34
     case k35
+    case k36
+    case k37
+    case k38
+    case k39
+    case k40
+    case k41
+    case k42
+    case k43
+    case k44
+    case k45
+    case k46
+    case k47
+    case k48
 
     var id: String { rawValue }
 
@@ -77,6 +90,19 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k33: return "Merry Mojito"
         case .k34: return "Spooky Season"
         case .k35: return "Train Game"
+        case .k36: return "First emoji"
+        case .k37: return "100 emoji"
+        case .k38: return "1,000 emoji"
+        case .k39: return "10,000 emoji"
+        case .k40: return "100,000 emoji"
+        case .k41: return "1,000,000 emoji"
+        case .k42: return "First symbol"
+        case .k43: return "First GIF"
+        case .k44: return "100 GIFs"
+        case .k45: return "1,000 GIFs"
+        case .k46: return "10,000 GIFs"
+        case .k47: return "100,000 GIFs"
+        case .k48: return "1,000,000 GIFs"
         }
     }
 
@@ -118,6 +144,19 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k33: return "`\(EggStrings.k33)` — ho ho ho."
         case .k34: return "`\(EggStrings.k34)` — trick or treat."
         case .k35: return "`\(EggStrings.k35)` — MY train goes from here... to here?"
+        case .k36: return "Your very first autocomplete. Welcome aboard."
+        case .k37: return "100 emoji autocompleted. Getting the hang of this."
+        case .k38: return "1,000 emoji autocompleted. Showing real commitment."
+        case .k39: return "10,000 emoji autocompleted. This is your life now."
+        case .k40: return "100,000 emoji autocompleted. Are you okay?"
+        case .k41: return "1,000,000 emoji autocompleted. Beyond reason."
+        case .k42: return "Inserted a symbol via `::name:`."
+        case .k43: return "Inserted your first GIF via `:::`."
+        case .k44: return "100 GIFs inserted. Reactions only."
+        case .k45: return "1,000 GIFs inserted. The thread is mostly GIFs now."
+        case .k46: return "10,000 GIFs inserted. Words are obsolete."
+        case .k47: return "100,000 GIFs inserted. Truly unhinged."
+        case .k48: return "1,000,000 GIFs inserted. A new form of communication."
         }
     }
 
@@ -157,6 +196,19 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k33: return "December's main event."
         case .k34: return "October 31st only."
         case .k35: return "MY train..."
+        case .k36: return "Every journey begins with a single keystroke."
+        case .k37: return "Keep typing."
+        case .k38: return "A thousand of anything is a lot."
+        case .k39: return "Five digits' worth."
+        case .k40: return "Six digits' worth."
+        case .k41: return "Seven digits' worth."
+        case .k42: return "There's more than emoji in here."
+        case .k43: return "Three colons in a row."
+        case .k44: return "Reactions, reactions, reactions."
+        case .k45: return "The thread is mostly GIFs now."
+        case .k46: return "Words are obsolete."
+        case .k47: return "Truly unhinged."
+        case .k48: return "A new form of communication."
         }
     }
 
@@ -195,8 +247,57 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k33: return "🎄"
         case .k34: return "🎃"
         case .k35: return "🚋"
+        case .k36: return "🎉"
+        case .k37: return "💯"
+        case .k38: return "🏆"
+        case .k39: return "🚀"
+        case .k40: return "🌟"
+        case .k41: return "👑"
+        case .k42: return "⌘"
+        case .k43: return "🎞️"
+        case .k44: return "🎬"
+        case .k45: return "📽️"
+        case .k46: return "🍿"
+        case .k47: return "🎥"
+        case .k48: return "🏅"
         }
     }
+
+    /// Chained eggs are hidden in Settings until their prereq is found,
+    /// so the list grows as the user works through the tier.
+    var prerequisite: EasterEgg? {
+        switch self {
+        case .k37: return .k36
+        case .k38: return .k37
+        case .k39: return .k38
+        case .k40: return .k39
+        case .k41: return .k40
+        case .k44: return .k43
+        case .k45: return .k44
+        case .k46: return .k45
+        case .k47: return .k46
+        case .k48: return .k47
+        default:   return nil
+        }
+    }
+
+    var discoveryEffect: DiscoveryEffect {
+        switch self {
+        case .k37, .k38, .k39, .k40, .k41,
+             .k44, .k45, .k46, .k47, .k48:
+            return .confettiSilent
+        default:
+            return .standard
+        }
+    }
+}
+
+/// What plays when an egg is first discovered.
+enum DiscoveryEffect {
+    /// Keyword-triggered eggs and first-tier achievements: banner + fanfare.
+    case standard
+    /// Count-milestone achievements: banner + confetti shower, no fanfare.
+    case confettiSilent
 }
 
 /// Persists the set of discovered effects.
@@ -236,22 +337,51 @@ enum EasterEggTracker {
         // UNUserNotification path (DiscoveryNotifier) is suppressed — it
         // doubled up with the in-app banner and required a permission grant.
         AchievementBanner.show(egg)
-        DiscoveryFanfare.play()
+        switch egg.discoveryEffect {
+        case .standard:
+            DiscoveryFanfare.play()
+        case .confettiSilent:
+            ConfettiRain.start()
+        }
     }
 
     static func isDiscovered(_ egg: EasterEgg) -> Bool {
         cache.contains(egg.rawValue)
     }
 
-    static var discoveredCount: Int { cache.count }
-    static var totalCount: Int { EasterEgg.allCases.count }
+    static var discoveredCount: Int { visibleCases.filter { isDiscovered($0) }.count }
+    static var totalCount: Int { visibleCases.count }
 
-    /// Writes an empty array (not `removeObject`) so the dev build's
-    /// release-domain fallback can't resurrect the set. See `clearUsageStats`.
+    /// Eggs to surface in Settings: every egg whose prerequisite is met
+    /// (or has none). Hidden milestones materialize as the chain unlocks.
+    ///
+    /// Milestone achievements lead — they're the newest additions and the
+    /// ones the user is most likely actively chasing. Keyword eggs follow
+    /// in their original declaration order.
+    static var visibleCases: [EasterEgg] {
+        let achievements: [EasterEgg] = [
+            .k36, .k37, .k38, .k39, .k40, .k41,
+            .k42,
+            .k43, .k44, .k45, .k46, .k47, .k48,
+        ]
+        let achievementSet = Set(achievements)
+        let keywords = EasterEgg.allCases.filter { !achievementSet.contains($0) }
+        return (achievements + keywords).filter { egg in
+            guard let prereq = egg.prerequisite else { return true }
+            return isDiscovered(prereq)
+        }
+    }
+
+    /// Writes empty values (not `removeObject`) so the dev build's
+    /// release-domain fallback can't resurrect the cleared state. See
+    /// `clearUsageStats`.
     static func reset() {
         cache.removeAll()
         UserDefaults.standard.set([String](), forKey: PrefsKey.easterEggsDiscovered)
         UserDefaults.standard.removeObject(forKey: PrefsKey.perfectBounceCount)
+        UserDefaults.standard.set(0, forKey: PrefsKey.totalEmojiInserted)
+        UserDefaults.standard.set(0, forKey: PrefsKey.totalSymbolInserted)
+        UserDefaults.standard.set(0, forKey: PrefsKey.totalGifInserted)
         NotificationCenter.default.post(name: .easterEggDiscovered, object: nil)
     }
 }

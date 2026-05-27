@@ -38,4 +38,11 @@ enum PrefsKey {
     /// exclusion list. Default true: users tend to exclude apps that
     /// have their own emoji UI (Slack, Discord), not their own GIF UI.
     static let gifBypassExclusions   = "mojito.gifSearch.bypassExclusions"
+    /// Lifetime totals that drive milestone achievements (k36–k48).
+    /// Separate from `usageCounts` so milestones aren't reset when the
+    /// user clears their per-emoji stats. Existing users seed from
+    /// `usageCounts` on first launch with this build.
+    static let totalEmojiInserted    = "mojito.totals.emojiInserted"
+    static let totalSymbolInserted   = "mojito.totals.symbolInserted"
+    static let totalGifInserted      = "mojito.totals.gifInserted"
 }

@@ -14,6 +14,11 @@ final class GifPickerWindow {
     /// stay in `.gifSearching` and keep mirroring typed chars after the
     /// picker is already gone.
     var onPickClicked: (() -> Void)?
+    /// Fired exactly once per GIF successfully copied to the clipboard, so
+    /// Engine can bump milestone counters. Independent of the paste step —
+    /// firing the achievement on copy means a secure-field bail-out (which
+    /// skips the paste) still counts.
+    var onGifInserted: (() -> Void)?
 
     private let panel: NSPanel
     private let viewModel: GifPickerViewModel
@@ -163,6 +168,7 @@ final class GifPickerWindow {
         copyTask = Task {
             let copied = await GifClipboard.copy(from: url)
             await MainActor.run {
+                if copied { onGifInserted?() }
                 guard copied, paste else { return }
                 // Delete the typed `:::query` only after the GIF actually
                 // made it to the clipboard. Earlier deletion would silently

@@ -77,6 +77,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             self?.stateMachine.reset()
         }
 
+        gifPickerWindow.onGifInserted = { [weak self] in
+            self?.recordGifInserted()
+        }
+
         // Per-keystroke polling raced the picker's `orderFrontRegardless()`,
         // so we listen for real app switches instead.
         workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
@@ -208,6 +212,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         objectWillChange.send()
         usage = [:]
         UserDefaults.standard.set([String: Int](), forKey: PrefsKey.usageCounts)
+        // Lifetime totals track milestone progress; they reset alongside
+        // the per-emoji counts so "Clear stats" feels like a true reset.
+        UserDefaults.standard.set(0, forKey: PrefsKey.totalEmojiInserted)
+        UserDefaults.standard.set(0, forKey: PrefsKey.totalSymbolInserted)
+        UserDefaults.standard.set(0, forKey: PrefsKey.totalGifInserted)
     }
 
     private func reconcile() {
@@ -611,6 +620,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 )
                 if let exact = hits.first(where: { $0.matchedShortcode.lowercased() == key }) {
                     TextInserter.replace(charactersToDelete: charsToDelete, with: exact.emoji.character)
+                    bumpSymbolCounter()
                 }
                 return
             }
@@ -786,6 +796,66 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private func recordUsage(emoji: Emoji) {
         usage[emoji.hexcode, default: 0] += 1
         UserDefaults.standard.set(usage, forKey: PrefsKey.usageCounts)
+        // Symbols come from the mixed corpus too (`:foo:` with symbols on
+        // and no double-colon required), and pick paths route through here.
+        // Branch on the synthetic hexcode prefix so symbols don't pad the
+        // emoji milestone count.
+        if emoji.hexcode.hasPrefix("SYM_") {
+            bumpSymbolCounter()
+        } else {
+            bumpEmojiCounter()
+        }
+    }
+
+    /// Seeded from `usageCounts` the first time we touch it so existing
+    /// users' next emoji insert fires every milestone they've cleared.
+    private func bumpEmojiCounter() {
+        let defaults = UserDefaults.standard
+        let current = (defaults.object(forKey: PrefsKey.totalEmojiInserted) as? Int) ?? seedEmojiTotal()
+        let next = current + 1
+        defaults.set(next, forKey: PrefsKey.totalEmojiInserted)
+        checkEmojiMilestones(next)
+    }
+
+    private func bumpSymbolCounter() {
+        let defaults = UserDefaults.standard
+        let current = (defaults.object(forKey: PrefsKey.totalSymbolInserted) as? Int) ?? seedSymbolTotal()
+        let next = current + 1
+        defaults.set(next, forKey: PrefsKey.totalSymbolInserted)
+        EasterEggTracker.record(.k42)
+    }
+
+    private func seedEmojiTotal() -> Int {
+        usage.reduce(0) { $1.key.hasPrefix("SYM_") ? $0 : $0 + $1.value }
+    }
+
+    private func seedSymbolTotal() -> Int {
+        usage.reduce(0) { $1.key.hasPrefix("SYM_") ? $0 + $1.value : $0 }
+    }
+
+    /// `record(_:)` is idempotent, so we can check every threshold on every
+    /// bump without gating. Backfilled users sweep the whole chain at once
+    /// on their next insert.
+    private func checkEmojiMilestones(_ total: Int) {
+        if total >= 1         { EasterEggTracker.record(.k36) }
+        if total >= 100       { EasterEggTracker.record(.k37) }
+        if total >= 1_000     { EasterEggTracker.record(.k38) }
+        if total >= 10_000    { EasterEggTracker.record(.k39) }
+        if total >= 100_000   { EasterEggTracker.record(.k40) }
+        if total >= 1_000_000 { EasterEggTracker.record(.k41) }
+    }
+
+    private func recordGifInserted() {
+        let defaults = UserDefaults.standard
+        let current = (defaults.object(forKey: PrefsKey.totalGifInserted) as? Int) ?? 0
+        let next = current + 1
+        defaults.set(next, forKey: PrefsKey.totalGifInserted)
+        if next >= 1         { EasterEggTracker.record(.k43) }
+        if next >= 100       { EasterEggTracker.record(.k44) }
+        if next >= 1_000     { EasterEggTracker.record(.k45) }
+        if next >= 10_000    { EasterEggTracker.record(.k46) }
+        if next >= 100_000   { EasterEggTracker.record(.k47) }
+        if next >= 1_000_000 { EasterEggTracker.record(.k48) }
     }
 
     /// Convert `:query<terminator>` into an emoticon, or no-op.

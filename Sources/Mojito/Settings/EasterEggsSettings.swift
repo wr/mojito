@@ -69,7 +69,7 @@ struct EasterEggsSettingsView: View {
     private var easterEggsSection: some View {
         Section {
             let _ = easterEggsTick
-            ForEach(EasterEgg.allCases) { egg in
+            ForEach(EasterEggTracker.visibleCases) { egg in
                 easterEggRow(egg, discovered: EasterEggTracker.isDiscovered(egg))
                     .padding(.vertical, rowPadding)
             }
