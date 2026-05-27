@@ -9,10 +9,11 @@ enum SymbolsDatabase {
         var result: [IndexedEmoji] = []
 
         for entry in curatedAliases {
-            seenCharacters.insert(entry.character)
+            let char = textPresentation(entry.character)
+            seenCharacters.insert(char)
             let emoji = Emoji(
                 hexcode: "SYM_" + entry.shortcodes[0],
-                character: entry.character,
+                character: char,
                 label: entry.shortcodes[0],
                 shortcodes: entry.shortcodes,
                 tags: [],
@@ -30,7 +31,7 @@ enum SymbolsDatabase {
         for range in symbolRanges {
             for codepoint in range {
                 guard let scalar = Unicode.Scalar(codepoint) else { continue }
-                let char = String(scalar)
+                let char = textPresentation(String(scalar))
                 if seenCharacters.contains(char) { continue }
                 guard let name = scalar.properties.name, !name.isEmpty else { continue }
 
@@ -56,6 +57,17 @@ enum SymbolsDatabase {
         }
 
         return result
+    }
+
+    /// Scalars with the Unicode `Emoji` property render in color on macOS
+    /// unless explicitly pinned to text style with VS15 (U+FE0E). Without
+    /// this, ::aries: returned ♈️ (emoji) where the picker expects ♈︎.
+    /// No-op for scalars that have no emoji presentation (⌘, ←, π, …).
+    private static func textPresentation(_ s: String) -> String {
+        guard let scalar = s.unicodeScalars.first, scalar.properties.isEmoji else {
+            return s
+        }
+        return s + "\u{FE0E}"
     }
 
     private struct Alias {

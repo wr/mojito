@@ -78,6 +78,7 @@
 		89AB6401CC7F94BCBF0D3437 /* s16.bin in Resources */ = {isa = PBXBuildFile; fileRef = E87A9C3A9251B8908CFB056A /* s16.bin */; };
 		8EE9F3A928A7AFDB16C6D9A2 /* OnboardingRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4512D76E20BD99269775200B /* OnboardingRoot.swift */; };
 		917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */; };
+		91A5F2A800EA1FC0700394EA /* SymbolsDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25EC50F4D58E03E218947DF /* SymbolsDatabaseTests.swift */; };
 		9234FF3040DB70F660567DCB /* v12.bin in Resources */ = {isa = PBXBuildFile; fileRef = 8616DAC09008096A70541CEE /* v12.bin */; };
 		9CB4AA2C8D9DE6B788068AA9 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = EB2F085FF2A8206D2905DF27 /* Sparkle */; };
 		9CCEA0B70EEB77F988521DDB /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DA7C9FD3286A7839BA642D /* AppInfo.swift */; };
@@ -263,6 +264,7 @@
 		DF0A9FF25BC996BC640A35A0 /* s01.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s01.bin; sourceTree = "<group>"; };
 		DF44D58B49F923004BEED6E7 /* FlyingToasters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlyingToasters.swift; sourceTree = "<group>"; };
 		E229DD4E9239183CD578F665 /* KonamiPayoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KonamiPayoff.swift; sourceTree = "<group>"; };
+		E25EC50F4D58E03E218947DF /* SymbolsDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolsDatabaseTests.swift; sourceTree = "<group>"; };
 		E5E4119DFCFBCC4A92FEEB1C /* v02.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v02.bin; sourceTree = "<group>"; };
 		E6F0EF28CC67A6AB9FFF203F /* DiscoveryNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryNotifier.swift; sourceTree = "<group>"; };
 		E7D1F9E45C5D2C8B6FB43111 /* TrainGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainGame.swift; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
 				9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */,
 				D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */,
+				E25EC50F4D58E03E218947DF /* SymbolsDatabaseTests.swift */,
 				B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */,
 			);
 			path = MojitoTests;
@@ -860,6 +863,7 @@
 				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
 				C025CD4AE30320C3FE69028A /* SeasonalGatesTests.swift in Sources */,
 				917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */,
+				91A5F2A800EA1FC0700394EA /* SymbolsDatabaseTests.swift in Sources */,
 				C86E0BA1D69D1A6B33068221 /* TriggerStateMachineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
