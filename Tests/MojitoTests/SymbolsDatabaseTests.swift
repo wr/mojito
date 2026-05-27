@@ -31,6 +31,14 @@ struct SymbolsDatabaseTests {
         #expect(scalars.first?.value == 0x2318)
     }
 
+    @Test func unrenderableScalarIsDroppedFromCorpus() {
+        // U+2BE8 STAR WITH LEFT HALF BLACK is in the swept range and has a
+        // Unicode name, but no font on macOS 14/15 carries a glyph for it.
+        // The Core Text cascade gate should excise it.
+        let hex = String(format: "SYM_U%X", 0x2BE8)
+        #expect(!SymbolsDatabaseTests.indexed.contains(where: { $0.emoji.hexcode == hex }))
+    }
+
     @Test func curatedShortcodeStillResolves() {
         // The character mutation must not break the existing shortcode-
         // based lookup the curated aliases rely on.

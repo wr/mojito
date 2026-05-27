@@ -1,3 +1,5 @@
+import AppKit
+import CoreText
 import Foundation
 
 /// Two layers: hand-picked aliases (`cmd` → ⌘) take precedence over the
@@ -34,6 +36,10 @@ enum SymbolsDatabase {
                 let char = textPresentation(String(scalar))
                 if seenCharacters.contains(char) { continue }
                 guard let name = scalar.properties.name, !name.isEmpty else { continue }
+                // Many scalars in these ranges have a Unicode name but no
+                // glyph anywhere in macOS's font cascade. Without this
+                // gate they show up in the picker as ?-tofu rows.
+                guard systemFontCanRender(char) else { continue }
 
                 let shortcode = name
                     .lowercased()
@@ -68,6 +74,33 @@ enum SymbolsDatabase {
             return s
         }
         return s + "\u{FE0E}"
+    }
+
+    /// Asks the actual rendering cascade whether anything but Apple's
+    /// `LastResort` fallback font handles `s`. LastResort is what draws
+    /// those `?`-in-a-box placeholder glyphs; non-zero glyphs from it
+    /// look rendered but read as tofu to the user. Real fonts in the
+    /// cascade (SF Pro, Apple Color Emoji, Apple Symbols, etc.) all
+    /// pass.
+    private static func systemFontCanRender(_ s: String) -> Bool {
+        guard let font = CTFontCreateUIFontForLanguage(.system, 13, nil) else {
+            return true
+        }
+        let attr = NSAttributedString(string: s, attributes: [.font: font])
+        let line = CTLineCreateWithAttributedString(attr)
+        guard let runs = CTLineGetGlyphRuns(line) as? [CTRun] else { return true }
+        for run in runs {
+            let n = CTRunGetGlyphCount(run)
+            guard n > 0 else { return false }
+            var glyphs = [CGGlyph](repeating: 0, count: n)
+            CTRunGetGlyphs(run, CFRange(location: 0, length: 0), &glyphs)
+            if glyphs.contains(0) { return false }
+            let attrs = CTRunGetAttributes(run) as NSDictionary
+            guard let runFont = attrs[kCTFontAttributeName as NSString] else { return false }
+            let name = CTFontCopyPostScriptName(runFont as! CTFont) as String
+            if name == "LastResort" { return false }
+        }
+        return true
     }
 
     private struct Alias {
