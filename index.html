@@ -346,6 +346,16 @@ Changes not staged for commit:
   </div>
 
   <div class="faq-item">
+    <h3>Can I insert GIFs too?</h3>
+    <p>Yes — type <code>:::</code> (three colons) then a search term to grab a GIF from <a href="https://giphy.com">Giphy</a>. It's on by default; flip it off in Settings &rarr; General if you'd rather keep things local.</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>What languages is it available in?</h3>
+    <p>The interface is translated into 19 locales — English (US + UK), German, Spanish (Spain + Latin America), French, Italian, Brazilian Portuguese, Japanese, Simplified and Traditional Chinese, Korean, Hindi, Russian, Polish, Dutch, Arabic, Farsi, and Hebrew. Emoji shortcodes are localized in 14 of those, so <code>:gato:</code> works in Spanish, <code>:chien:</code> in French, and so on. Translations started as LLM drafts; <a href="https://github.com/wr/mojito#translations">native-speaker corrections</a> are very welcome.</p>
+  </div>
+
+  <div class="faq-item">
     <h3>What are the system requirements?</h3>
     <p>macOS 14 (Sonoma) or later. Native on Apple Silicon and Intel.</p>
   </div>
@@ -373,7 +383,8 @@ Changes not staged for commit:
 
 <section id="privacy" class="prose">
   <h2>Privacy</h2>
-  <p>Nothing leaves your Mac. Keystrokes are matched against the shortcode list locally; nothing is logged, transmitted, or stored. Password and other secure-text fields are ignored entirely. The only network request Mojito makes is (anonymously) checking for app updates.</p>
+  <p>Keystrokes are matched against the shortcode list locally — nothing is logged, transmitted, or stored on a server somewhere. Password and other secure-text fields are ignored entirely. There's no telemetry, no analytics, and no account.</p>
+  <p>Mojito makes two kinds of outbound request. First, an anonymous check for app updates. Second, if GIF search is enabled (on by default — toggle in Settings &rarr; General), the text you type after <code>:::</code> is sent to <a href="https://giphy.com">Giphy</a> to fetch matching GIFs, and <a href="https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy">Giphy's privacy policy</a> applies to those requests.</p>
 </section>
 
 </main>
