@@ -155,8 +155,7 @@ struct AboutSettingsView: View {
     }
 }
 
-/// Speaks "Thank you" in the current locale via AVSpeechSynthesizer.
-/// Kept as a singleton so the synthesizer outlives the toggle callback —
+/// Singleton so the synthesizer outlives the toggle callback —
 /// the utterance is cancelled if the synth instance dies mid-speech.
 @MainActor
 private final class ThankYouSpeaker {
@@ -165,12 +164,8 @@ private final class ThankYouSpeaker {
 
     func say() {
         let utterance = AVSpeechUtterance(string: String(localized: "Thank you"))
-        // Voice that speaks the bundle's active language. If the user
-        // doesn't have that voice installed, `AVSpeechSynthesisVoice`
-        // returns nil and the system picks the default voice — which
-        // will mispronounce non-English text, so we just skip speech
-        // in that case rather than say "shay-shay" with an American
-        // accent.
+        // Skip if no TTS voice is installed for this locale, rather than
+        // fall back to an English-accented mispronunciation.
         let lang = Bundle.main.preferredLocalizations.first ?? "en-US"
         guard let voice = AVSpeechSynthesisVoice(language: lang) else { return }
         utterance.voice = voice
