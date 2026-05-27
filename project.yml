@@ -174,8 +174,8 @@ targets:
         # works in Debug too — otherwise it'd derive from PRODUCT_NAME and
         # become "Mojito_Dev" for the dev build.
         PRODUCT_MODULE_NAME: Mojito
-        MARKETING_VERSION: "1.0.4"
-        CURRENT_PROJECT_VERSION: "9"
+        MARKETING_VERSION: "1.0.5"
+        CURRENT_PROJECT_VERSION: "10"
         ENABLE_USER_SCRIPT_SANDBOXING: NO
         GENERATE_INFOPLIST_FILE: NO
         COMBINE_HIDPI_IMAGES: YES
