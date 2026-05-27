@@ -128,7 +128,7 @@ struct ExclusionsSettingsView: View {
 
 /// Sizes to content vertically. Matches System Settings → Privacy.
 private struct BoxedList<ID: Hashable, RowContent: View>: View {
-    let header: String
+    let header: LocalizedStringKey
     let items: [ID]
     @Binding var selected: ID?
     let onAdd: () -> Void
@@ -161,7 +161,7 @@ private struct BoxedList<ID: Hashable, RowContent: View>: View {
     }
 
     private var headerView: some View {
-        Text(.init(header))
+        Text(header)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
