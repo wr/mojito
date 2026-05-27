@@ -230,13 +230,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
     private func process(input: TriggerInput) -> Bool {
         inputSeq &+= 1
-        // GIF picker owns the keyboard while visible — its SwiftUI TextField
-        // is the first responder and gets the keystrokes through normal AppKit
-        // routing. Don't double-process here.
-        if gifPickerWindow.isVisible {
-            return false
-        }
-
         // BSOD-style "press any key" effects pre-empt everything; the key is
         // consumed so it doesn't leak into the focused app underneath.
         if case .idle = stateMachine.state, EffectDismisser.topWantsAnyKey() {
@@ -421,6 +414,18 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 let anchor = CaretLocator.caretRect()
                 self.gifPickerWindow.show(near: anchor)
             }
+
+        case .refreshGifPicker(let q):
+            gifPickerWindow.setQuery(q)
+
+        case .closeGifPicker:
+            gifPickerWindow.hide()
+
+        case .pickGif:
+            gifPickerWindow.pickSelected()
+
+        case .moveGifSelection(let direction):
+            gifPickerWindow.move(direction)
         }
     }
 

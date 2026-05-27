@@ -3,6 +3,10 @@ import Foundation
 enum TriggerState: Equatable {
     case idle
     case capturing(query: String)
+    /// Active while the GIF picker is up. Consumes keystrokes and forwards
+    /// them to the picker's view model via `.refreshGifPicker`, so typing
+    /// after `:::` lands in the GIF search box (not the focused app).
+    case gifSearching(query: String)
 }
 
 /// `:foo` = full corpus, `::foo` = experimental Symbols set
@@ -84,7 +88,17 @@ enum TriggerAction: Equatable {
     /// Engine deletes `deleteCount` chars (the 3 colons already typed)
     /// and opens the GIF search panel.
     case openGifPicker(deleteCount: Int)
+    /// Updated GIF search query — Engine writes to the picker's view model.
+    case refreshGifPicker(query: String)
+    /// Close the GIF picker (esc, click-away, focus change).
+    case closeGifPicker
+    /// Enter pressed inside the GIF picker — copy the selected GIF.
+    case pickGif
+    /// Arrow-key navigation across the GIF grid.
+    case moveGifSelection(direction: GifMoveDirection)
 }
+
+enum GifMoveDirection: Equatable { case left, right, up, down }
 
 struct TriggerStateMachine {
     var state: TriggerState = .idle
@@ -175,6 +189,14 @@ struct TriggerStateMachine {
     }
 
     private mutating func process(_ input: TriggerInput) -> TriggerOutput {
+        // While the GIF picker is showing, the state machine owns the
+        // keyboard — namechars + arrows + enter + esc + backspace are
+        // forwarded to the picker view model and consumed so they don't
+        // double-feed into the focused app underneath.
+        if case .gifSearching = state {
+            return handleGifSearching(input)
+        }
+
         // `:::` within `gifTripleColonWindow` opens the GIF picker no
         // matter what the capture state is. Runs before everything else
         // so it overrides the normal colon flow.
@@ -186,7 +208,7 @@ struct TriggerStateMachine {
             }
             if recentColonTimes.count >= 3 {
                 recentColonTimes.removeAll()
-                state = .idle
+                state = .gifSearching(query: "")
                 currentScope = .normal
                 konamiProgress = 0
                 idleWord = ""
@@ -221,6 +243,11 @@ struct TriggerStateMachine {
         }
 
         switch (state, input) {
+
+        // `.gifSearching` is handled by the early-return guard above; this
+        // branch is unreachable but required for exhaustiveness.
+        case (.gifSearching, _):
+            return .passthrough
 
         // MARK: Cmd+Z — must come before the `(.idle, _)` catch-all below.
 
@@ -467,6 +494,58 @@ struct TriggerStateMachine {
     /// scope stays at 1 because its corpus is mostly single-char entries.
     private func pickerThreshold(for scope: CaptureScope) -> Int {
         scope == .symbolsOnly ? 1 : 2
+    }
+
+    /// Routes keystrokes into the GIF picker's view model. Every input is
+    /// `consumesKey: true` so nothing leaks into the focused app while the
+    /// picker has the floor.
+    private mutating func handleGifSearching(_ input: TriggerInput) -> TriggerOutput {
+        guard case .gifSearching(let q) = state else { return .passthrough }
+        switch input {
+        case .nameChar(let c):
+            let next = q + String(c)
+            state = .gifSearching(query: next)
+            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: true)
+        case .colon:
+            // Allow as a query char so quirky searches still go through.
+            let next = q + ":"
+            state = .gifSearching(query: next)
+            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: true)
+        case .cancelChar(let c):
+            // Space + punctuation are valid in GIF queries
+            // ("spongebob imagination", "you're welcome").
+            let next = q + String(c)
+            state = .gifSearching(query: next)
+            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: true)
+        case .backspace:
+            if q.isEmpty {
+                state = .idle
+                return TriggerOutput(action: .closeGifPicker, consumesKey: true)
+            }
+            let next = String(q.dropLast())
+            state = .gifSearching(query: next)
+            return TriggerOutput(action: .refreshGifPicker(query: next), consumesKey: true)
+        case .escape:
+            state = .idle
+            return TriggerOutput(action: .closeGifPicker, consumesKey: true)
+        case .returnKey, .tabKey:
+            state = .idle
+            return TriggerOutput(action: .pickGif, consumesKey: true)
+        case .arrowUp:
+            return TriggerOutput(action: .moveGifSelection(direction: .up), consumesKey: true)
+        case .arrowDown:
+            return TriggerOutput(action: .moveGifSelection(direction: .down), consumesKey: true)
+        case .arrowLeft:
+            return TriggerOutput(action: .moveGifSelection(direction: .left), consumesKey: true)
+        case .arrowRight:
+            return TriggerOutput(action: .moveGifSelection(direction: .right), consumesKey: true)
+        case .focusChange:
+            state = .idle
+            return TriggerOutput(action: .closeGifPicker, consumesKey: false)
+        case .cmdZ:
+            state = .idle
+            return TriggerOutput(action: .closeGifPicker, consumesKey: false)
+        }
     }
 
     /// Fire if `idleWord` is a complete ambient that needs no terminator.

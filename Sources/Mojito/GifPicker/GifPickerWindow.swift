@@ -73,9 +73,8 @@ final class GifPickerWindow {
         return effect
     }
 
-    /// Whether the panel is currently visible — Engine uses this to suppress
-    /// keystroke processing so typing in the search field doesn't also feed
-    /// the emoji trigger state machine.
+    /// Whether the panel is currently visible — Engine uses this to know
+    /// when to route keystrokes here via the state machine.
     var isVisible: Bool { viewModel.isVisible }
 
     func show(near caret: CGRect?) {
@@ -86,7 +85,6 @@ final class GifPickerWindow {
         viewModel.reset()
         panel.setFrame(frame, display: true)
         panel.orderFrontRegardless()
-        panel.makeKey()
         viewModel.isVisible = true
         installClickMonitors()
     }
@@ -98,6 +96,27 @@ final class GifPickerWindow {
         viewModel.isVisible = false
         viewModel.reset()
         removeClickMonitors()
+    }
+
+    /// Engine pipes the state machine's GIF query updates in here.
+    func setQuery(_ query: String) {
+        viewModel.query = query
+    }
+
+    func move(_ direction: GifMoveDirection) {
+        switch direction {
+        case .left:  viewModel.moveSelection(.left)
+        case .right: viewModel.moveSelection(.right)
+        case .up:    viewModel.moveSelection(.up)
+        case .down:  viewModel.moveSelection(.down)
+        }
+    }
+
+    /// Copies the currently-selected GIF and dismisses. No-op if the
+    /// search hasn't returned anything yet.
+    func pickSelected() {
+        guard let asset = viewModel.selectedAsset() else { return }
+        handlePick(asset)
     }
 
     private func handlePick(_ asset: GifAsset) {
