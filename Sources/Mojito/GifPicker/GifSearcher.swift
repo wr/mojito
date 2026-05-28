@@ -11,18 +11,21 @@ import os.log
 @MainActor
 final class GifSearcher {
     private let log = OSLog(subsystem: "ee.wells.Mojito", category: "GifSearcher")
-    private let session: URLSession
     private var inFlight: URLSessionDataTask?
 
-    init() {
+    /// Shared across search API calls and `AnimatedGifView` thumbnail loads
+    /// so all GIF traffic populates one disk-backed `URLCache` — without
+    /// this, thumbnails fall back to `URLCache.shared` (~10 MB system-wide)
+    /// and evict almost immediately as cells scroll.
+    nonisolated(unsafe) static let session: URLSession = {
         let config = URLSessionConfiguration.default
         config.requestCachePolicy = .returnCacheDataElseLoad
         config.urlCache = URLCache(memoryCapacity: 8 * 1024 * 1024,
                                    diskCapacity: 50 * 1024 * 1024,
                                    diskPath: "mojito-gif")
         config.timeoutIntervalForRequest = 8
-        self.session = URLSession(configuration: config)
-    }
+        return URLSession(configuration: config)
+    }()
 
     var apiKey: String {
         if let k = UserDefaults.standard.string(forKey: PrefsKey.giphyApiKey), !k.isEmpty { return k }
@@ -66,7 +69,7 @@ final class GifSearcher {
             return
         }
 
-        let task = session.dataTask(with: url) { [weak self] data, response, error in
+        let task = GifSearcher.session.dataTask(with: url) { [weak self] data, response, error in
             if let error = error as NSError?, error.code == NSURLErrorCancelled { return }
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
