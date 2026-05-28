@@ -236,4 +236,230 @@ struct TriggerStateMachineTests {
         #expect(sm.state == .capturing(query: ""))
         #expect(out.action == .none)
     }
+
+    // MARK: GIF picker (:::)
+
+    /// Drive the machine into `.gifSearching` via three quick colons.
+    /// Colon #2 momentarily cancels capture back to idle, but the rolling
+    /// `recentColonTimes` window survives that, so colon #3 still trips the
+    /// GIF trigger — that's the behaviour this helper pins down.
+    private func enterGifSearching() -> TriggerStateMachine {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)
+        return sm
+    }
+
+    @Test func tripleColonOpensGifPicker() {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)
+        let out = sm.handle(.colon)
+        #expect(out.action == .openGifPicker)
+        // The colons stay in the focused app — deleted only when a GIF is picked.
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .gifSearching(query: ""))
+    }
+
+    @Test func gifNameCharsRefreshQueryAndPassThrough() {
+        var sm = enterGifSearching()
+        _ = sm.handle(.nameChar("c"))
+        let out = sm.handle(.nameChar("a"))
+        #expect(out.action == .refreshGifPicker(query: "ca"))
+        // Mirrors emoji UX: query is echoed into the focused app too.
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .gifSearching(query: "ca"))
+    }
+
+    @Test func gifQueryAcceptsSpacesAndColons() {
+        var sm = enterGifSearching()
+        _ = sm.handle(.nameChar("a"))
+        let space = sm.handle(.cancelChar(" "))
+        #expect(space.action == .refreshGifPicker(query: "a "))
+        // A colon mid-search is just part of the query, not a new trigger.
+        let colon = sm.handle(.colon)
+        #expect(colon.action == .refreshGifPicker(query: "a :"))
+        #expect(sm.state == .gifSearching(query: "a :"))
+    }
+
+    @Test func gifBackspacePeelsQueryThenClosesOnEmpty() {
+        var sm = enterGifSearching()
+        _ = sm.handle(.nameChar("h"))
+        let peel = sm.handle(.backspace)
+        #expect(peel.action == .refreshGifPicker(query: ""))
+        #expect(sm.state == .gifSearching(query: ""))
+        let close = sm.handle(.backspace)
+        #expect(close.action == .closeGifPicker)
+        #expect(close.consumesKey == false)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func gifReturnPicksAndDeletesTripleColonPlusQuery() {
+        var sm = enterGifSearching()
+        for ch in "dog" { _ = sm.handle(.nameChar(ch)) }
+        let out = sm.handle(.returnKey)
+        // deleteCount = query.count (3) + the three colons typed through.
+        #expect(out.action == .pickGif(deleteCount: 6))
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func gifTabAlsoPicksWithEmptyQuery() {
+        var sm = enterGifSearching()
+        let out = sm.handle(.tabKey)
+        #expect(out.action == .pickGif(deleteCount: 3))
+        #expect(out.consumesKey == true)
+    }
+
+    @Test func gifEscapeClosesAndConsumes() {
+        var sm = enterGifSearching()
+        let out = sm.handle(.escape)
+        #expect(out.action == .closeGifPicker)
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func gifArrowsMoveSelectionAndConsume() {
+        var sm = enterGifSearching()
+        #expect(sm.handle(.arrowRight).action == .moveGifSelection(direction: .right))
+        #expect(sm.handle(.arrowLeft).action == .moveGifSelection(direction: .left))
+        #expect(sm.handle(.arrowDown).action == .moveGifSelection(direction: .down))
+        let up = sm.handle(.arrowUp)
+        #expect(up.action == .moveGifSelection(direction: .up))
+        #expect(up.consumesKey == true)
+        // Navigation never leaves the search state.
+        #expect(sm.state == .gifSearching(query: ""))
+    }
+
+    @Test func gifFocusChangeClosesWithoutConsuming() {
+        var sm = enterGifSearching()
+        let out = sm.handle(.focusChange)
+        #expect(out.action == .closeGifPicker)
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func resumeGifSearchingReentersState() {
+        var sm = enterGifSearching()
+        _ = sm.handle(.returnKey)  // pickGif transitions to idle
+        #expect(sm.state == .idle)
+        // Engine calls this when the picker stayed open (e.g. "Load more").
+        sm.resumeGifSearching(query: "cats")
+        #expect(sm.state == .gifSearching(query: "cats"))
+        let out = sm.handle(.backspace)
+        #expect(out.action == .refreshGifPicker(query: "cat"))
+    }
+
+    // MARK: ambient emoticons (no leading colon)
+
+    @Test func ambientHeartFiresImmediately() {
+        // `<` is punctuation-led, so `<3` fires the moment it completes —
+        // no terminator needed.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("<"))
+        let out = sm.handle(.nameChar("3"))
+        #expect(out.action == .insertAmbientEmoticon(word: "<3"))
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func ambientLetterLedWaitsForTerminator() {
+        // `XD` is letter-led — must wait for a terminator so it doesn't eat
+        // into prose like "XDog".
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.nameChar("X"))
+        let mid = sm.handle(.nameChar("D"))
+        #expect(mid.action == .none)
+        let out = sm.handle(.cancelChar(" "))
+        #expect(out.action == .checkAmbientEmoticon(word: "XD", terminator: " "))
+        #expect(out.consumesKey == false)
+    }
+
+    @Test func ambientColonContinuationIsNotHijackedByCapture() {
+        // `>` is a colon-continuation prefix: the `:` after it must extend
+        // the ambient word (`>:)`), NOT start emoji capture.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar(">"))
+        let colon = sm.handle(.colon)
+        #expect(colon.action == .none)
+        #expect(sm.state == .idle)
+        let out = sm.handle(.cancelChar(")"))
+        #expect(out.action == .insertAmbientEmoticon(word: ">:)"))
+    }
+
+    @Test func ambientTerminatorChecksWordThenResetsBuffer() {
+        var sm = TriggerStateMachine()
+        for ch in "hello" { _ = sm.handle(.nameChar(ch)) }
+        let out = sm.handle(.cancelChar(" "))
+        #expect(out.action == .checkAmbientEmoticon(word: "hello", terminator: " "))
+        // Buffer is cleared — a second terminator with nothing buffered
+        // just passes through.
+        let next = sm.handle(.cancelChar(" "))
+        #expect(next.action == .none)
+    }
+
+    // MARK: Cmd+Z
+
+    @Test func cmdZFromIdleRequestsUndo() {
+        var sm = TriggerStateMachine()
+        let out = sm.handle(.cmdZ)
+        #expect(out.action == .maybeUndoEmoticon)
+        #expect(out.consumesKey == false)
+    }
+
+    @Test func cmdZDuringCapturePassesThroughAndKeepsCapture() {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        _ = sm.handle(.nameChar("f"))
+        let out = sm.handle(.cmdZ)
+        #expect(out.action == .none)
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .capturing(query: "f"))
+    }
+
+    // MARK: symbols-scope backspace demotion
+
+    @Test func symbolsScopeBackspaceDemotesToNormalWithoutEndingCapture() {
+        var sm = TriggerStateMachine()
+        sm.symbolsDoubleColonEnabled = true
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)  // → symbolsOnly scope, capturing("")
+        // Backspace on the empty symbols query deletes the 2nd colon and
+        // demotes to normal scope — capture stays open.
+        let out = sm.handle(.backspace)
+        #expect(out.action == .closePicker)
+        // Now in normal scope: threshold rises back to 2, so a single char
+        // doesn't surface the picker.
+        let next = sm.handle(.nameChar("a"))
+        #expect(next.action == .none)
+    }
+
+    // MARK: non-ASCII single-char threshold
+
+    @Test func singleNonASCIICharOpensPickerImmediately() {
+        // A lone CJK/Devanagari/etc. char is a complete word — threshold
+        // drops to 1 so the picker opens on the first keystroke.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        let out = sm.handle(.nameChar("愛"))
+        #expect(out.action == .openPicker(query: "愛", scope: .normal))
+    }
+
+    // MARK: revival path is currently inert
+
+    @Test func backspaceAfterCancelDoesNotRevivePicker() {
+        // `revivableQuery` is read but never armed in the current source,
+        // so a backspace after a cancel char does NOT re-open the picker.
+        // This test documents the live behaviour; if revival is wired back
+        // up, update it to expect `.refreshPicker`.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        for ch in "foo" { _ = sm.handle(.nameChar(ch)) }
+        _ = sm.handle(.cancelChar(" "))  // ends capture → idle
+        #expect(sm.state == .idle)
+        let out = sm.handle(.backspace)
+        #expect(out.action == .none)
+        #expect(sm.state == .idle)
+    }
 }
