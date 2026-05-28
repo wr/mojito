@@ -51,8 +51,9 @@ struct FuzzyMatcher {
     static let k35Hex     = "k35"
     /// Fires from the state machine, not the picker — no `EggIndex` entry.
     static let k99Hex       = "k99"
-    /// Below this we skip the hash lookup. 2-char keywords still match at 2.
-    private static let specialMinPrefix = 2
+    /// Below this we skip the hash lookup, so short prefixes don't surface
+    /// a discovery hint.
+    private static let specialMinPrefix = 4
 
     private struct PinnedRow {
         let hexcode: String
@@ -191,23 +192,47 @@ struct FuzzyMatcher {
 
         let lowercased = query.lowercased()
 
-        // Pinned rows at top. Hash the query against `EggIndex` (no
-        // plaintext keywords in source). Skipped for `::symbols`.
-        var output: [ScoredEmoji] = []
+        // Discovery hint sits just below the top real match — a normal
+        // shortcode surfaces the actual emoji first, but the hint stays
+        // visible right under it — and only once enough of the trigger is
+        // typed. Hash the query against `EggIndex` — no plaintext keywords in
+        // source. Skipped for `::symbols`.
+        var specialRow: ScoredEmoji?
         if corpus != .symbolsOnly,
            lowercased.count >= specialMinPrefix,
            let hexcode = EggIndex.id(forPrefix: lowercased),
            let row = pinnedRows[hexcode] {
-            output.append(makeSpecialRow(
+            specialRow = makeSpecialRow(
                 hexcode: row.hexcode,
                 character: row.character,
                 label: row.label,
                 order: row.order
-            ))
+            )
         }
 
-        let remainingSlots = max(0, limit - output.count)
-        output.append(contentsOf: trimmed.prefix(remainingSlots))
+        guard let specialRow else {
+            return Array(trimmed.prefix(limit))
+        }
+        // Rank the hint among the real matches by how well they fit the query,
+        // so a genuine match always wins but loose subsequence matches don't:
+        //   • right after its lookalike emoji (same glyph), if one matched; else
+        //   • right after the last prefix-tier match (shortcode starts with the
+        //     query); else
+        //   • at the top, when nothing real actually starts with the query.
+        let real = Array(trimmed.prefix(max(0, limit - 1)))
+        guard !real.isEmpty else { return [specialRow] }
+        let insertAt: Int
+        if let twin = real.firstIndex(where: { $0.emoji.character == specialRow.emoji.character }) {
+            insertAt = twin + 1
+        } else if let lastPrefix = real.lastIndex(where: {
+            $0.matchedShortcode.lowercased().hasPrefix(lowercased)
+        }) {
+            insertAt = lastPrefix + 1
+        } else {
+            insertAt = 0
+        }
+        var output = real
+        output.insert(specialRow, at: insertAt)
         return output
     }
 
