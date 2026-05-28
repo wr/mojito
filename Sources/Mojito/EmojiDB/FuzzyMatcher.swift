@@ -49,6 +49,7 @@ struct FuzzyMatcher {
     static let k29Hex          = "k29"
     static let k30Hex       = "k30"
     static let k35Hex     = "k35"
+    static let k49Hex     = "k49"
     /// Fires from the state machine, not the picker — no `EggIndex` entry.
     static let k99Hex       = "k99"
     /// Below this we skip the hash lookup. 2-char keywords still match at 2.
@@ -89,6 +90,7 @@ struct FuzzyMatcher {
         k29Hex:           PinnedRow(hexcode: k29Hex,           character: "📺", label: "???",      order: 74),
         k30Hex:        PinnedRow(hexcode: k30Hex,        character: "🥬", label: "???",      order: 73),
         k35Hex:        PinnedRow(hexcode: k35Hex,        character: "🚋", label: "???",      order: 72),
+        k49Hex:        PinnedRow(hexcode: k49Hex,        character: "🟩", label: "???",      order: 71),
     ]
 
     /// Every pinned row renders with the rainbow gradient. (Used to mark

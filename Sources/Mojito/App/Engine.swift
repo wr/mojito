@@ -840,6 +840,17 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             TrainGame.start()
             ChooChooSound.play()
             EasterEggTracker.record(.k35)
+        case FuzzyMatcher.k49Hex:
+            TextInserter.deleteBackward(deleteCount)
+            // Let synth-backspaces drain before opening the key window;
+            // otherwise the game swallows them.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                MainActor.assumeIsolated {
+                    WordleGame.start()
+                    EasterEggTracker.record(.k49)
+                }
+            }
+            return true
         default:
             return false
         }
