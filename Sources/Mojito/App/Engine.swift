@@ -329,7 +329,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         let output = stateMachine.handle(input)
         apply(action: output.action)
-        return output.consumesKey
+        // In excluded apps `apply` suppresses the picker / insertion, but
+        // returning a true `consumesKey` would still swallow the keystroke
+        // (e.g. Return / Esc / arrows during an invisible capture) and break
+        // the host app — see Vim in Terminal, where `:q<Enter>` needed two
+        // Enters to quit.
+        return captureIsExcluded ? false : output.consumesKey
     }
 
     private func apply(action: TriggerAction) {
