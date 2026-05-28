@@ -22,12 +22,16 @@ struct PickerView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing: 0) {
+                    // Scroll sentinel: scrolling to row 0 with .top would
+                    // align the row's top with the scroll frame's top and
+                    // swallow the 8 pt gap. A spacer with a stable ID lets
+                    // `scrollTo("top", anchor: .top)` keep the gap visible.
+                    Color.clear.frame(height: 8).id("top")
                     ForEach(Array(viewModel.results.enumerated()), id: \.offset) { index, scored in
                         PickerRow(scored: scored, index: index, viewModel: viewModel)
                             .id(index)
                     }
                 }
-                .padding(.top, 8)
                 .padding(.bottom, 6)
             }
             .scrollIndicators(.never)
@@ -38,7 +42,7 @@ struct PickerView: View {
                 proxy.scrollTo(newIndex, anchor: nil)
             }
             .onChange(of: viewModel.query) { _, _ in
-                proxy.scrollTo(0, anchor: .top)
+                proxy.scrollTo("top", anchor: .top)
             }
         }
     }
