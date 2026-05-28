@@ -201,7 +201,7 @@ fileprivate final class WordleModel {
                 scheduleBonusJump()
             } else {
                 // The follow-up egg is the reward for beating the bonus round.
-                EasterEggTracker.record(.k50)
+                EasterEggTracker.record(.k51)
                 WordleSounds.bonusWin()
             }
         } else if lost {
