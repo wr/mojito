@@ -6,6 +6,7 @@ import Foundation
 /// after discovery, and hints never quote the trigger word.
 enum EasterEgg: String, CaseIterable, Identifiable {
     case k01
+    case k02
     case k03
     case k04
     case k05
@@ -58,6 +59,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .k01: return "Emoji rain"
+        case .k02: return "Luck of the Draw"
         case .k03: return "Moof!"
         case .k04: return "Confetti shower"
         case .k05: return "Pride wave"
@@ -112,6 +114,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     var detail: String {
         switch self {
         case .k01: return "`\(EggStrings.k01)` — the house special."
+        case .k02: return "`\(EggStrings.k02)` — leave it to chance."
         case .k03: return "`\(EggStrings.k03)` — Clarus the dogcow."
         case .k04: return "`\(EggStrings.k04)` — small victories."
         case .k05: return "`\(EggStrings.k05)` — every June, all year."
@@ -164,6 +167,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     var hint: String {
         switch self {
         case .k01: return "Rum, mint, lime, soda."
+        case .k02: return "Can't decide? Let fate pick."
         case .k03: return "Clarus the dogcow goes..."
         case .k04: return "Celebrate a little victory."
         case .k05: return "Castro Street, 1978."
@@ -215,6 +219,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     var emojiGlyph: String? {
         switch self {
         case .k01: return "🎁"
+        case .k02: return "🎲"
         case .k03: return nil
         case .k04: return "🎊"
         case .k05: return "🏳️‍🌈"
