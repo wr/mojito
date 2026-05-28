@@ -373,24 +373,51 @@ enum EasterEggTracker {
     static var discoveredCount: Int { visibleCases.filter { isDiscovered($0) }.count }
     static var totalCount: Int { visibleCases.count }
 
+    private static let achievements: [EasterEgg] = [
+        .k36, .k37, .k38, .k39, .k40, .k41,
+        .k42,
+        .k43, .k44, .k45, .k46, .k47, .k48,
+    ]
+    private static let achievementSet: Set<EasterEgg> = Set(achievements)
+
     /// Eggs to surface in Settings: every egg whose prerequisite is met
     /// (or has none). Hidden milestones materialize as the chain unlocks.
     ///
     /// Milestone achievements lead — they're the newest additions and the
     /// ones the user is most likely actively chasing. Keyword eggs follow
-    /// in their original declaration order.
+    /// in their original declaration order, except a keyword egg gated behind
+    /// another keyword egg is lifted to sit directly beneath its parent.
     static var visibleCases: [EasterEgg] {
-        let achievements: [EasterEgg] = [
-            .k36, .k37, .k38, .k39, .k40, .k41,
-            .k42,
-            .k43, .k44, .k45, .k46, .k47, .k48,
-        ]
-        let achievementSet = Set(achievements)
         let keywords = EasterEgg.allCases.filter { !achievementSet.contains($0) }
-        return (achievements + keywords).filter { egg in
+        let visible = (achievements + keywords).filter { egg in
             guard let prereq = egg.prerequisite else { return true }
             return isDiscovered(prereq)
         }
+        return reorderChildKeywords(visible)
+    }
+
+    /// `true` when this egg's prerequisite is another keyword egg rather than
+    /// a milestone achievement. Drives the Settings sub-row indentation.
+    static func isChildKeyword(_ egg: EasterEgg) -> Bool {
+        guard let prereq = egg.prerequisite else { return false }
+        return !achievementSet.contains(prereq)
+    }
+
+    /// Lifts each keyword egg that's gated behind another keyword egg to sit
+    /// immediately after its parent, so the pair reads as parent → child in
+    /// the flat Settings list. Pure over the already-filtered input.
+    static func reorderChildKeywords(_ eggs: [EasterEgg]) -> [EasterEgg] {
+        var ordered = eggs
+        for egg in eggs where isChildKeyword(egg) {
+            guard let parent = egg.prerequisite,
+                  let parentIdx = ordered.firstIndex(of: parent),
+                  let childIdx = ordered.firstIndex(of: egg),
+                  childIdx != parentIdx + 1 else { continue }
+            ordered.remove(at: childIdx)
+            let insertIdx = ordered.firstIndex(of: parent)! + 1
+            ordered.insert(egg, at: insertIdx)
+        }
+        return ordered
     }
 
     /// Writes empty values (not `removeObject`) so the dev build's
