@@ -18,7 +18,11 @@ enum DiskOptimizer {
 
         guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
         let frame = screen.frame
-        let script = OptimizerRun(width: frame.width * 0.72, height: frame.height * 0.5)
+        // Fixed window size (clamped to fit) so the dialog doesn't scale up on
+        // large / 4K displays — its chrome, fonts, and blocks are point-sized.
+        let winW = min(1040, frame.width - 80)
+        let winH = min(640, frame.height - 80)
+        let script = OptimizerRun(width: winW * 0.94, height: winH * 0.56)
 
         let panel = ParticlePanel.makeFullScreen(frame: frame, interactive: true)
         activeWindow = panel
@@ -40,6 +44,7 @@ enum DiskOptimizer {
             script: script,
             startDate: Date(),
             screenSize: frame.size,
+            windowSize: CGSize(width: winW, height: winH),
             onStop: { dismiss() }
         ))
         host.frame = CGRect(origin: .zero, size: frame.size)
@@ -268,6 +273,7 @@ private struct DefragWindowView: View {
     let script: OptimizerRun
     let startDate: Date
     let screenSize: CGSize
+    let windowSize: CGSize
     let onStop: () -> Void
 
     @State private var pausedAccum: TimeInterval = 0
@@ -285,8 +291,8 @@ private struct DefragWindowView: View {
     }
 
     var body: some View {
-        let winW = detailsHidden ? min(580, screenSize.width - 80) : min(screenSize.width * 0.72, screenSize.width - 140)
-        let winH = detailsHidden ? 134 : min(screenSize.height * 0.74, screenSize.height - 140)
+        let winW = detailsHidden ? min(580, windowSize.width) : windowSize.width
+        let winH = detailsHidden ? 134 : windowSize.height
         ZStack {
             Win98.desktop.ignoresSafeArea()
             window
