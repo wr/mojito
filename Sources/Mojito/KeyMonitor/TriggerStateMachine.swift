@@ -135,11 +135,6 @@ struct TriggerStateMachine {
     /// focus changes so the picker still opens after non-typing caret motion.
     private var lastWasWordChar: Bool = false
 
-    /// Query in flight when capture ended via a non-Esc cancel char. If the
-    /// user immediately backspaces, we re-open with this query — the `:foo`
-    /// is still in the field, just behind the space they typed.
-    private var revivableQuery: String? = nil
-
     /// Used by `cancelChar` to compare against `emoticonMaxIdle`.
     private var lastCaptureKeystrokeAt: Date? = nil
 
@@ -219,7 +214,6 @@ struct TriggerStateMachine {
                 konamiProgress = 0
                 idleWord = ""
                 lastIdleKeystrokeAt = nil
-                revivableQuery = nil
                 return TriggerOutput(action: .openGifPicker, consumesKey: false)
             }
         } else {
@@ -271,7 +265,6 @@ struct TriggerStateMachine {
         // MARK: idle
 
         case (.idle, .colon):
-            revivableQuery = nil
             // Carve-out so `>:)` etc. survive: if the colon-continuation
             // prefix is in the buffer (currently just `>`), append the
             // colon to the ambient word instead of starting capture —
@@ -300,19 +293,9 @@ struct TriggerStateMachine {
                 idleWord = String(idleWord.dropLast())
                 lastIdleKeystrokeAt = idleWord.isEmpty ? nil : Date()
             }
-            // Revival: user typed `:foo<cancel>`, then backspaced the
-            // cancel back off. `:foo` is still in the field; re-open the
-            // picker. Normal-scope only (scope isn't tracked across cancel).
-            if let q = revivableQuery, !q.isEmpty {
-                revivableQuery = nil
-                currentScope = .normal
-                state = .capturing(query: q)
-                return TriggerOutput(action: .refreshPicker(query: q, scope: .normal), consumesKey: false)
-            }
             return .passthrough
 
         case (.idle, .nameChar(let c)):
-            revivableQuery = nil
             idleWord += String(c)
             lastIdleKeystrokeAt = Date()
             if let fire = checkImmediateAmbientFire() {
@@ -321,7 +304,6 @@ struct TriggerStateMachine {
             return .passthrough
 
         case (.idle, .cancelChar(let c)):
-            revivableQuery = nil
             if Self.ambientTerminators.contains(c) {
                 // Terminator — look up the buffered word, then reset.
                 let word = idleWord
@@ -347,7 +329,6 @@ struct TriggerStateMachine {
         case (.idle, _):
             // Arrows / focus change / escape / return/tab in idle — caret
             // motion or context switch. Drop the buffer.
-            revivableQuery = nil
             idleWord = ""
             lastIdleKeystrokeAt = nil
             return .passthrough
@@ -448,19 +429,12 @@ struct TriggerStateMachine {
         // MARK: capturing — exits
 
         case (.capturing, .escape):
-            // Clear revival so a later backspace doesn't bring the picker back.
-            revivableQuery = nil
             state = .idle
             currentScope = .normal
             return TriggerOutput(action: .closePicker, consumesKey: true)
 
         case (.capturing(let q), .cancelChar(let c)):
-            // Don't set revivableQuery: if this triggers an emoticon
-            // replacement, `:query` is gone and reviving would target
-            // stale text. Worst case the user re-types `:foo` — rare.
-            //
             // Symbols-only skips emoticons entirely (it's an emoji feature).
-            revivableQuery = nil
             let wasSymbolsOnly = currentScope == .symbolsOnly
             let lastAt = lastCaptureKeystrokeAt
             state = .idle
@@ -476,8 +450,6 @@ struct TriggerStateMachine {
             return TriggerOutput(action: .checkEmoticon(query: q, terminator: c), consumesKey: false)
 
         case (.capturing, .focusChange):
-            // `:foo` is in a different context now; don't revive.
-            revivableQuery = nil
             state = .idle
             currentScope = .normal
             return TriggerOutput(action: .closePicker, consumesKey: false)
@@ -496,7 +468,6 @@ struct TriggerStateMachine {
         state = .idle
         currentScope = .normal
         lastWasWordChar = false
-        revivableQuery = nil
         konamiProgress = 0
         idleWord = ""
         lastIdleKeystrokeAt = nil

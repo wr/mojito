@@ -446,13 +446,12 @@ struct TriggerStateMachineTests {
         #expect(out.action == .openPicker(query: "愛", scope: .normal))
     }
 
-    // MARK: revival path is currently inert
+    // MARK: backspace after cancel char
 
     @Test func backspaceAfterCancelDoesNotRevivePicker() {
-        // `revivableQuery` is read but never armed in the current source,
-        // so a backspace after a cancel char does NOT re-open the picker.
-        // This test documents the live behaviour; if revival is wired back
-        // up, update it to expect `.refreshPicker`.
+        // After a cancel char ends capture, a following backspace just
+        // passes through — it does not re-open the picker on the `:query`
+        // still sitting in the field.
         var sm = TriggerStateMachine()
         _ = sm.handle(.colon)
         for ch in "foo" { _ = sm.handle(.nameChar(ch)) }
