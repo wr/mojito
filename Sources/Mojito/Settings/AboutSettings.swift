@@ -117,21 +117,26 @@ struct AboutSettingsView: View {
 
     private var byline: some View {
         VStack(spacing: 8) {
-            Button("Report an issue") {
-                NSWorkspace.shared.open(URL(string: "https://github.com/wr/mojito/issues/new")!)
+            HStack(spacing: 8) {
+                Button("Report an issue") {
+                    NSWorkspace.shared.open(URL(string: "https://github.com/wr/mojito/issues/new")!)
+                }
+                Button(debugCopied ? "Copied!" : "Copy debug info") {
+                    copyDebugInfo()
+                }
             }
 
-            Button(debugCopied ? "Copied!" : "Copy debug info") {
-                copyDebugInfo()
-            }
-
-            Link("Website", destination: URL(string: "https://github.com/wr/mojito")!)
-                .font(.callout)
-
-            if !copyright.isEmpty {
-                Text(copyright)
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+            HStack(spacing: 8) {
+                Link("Website", destination: URL(string: "https://github.com/wr/mojito")!)
+                    .font(.callout)
+                if !copyright.isEmpty {
+                    Text(verbatim: "·")
+                        .font(.callout)
+                        .foregroundStyle(.tertiary)
+                    Text(copyright)
+                        .font(.callout)
+                        .foregroundStyle(.tertiary)
+                }
             }
         }
         .frame(maxWidth: .infinity)
