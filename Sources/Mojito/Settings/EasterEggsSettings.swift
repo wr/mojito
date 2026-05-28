@@ -72,6 +72,7 @@ struct EasterEggsSettingsView: View {
             ForEach(EasterEggTracker.visibleCases) { egg in
                 easterEggRow(egg, discovered: EasterEggTracker.isDiscovered(egg))
                     .padding(.vertical, rowPadding)
+                    .padding(.leading, EasterEggTracker.isChildKeyword(egg) ? 20 : 0)
             }
             HStack {
                 Text("Danger zone")
