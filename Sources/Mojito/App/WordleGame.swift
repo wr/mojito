@@ -5,7 +5,7 @@ import SwiftUI
 /// A five-letter guessing game in a regular game window. Key handling lives
 /// on an NSWindow subclass — NSHostingView doesn't reliably put a child
 /// responder in the chain, and NSEvent monitors are flaky for LSUIElement
-/// apps. The secret word never changes.
+/// apps. Solving the first word unlocks a tougher bonus round.
 @MainActor
 enum WordleGame {
     fileprivate static var window: WordleWindow?
@@ -21,7 +21,7 @@ enum WordleGame {
 
         model.reset()
 
-        let size = NSSize(width: 400, height: 700)
+        let size = NSSize(width: 380, height: 560)
         let w = WordleWindow(
             contentRect: NSRect(origin: .zero, size: size),
             styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
@@ -32,9 +32,9 @@ enum WordleGame {
         w.titlebarAppearsTransparent = true
         w.titleVisibility = .hidden
         w.isMovableByWindowBackground = true
-        w.backgroundColor = .white
-        // Light look sets it apart from the dark-themed games.
-        w.appearance = NSAppearance(named: .aqua)
+        w.backgroundColor = NSColor(WordlePalette.background)
+        // Dark glass look, distinct from the original.
+        w.appearance = NSAppearance(named: .darkAqua)
         w.isReleasedWhenClosed = false
         w.center()
         w.level = .floating
@@ -77,9 +77,9 @@ fileprivate final class WordleWindow: NSWindow {
         case 51:            // Delete
             model.backspace()
         case 36, 76:        // Return / keypad Enter
-            if model.finished { model.reset() } else { model.submit() }
-        case 49:            // Space restarts only once the round is over
-            if model.finished { model.reset() }
+            if model.finished { model.advance() } else { model.submit() }
+        case 49:            // Space advances once the round is over
+            if model.finished { model.advance() }
         default:
             guard !event.modifierFlags.contains(.command),
                   let chars = event.charactersIgnoringModifiers,
@@ -96,15 +96,27 @@ fileprivate enum LetterState {
     case correct    // right letter, right spot
     case present    // right letter, wrong spot
     case absent     // not in the word
+
+    var revealTone: WordleSounds.RevealTone {
+        switch self {
+        case .correct: return .hit
+        case .present: return .near
+        default:       return .miss
+        }
+    }
 }
+
+fileprivate enum WordleStage { case main, bonus }
 
 @MainActor
 @Observable
 fileprivate final class WordleModel {
-    static let answer = "emoji"
+    static let mainAnswer = "emoji"
+    static let bonusAnswer = "fizzy"
     static let maxGuesses = 6
     static let wordLength = 5
 
+    private(set) var stage: WordleStage = .main
     private(set) var guesses: [String] = []
     private(set) var current: String = ""
     private(set) var won = false
@@ -112,10 +124,32 @@ fileprivate final class WordleModel {
     private(set) var keyStates: [Character: LetterState] = [:]
     /// Bumped on an invalid (incomplete) submit so the view can shake.
     private(set) var shakeTick = 0
+    /// Bumped whenever the board is freshly cleared (reset or bonus advance)
+    /// so the view can drop its per-tile animation state.
+    private(set) var roundTick = 0
 
+    var answer: String { stage == .main ? Self.mainAnswer : Self.bonusAnswer }
     var finished: Bool { won || lost }
 
     func reset() {
+        stage = .main
+        clearBoard()
+        roundTick += 1
+    }
+
+    /// Return after a result: into the bonus round on a first-word win,
+    /// otherwise back to a fresh main round.
+    func advance() {
+        if won && stage == .main {
+            stage = .bonus
+            clearBoard()
+            roundTick += 1
+        } else {
+            reset()
+        }
+    }
+
+    private func clearBoard() {
         guesses = []
         current = ""
         won = false
@@ -128,6 +162,7 @@ fileprivate final class WordleModel {
         guard !finished, current.count < Self.wordLength,
               let lower = c.lowercased().first, lower.isLetter else { return }
         current.append(lower)
+        WordleSounds.tick()
     }
 
     func backspace() {
@@ -137,7 +172,11 @@ fileprivate final class WordleModel {
 
     func submit() {
         guard !finished else { return }
-        guard current.count == Self.wordLength else { shakeTick += 1; return }
+        guard current.count == Self.wordLength else {
+            shakeTick += 1
+            WordleSounds.invalid()
+            return
+        }
 
         let guess = current
         let eval = evaluation(for: guess)
@@ -145,17 +184,45 @@ fileprivate final class WordleModel {
         guesses.append(guess)
         current = ""
 
-        if guess == Self.answer {
+        if guess == answer {
             won = true
         } else if guesses.count >= Self.maxGuesses {
             lost = true
         }
     }
 
+    /// Called by the view once a row's flip-reveal animation has finished,
+    /// so win/lose audio and the egg unlock land with the colors, not before.
+    func onRevealComplete() {
+        guard finished else { return }
+        if won {
+            if stage == .main {
+                WordleSounds.win()
+                scheduleBonusJump()
+            } else {
+                // The follow-up egg is the reward for beating the bonus round.
+                EasterEggTracker.record(.k51)
+                WordleSounds.bonusWin()
+            }
+        } else if lost {
+            WordleSounds.lose()
+        }
+    }
+
+    /// Auto-advance into the bonus round once the win celebration has played —
+    /// a "press return" cue was too easy to miss. Pressing return still jumps
+    /// early; the guard keeps that from double-advancing.
+    private func scheduleBonusJump() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) { [weak self] in
+            guard let self, self.won, self.stage == .main else { return }
+            self.advance()
+        }
+    }
+
     /// Two-pass scoring so duplicate letters in a guess don't all light up
     /// when the answer holds fewer copies.
     func evaluation(for guess: String) -> [LetterState] {
-        let answer = Array(Self.answer)
+        let answer = Array(self.answer)
         let g = Array(guess)
         var result = [LetterState](repeating: .absent, count: g.count)
         var counts: [Character: Int] = [:]
@@ -197,41 +264,60 @@ private struct WordleView: View {
     let model: WordleModel
 
     @State private var shakeOffset: CGFloat = 0
+    @State private var flipY: [Int: CGFloat] = [:]
+    @State private var revealedFront: Set<Int> = []
+    @State private var popScale: [Int: CGFloat] = [:]
+    @State private var winHop: [Int: CGFloat] = [:]
+    @State private var lastGuessCount = 0
 
-    private let tileSize: CGFloat = 56
-    private let tileGap: CGFloat = 6
+    private let tileSize: CGFloat = 58
+    private let tileGap: CGFloat = 7
+    private let colRevealStep = 0.22
 
     var body: some View {
-        VStack(spacing: 14) {
-            header
+        VStack(spacing: 16) {
+            stageBadge
             grid
                 .offset(x: shakeOffset)
             message
-            Keyboard(model: model)
+                .frame(height: 50)
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 18)
+        .padding(.horizontal, 18)
+        .padding(.top, 30)
+        .padding(.bottom, 22)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .background(WordlePalette.backgroundGradient)
         .onChange(of: model.shakeTick) { _, newValue in
             guard newValue > 0 else { return }
             shake()
         }
+        .onChange(of: model.guesses.count) { _, newValue in
+            if newValue > lastGuessCount { revealRow(newValue - 1) }
+            lastGuessCount = newValue
+        }
+        .onChange(of: model.current.count) { old, newValue in
+            if newValue > old { popActiveTile(col: newValue - 1) }
+        }
+        .onChange(of: model.roundTick) { _, _ in resetAnimationState() }
     }
 
-    private var header: some View {
-        Text(verbatim: "WORDLE")
-            .font(.system(size: 26, weight: .heavy, design: .rounded))
-            .tracking(6)
-            .foregroundColor(WordlePalette.ink)
-            .padding(.bottom, 2)
-            .overlay(alignment: .bottom) {
-                Rectangle()
-                    .fill(WordlePalette.border)
-                    .frame(height: 1)
-                    .offset(y: 8)
+    // Constant height in both stages so the grid never shifts when the
+    // bonus badge appears.
+    private var stageBadge: some View {
+        ZStack {
+            if model.stage == .bonus {
+                Text(verbatim: "BONUS ROUND")
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .tracking(3)
+                    .foregroundColor(WordlePalette.correct)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(WordlePalette.correct.opacity(0.14)))
+                    .overlay(Capsule().strokeBorder(WordlePalette.correct.opacity(0.4), lineWidth: 1))
             }
+        }
+        .frame(height: 30)
     }
 
     private var grid: some View {
@@ -244,34 +330,37 @@ private struct WordleView: View {
 
     private func rowView(_ row: Int) -> some View {
         let letters: [Character]
-        let states: [LetterState]
+        let judged: [LetterState]
+        var isJudgedRow = false
         if row < model.guesses.count {
-            let g = Array(model.guesses[row])
-            letters = g
-            states = model.evaluation(for: model.guesses[row])
+            letters = Array(model.guesses[row])
+            judged = model.evaluation(for: model.guesses[row])
+            isJudgedRow = true
         } else if row == model.guesses.count && !model.finished {
-            let c = Array(model.current)
-            letters = c
-            states = c.map { _ in .filled }
+            letters = Array(model.current)
+            judged = letters.map { _ in .filled }
         } else {
             letters = []
-            states = []
+            judged = []
         }
 
         return HStack(spacing: tileGap) {
             ForEach(0..<WordleModel.wordLength, id: \.self) { col in
+                let idx = row * WordleModel.wordLength + col
                 let letter = col < letters.count ? letters[col] : nil
-                let state = col < states.count ? states[col] : LetterState.empty
-                tile(letter: letter, state: state)
+                let baseState = col < judged.count ? judged[col] : LetterState.empty
+                // A judged tile reads as "filled" until its flip exposes color.
+                let shown = (isJudgedRow && !revealedFront.contains(idx)) ? LetterState.filled : baseState
+                tile(letter: letter, state: shown, idx: idx)
             }
         }
     }
 
-    private func tile(letter: Character?, state: LetterState) -> some View {
+    private func tile(letter: Character?, state: LetterState, idx: Int) -> some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(WordlePalette.fill(state))
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(WordlePalette.tileBorder(state), lineWidth: 2)
             if let letter {
                 Text(String(letter).uppercased())
@@ -280,39 +369,48 @@ private struct WordleView: View {
             }
         }
         .frame(width: tileSize, height: tileSize)
+        .scaleEffect(x: 1, y: flipY[idx] ?? 1, anchor: .center)
+        .scaleEffect(popScale[idx] ?? 1)
+        .offset(y: winHop[idx] ?? 0)
+        .shadow(
+            color: WordlePalette.glow(state),
+            radius: WordlePalette.glowRadius(state)
+        )
     }
 
     @ViewBuilder
     private var message: some View {
         if model.won {
-            VStack(spacing: 4) {
+            VStack(spacing: 5) {
                 Text(verbatim: winLabel)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(WordlePalette.correct)
-                restartHint
+                Text(verbatim: model.stage == .main
+                     ? "bonus round incoming…"
+                     : "return to play again · esc to close")
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundColor(WordlePalette.subtle)
             }
         } else if model.lost {
-            VStack(spacing: 4) {
-                Text(verbatim: WordleModel.answer.uppercased())
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .tracking(4)
+            VStack(spacing: 5) {
+                Text(verbatim: "Out of guesses")
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
                     .foregroundColor(WordlePalette.ink)
-                restartHint
+                Text(verbatim: "return to play again · esc to close")
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundColor(WordlePalette.subtle)
             }
         } else {
-            Text(verbatim: "Guess the five-letter word")
+            Text(verbatim: model.stage == .bonus
+                 ? "One more word. Make it count."
+                 : "Guess the five-letter word")
                 .font(.system(size: 13, weight: .regular, design: .rounded))
                 .foregroundColor(WordlePalette.subtle)
         }
     }
 
-    private var restartHint: some View {
-        Text(verbatim: "return to play again · esc to close")
-            .font(.system(size: 11, weight: .regular, design: .rounded))
-            .foregroundColor(WordlePalette.subtle)
-    }
-
     private var winLabel: String {
+        if model.stage == .bonus { return "Bonus cleared! 🍹" }
         switch model.guesses.count {
         case 1:  return "Genius!"
         case 2:  return "Magnificent!"
@@ -323,100 +421,113 @@ private struct WordleView: View {
         }
     }
 
+    // MARK: animations
+
     private func shake() {
         let step = 0.06
-        let path: [CGFloat] = [-8, 8, -6, 6, 0]
+        let path: [CGFloat] = [-9, 9, -7, 7, -4, 4, 0]
         for (i, x) in path.enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + step * Double(i)) {
                 withAnimation(.linear(duration: step)) { shakeOffset = x }
             }
         }
     }
-}
 
-private struct Keyboard: View {
-    let model: WordleModel
+    private func popActiveTile(col: Int) {
+        let idx = model.guesses.count * WordleModel.wordLength + col
+        popScale[idx] = 1.22
+        withAnimation(.spring(response: 0.22, dampingFraction: 0.5)) {
+            popScale[idx] = 1
+        }
+    }
 
-    private let rows = ["qwertyuiop", "asdfghjkl"]
+    private func revealRow(_ row: Int) {
+        // Pressing return during the reveal advances the round and clears
+        // animation state; guard every deferred closure so stragglers from a
+        // superseded round don't write into the fresh board.
+        let round = model.roundTick
+        let states = model.evaluation(for: model.guesses[row])
+        for col in 0..<WordleModel.wordLength {
+            let idx = row * WordleModel.wordLength + col
+            let delay = Double(col) * colRevealStep
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                guard model.roundTick == round else { return }
+                // Center-anchored vertical scale, not a 3D rotation (which
+                // juts in perspective).
+                withAnimation(.easeIn(duration: 0.12)) { flipY[idx] = 0.04 }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay + 0.12) {
+                guard model.roundTick == round else { return }
+                revealedFront.insert(idx)
+                if col < states.count { WordleSounds.reveal(states[col].revealTone) }
+                withAnimation(.easeOut(duration: 0.12)) { flipY[idx] = 1 }
+            }
+        }
+        let endDelay = Double(WordleModel.wordLength - 1) * colRevealStep + 0.26
+        DispatchQueue.main.asyncAfter(deadline: .now() + endDelay) {
+            guard model.roundTick == round else { return }
+            model.onRevealComplete()
+            if model.won { winBounce(row: row, round: round) }
+        }
+    }
 
-    var body: some View {
-        VStack(spacing: 7) {
-            ForEach(rows, id: \.self) { row in
-                HStack(spacing: 5) {
-                    ForEach(Array(row), id: \.self) { c in
-                        letterKey(c)
-                    }
+    private func winBounce(row: Int, round: Int) {
+        for col in 0..<WordleModel.wordLength {
+            let idx = row * WordleModel.wordLength + col
+            let delay = Double(col) * 0.08
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                guard model.roundTick == round else { return }
+                withAnimation(.spring(response: 0.26, dampingFraction: 0.42)) { winHop[idx] = -18 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.17) {
+                    guard model.roundTick == round else { return }
+                    withAnimation(.spring(response: 0.32, dampingFraction: 0.5)) { winHop[idx] = 0 }
                 }
             }
-            HStack(spacing: 5) {
-                actionKey("ENTER", width: 52) {
-                    if model.finished { model.reset() } else { model.submit() }
-                }
-                ForEach(Array("zxcvbnm"), id: \.self) { c in
-                    letterKey(c)
-                }
-                actionKey("⌫", width: 52) { model.backspace() }
-            }
         }
     }
 
-    private func letterKey(_ c: Character) -> some View {
-        let state = model.keyState(c)
-        return Button {
-            model.type(c)
-        } label: {
-            Text(String(c).uppercased())
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundColor(WordlePalette.keyText(state))
-                .frame(width: 31, height: 50)
-                .background(
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(WordlePalette.keyFill(state))
-                )
-        }
-        .buttonStyle(.plain)
-        .focusEffectDisabled()
-    }
-
-    private func actionKey(_ label: String, width: CGFloat, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(verbatim: label)
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundColor(WordlePalette.keyText(.empty))
-                .frame(width: width, height: 50)
-                .background(
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(WordlePalette.keyFill(.empty))
-                )
-        }
-        .buttonStyle(.plain)
-        .focusEffectDisabled()
+    private func resetAnimationState() {
+        flipY = [:]
+        revealedFront = []
+        popScale = [:]
+        winHop = [:]
+        shakeOffset = 0
+        lastGuessCount = 0
     }
 }
 
-/// Classic light-mode palette so the window reads as its own thing.
+/// Mint/lime on dark glass — its own identity, not the classic palette.
 private enum WordlePalette {
-    static let correct = Color(red: 0.42, green: 0.67, blue: 0.39)
-    static let present = Color(red: 0.79, green: 0.71, blue: 0.35)
-    static let absent  = Color(red: 0.47, green: 0.49, blue: 0.50)
-    static let border  = Color(red: 0.83, green: 0.84, blue: 0.86)
-    static let filledBorder = Color(red: 0.53, green: 0.54, blue: 0.55)
-    static let ink     = Color(red: 0.10, green: 0.11, blue: 0.12)
-    static let subtle  = Color(red: 0.47, green: 0.49, blue: 0.50)
-    static let keyBase = Color(red: 0.83, green: 0.85, blue: 0.86)
+    static let background = Color(red: 0.07, green: 0.08, blue: 0.09)
+    static let backgroundGradient = LinearGradient(
+        colors: [Color(red: 0.10, green: 0.12, blue: 0.13),
+                 Color(red: 0.06, green: 0.07, blue: 0.08)],
+        startPoint: .top, endPoint: .bottom
+    )
+
+    static let correct = Color(red: 0.56, green: 0.85, blue: 0.36)   // lime
+    static let present = Color(red: 0.93, green: 0.71, blue: 0.29)   // amber
+    static let absent  = Color(red: 0.24, green: 0.27, blue: 0.31)   // slate
+
+    static let emptyFill = Color(red: 0.12, green: 0.14, blue: 0.16)
+    static let emptyBorder = Color.white.opacity(0.12)
+    static let filledBorder = Color.white.opacity(0.38)
+
+    static let ink    = Color(red: 0.95, green: 0.96, blue: 0.94)    // cream
+    static let subtle = Color.white.opacity(0.5)
 
     static func fill(_ s: LetterState) -> Color {
         switch s {
         case .correct: return correct
         case .present: return present
         case .absent:  return absent
-        default:       return .white
+        default:       return emptyFill
         }
     }
 
     static func tileBorder(_ s: LetterState) -> Color {
         switch s {
-        case .empty:  return border
+        case .empty:  return emptyBorder
         case .filled: return filledBorder
         default:      return .clear
         }
@@ -424,24 +535,24 @@ private enum WordlePalette {
 
     static func text(_ s: LetterState) -> Color {
         switch s {
-        case .empty, .filled: return ink
-        default:              return .white
+        case .correct, .present: return Color(red: 0.08, green: 0.10, blue: 0.07) // dark on bright
+        default:                 return ink
         }
     }
 
-    static func keyFill(_ s: LetterState) -> Color {
+    /// A soft glow on the bright revealed states adds life against the dark.
+    static func glow(_ s: LetterState) -> Color {
         switch s {
-        case .correct: return correct
-        case .present: return present
-        case .absent:  return absent
-        default:       return keyBase
+        case .correct: return correct.opacity(0.55)
+        case .present: return present.opacity(0.45)
+        default:       return .clear
         }
     }
 
-    static func keyText(_ s: LetterState) -> Color {
+    static func glowRadius(_ s: LetterState) -> CGFloat {
         switch s {
-        case .correct, .present, .absent: return .white
-        default:                          return ink
+        case .correct, .present: return 9
+        default:                 return 0
         }
     }
 }
