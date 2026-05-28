@@ -648,6 +648,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if scored.emoji.hexcode == FuzzyMatcher.k02Hex {
                 guard let pick = database.all.randomElement() else { return }
                 TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(pick))
+                EasterEggTracker.record(.k02)
                 return  // random rolls shouldn't bias future search
             }
             TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(scored.emoji))
@@ -683,6 +684,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 if id == FuzzyMatcher.k02Hex {
                     guard let pick = database.all.randomElement() else { return }
                     TextInserter.replace(charactersToDelete: charsToDelete, with: pick.character)
+                    EasterEggTracker.record(.k02)
                     return
                 }
                 if triggerEasterEgg(hexcode: id, deleteCount: charsToDelete) {
