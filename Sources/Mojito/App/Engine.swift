@@ -328,13 +328,26 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
 
         let output = stateMachine.handle(input)
+
+        // Return/Tab during capture resolves to `.fromPicker`, which the
+        // state machine marks consumed so the key selects the highlighted
+        // row. But a sub-threshold query like `:q` never surfaced the picker
+        // (and a no-match query surfaces it empty), so there's no row to
+        // select — `insert` will no-op on its `topResult` guard. Consuming
+        // anyway swallows the key and the host app needs a second press.
+        // Read the model before `apply`, since insertion resets it.
+        var consumesKey = output.consumesKey
+        if case .insertEmoji(_, .fromPicker, _) = output.action, viewModel.topResult == nil {
+            consumesKey = false
+        }
+
         apply(action: output.action)
         // In excluded apps `apply` suppresses the picker / insertion, but
         // returning a true `consumesKey` would still swallow the keystroke
         // (e.g. Return / Esc / arrows during an invisible capture) and break
         // the host app — see Vim in Terminal, where `:q<Enter>` needed two
         // Enters to quit.
-        return captureIsExcluded ? false : output.consumesKey
+        return captureIsExcluded ? false : consumesKey
     }
 
     private func apply(action: TriggerAction) {
