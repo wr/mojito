@@ -1,18 +1,18 @@
 import AVFoundation
 
-/// Rhythmic disk-head chatter — the *chk chk … chiddle chk* of a spinning
-/// drive seeking clusters. No sample: short filtered-noise bursts and the
-/// occasional stepper-motor chirp are synthesized once, then dealt out on a
-/// jittery timer so the cadence never reads as an obvious loop. Runs until
-/// `stop()`.
+/// Mechanical disk-head chatter — the "chk … chk chk" of a drive seeking
+/// clusters. No samples: short noise-transient-over-resonant-body clicks are
+/// synthesized once, then fired on demand by the optimizer (one per
+/// consolidated chunk) so the cadence tracks the on-screen defrag instead of a
+/// free-running loop.
 @MainActor
 enum DiskChatterSound {
     private static let engine = AVAudioEngine()
     private static let player = AVAudioPlayerNode()
     private static var started = false
-    private static var active = false
-    /// Bumped on every start/stop so stale timer closures no-op.
-    private static var generation = 0
+    /// Gates playback so ticks queued by a still-running view stop the instant
+    /// the effect is dismissed.
+    private static var enabled = false
 
     private static let sampleRate: Double = 44_100
     private static let format = AVAudioFormat(
@@ -26,21 +26,37 @@ enum DiskChatterSound {
     private static var chatter: AVAudioPCMBuffer?
     private static var chirp: AVAudioPCMBuffer?
 
+    /// Stand up the engine so subsequent `playTick`/`playRun` are instant.
     static func start() {
         ensureBuffers()
         ensureRunning()
-        guard !active else { return }   // re-trigger: let the run continue
-        active = true
-        generation += 1
-        if !player.isPlaying { player.play() }
-        scheduleNext(gen: generation)
+        enabled = true
+        guard started, !player.isPlaying else { return }
+        player.play()
     }
 
     static func stop() {
-        guard active else { return }
-        active = false
-        generation += 1
+        enabled = false
+        guard started else { return }
         player.stop()
+    }
+
+    /// One head tick — call once per small consolidated chunk.
+    static func playTick() {
+        guard enabled else { return }
+        ensureRunning()
+        guard started, let buffer = ticks.randomElement() else { return }
+        player.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)
+        if !player.isPlaying { player.play() }
+    }
+
+    /// A rapid run — call for a big relocation band.
+    static func playRun() {
+        guard enabled else { return }
+        ensureRunning()
+        guard started, let buffer = (Bool.random() ? chirp : chatter) else { return }
+        player.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)
+        if !player.isPlaying { player.play() }
     }
 
     private static func ensureRunning() {
@@ -55,73 +71,63 @@ enum DiskChatterSound {
         }
     }
 
-    private static func scheduleNext(gen: Int) {
-        guard active, gen == generation else { return }
-
-        let roll = Int.random(in: 0..<12)
-        let buffer: AVAudioPCMBuffer?
-        if roll == 0 { buffer = chirp }
-        else if roll < 3 { buffer = chatter }
-        else { buffer = ticks.randomElement() }
-
-        if let buffer {
-            player.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)
-        }
-
-        // Mostly brisk ticks with an occasional pause for the "…" beat.
-        let interval = (Int.random(in: 0..<8) == 0)
-            ? Double.random(in: 0.45...0.85)
-            : Double.random(in: 0.09...0.22)
-        DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
-            MainActor.assumeIsolated { scheduleNext(gen: gen) }
-        }
-    }
-
     // MARK: - Synthesis
 
     private static func ensureBuffers() {
         guard ticks.isEmpty else { return }
-        // A few "chk" variants: short noise bursts, decaying fast, each with
-        // a slightly different pitch tint so repeats don't sound identical.
+        // A few "chk" variants — a noise transient over a short resonant body,
+        // so each reads as a mechanical head tick rather than a hiss. Quiet.
+        // Eight "chk" variants — higher cutoffs + faster decays read clickier;
+        // the resonant body is high and brief so it never goes "farty".
         ticks = [
-            makeTick(duration: 0.030, decay: 140, tint: 1900),
-            makeTick(duration: 0.026, decay: 170, tint: 2300),
-            makeTick(duration: 0.038, decay: 110, tint: 1500),
+            makeClick(duration: 0.024, lpCutoff: 2300, noiseDecay: 520, bodyFreq: 1050, bodyDecay: 540, amp: 0.090),
+            makeClick(duration: 0.021, lpCutoff: 2700, noiseDecay: 600, bodyFreq: 1200, bodyDecay: 600, amp: 0.085),
+            makeClick(duration: 0.028, lpCutoff: 2000, noiseDecay: 460, bodyFreq: 920, bodyDecay: 480, amp: 0.090),
+            makeClick(duration: 0.019, lpCutoff: 3000, noiseDecay: 680, bodyFreq: 1380, bodyDecay: 680, amp: 0.078),
+            makeClick(duration: 0.026, lpCutoff: 2200, noiseDecay: 500, bodyFreq: 990, bodyDecay: 520, amp: 0.088),
+            makeClick(duration: 0.022, lpCutoff: 2550, noiseDecay: 560, bodyFreq: 1140, bodyDecay: 560, amp: 0.082),
+            makeClick(duration: 0.030, lpCutoff: 1850, noiseDecay: 420, bodyFreq: 860, bodyDecay: 440, amp: 0.090),
+            makeClick(duration: 0.020, lpCutoff: 2850, noiseDecay: 640, bodyFreq: 1300, bodyDecay: 640, amp: 0.076),
         ].compactMap { $0 }
-        chatter = makeChatter()
-        chirp = makeChirp()
+        chatter = makeRun(clicks: 4, stride: 0.020, clickDur: 0.013, baseFreq: 900, step: 40, amp: 0.075)
+        chirp   = makeRun(clicks: 6, stride: 0.015, clickDur: 0.011, baseFreq: 1000, step: 80, amp: 0.065)
     }
 
-    /// Single click: white noise shaped by a one-pole low-pass (the `tint`
-    /// cutoff) under an exponential-decay envelope.
-    private static func makeTick(duration: Double, decay: Double, tint: Double) -> AVAudioPCMBuffer? {
+    /// One mechanical click: a brief filtered-noise transient summed with a
+    /// fast-decaying resonant "body" (the casing thunk). The low cutoff keeps
+    /// it muffled rather than hissy; amplitudes are deliberately modest.
+    private static func makeClick(duration: Double, lpCutoff: Double, noiseDecay: Double, bodyFreq: Double, bodyDecay: Double, amp: Float) -> AVAudioPCMBuffer? {
         let frames = Int(duration * sampleRate)
         guard frames > 0,
               let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frames)),
               let channel = buffer.floatChannelData?[0] else { return nil }
         buffer.frameLength = AVAudioFrameCount(frames)
 
-        // One-pole LPF coefficient from cutoff frequency.
-        let rc = 1.0 / (2.0 * Double.pi * tint)
+        let rc = 1.0 / (2.0 * Double.pi * lpCutoff)
         let dt = 1.0 / sampleRate
         let alpha = Float(dt / (rc + dt))
         var lp: Float = 0
-        let amplitude: Float = 0.22
+        var phase = 0.0
 
         for i in 0..<frames {
+            let t = Double(i) / sampleRate
             let noise = Float.random(in: -1...1)
             lp += alpha * (noise - lp)
-            let env = Float(exp(-decay * Double(i) / sampleRate))
-            channel[i] = lp * env * amplitude
+            let nEnv = Float(exp(-noiseDecay * t))
+            phase += bodyFreq / sampleRate
+            if phase >= 1 { phase -= 1 }
+            let body = Float(sin(2 * Double.pi * phase)) * Float(exp(-bodyDecay * t))
+            // Noise-dominant click; the body is just a faint high "k", never a
+            // low ringing tone (which reads as "farty").
+            channel[i] = (lp * nEnv * 0.88 + body * 0.12) * amp
         }
         return buffer
     }
 
-    /// "Chiddle": three very fast clicks in one buffer — the rapid head step.
-    private static func makeChatter() -> AVAudioPCMBuffer? {
-        let clickDur = 0.018
-        let stride = 0.024
-        let total = stride * 3
+    /// A run of fast descending clicks: "chiddle" (short run) or a longer head
+    /// seek. Grittier than a clean tone.
+    private static func makeRun(clicks: Int, stride: Double, clickDur: Double, baseFreq: Double, step: Double, amp: Float) -> AVAudioPCMBuffer? {
+        let total = stride * Double(clicks)
         let frames = Int(total * sampleRate)
         guard frames > 0,
               let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frames)),
@@ -129,45 +135,27 @@ enum DiskChatterSound {
         buffer.frameLength = AVAudioFrameCount(frames)
         for i in 0..<frames { channel[i] = 0 }
 
-        let clickFrames = Int(clickDur * sampleRate)
-        let strideFrames = Int(stride * sampleRate)
-        let rc = 1.0 / (2.0 * Double.pi * 2100)
+        let rc = 1.0 / (2.0 * Double.pi * 1300)
         let dt = 1.0 / sampleRate
         let alpha = Float(dt / (rc + dt))
-        let amplitude: Float = 0.18
+        let strideFrames = Int(stride * sampleRate)
+        let clickFrames = Int(clickDur * sampleRate)
 
-        for c in 0..<3 {
+        for c in 0..<clicks {
             let base = c * strideFrames
             var lp: Float = 0
+            var phase = 0.0
+            let bodyFreq = max(90, baseFreq - Double(c) * step)
             for i in 0..<clickFrames where base + i < frames {
+                let t = Double(i) / sampleRate
                 let noise = Float.random(in: -1...1)
                 lp += alpha * (noise - lp)
-                let env = Float(exp(-150 * Double(i) / sampleRate))
-                channel[base + i] = lp * env * amplitude
+                let nEnv = Float(exp(-420 * t))
+                phase += bodyFreq / sampleRate
+                if phase >= 1 { phase -= 1 }
+                let body = Float(sin(2 * Double.pi * phase)) * Float(exp(-400 * t))
+                channel[base + i] = (lp * nEnv * 0.88 + body * 0.12) * amp
             }
-        }
-        return buffer
-    }
-
-    /// Stepper-motor seek: a short descending sine sweep with a hint of decay.
-    private static func makeChirp() -> AVAudioPCMBuffer? {
-        let duration = 0.085
-        let frames = Int(duration * sampleRate)
-        guard frames > 0,
-              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frames)),
-              let channel = buffer.floatChannelData?[0] else { return nil }
-        buffer.frameLength = AVAudioFrameCount(frames)
-
-        let f0 = 1300.0, f1 = 480.0
-        let amplitude: Float = 0.10
-        var phase = 0.0
-        for i in 0..<frames {
-            let frac = Double(i) / Double(frames)
-            let freq = f0 + (f1 - f0) * frac
-            phase += freq / sampleRate
-            if phase >= 1 { phase -= 1 }
-            let env = Float(exp(-9 * frac))
-            channel[i] = Float(sin(2 * Double.pi * phase)) * env * amplitude
         }
         return buffer
     }
