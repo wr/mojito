@@ -7,7 +7,6 @@ enum DefaultExclusions {
         "com.hnc.Discord",                    // Discord
         "notion.id",                          // Notion (mac)
         "com.linear",                         // Linear
-        "com.figma.Desktop",                  // Figma
         "com.github.GitHubClient",            // GitHub Desktop
         "com.electron.basecamp3",             // Basecamp
         "com.microsoft.teams2",               // Teams
@@ -28,7 +27,6 @@ enum DefaultExclusions {
         "*.notion.site",
         "linear.app",
         "*.linear.app",
-        "*.figma.com",
         "messages.google.com",
         "web.whatsapp.com",
         "web.telegram.org",
