@@ -112,7 +112,6 @@ fileprivate enum WordleStage { case main, bonus }
 @Observable
 fileprivate final class WordleModel {
     static let mainAnswer = "emoji"
-    /// The bonus word — a double-letter trap that's a harder solve.
     static let bonusAnswer = "fizzy"
     static let maxGuesses = 6
     static let wordLength = 5
@@ -270,7 +269,6 @@ private struct WordleView: View {
     @State private var popScale: [Int: CGFloat] = [:]
     @State private var winHop: [Int: CGFloat] = [:]
     @State private var lastGuessCount = 0
-    @State private var lastCurrentCount = 0
 
     private let tileSize: CGFloat = 58
     private let tileGap: CGFloat = 7
@@ -300,7 +298,6 @@ private struct WordleView: View {
         }
         .onChange(of: model.current.count) { old, newValue in
             if newValue > old { popActiveTile(col: newValue - 1) }
-            lastCurrentCount = newValue
         }
         .onChange(of: model.roundTick) { _, _ in resetAnimationState() }
     }
@@ -445,16 +442,22 @@ private struct WordleView: View {
     }
 
     private func revealRow(_ row: Int) {
+        // Pressing return during the reveal advances the round and clears
+        // animation state; guard every deferred closure so stragglers from a
+        // superseded round don't write into the fresh board.
+        let round = model.roundTick
         let states = model.evaluation(for: model.guesses[row])
         for col in 0..<WordleModel.wordLength {
             let idx = row * WordleModel.wordLength + col
             let delay = Double(col) * colRevealStep
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                // Collapse to a sliver (center-anchored) — reads as a card
-                // flipping edge-on without the 3D-perspective "jut".
+                guard model.roundTick == round else { return }
+                // Center-anchored vertical scale, not a 3D rotation (which
+                // juts in perspective).
                 withAnimation(.easeIn(duration: 0.12)) { flipY[idx] = 0.04 }
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + delay + 0.12) {
+                guard model.roundTick == round else { return }
                 revealedFront.insert(idx)
                 if col < states.count { WordleSounds.reveal(states[col].revealTone) }
                 withAnimation(.easeOut(duration: 0.12)) { flipY[idx] = 1 }
@@ -462,18 +465,21 @@ private struct WordleView: View {
         }
         let endDelay = Double(WordleModel.wordLength - 1) * colRevealStep + 0.26
         DispatchQueue.main.asyncAfter(deadline: .now() + endDelay) {
+            guard model.roundTick == round else { return }
             model.onRevealComplete()
-            if model.won { winBounce(row: row) }
+            if model.won { winBounce(row: row, round: round) }
         }
     }
 
-    private func winBounce(row: Int) {
+    private func winBounce(row: Int, round: Int) {
         for col in 0..<WordleModel.wordLength {
             let idx = row * WordleModel.wordLength + col
             let delay = Double(col) * 0.08
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                guard model.roundTick == round else { return }
                 withAnimation(.spring(response: 0.26, dampingFraction: 0.42)) { winHop[idx] = -18 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.17) {
+                    guard model.roundTick == round else { return }
                     withAnimation(.spring(response: 0.32, dampingFraction: 0.5)) { winHop[idx] = 0 }
                 }
             }
@@ -487,7 +493,6 @@ private struct WordleView: View {
         winHop = [:]
         shakeOffset = 0
         lastGuessCount = 0
-        lastCurrentCount = 0
     }
 }
 
