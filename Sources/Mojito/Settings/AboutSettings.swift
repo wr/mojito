@@ -3,6 +3,7 @@ import AppKit
 import AVFoundation
 
 struct AboutSettingsView: View {
+    @EnvironmentObject private var engine: Engine
     @AppStorage(PrefsKey.donated) private var donated: Bool = false
     @State private var debugCopied: Bool = false
 
@@ -157,7 +158,7 @@ struct AboutSettingsView: View {
 
     private func copyDebugInfo() {
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(DebugReport.markdown(), forType: .string)
+        NSPasteboard.general.setString(DebugReport.markdown(engine: engine), forType: .string)
         debugCopied = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             debugCopied = false

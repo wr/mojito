@@ -35,10 +35,10 @@ enum DebugReport {
         return Date(timeIntervalSince1970: sec + usec)
     }
 
-    static func markdown(now: Date = Date()) -> String {
+    static func markdown(engine: Engine? = nil, now: Date = Date()) -> String {
         var out = ""
         out += "# Mojito debug report\n\n"
-        out += mojitoSection(now: now)
+        out += mojitoSection(engine: engine, now: now)
         out += "\n"
         out += buildSection()
         out += "\n"
@@ -68,7 +68,7 @@ enum DebugReport {
 
     // MARK: - Sections
 
-    private static func mojitoSection(now: Date) -> String {
+    private static func mojitoSection(engine: Engine?, now: Date) -> String {
         let info = Bundle.main.infoDictionary ?? [:]
         let bundleID = Bundle.main.bundleIdentifier ?? "—"
         let version = info["CFBundleShortVersionString"] as? String ?? "—"
@@ -90,6 +90,10 @@ enum DebugReport {
         s += "- paused: \(paused)\n"
         if paused, let pausedUntil {
             s += "- pausedRemaining: \(formatDuration(pausedUntil - now.timeIntervalSince1970))\n"
+        }
+        if let engine {
+            s += "- engine.active: \(engine.isActive)\n"
+            s += "- triggerState: \(engine.triggerStateLabel)\n"
         }
         return s
     }
