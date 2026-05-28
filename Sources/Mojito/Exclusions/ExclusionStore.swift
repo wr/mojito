@@ -53,14 +53,31 @@ final class ExclusionStore: ObservableObject {
         var built: [String: NSRegularExpression] = [:]
         for raw in patterns {
             let pattern = raw.lowercased()
-            guard pattern.contains("*") else { continue }
-            let regexPattern = "^" + NSRegularExpression.escapedPattern(for: pattern)
-                .replacingOccurrences(of: "\\*", with: "[^.]+") + "$"
-            if let regex = try? NSRegularExpression(pattern: regexPattern) {
+            if let regex = Self.compiledGlob(for: pattern) {
                 built[pattern] = regex
             }
         }
         compiledPatterns = built
+    }
+
+    /// Compile a wildcard host pattern. `*` matches exactly one subdomain
+    /// segment (`[^.]+`), anchored at both ends. Returns nil for patterns
+    /// with no wildcard — those are compared by equality.
+    nonisolated static func compiledGlob(for pattern: String) -> NSRegularExpression? {
+        guard pattern.contains("*") else { return nil }
+        let regexPattern = "^" + NSRegularExpression.escapedPattern(for: pattern)
+            .replacingOccurrences(of: "\\*", with: "[^.]+") + "$"
+        return try? NSRegularExpression(pattern: regexPattern)
+    }
+
+    /// Pure host/pattern decision. Equality unless the pattern carries a
+    /// `*` wildcard. Compiles on demand — the instance hot path uses the
+    /// `compiledPatterns` cache instead to avoid per-`:` recompilation.
+    nonisolated static func matches(host: String, pattern: String) -> Bool {
+        guard pattern.contains("*") else { return host == pattern }
+        guard let regex = compiledGlob(for: pattern) else { return false }
+        let range = NSRange(host.startIndex..., in: host)
+        return regex.firstMatch(in: host, range: range) != nil
     }
 
     func isExcluded(bundleID: String?, url: URL?) -> Bool {
