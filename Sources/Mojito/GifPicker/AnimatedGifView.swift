@@ -56,7 +56,7 @@ struct AnimatedGifView: NSViewRepresentable {
             view.image = nil
 
             let request = URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad, timeoutInterval: 8)
-            task = URLSession.shared.dataTask(with: request) { [weak view] data, _, _ in
+            task = GifSearcher.session.dataTask(with: request) { [weak view] data, _, _ in
                 guard let data, let image = NSImage(data: data) else { return }
                 DispatchQueue.main.async { [weak view] in
                     guard let view else { return }
