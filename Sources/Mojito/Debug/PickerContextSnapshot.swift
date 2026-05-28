@@ -24,9 +24,20 @@ struct PickerContextSnapshot {
     let focusedRole: String?
     let focusedSubrole: String?
     let attributes: [AXAttribute]
+    /// Everything the focused element advertises, not just the curated set.
+    /// Useful when the curated set comes back mostly absent and we want to
+    /// see what *is* available without rebuilding a probe build.
+    let allAttributeNames: [String]
+    let allParameterizedAttributeNames: [String]
+    /// Focused → parent → … up to 4 levels (e.g. "AXTextArea ← AXScrollArea
+    /// ← AXSplitGroup ← AXWindow"). Length only, no titles.
+    let roleChain: [String]
+    /// Length of `kAXTitleAttribute` on the focused element's containing
+    /// window. Title text itself is never captured.
+    let windowTitleLength: Int?
     let elementFrame: CGRect?
     let mouseLocation: CGPoint?
-    let caretOutcome: String   // "axBounds" | "elementTopLeft" | "unavailable"
+    let caretOutcome: String   // "axBounds" | "elementTopLeft" | "elementTooTall" | "unavailable"
     let resolvedCaret: CGRect?
 }
 
@@ -54,9 +65,9 @@ enum PickerContextStore {
         // parameter, so presence is determined by enumerating the names
         // the element advertises. This is what distinguishes Ghostty
         // (advertises nothing) from TextEdit (advertises BoundsForRange).
-        let parameterizedNames: Set<String> = element.flatMap(parameterizedNames(of:)) ?? []
+        let paramSet: Set<String> = element.flatMap(parameterizedNames(of:)) ?? []
         let parameterized = parameterizedCaretAttributes.map { key -> PickerContextSnapshot.AXAttribute in
-            let present = parameterizedNames.contains(key)
+            let present = paramSet.contains(key)
             return .init(name: key, present: present, summary: present ? "<parameterized>" : nil)
         }
         let attrs = regular + parameterized
@@ -71,6 +82,18 @@ enum PickerContextStore {
             return CGRect(origin: origin, size: size)
         }()
 
+        let allAttrs = element.flatMap(allAttributeNames(of:)) ?? []
+        let allParamAttrs = Array(paramSet)
+        let chain = element.flatMap(roleChain(from:)) ?? []
+        let windowTitleLen: Int? = {
+            guard let element,
+                  let win = asAXUIElement(copy(element, kAXWindowAttribute as String)),
+                  let title = copy(win, kAXTitleAttribute as String) as? String else {
+                return nil
+            }
+            return title.count
+        }()
+
         latest = PickerContextSnapshot(
             capturedAt: Date(),
             frontmostBundleID: app?.bundleIdentifier,
@@ -78,6 +101,10 @@ enum PickerContextStore {
             focusedRole: focusedRole,
             focusedSubrole: focusedSubrole,
             attributes: attrs,
+            allAttributeNames: allAttrs,
+            allParameterizedAttributeNames: allParamAttrs,
+            roleChain: chain,
+            windowTitleLength: windowTitleLen,
             elementFrame: elementFrame,
             mouseLocation: NSEvent.mouseLocation,
             caretOutcome: caretOutcome,
@@ -120,6 +147,31 @@ enum PickerContextStore {
         guard AXUIElementCopyParameterizedAttributeNames(element, &names) == .success,
               let list = names as? [String] else { return [] }
         return Set(list)
+    }
+
+    private static func allAttributeNames(of element: AXUIElement) -> [String] {
+        var names: CFArray?
+        guard AXUIElementCopyAttributeNames(element, &names) == .success,
+              let list = names as? [String] else { return [] }
+        return list
+    }
+
+    /// Up to 4 levels of AX ancestry. Names only — no titles or values.
+    private static func roleChain(from element: AXUIElement) -> [String] {
+        var chain: [String] = []
+        var cursor: AXUIElement? = element
+        for _ in 0..<4 {
+            guard let current = cursor else { break }
+            let role = (copy(current, kAXRoleAttribute) as? String) ?? "?"
+            chain.append(role)
+            cursor = asAXUIElement(copy(current, kAXParentAttribute as String))
+        }
+        return chain
+    }
+
+    private static func asAXUIElement(_ value: AnyObject?) -> AXUIElement? {
+        guard let v = value, CFGetTypeID(v) == AXUIElementGetTypeID() else { return nil }
+        return (v as! AXUIElement)
     }
 
     /// Shape-only stringification. Never returns the raw value's contents.

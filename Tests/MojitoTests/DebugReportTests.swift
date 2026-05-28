@@ -38,15 +38,21 @@ struct DebugReportTests {
         }
     }
 
-    @Test func reportFitsUnderEightKB() {
+    @Test func reportFitsUnderCap() {
         DebugRecorder.reset()
-        // Fill the recorder past the surfacing window (50 events) — the
-        // report should still stay capped.
-        for i in 0..<200 {
+        for i in 0..<300 {
             DebugRecorder.record(.picker, "open", ["outcome": "axBounds", "iter": "\(i)"])
         }
         let out = DebugReport.markdown()
         #expect(out.utf8.count < DebugReport.maxSizeBytes, "report is \(out.utf8.count) bytes")
+    }
+
+    @Test func includesNewSections() {
+        DebugRecorder.reset()
+        let out = DebugReport.markdown()
+        for section in ["## Mojito", "## Build", "## Prefs", "## System", "## Database", "## Updater", "## Last picker context", "## Activity log", "## Now"] {
+            #expect(out.contains(section), "missing section \(section)")
+        }
     }
 
     @Test func noAbsoluteDatesInPrefsSection() {
