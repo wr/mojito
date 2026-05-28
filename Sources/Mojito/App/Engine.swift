@@ -302,10 +302,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         if case .idle = stateMachine.state, case .colon = input {
             let context = AppContextDetector.current()
             if context.focusedFieldIsSecure {
+                DebugRecorder.record(.engine, "secureFieldBlocked")
                 return false
             }
             captureContext = context
             captureIsExcluded = exclusions.isExcluded(bundleID: context.bundleID, url: context.url)
+            DebugRecorder.record(.engine, "colon", [
+                "excluded": "\(captureIsExcluded)",
+                "hasURL": "\(context.url != nil)",
+            ])
             // Snapshot now so the deferred picker show and any focus-change
             // notifications can detect movement out from under us.
             captureFocusSnapshot = FocusedElementCache.shared.element
@@ -565,6 +570,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             corpus: corpusFor(scope: scope),
             useFrequencyBoost: useFrequencyBoost
         )
+        DebugRecorder.record(.picker, "search", [
+            "queryLen": "\(query.count)",
+            "results": "\(results.count)",
+            "scope": "\(scope)",
+        ])
         viewModel.update(query: query, results: results)
     }
 
@@ -957,6 +967,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         let emojiLen = entry.emojiInserted.count
         TextInserter.replace(charactersToDelete: emojiLen, with: entry.originalText)
         pendingEmoticonUndo = nil
+        DebugRecorder.record(.emoticon, "undo")
         return true
     }
 
