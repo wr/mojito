@@ -12,51 +12,59 @@ struct ExclusionsSettingsView: View {
     @State private var showAddSheet = false
     @State private var newPattern: String = ""
 
+    private var activeBundleIDs: Set<String> {
+        store.mode == .allowlist ? store.allowedBundleIDs : store.bundleIDs
+    }
+
     private var visibleBundleIDs: [String] {
-        store.bundleIDs.sorted().filter {
+        activeBundleIDs.sorted().filter {
             NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) != nil
         }
     }
 
     private var sortedPatterns: [String] {
-        store.urlPatterns.sorted()
+        (store.mode == .allowlist ? store.allowedURLPatterns : store.urlPatterns).sorted()
+    }
+
+    private var appsHeader: LocalizedStringKey {
+        store.mode == .allowlist
+            ? "These apps will trigger \(AppInfo.displayName)."
+            : "These apps won't trigger \(AppInfo.displayName)."
+    }
+
+    private var sitesHeader: LocalizedStringKey {
+        store.mode == .allowlist
+            ? "These sites will trigger \(AppInfo.displayName).\n`*` matches a subdomain."
+            : "These sites won't trigger \(AppInfo.displayName).\n`*` matches a subdomain."
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+                modePicker
+
                 BoxedList(
-                    header: "Prevent \(AppInfo.displayName) from triggering inside these apps.",
+                    header: appsHeader,
                     items: visibleBundleIDs,
                     selected: $selectedApp,
                     onAdd: addApp,
-                    onRemove: {
-                        if let s = selectedApp {
-                            store.bundleIDs.remove(s)
-                            selectedApp = nil
-                        }
-                    },
+                    onRemove: removeSelectedApp,
                     row: appRow
                 )
 
                 BoxedList(
-                    header: "Prevent \(AppInfo.displayName) from triggering on these sites. `*` matches a subdomain.",
+                    header: sitesHeader,
                     items: sortedPatterns,
                     selected: $selectedPattern,
                     onAdd: { newPattern = ""; showAddSheet = true },
-                    onRemove: {
-                        if let s = selectedPattern {
-                            store.urlPatterns.remove(s)
-                            selectedPattern = nil
-                        }
-                    },
+                    onRemove: removeSelectedPattern,
                     row: siteRow
                 )
 
                 BoxedToggle(
-                    header: "GIF search bypass",
-                    title: "Let GIF search work in excluded apps",
-                    caption: "`:::` overrides the exclusion list.",
+                    header: "GIF search override",
+                    title: "Always let GIF search work",
+                    caption: "`:::` opens the GIF picker regardless of the lists above.",
                     isOn: $gifBypassExclusions
                 )
             }
@@ -64,11 +72,37 @@ struct ExclusionsSettingsView: View {
         }
         .sheet(isPresented: $showAddSheet) {
             AddWebsiteSheet(pattern: $newPattern) { trimmed in
-                store.urlPatterns.insert(trimmed)
+                insertPattern(trimmed)
                 showAddSheet = false
             } onCancel: {
                 showAddSheet = false
             }
+        }
+    }
+
+    // MARK: - Mode picker
+
+    private var modePicker: some View {
+        // Local binding keeps the selection drawn from `store.mode` so it
+        // updates whenever any other surface flips the mode.
+        let binding = Binding<ExclusionMode>(
+            get: { store.mode },
+            set: { newValue in
+                guard newValue != store.mode else { return }
+                store.mode = newValue
+                selectedApp = nil
+                selectedPattern = nil
+            }
+        )
+        return HStack(spacing: 6) {
+            Text("\(AppInfo.displayName) runs")
+            Picker("", selection: binding) {
+                Text("everywhere except the apps & sites below").tag(ExclusionMode.denylist)
+                Text("only in the apps & sites below").tag(ExclusionMode.allowlist)
+            }
+            .labelsHidden()
+            .fixedSize()
+            Spacer(minLength: 0)
         }
     }
 
@@ -127,8 +161,36 @@ struct ExclusionsSettingsView: View {
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
         panel.allowsMultipleSelection = false
         if panel.runModal() == .OK, let url = panel.url, let bundle = Bundle(url: url), let id = bundle.bundleIdentifier {
-            store.bundleIDs.insert(id)
+            switch store.mode {
+            case .denylist:  store.bundleIDs.insert(id)
+            case .allowlist: store.allowedBundleIDs.insert(id)
+            }
         }
+    }
+
+    private func removeSelectedApp() {
+        guard let s = selectedApp else { return }
+        switch store.mode {
+        case .denylist:  store.bundleIDs.remove(s)
+        case .allowlist: store.allowedBundleIDs.remove(s)
+        }
+        selectedApp = nil
+    }
+
+    private func insertPattern(_ pattern: String) {
+        switch store.mode {
+        case .denylist:  store.urlPatterns.insert(pattern)
+        case .allowlist: store.allowedURLPatterns.insert(pattern)
+        }
+    }
+
+    private func removeSelectedPattern() {
+        guard let s = selectedPattern else { return }
+        switch store.mode {
+        case .denylist:  store.urlPatterns.remove(s)
+        case .allowlist: store.allowedURLPatterns.remove(s)
+        }
+        selectedPattern = nil
     }
 }
 

@@ -10,6 +10,13 @@ enum PrefsKey {
     static let useFrequencyBoost     = "mojito.search.frequencyBoost"
     static let excludedBundleIDs     = "mojito.excludeBundleIDs"     // [String]
     static let excludedURLPatterns   = "mojito.excludeURLPatterns"   // [String]
+    /// `denylist` (default) = block apps/sites in the excluded lists.
+    /// `allowlist` = block everything except apps/sites in the allowed lists.
+    /// In allowlist mode a URL-pattern match implicitly allows the browser
+    /// hosting it, so users don't have to allowlist Chrome to allow github.com.
+    static let exclusionMode         = "mojito.exclusions.mode"      // String, ExclusionMode raw
+    static let allowedBundleIDs      = "mojito.allowBundleIDs"       // [String]
+    static let allowedURLPatterns    = "mojito.allowURLPatterns"     // [String]
     static let usageCounts           = "mojito.usageCounts"          // [String: Int]  (hexcode → count)
     /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
