@@ -851,6 +851,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 }
             }
             return true
+        case FuzzyMatcher.k50Hex:
+            TextInserter.deleteBackward(deleteCount)
+            DiskOptimizer.start()
+            EasterEggTracker.record(.k50)
+            return true
         default:
             return false
         }

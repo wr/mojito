@@ -53,6 +53,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case k47
     case k48
     case k49
+    case k50
     case k51
 
     var id: String { rawValue }
@@ -108,6 +109,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k47: return "100,000 GIFs"
         case .k48: return "1,000,000 GIFs"
         case .k49: return "Wordle"
+        case .k50: return "Disk Optimizer"
         case .k51: return "Last Call"
         }
     }
@@ -165,6 +167,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k47: return "100,000 GIFs inserted. Truly unhinged."
         case .k48: return "1,000,000 GIFs inserted. A new form of communication."
         case .k49: return "`\(EggStrings.k49)` — six guesses, one word."
+        case .k50: return "`\(EggStrings.k50)` — tidying clusters, one seek at a time."
         case .k51: return "Solve the word, then survive the bonus round."
         }
     }
@@ -220,6 +223,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k47: return "Truly unhinged."
         case .k48: return "A new form of communication."
         case .k49: return "Green, yellow, gray — six tries."
+        case .k50: return "Those little colored blocks, all out of order."
         case .k51: return "Solve it to see what comes next."
         }
     }
@@ -274,6 +278,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k47: return "🎥"
         case .k48: return "🏅"
         case .k49: return "🟩"
+        case .k50: return "💽"
         case .k51: return "🍹"
         }
     }

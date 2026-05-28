@@ -133,6 +133,7 @@
 		E5C85B09298DAB6F6594B181 /* BouncingDVD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0836B5ACF7E24509928DA7B0 /* BouncingDVD.swift */; };
 		E62A74A5CA784B452A59CE00 /* DiscoveryNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F0EF28CC67A6AB9FFF203F /* DiscoveryNotifier.swift */; };
 		E9340C650BD416393A44ACC3 /* DockIconManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02F1996A3DED7A0A133E24C /* DockIconManager.swift */; };
+		EAF2B984187615EBAF67954E /* DiskOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDDFF6254C8A58E63AC223D5 /* DiskOptimizer.swift */; };
 		ECC3936D06DC519BCE249F8D /* PermissionsCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2027256AFD59D65C41FAA2AD /* PermissionsCoordinator.swift */; };
 		EF12FA0699114C96BC4FEFC2 /* s09.bin in Resources */ = {isa = PBXBuildFile; fileRef = 4678DF22D8E1B41FC8359CF1 /* s09.bin */; };
 		EF68C901592CF3ACF08A344B /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 8B43031B38814AF859998A56 /* KeyboardShortcuts */; };
@@ -140,6 +141,7 @@
 		F07DEA88DD7DFC70934988EF /* EffectDismisser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D64E06BE48B822A5BA55952 /* EffectDismisser.swift */; };
 		F438993077911C965697652C /* s08.bin in Resources */ = {isa = PBXBuildFile; fileRef = 5111A1AB2B4D546A7D073563 /* s08.bin */; };
 		F46B89A2E807D259981405E5 /* ConfettiRain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C410F8B7AF8493C098EA2AF1 /* ConfettiRain.swift */; };
+		F73F58BE72CA74368A7DB969 /* DiskChatterSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDB0D2C1CE1FF9C32F6BBA0 /* DiskChatterSound.swift */; };
 		F764F95E296A1CFA71C231A7 /* GifAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B02E1E7C31A388F8B220B6B /* GifAsset.swift */; };
 		FB20006241210D1D36AB7EEF /* s06.bin in Resources */ = {isa = PBXBuildFile; fileRef = 2F21A9938263FE3EE577F03D /* s06.bin */; };
 		FB6F709623B1472B32490F1D /* KonamiPayoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = E229DD4E9239183CD578F665 /* KonamiPayoff.swift */; };
@@ -184,6 +186,7 @@
 		2C66984ECCB4DB6B1A018452 /* PrefsKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefsKey.swift; sourceTree = "<group>"; };
 		2D64E06BE48B822A5BA55952 /* EffectDismisser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EffectDismisser.swift; sourceTree = "<group>"; };
 		2DB3CE6896B4FB11651A14AD /* PickerContextSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerContextSnapshot.swift; sourceTree = "<group>"; };
+		2DDB0D2C1CE1FF9C32F6BBA0 /* DiskChatterSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskChatterSound.swift; sourceTree = "<group>"; };
 		2F21A9938263FE3EE577F03D /* s06.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s06.bin; sourceTree = "<group>"; };
 		300590ABBE9E070A97FCFF92 /* SosumiSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SosumiSound.swift; sourceTree = "<group>"; };
 		3188FF1FD6559BF8E64C19CC /* EasterEggTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasterEggTracker.swift; sourceTree = "<group>"; };
@@ -270,6 +273,7 @@
 		C876AD00FBA92A6CA56ABD95 /* s07.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s07.bin; sourceTree = "<group>"; };
 		CB7ACE7E64FDA50492BD8570 /* WordleGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordleGame.swift; sourceTree = "<group>"; };
 		CDB886D82441D68D2F815AD3 /* AppIconDev.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIconDev.icon; sourceTree = "<group>"; };
+		CDDFF6254C8A58E63AC223D5 /* DiskOptimizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskOptimizer.swift; sourceTree = "<group>"; };
 		D05EB6710B1D2B6310DE45AC /* s14.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s14.bin; sourceTree = "<group>"; };
 		D2C4C16E01184684E33C3437 /* MyLegSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLegSound.swift; sourceTree = "<group>"; };
 		D2F34180D15CF8B53F58B2A2 /* TextInserter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInserter.swift; sourceTree = "<group>"; };
@@ -503,6 +507,8 @@
 				2361376F2801DB575F27B480 /* DialupSound.swift */,
 				520ABC6E5EB064A7DF4041D3 /* DiscoveryFanfare.swift */,
 				E6F0EF28CC67A6AB9FFF203F /* DiscoveryNotifier.swift */,
+				2DDB0D2C1CE1FF9C32F6BBA0 /* DiskChatterSound.swift */,
+				CDDFF6254C8A58E63AC223D5 /* DiskOptimizer.swift */,
 				C02F1996A3DED7A0A133E24C /* DockIconManager.swift */,
 				3188FF1FD6559BF8E64C19CC /* EasterEggTracker.swift */,
 				2D64E06BE48B822A5BA55952 /* EffectDismisser.swift */,
@@ -820,6 +826,8 @@
 				55C7BE736206664DE37166E2 /* DialupSound.swift in Sources */,
 				3D91FC131565306ABD82887E /* DiscoveryFanfare.swift in Sources */,
 				E62A74A5CA784B452A59CE00 /* DiscoveryNotifier.swift in Sources */,
+				F73F58BE72CA74368A7DB969 /* DiskChatterSound.swift in Sources */,
+				EAF2B984187615EBAF67954E /* DiskOptimizer.swift in Sources */,
 				E9340C650BD416393A44ACC3 /* DockIconManager.swift in Sources */,
 				A9CDDCEBAC41BF8676B8F2EC /* EasterEggTracker.swift in Sources */,
 				751B7D80FF9EA3BA8B30B8FC /* EasterEggsSettings.swift in Sources */,

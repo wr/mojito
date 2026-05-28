@@ -37,6 +37,7 @@ enum EggIndex {
     // MARK: - Tables (generated — do not hand-edit)
 
     private static let exact: [String: String] = [
+        "a5b6267ab2e8f02a153c83ceac4902482256b2bab3f9c58756b517f912160ca6": "k50",
         "09d8516dbf1a3e0498d3252fe1e786ea217f870bc1a438eddec1f483bca01fee": "k01",
         "a441b15fe9a3cf56661190a0b93b9dec7d04127288cc87250967cf3b52894d11": "k02",
         "ec5075d91d86e38eb0db517a7736767b2a83a1f981444343f1835925332d9be3": "k03",
@@ -69,6 +70,10 @@ enum EggIndex {
     ]
 
     private static let prefix: [String: String] = [
+        "cb8379ac2098aa165029e3938a51da0bcecfc008fd6795f401178647f96c5b34": "k50",
+        "16bf7ebfca35e3938060abc44fdfe5f5924a8e35b06486075178f66e9ac6c357": "k50",
+        "4eda28a81fa24f37d719cafd2b01aaba4dc0a04da2aa1bb02946d9866dfbb839": "k50",
+        "a5b6267ab2e8f02a153c83ceac4902482256b2bab3f9c58756b517f912160ca6": "k50",
         "40dcb50eb5d78545a91754e962d9530723de0e094aefd7481e2de677684ee820": "k22",
         "36c379d9648a48c77c7021b5b5eac41870273444c124ad8250f5c976280f8d44": "k22",
         "a5598d139d7b775de865f40a8b3affcddd604c2db5019b874e8e58f7393a5499": "k22",
