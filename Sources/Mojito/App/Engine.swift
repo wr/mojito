@@ -9,6 +9,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     @Published private(set) var isActive: Bool = false
     @Published var pausedUntil: Date?
 
+    /// State-machine label for diagnostic reports. Query contents are
+    /// elided so the value is anonymous.
+    var triggerStateLabel: String {
+        switch stateMachine.state {
+        case .idle:          return "idle"
+        case .capturing:     return "capturing"
+        case .gifSearching:  return "gifSearching"
+        }
+    }
+
     private let database: EmojiDatabase
     private let exclusions: ExclusionStore
     private let viewModel = PickerViewModel()
