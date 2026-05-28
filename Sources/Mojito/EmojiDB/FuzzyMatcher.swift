@@ -50,6 +50,7 @@ struct FuzzyMatcher {
     static let k30Hex       = "k30"
     static let k35Hex     = "k35"
     static let k49Hex     = "k49"
+    static let k50Hex     = "k50"
     /// Fires from the state machine, not the picker — no `EggIndex` entry.
     static let k99Hex       = "k99"
     /// Below this we skip the hash lookup, so short prefixes don't surface
@@ -92,6 +93,7 @@ struct FuzzyMatcher {
         k30Hex:        PinnedRow(hexcode: k30Hex,        character: "🥬", label: "???",      order: 73),
         k35Hex:        PinnedRow(hexcode: k35Hex,        character: "🚋", label: "???",      order: 72),
         k49Hex:        PinnedRow(hexcode: k49Hex,        character: "🟩", label: "???",      order: 71),
+        k50Hex:        PinnedRow(hexcode: k50Hex,        character: "💽", label: "???",      order: 70),
     ]
 
     /// Every pinned row renders with the rainbow gradient. (Used to mark
