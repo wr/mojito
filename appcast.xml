@@ -6,6 +6,14 @@
     <description>Mojito updates</description>
     <language>en</language>
     <item>
+      <title>Mojito 1.0.8</title>
+      <pubDate>Thu, 28 May 2026 14:50:16 +0000</pubDate>
+      <sparkle:shortVersionString>1.0.8</sparkle:shortVersionString>
+      <sparkle:version>13</sparkle:version>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure url="https://github.com/wr/mojito/releases/download/v1.0.8/Mojito.dmg" type="application/octet-stream" length="9030483" sparkle:edSignature="Z5y1ACEsPCJQNrg2E4Of3NM/Sc/aYxI+GdaoHWSzm0Ok8UK3QM8Yj3brmYpf+Mi/gNn9xvrvB7GvcmY2gqP8DQ==" />
+    </item>
+    <item>
       <title>Mojito 1.0.7</title>
       <pubDate>Thu, 28 May 2026 14:32:29 +0000</pubDate>
       <sparkle:shortVersionString>1.0.7</sparkle:shortVersionString>
