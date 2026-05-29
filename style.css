@@ -338,7 +338,7 @@ code {
    spring (response 0.42, damping 0.55); exit is a quick ease-in. */
 .achievement {
   position: fixed;
-  top: 4px;
+  top: 24px;
   left: 0;
   right: 0;
   display: flex;
