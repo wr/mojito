@@ -10,6 +10,7 @@ final class PermissionsCoordinator: ObservableObject {
 
     private var timer: Timer?
     private var distributedObserver: NSObjectProtocol?
+    private var activeObserver: NSObjectProtocol?
 
     init() {
         refresh()
@@ -20,16 +21,29 @@ final class PermissionsCoordinator: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            // The notification fires slightly before AXIsProcessTrusted()
+            // The notification fires slightly before the AX subsystem
             // flips, so refresh now AND a moment later.
             self?.refresh()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { self?.refresh() }
+        }
+        // Changing an Accessibility grant means switching to System Settings
+        // and back. The trust state can lag a live toggle, so re-derive it
+        // whenever we regain focus — by then the change has settled.
+        activeObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.refresh()
         }
     }
 
     deinit {
         if let distributedObserver {
             DistributedNotificationCenter.default().removeObserver(distributedObserver)
+        }
+        if let activeObserver {
+            NotificationCenter.default.removeObserver(activeObserver)
         }
     }
 
