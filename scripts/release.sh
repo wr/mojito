@@ -210,11 +210,29 @@ if [[ -z "$EDDSA_SIGNATURE" ]]; then
     exit 1
 fi
 
+echo "→ Extracting release notes for v$VERSION from CHANGELOG.md"
+# Pull the body of the `## v$VERSION` section (everything up to the next `##`).
+# This fragment is the single source of truth for both the GitHub Release body
+# and the Sparkle HTML notes, so the two can never drift apart.
+CHANGELOG_FRAGMENT=$(mktemp)
+awk -v header="## v$VERSION" '
+    $0 == header { capture = 1; next }
+    capture && /^## / { exit }
+    capture { print }
+' "$REPO_ROOT/CHANGELOG.md" > "$CHANGELOG_FRAGMENT"
+if [[ ! -s "$CHANGELOG_FRAGMENT" ]]; then
+    echo "error: no '## v$VERSION' section found in CHANGELOG.md." >&2
+    echo "       Add a '## v$VERSION' entry before releasing." >&2
+    exit 1
+fi
+
 echo "→ Creating GitHub Release"
 RELEASE_NOTES_FILE=$(mktemp)
-echo "## $APP_NAME $VERSION" > "$RELEASE_NOTES_FILE"
-echo "" >> "$RELEASE_NOTES_FILE"
-echo "TODO: paste release notes here, or wire this script to read CHANGELOG.md" >> "$RELEASE_NOTES_FILE"
+{
+    echo "## $APP_NAME $VERSION"
+    echo ""
+    cat "$CHANGELOG_FRAGMENT"
+} > "$RELEASE_NOTES_FILE"
 
 gh release create "v$VERSION" "$DMG_PATH" \
     --repo "$GITHUB_REPO" \
@@ -228,6 +246,14 @@ GH_PAGES_DIR=$(mktemp -d)
 git clone --depth 1 --branch gh-pages "https://github.com/$GITHUB_REPO.git" "$GH_PAGES_DIR" || \
     (mkdir -p "$GH_PAGES_DIR" && cd "$GH_PAGES_DIR" && git init && git checkout -b gh-pages)
 
+echo "→ Rendering release-notes HTML"
+RELEASE_NOTES_URL="https://mojito.wells.ee/release-notes/$VERSION.html"
+mkdir -p "$GH_PAGES_DIR/release-notes"
+python3 "$REPO_ROOT/scripts/md_to_release_notes.py" \
+    --title "$APP_NAME $VERSION" \
+    < "$CHANGELOG_FRAGMENT" \
+    > "$GH_PAGES_DIR/release-notes/$VERSION.html"
+
 APPCAST="$GH_PAGES_DIR/appcast.xml"
 python3 "$REPO_ROOT/scripts/update_appcast.py" \
     --appcast "$APPCAST" \
@@ -235,10 +261,11 @@ python3 "$REPO_ROOT/scripts/update_appcast.py" \
     --build "$NEW_BUILD" \
     --url "$DOWNLOAD_URL" \
     --length "$LENGTH" \
-    --signature "$EDDSA_SIGNATURE"
+    --signature "$EDDSA_SIGNATURE" \
+    --release-notes-url "$RELEASE_NOTES_URL"
 
 cd "$GH_PAGES_DIR"
-git add appcast.xml
+git add appcast.xml release-notes
 git commit -m "Mojito $VERSION"
 git push origin gh-pages
 
