@@ -71,6 +71,30 @@ struct DebugReportTests {
         #expect(regex.firstMatch(in: prefs, range: range) == nil, "prefs leaks an absolute date")
     }
 
+    @Test func prefsShowsEmoticonTotal() {
+        DebugRecorder.reset()
+        let out = DebugReport.markdown()
+        #expect(out.contains("totals.emoticonInserted:"))
+    }
+
+    @Test func focusChurnDoesNotEvictActionEvents() {
+        DebugRecorder.reset()
+        // Action events recorded *before* a long burst of app-switching.
+        // The old flat last-100 window dropped these; the split rings keep
+        // them since focus changes can no longer crowd the action history.
+        DebugRecorder.record(.emoticon, "convert", ["consumesTerminator": "true"])
+        DebugRecorder.record(.insert, "replace", ["del": "3", "len": "1"])
+        for i in 0..<100 {
+            DebugRecorder.record(.focus, "app", ["bundleID": "com.example.app\(i % 3)"])
+        }
+        let out = DebugReport.markdown()
+        #expect(out.contains("emoticon.convert"), "action events evicted by focus churn")
+        #expect(out.contains("insert.replace"))
+        // Focus lines are capped so they can't swamp the log.
+        let focusLines = out.components(separatedBy: "focus.app").count - 1
+        #expect(focusLines <= 15, "focus lines not capped: \(focusLines)")
+    }
+
     @Test func activityLogClampsLongMetadataValues() {
         DebugRecorder.reset()
         let huge = String(repeating: "X", count: 1024)
