@@ -125,7 +125,7 @@ struct TriggerStateMachineTests {
     }
 
     @Test func subThresholdBackspaceStaysCapturingThenReopens() {
-        // W-290 invariant: a sub-threshold backspace emits .closePicker but
+        // Invariant: a sub-threshold backspace emits .closePicker but
         // the SM stays in .capturing. The Engine relies on this to keep the
         // capture's exclusion flag / focus snapshot alive — if the SM went
         // idle here, the metadata would (correctly) be torn down. Typing back
