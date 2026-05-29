@@ -29,6 +29,7 @@
 		2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F7DB616A5940BE3DE17B77 /* EggStrings.swift */; };
 		304C8571D431917AC25596C3 /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3A3B5079FC9275F5947104 /* PickerView.swift */; };
 		30C268985E8FC43E95617345 /* OnboardingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1F4596F8DFA66A87D50D02 /* OnboardingWindowController.swift */; };
+		30D00DD970495E218C74C279 /* AppRelauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B08003428CEFA7AECC2E66 /* AppRelauncher.swift */; };
 		31277ED14E13ADDE2816BB69 /* PickerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B9E4C2183154C36F1883004 /* PickerViewModel.swift */; };
 		32C650C3EEA85B4276EDB33B /* s10.bin in Resources */ = {isa = PBXBuildFile; fileRef = 73FCCFD6A9499FB84B690194 /* s10.bin */; };
 		340DAC1A3E1A94B6CB4C21D1 /* TextInserter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F34180D15CF8B53F58B2A2 /* TextInserter.swift */; };
@@ -229,6 +230,7 @@
 		7E63ABA27E65953D84162097 /* SolitaireWin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolitaireWin.swift; sourceTree = "<group>"; };
 		7EB589505841013FF5EF5500 /* ConfettiSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiSound.swift; sourceTree = "<group>"; };
 		7EE0400354B7B76C1E28F725 /* MojitoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MojitoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		80B08003428CEFA7AECC2E66 /* AppRelauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRelauncher.swift; sourceTree = "<group>"; };
 		83366C0C02EF9F599EC2B65A /* VideoBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoBlob.swift; sourceTree = "<group>"; };
 		8616DAC09008096A70541CEE /* v12.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v12.bin; sourceTree = "<group>"; };
 		877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultExclusions.swift; sourceTree = "<group>"; };
@@ -614,6 +616,7 @@
 			isa = PBXGroup;
 			children = (
 				A1DA7C9FD3286A7839BA642D /* AppInfo.swift */,
+				80B08003428CEFA7AECC2E66 /* AppRelauncher.swift */,
 				A0DE1B7DD5243E817418580C /* AudioBlob.swift */,
 				74DB9192DF20F83CAD8A820C /* ImageBlob.swift */,
 				2C66984ECCB4DB6B1A018452 /* PrefsKey.swift */,
@@ -810,6 +813,7 @@
 				3FDBEFA3636F345D917BE553 /* AppContext.swift in Sources */,
 				87F16A28F58C4854576DD450 /* AppDelegate.swift in Sources */,
 				9CCEA0B70EEB77F988521DDB /* AppInfo.swift in Sources */,
+				30D00DD970495E218C74C279 /* AppRelauncher.swift in Sources */,
 				E41E62A3741D084E3630FDEC /* AudioBlob.swift in Sources */,
 				6F9314FB48040BE582D87716 /* BlueScreen.swift in Sources */,
 				E5C85B09298DAB6F6594B181 /* BouncingDVD.swift in Sources */,
