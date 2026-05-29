@@ -5,6 +5,12 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.1.1
+
+- **See what changed before you update.** The in-app update prompt now shows the release notes for the new version.
+- Copy Debug Info reports (About → Copy Debug Info) now point at the likely cause themselves, making support faster.
+- **Fixed:** Mojito could keep expanding shortcodes in an excluded app after you backspaced part of one — it now stays out, as intended.
+
 ## v1.1.0
 
 **New**
