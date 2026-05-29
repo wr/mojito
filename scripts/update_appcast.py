@@ -34,6 +34,7 @@ def main() -> int:
     p.add_argument("--url", required=True)
     p.add_argument("--length", required=True)
     p.add_argument("--signature", required=True)
+    p.add_argument("--release-notes-url", default="", help="URL to hosted HTML release notes")
     args = p.parse_args()
 
     if os.path.exists(args.appcast):
@@ -63,6 +64,8 @@ def main() -> int:
     # update comparison against this field, NOT shortVersionString.
     ET.SubElement(item, "{%s}version" % NS["sparkle"]).text = args.build
     ET.SubElement(item, "{%s}minimumSystemVersion" % NS["sparkle"]).text = "14.0"
+    if args.release_notes_url:
+        ET.SubElement(item, "{%s}releaseNotesURL" % NS["sparkle"]).text = args.release_notes_url
     ET.SubElement(
         item,
         "enclosure",
