@@ -47,23 +47,22 @@ final class PermissionsCoordinator: ObservableObject {
         }
     }
 
-    /// AX uses the distributed notification, so this timer is really
-    /// just for catching Input Monitoring toggles. 5s is slow enough not
-    /// to churn IPC but fast enough for a quick green checkmark.
-    private static let slowPollInterval: TimeInterval = 5.0
+    /// Polls on for the app's lifetime — not just until granted. Revoking
+    /// Accessibility *while running* must be caught promptly: the keystroke
+    /// tap teardown is driven off `accessibility` flipping false, and the
+    /// distributed notification alone is private + unreliable for revocation.
+    /// 2s keeps the freeze window after a revoke short without churning IPC
+    /// (both checks are cheap, local).
+    private static let slowPollInterval: TimeInterval = 2.0
 
     func startMonitoring(interval: TimeInterval = slowPollInterval) {
         refresh()
-        // Stop polling once granted; revocation re-enters via
-        // `handleInputMonitoringLost()`.
-        if allGranted {
-            stopMonitoring()
-            return
-        }
         timer?.invalidate()
         let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.refresh() }
         }
+        // Let the OS coalesce these wakeups — detection latency isn't tight.
+        t.tolerance = interval / 4
         RunLoop.main.add(t, forMode: .common)
         timer = t
     }
@@ -83,9 +82,6 @@ final class PermissionsCoordinator: ObservableObject {
         if im != inputMonitoring {
             inputMonitoring = im
             DebugRecorder.record(.permissions, im ? "inputGranted" : "inputRevoked")
-        }
-        if accessibility && inputMonitoring {
-            stopMonitoring()
         }
     }
 
