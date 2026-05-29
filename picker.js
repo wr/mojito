@@ -4090,7 +4090,9 @@
      drag-and-drop isn't a native touch gesture anyway). On drop, we stop the
      autoplay loop, play a short synthesized "death chime" via Web Audio, and
      show the Sad Mac overlay (#sadmac). Click anywhere on the overlay to
-     reload — the page literally reboots itself. */
+     "reboot": we fade it out and restart the demo in place rather than
+     reloading the page, so the separately-animated discovery banner
+     (#achievement) survives to run out its own timer. */
   const folder = document.getElementById('desktop-folder');
   const trash = document.getElementById('desktop-trash');
   const sadmac = document.getElementById('sadmac');
@@ -4168,8 +4170,20 @@
       sadmac.setAttribute('aria-hidden', 'false');
       // next frame so the transition runs
       requestAnimationFrame(() => sadmac.classList.add('is-on'));
+      // "Reboot" in place instead of window.location.reload(): the banner is
+      // a separate, independently-animated element and a full reload would
+      // tear it down mid-flight. Fade the overlay out and restart the demo so
+      // the banner survives on its own auto-dismiss timer.
       sadmac.addEventListener('click', () => {
-        window.location.reload();
+        sadmac.classList.remove('is-on');        // 0.12s opacity fade-out
+        sadmac.setAttribute('aria-hidden', 'true');
+        if (reduceMotion) {
+          setActiveApp(0);
+          input.value = "Don't forget the :tada";
+          handleInput();
+        } else {
+          autoplayLoop();
+        }
       }, { once: true });
     }
     // Discovery half: once the chime has cleared, the banner scale-pops in
