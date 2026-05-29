@@ -1,0 +1,26 @@
+name: localizations
+
+# Fail a PR (or push to main) that leaves a user-facing string untranslated.
+# Pure-Python catalog check — no Xcode/build needed, runs in seconds.
+on:
+  pull_request:
+    paths:
+      - "Resources/Localizable.xcstrings"
+      - "scripts/check_localizations.py"
+      - "scripts/translate-localizable.py"
+      - ".github/workflows/localizations.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Resources/Localizable.xcstrings"
+      - "scripts/check_localizations.py"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/check_localizations.py
