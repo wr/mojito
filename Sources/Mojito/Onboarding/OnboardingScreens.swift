@@ -413,8 +413,21 @@ struct PermissionsStep: View {
             }
             .frame(maxWidth: 480)
 
-            Button("Privacy details…") { showPrivacyDetails = true }
-                .buttonStyle(.link)
+            VStack(spacing: 6) {
+                Button("Privacy details…") { showPrivacyDetails = true }
+                    .buttonStyle(.link)
+
+                // A fresh grant sometimes only registers on a clean launch.
+                if !(accessibilityGranted && inputMonitoringGranted) {
+                    HStack(spacing: 4) {
+                        Text("Already allowed but still not detected?")
+                            .foregroundStyle(.secondary)
+                        Button("Quit & Reopen") { AppRelauncher.relaunch() }
+                            .buttonStyle(.link)
+                    }
+                    .font(.system(size: 13))
+                }
+            }
 
             Spacer(minLength: 0)
         }

@@ -13,10 +13,27 @@ struct OnboardingRoot: View {
     }
 
     @EnvironmentObject private var permissions: PermissionsCoordinator
-    @State private var step: Step = .welcome
+    @State private var step: Step
     /// `.trailing` = forward, `.leading` = back.
     @State private var transitionEdge: Edge = .trailing
     @FocusState private var focused: Bool
+
+    init() {
+        _step = State(initialValue: Self.resumeStep())
+    }
+
+    /// Where to open onboarding. A fresh Accessibility grant sometimes only
+    /// registers after a quit+reopen, so we persist the current step and
+    /// resume there rather than bouncing the user back to the welcome screen.
+    /// The step is cleared on completion; the celebratory final step is never
+    /// resumed into.
+    private static func resumeStep() -> Step {
+        if let raw = UserDefaults.standard.object(forKey: PrefsKey.onboardingStep) as? Int,
+           let saved = Step(rawValue: raw), saved != .done {
+            return saved
+        }
+        return .welcome
+    }
 
     var body: some View {
         ZStack {
@@ -50,8 +67,9 @@ struct OnboardingRoot: View {
             permissions.startMonitoring(interval: 0.5)
             focused = true
         }
-        .onChange(of: permissions.accessibility) { _, _ in advanceIfPermissionsSatisfied() }
-        .onChange(of: permissions.inputMonitoring) { _, _ in advanceIfPermissionsSatisfied() }
+        .onChange(of: step) { _, new in
+            UserDefaults.standard.set(new.rawValue, forKey: PrefsKey.onboardingStep)
+        }
         .onKeyPress(.return) {
             if primaryEnabled { primaryAction() }
             return .handled
@@ -109,9 +127,14 @@ struct OnboardingRoot: View {
     }
 
     private func finishAndOpenSettings() {
-        UserDefaults.standard.set(true, forKey: PrefsKey.onboardingComplete)
-        NotificationCenter.default.post(name: .mojitoOnboardingFinished, object: nil)
+        completeOnboarding()
         NotificationCenter.default.post(name: .mojitoShouldOpenSettings, object: nil)
+    }
+
+    private func completeOnboarding() {
+        UserDefaults.standard.set(true, forKey: PrefsKey.onboardingComplete)
+        UserDefaults.standard.removeObject(forKey: PrefsKey.onboardingStep)
+        NotificationCenter.default.post(name: .mojitoOnboardingFinished, object: nil)
     }
 
     private var primaryLabel: String {
@@ -131,11 +154,9 @@ struct OnboardingRoot: View {
 
     private func primaryAction() {
         if step.isLast {
-            UserDefaults.standard.set(true, forKey: PrefsKey.onboardingComplete)
-            NotificationCenter.default.post(name: .mojitoOnboardingFinished, object: nil)
+            completeOnboarding()
         } else {
             goForward()
-            advanceIfPermissionsSatisfied()
         }
     }
 
@@ -149,15 +170,6 @@ struct OnboardingRoot: View {
         guard let prev = Step(rawValue: step.rawValue - 1) else { return }
         transitionEdge = .leading
         withAnimation(.easeInOut(duration: 0.32)) { step = prev }
-    }
-
-    /// Auto-skip past the permissions step when both are already granted
-    /// (manual entry, or live grant during the step).
-    private func advanceIfPermissionsSatisfied() {
-        guard step == .permissions,
-              permissions.accessibility,
-              permissions.inputMonitoring else { return }
-        goForward()
     }
 
     private func oppositeEdge(of edge: Edge) -> Edge {

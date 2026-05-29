@@ -1,4 +1,5 @@
 import AppKit
+import ApplicationServices
 import Combine
 import KeyboardShortcuts
 import os.log
@@ -33,6 +34,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         NSApp.setActivationPolicy(.accessory)
         installMainMenu()
         applyAppIcon()
+
+        // Bound every AX query globally. Without this, a revoked Accessibility
+        // grant (or a hung target app) makes synchronous AX calls on the
+        // keystroke path block forever — and since the event-tap callback runs
+        // on the main thread, that freezes the keyboard system-wide. Set on the
+        // system-wide element, it's the default timeout for all AX messages.
+        AXUIElementSetMessagingTimeout(AXUIElementCreateSystemWide(), 0.5)
 
         permissions.startMonitoring()
         engine.attach(permissions: permissions)
@@ -86,6 +94,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             .sink { [weak self] _ in
                 self?.onboardingController.close()
                 self?.engine.start()
+                // Drop the onboarding fast-poll back to the baseline cadence.
+                self?.permissions.startMonitoring()
             }
             .store(in: &observers)
 
