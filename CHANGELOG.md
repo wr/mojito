@@ -7,9 +7,8 @@ updater.
 
 ## v1.1.1
 
-- **See what changed before you update.** The in-app update prompt now shows the release notes for the new version.
-- Copy Debug Info reports (About → Copy Debug Info) now point at the likely cause themselves, making support faster.
-- **Fixed:** Mojito could keep expanding shortcodes in an excluded app after you backspaced part of one — it now stays out, as intended.
+- Fixed an issue where Mojito could accidentally trigger in an excluded app.
+- Improved debug logs.
 
 ## v1.1.0
 
