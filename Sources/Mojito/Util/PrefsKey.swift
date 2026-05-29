@@ -56,4 +56,8 @@ enum PrefsKey {
     static let totalEmojiInserted    = "mojito.totals.emojiInserted"
     static let totalSymbolInserted   = "mojito.totals.symbolInserted"
     static let totalGifInserted      = "mojito.totals.gifInserted"
+    /// Lifetime emoticon conversions (`:)` → 🙂, ambient `<3` → ❤️). Pure
+    /// diagnostic tally — no milestone achievements ride on it — so the
+    /// debug report can show whether conversions are landing at all.
+    static let totalEmoticonInserted = "mojito.totals.emoticonInserted"
 }

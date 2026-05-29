@@ -137,6 +137,7 @@ enum DebugReport {
         s += "- totals.emojiInserted: \(d.integer(forKey: PrefsKey.totalEmojiInserted))\n"
         s += "- totals.symbolInserted: \(d.integer(forKey: PrefsKey.totalSymbolInserted))\n"
         s += "- totals.gifInserted: \(d.integer(forKey: PrefsKey.totalGifInserted))\n"
+        s += "- totals.emoticonInserted: \(d.integer(forKey: PrefsKey.totalEmoticonInserted))\n"
         return s
     }
 
@@ -234,11 +235,16 @@ enum DebugReport {
     }
 
     private static func activitySection(now: Date) -> String {
-        let events = DebugRecorder.snapshot().suffix(100)
+        // Action events get the lion's share; focus changes are capped so a
+        // session of heavy app-switching can't crowd them out. Merge the two
+        // streams back into chronological order for reading.
+        let actions = DebugRecorder.snapshot().suffix(85)
+        let focus = DebugRecorder.focusSnapshot().suffix(15)
+        let events = (actions + focus).sorted { $0.timestamp < $1.timestamp }
         guard let oldest = events.first else {
             return "## Activity log\n- (empty)\n"
         }
-        var s = "## Activity log (last \(events.count))\n"
+        var s = "## Activity log (\(actions.count) action, \(focus.count) focus)\n"
         for event in events {
             let dt = event.timestamp.timeIntervalSince(oldest.timestamp)
             let meta = event.metadata

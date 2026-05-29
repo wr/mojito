@@ -231,6 +231,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         UserDefaults.standard.set(0, forKey: PrefsKey.totalEmojiInserted)
         UserDefaults.standard.set(0, forKey: PrefsKey.totalSymbolInserted)
         UserDefaults.standard.set(0, forKey: PrefsKey.totalGifInserted)
+        UserDefaults.standard.set(0, forKey: PrefsKey.totalEmoticonInserted)
     }
 
     private func reconcile() {
@@ -894,6 +895,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         EasterEggTracker.record(.k42)
     }
 
+    /// Pure diagnostic tally — no milestone eggs ride on it, so no seeding.
+    /// Lets the debug report show whether emoticon conversions are landing.
+    private func bumpEmoticonCounter() {
+        let defaults = UserDefaults.standard
+        defaults.set(defaults.integer(forKey: PrefsKey.totalEmoticonInserted) + 1,
+                     forKey: PrefsKey.totalEmoticonInserted)
+    }
+
     private func seedEmojiTotal() -> Int {
         usage.reduce(0) { $1.key.hasPrefix("SYM_") ? $0 : $0 + $1.value }
     }
@@ -942,6 +951,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             ? match.emoji
             : match.emoji + String(terminator)
         TextInserter.replace(charactersToDelete: charsToDelete, with: replacement)
+        bumpEmoticonCounter()
 
         let original = ":" + query + String(terminator)
         pendingEmoticonUndo = EmoticonUndo(
@@ -962,6 +972,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
         DebugRecorder.record(.emoticon, "ambientImmediate")
         TextInserter.replace(charactersToDelete: word.count, with: emoji)
+        bumpEmoticonCounter()
 
         pendingEmoticonUndo = EmoticonUndo(
             emojiInserted: emoji,
@@ -985,6 +996,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         let charsToDelete = word.count + 1
         let replacement = emoji + String(terminator)
         TextInserter.replace(charactersToDelete: charsToDelete, with: replacement)
+        bumpEmoticonCounter()
 
         let original = word + String(terminator)
         pendingEmoticonUndo = EmoticonUndo(
