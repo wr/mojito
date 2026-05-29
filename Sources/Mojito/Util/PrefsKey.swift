@@ -2,6 +2,10 @@ import Foundation
 
 enum PrefsKey {
     static let onboardingComplete    = "mojito.onboarding.complete"
+    /// Last onboarding step shown, so a quit+reopen (sometimes needed for a
+    /// fresh Accessibility grant to register) resumes mid-flow instead of
+    /// restarting at the welcome screen. Raw value of `OnboardingRoot.Step`.
+    static let onboardingStep        = "mojito.onboarding.step"
     static let pausedUntil           = "mojito.paused.until"
     static let launchAtLogin         = "mojito.launchAtLogin"
     /// When false, the menu-bar status item is suppressed; users reach
