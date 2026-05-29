@@ -124,6 +124,24 @@ struct TriggerStateMachineTests {
         #expect(sm.state == .capturing(query: "f"))
     }
 
+    @Test func subThresholdBackspaceStaysCapturingThenReopens() {
+        // W-290 invariant: a sub-threshold backspace emits .closePicker but
+        // the SM stays in .capturing. The Engine relies on this to keep the
+        // capture's exclusion flag / focus snapshot alive — if the SM went
+        // idle here, the metadata would (correctly) be torn down. Typing back
+        // up to the threshold must re-open the picker on the SAME capture.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        _ = sm.handle(.nameChar("f"))
+        _ = sm.handle(.nameChar("o"))  // .openPicker("fo")
+        let close = sm.handle(.backspace)
+        #expect(close.action == .closePicker)
+        #expect(sm.state == .capturing(query: "f"))
+        let reopen = sm.handle(.nameChar("o"))
+        #expect(reopen.action == .openPicker(query: "fo", scope: .normal))
+        #expect(sm.state == .capturing(query: "fo"))
+    }
+
     @Test func backspaceFromEmptyQueryEndsCapture() {
         var sm = TriggerStateMachine()
         _ = sm.handle(.colon)

@@ -351,6 +351,18 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         return captureIsExcluded ? false : consumesKey
     }
 
+    /// Exclusion verdict for the active capture. Prefers the flag cached at
+    /// `:` time; falls back to re-deriving from `captureContext` so an emoji
+    /// action can never slip through if the flag was somehow cleared while the
+    /// capture is still live. No AX call — `captureContext` was snapshotted
+    /// when capture began, and a real app/focus change cancels the capture
+    /// outright, so the snapshot stays authoritative for the capture's life.
+    private var captureExcluded: Bool {
+        if captureIsExcluded { return true }
+        guard let ctx = captureContext else { return false }
+        return exclusions.isExcluded(bundleID: ctx.bundleID, url: ctx.url)
+    }
+
     private func apply(action: TriggerAction) {
         switch action {
         case .none:
@@ -359,13 +371,19 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .closePicker:
             viewModel.reset()
             pickerWindow.hide()
+            // Backspacing below the picker threshold (or demoting `::` symbols
+            // scope) emits .closePicker while the SM stays in .capturing. The
+            // capture metadata — exclusion flag, focus snapshot — must survive
+            // so typing back up to the threshold still respects the exclusion
+            // and focus checks. Only tear it down once the SM has gone idle.
+            if case .capturing = stateMachine.state { break }
             captureContext = nil
             captureFocusSnapshot = nil
             captureFocusPID = nil
             captureIsExcluded = false
 
         case .openPicker(let q, let scope):
-            if captureIsExcluded { break }
+            if captureExcluded { break }
             updateResults(query: q, scope: scope)
             // Defer one tick: the keystroke moves the caret in the focused
             // app after the tap callback returns. AX returns stale coords if
@@ -373,7 +391,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             scheduleRepositionAndShow()
 
         case .refreshPicker(let q, let scope):
-            if captureIsExcluded { break }
+            if captureExcluded { break }
             updateResults(query: q, scope: scope)
             scheduleRepositionAndShow()
 
@@ -381,7 +399,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if delta > 0 { viewModel.selectNext() } else { viewModel.selectPrevious() }
 
         case .insertEmoji(let q, let mode, let scope):
-            if captureIsExcluded { break }
+            if captureExcluded { break }
             // `.exactMatch` passed the closing `:` through to the focused
             // app — wait one tick for it to land before deleting `:query:`.
             // `.fromPicker` consumed the key, so we can act immediately.
