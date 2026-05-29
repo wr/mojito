@@ -8,12 +8,14 @@ enum AppRelauncher {
     /// launch.
     static func relaunch() {
         let pid = ProcessInfo.processInfo.processIdentifier
-        let path = Bundle.main.bundlePath
+        // Single-quote the path for the shell, escaping any embedded quote, so
+        // a `"`/`$`/backtick in the bundle path can't break out or expand.
+        let quotedPath = "'" + Bundle.main.bundlePath.replacingOccurrences(of: "'", with: "'\\''") + "'"
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/sh")
         task.arguments = [
             "-c",
-            "while /bin/kill -0 \(pid) 2>/dev/null; do sleep 0.1; done; /usr/bin/open \"\(path)\"",
+            "while /bin/kill -0 \(pid) 2>/dev/null; do sleep 0.1; done; /usr/bin/open \(quotedPath)",
         ]
         try? task.run()
         NSApp.terminate(nil)
