@@ -770,8 +770,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             EasterEggTracker.record(.k17)
         case FuzzyMatcher.k19Hex:
             TextInserter.deleteBackward(deleteCount)
-            BlueScreen.start()
+            // Start the banner's self-dismiss timer before the any-key effect
+            // registers, so dismissing that effect doesn't tear the banner down.
             EasterEggTracker.record(.k19)
+            BlueScreen.start()
         case FuzzyMatcher.k99Hex:
             TextInserter.deleteBackward(deleteCount)
             KonamiPayoff.start()
