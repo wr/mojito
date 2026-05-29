@@ -99,6 +99,7 @@
 		ADC91CB08A1B9AE8F767488D /* OnboardingScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489170955CD25EB1DE2E681C /* OnboardingScreens.swift */; };
 		B1A2CBCCBC3A23CDE4F032F4 /* v08.bin in Resources */ = {isa = PBXBuildFile; fileRef = B000574456AD1D158ED5C88B /* v08.bin */; };
 		B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CD38087938C1E258718C69 /* FzyScorerTests.swift */; };
+		B33ABD1825CC5908D3DE7030 /* EasterEggOrderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3042E363CC429F15721773F /* EasterEggOrderingTests.swift */; };
 		B33E18A7CE2409FEE3367728 /* LaunchAtLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC763FD3C4773231C72CFDD /* LaunchAtLogin.swift */; };
 		B43E634B3FAB6B7FBF2CFC6C /* AboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100317FDEDAED8905256B964 /* AboutSettings.swift */; };
 		B520161A0B158BFFC5C33440 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6BDC5E636ADC61D8671950 /* main.swift */; };
@@ -260,6 +261,7 @@
 		B05F08FB28C8998B7F7075BB /* TicTacToeGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicTacToeGame.swift; sourceTree = "<group>"; };
 		B0953EA30C5D11ACF280D7A2 /* Trogdor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trogdor.swift; sourceTree = "<group>"; };
 		B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerStateMachineTests.swift; sourceTree = "<group>"; };
+		B3042E363CC429F15721773F /* EasterEggOrderingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasterEggOrderingTests.swift; sourceTree = "<group>"; };
 		B3154DBEA72DA316E341C440 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		B375DE27AC0AE1D8DE965403 /* SkinTone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinTone.swift; sourceTree = "<group>"; };
 		BC79E6EAFAF655E0E63E78DC /* Shortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shortcuts.swift; sourceTree = "<group>"; };
@@ -328,6 +330,7 @@
 			children = (
 				F36FC6BE9A109EAEE6A18CE1 /* AmbientEmoticonTableTests.swift */,
 				6C69999E4AC7F8B8C054B395 /* DebugReportTests.swift */,
+				B3042E363CC429F15721773F /* EasterEggOrderingTests.swift */,
 				A1B842CBBD6C7466F9BA2786 /* EmojiDatabaseTests.swift */,
 				DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */,
 				625433055302CF9B9053F885 /* ExclusionStoreTests.swift */,
@@ -916,6 +919,7 @@
 			files = (
 				EFCA5419E2CE5D16F2DE7DB3 /* AmbientEmoticonTableTests.swift in Sources */,
 				B878C3CC891907E89DE33158 /* DebugReportTests.swift in Sources */,
+				B33ABD1825CC5908D3DE7030 /* EasterEggOrderingTests.swift in Sources */,
 				DD501615C4A6623E5BA03369 /* EmojiDatabaseTests.swift in Sources */,
 				9E9309E8AF1F9D8B44213729 /* EmoticonTableTests.swift in Sources */,
 				06082A2DD9E20456D2D20F2C /* ExclusionStoreTests.swift in Sources */,
