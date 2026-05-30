@@ -25,7 +25,6 @@
 		28A1C045D2F7BBEC55E4A00A /* GifPickerWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FA9BBA311F77BEBE0C6A4 /* GifPickerWindow.swift */; };
 		29B4C683D96EE275A114B5FD /* SingleInstanceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137C5B7AB01C74DA68FE7B74 /* SingleInstanceCoordinator.swift */; };
 		29FCA4D30EFA3D817124178B /* FuzzyMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8851906565F70B7815640F /* FuzzyMatcher.swift */; };
-		2A7B6E8E3BC9171E1EA88437 /* EmojiBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B43D8984A42AB322ECD4AE /* EmojiBrowserView.swift */; };
 		2B36C9A8EE648C8DC1836F33 /* EmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2009C3B36DF9228B873244 /* EmoticonTable.swift */; };
 		2B3FD6118D1C2D7AB0D24588 /* SymbolsDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6666150B793721D5095E72A8 /* SymbolsDatabase.swift */; };
 		2BF7E787E46AB243597A38CB /* VideoBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83366C0C02EF9F599EC2B65A /* VideoBlob.swift */; };
@@ -70,6 +69,7 @@
 		75008F5E9E8750E55512283C /* FzyScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */; };
 		751B7D80FF9EA3BA8B30B8FC /* EasterEggsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA756B434C9FED6B691D07B8 /* EasterEggsSettings.swift */; };
 		7525CC4DDD1EDE4BE0FADC03 /* s15.bin in Resources */ = {isa = PBXBuildFile; fileRef = ED8647D638A24D3741D78A59 /* s15.bin */; };
+		75402AE472D5B43CE11590A9 /* InlineBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7161D8677669C3B6B7947ECF /* InlineBrowserView.swift */; };
 		755312D29AEDF631AF9D98C5 /* ExclusionsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6171603CD5F5CC6ED9A636 /* ExclusionsSettings.swift */; };
 		75BBF0FDC76C3BB733E4C6C8 /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0A255DD094B85EF7DC67D2 /* Engine.swift */; };
 		7655329BF3B69EE157875660 /* s03.bin in Resources */ = {isa = PBXBuildFile; fileRef = 392847FD44ED870B7154ED09 /* s03.bin */; };
@@ -135,7 +135,6 @@
 		DF4F5EB36D764A99CAB8CADB /* WilhelmScream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 088608D6A2243D8E95953095 /* WilhelmScream.swift */; };
 		E29AE211BD536EA5FD09BF0E /* v11.bin in Resources */ = {isa = PBXBuildFile; fileRef = D3C7F5A4189B7652C993C384 /* v11.bin */; };
 		E3B84D347FB801B6A62E980D /* v06.bin in Resources */ = {isa = PBXBuildFile; fileRef = FACE9E8BAF08240551D5237A /* v06.bin */; };
-		E3D493B7202C424A6EEDFF22 /* EmojiBrowserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 940FACA44E1A59C11BD5773D /* EmojiBrowserController.swift */; };
 		E41E62A3741D084E3630FDEC /* AudioBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DE1B7DD5243E817418580C /* AudioBlob.swift */; };
 		E4A22D4B3F3A0A818AEAA21E /* MoofSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186ED6EF6F678E8C3F082FD8 /* MoofSound.swift */; };
 		E539CB425388907B1CA7D3CE /* GifSearcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3CAFD7B83168FF01538FF4 /* GifSearcher.swift */; };
@@ -204,7 +203,6 @@
 		392847FD44ED870B7154ED09 /* s03.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s03.bin; sourceTree = "<group>"; };
 		42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcherTests.swift; sourceTree = "<group>"; };
 		4512D76E20BD99269775200B /* OnboardingRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingRoot.swift; sourceTree = "<group>"; };
-		45B43D8984A42AB322ECD4AE /* EmojiBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBrowserView.swift; sourceTree = "<group>"; };
 		463478D4F770642DDCBA5C8F /* Snowfall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snowfall.swift; sourceTree = "<group>"; };
 		4678DF22D8E1B41FC8359CF1 /* s09.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s09.bin; sourceTree = "<group>"; };
 		489170955CD25EB1DE2E681C /* OnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreens.swift; sourceTree = "<group>"; };
@@ -233,6 +231,7 @@
 		6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientEmoticonTable.swift; sourceTree = "<group>"; };
 		702AC2870CD686AB17CC518E /* UpdaterCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterCoordinator.swift; sourceTree = "<group>"; };
 		70F2866D3BE0CC5D08CF9AD1 /* Emoji */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Emoji; path = Resources/Emoji; sourceTree = SOURCE_ROOT; };
+		7161D8677669C3B6B7947ECF /* InlineBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineBrowserView.swift; sourceTree = "<group>"; };
 		7292DF1A52CC009F5780BB22 /* EmbeddedGiphyKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedGiphyKey.swift; sourceTree = "<group>"; };
 		73FCCFD6A9499FB84B690194 /* s10.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s10.bin; sourceTree = "<group>"; };
 		74DB9192DF20F83CAD8A820C /* ImageBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBlob.swift; sourceTree = "<group>"; };
@@ -247,7 +246,6 @@
 		877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultExclusions.swift; sourceTree = "<group>"; };
 		8792D3A9CA964FE06B29F30F /* PrideWave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrideWave.swift; sourceTree = "<group>"; };
 		90F7DB616A5940BE3DE17B77 /* EggStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggStrings.swift; sourceTree = "<group>"; };
-		940FACA44E1A59C11BD5773D /* EmojiBrowserController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBrowserController.swift; sourceTree = "<group>"; };
 		947CA35F448BC012E3F73860 /* CeleryMan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CeleryMan.swift; sourceTree = "<group>"; };
 		94A31DD44ACC90D6CAC3A486 /* AchievementBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementBanner.swift; sourceTree = "<group>"; };
 		9528726096C90D6A0523B86F /* Emoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
@@ -447,9 +445,8 @@
 			isa = PBXGroup;
 			children = (
 				96C001583E27CC71D9959055 /* EmojiBrowserCatalog.swift */,
-				940FACA44E1A59C11BD5773D /* EmojiBrowserController.swift */,
-				45B43D8984A42AB322ECD4AE /* EmojiBrowserView.swift */,
 				C3B79AAA76C55A5B4FB087A6 /* EmojiBrowserViewModel.swift */,
+				7161D8677669C3B6B7947ECF /* InlineBrowserView.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -873,8 +870,6 @@
 				87514A922406A1535D7BCB42 /* EmbeddedGiphyKey.swift in Sources */,
 				AC7748989CE2B7D96CBB21FE /* Emoji.swift in Sources */,
 				A637DCA2905238217427E806 /* EmojiBrowserCatalog.swift in Sources */,
-				E3D493B7202C424A6EEDFF22 /* EmojiBrowserController.swift in Sources */,
-				2A7B6E8E3BC9171E1EA88437 /* EmojiBrowserView.swift in Sources */,
 				8D584DDFB9305768A3547EAA /* EmojiBrowserViewModel.swift in Sources */,
 				786D4AD196F221CD0F7887DA /* EmojiDatabase.swift in Sources */,
 				67560B8C0EC9028ED9659937 /* EmojiRain.swift in Sources */,
@@ -899,6 +894,7 @@
 				E539CB425388907B1CA7D3CE /* GifSearcher.swift in Sources */,
 				76FDC12E75201F5DC497CBAF /* HatchClock.swift in Sources */,
 				CA9FE651B042EFCC920407D5 /* ImageBlob.swift in Sources */,
+				75402AE472D5B43CE11590A9 /* InlineBrowserView.swift in Sources */,
 				87ACEE7E1331065BA81E0B52 /* KeyMonitor.swift in Sources */,
 				FB6F709623B1472B32490F1D /* KonamiPayoff.swift in Sources */,
 				B33E18A7CE2409FEE3367728 /* LaunchAtLogin.swift in Sources */,

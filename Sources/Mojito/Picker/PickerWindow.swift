@@ -99,6 +99,24 @@ final class PickerWindow {
         show(near: caret)
     }
 
+    /// Grow (or open) the panel into the full browser grid. Animates the
+    /// frame when already on screen — the pill→grid expansion.
+    func showExpanded(near caret: CGRect?) {
+        panel.appearance = NSApp.effectiveAppearance
+        setCornerRadius(BrowserLayout.cornerRadius)
+        let size = CGSize(width: BrowserLayout.width, height: BrowserLayout.height)
+        let anchor = caret ?? mouseAnchor()
+        let frame = positionedFrame(anchor: anchor, size: size)
+        if panel.isVisible {
+            panel.setFrame(frame, display: true, animate: true)
+        } else {
+            panel.setFrame(frame, display: true)
+            panel.orderFrontRegardless()
+        }
+        viewModel.isVisible = true
+        installClickMonitors()
+    }
+
     func hide() {
         panel.orderOut(nil)
         viewModel.isVisible = false

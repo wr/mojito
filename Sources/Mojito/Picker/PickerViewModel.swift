@@ -10,10 +10,18 @@ final class PickerViewModel: ObservableObject {
     /// True for the bare-`:` favorites surface, which renders as a compact
     /// horizontal pill instead of the vertical shortcode list.
     @Published var compact: Bool = false
+    /// True once the pill has grown into the full-library grid (same panel).
+    @Published var expanded: Bool = false
+
+    /// Drives the grid while `expanded`. Set by the Engine on expand.
+    var browser: EmojiBrowserViewModel?
 
     /// Mouse-pick from the picker (compact bar cells). The Engine sets this;
     /// the index is the cell tapped.
     var onActivate: ((Int) -> Void)?
+    /// Mouse-pick / tab-click inside the expanded grid.
+    var onBrowserPick: ((Emoji) -> Void)?
+    var onBrowserCategory: ((EmojiCategory) -> Void)?
 
     var topResult: ScoredEmoji? {
         guard !results.isEmpty, selectedIndex < results.count else { return nil }
@@ -42,5 +50,7 @@ final class PickerViewModel: ObservableObject {
         selectedIndex = 0
         isVisible = false
         compact = false
+        expanded = false
+        browser = nil
     }
 }

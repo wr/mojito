@@ -7,6 +7,10 @@ enum TriggerState: Equatable {
     /// them to the picker's view model via `.refreshGifPicker`, so typing
     /// after `:::` lands in the GIF search box (not the focused app).
     case gifSearching(query: String)
+    /// Active while the full-library browser grid is up (the picker panel,
+    /// grown). Consumes keystrokes and routes them to the browser — search,
+    /// grid navigation, pick — so nothing leaks into the focused app.
+    case browsing(query: String)
 }
 
 /// `:foo` = full corpus, `::foo` = experimental Symbols set
@@ -99,6 +103,14 @@ enum TriggerAction: Equatable {
     case pickGif(deleteCount: Int)
     /// Arrow-key navigation across the GIF grid.
     case moveGifSelection(direction: GifMoveDirection)
+    /// Browser search query changed — Engine writes it to the browser model.
+    case refreshBrowser(query: String)
+    /// Arrow-key navigation across the browser grid.
+    case moveBrowser(direction: GifMoveDirection)
+    /// Enter / click in the browser — insert the selected emoji.
+    case pickBrowser
+    /// Close the browser grid (esc, backspace past empty, click-away).
+    case closeBrowser
 }
 
 enum GifMoveDirection: Equatable { case left, right, up, down }
@@ -211,6 +223,13 @@ struct TriggerStateMachine {
             return handleGifSearching(input)
         }
 
+        // While the browser grid is up, it owns the keyboard — everything is
+        // consumed and routed to the browser model so nothing leaks into the
+        // focused app underneath.
+        if case .browsing = state {
+            return handleBrowsing(input)
+        }
+
         // `:::` within `gifTripleColonWindow` opens the GIF picker no
         // matter what the capture state is. Runs before everything else
         // so it overrides the normal colon flow.
@@ -260,9 +279,13 @@ struct TriggerStateMachine {
 
         switch (state, input) {
 
-        // `.gifSearching` is handled by the early-return guard above; this
-        // branch is unreachable but required for exhaustiveness.
+        // `.gifSearching` / `.browsing` are handled by the early-return
+        // guards above; these branches are unreachable but required for
+        // exhaustiveness.
         case (.gifSearching, _):
+            return .passthrough
+
+        case (.browsing, _):
             return .passthrough
 
         // MARK: Cmd+Z — must come before the `(.idle, _)` catch-all below.
@@ -527,6 +550,22 @@ struct TriggerStateMachine {
         state = .gifSearching(query: query)
     }
 
+    /// Engine calls this when the pill's Browse row (or the menu) opens the
+    /// full grid: hand the keyboard to the browser.
+    mutating func enterBrowsing(query: String) {
+        state = .browsing(query: query)
+        emptyPickerActive = false
+        konamiProgress = 0
+    }
+
+    /// Keep the state machine's browser query in sync when a mouse action
+    /// (category tab) resets the search.
+    mutating func setBrowsingQuery(_ query: String) {
+        if case .browsing = state {
+            state = .browsing(query: query)
+        }
+    }
+
     mutating func reset() {
         state = .idle
         currentScope = .normal
@@ -603,6 +642,57 @@ struct TriggerStateMachine {
         case .cmdZ:
             state = .idle
             return TriggerOutput(action: .closeGifPicker, consumesKey: false)
+        }
+    }
+
+    /// Routes keystrokes to the full-library browser grid. Everything is
+    /// consumed — the browser owns the keyboard while it's up, so typing,
+    /// arrows, and Enter never reach the focused app (only the final pick is
+    /// synthesized there).
+    private mutating func handleBrowsing(_ input: TriggerInput) -> TriggerOutput {
+        guard case .browsing(let q) = state else { return .passthrough }
+        switch input {
+        case .nameChar(let c):
+            let next = q + String(c)
+            state = .browsing(query: next)
+            return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
+        case .cancelChar(let c):
+            // Spaces + punctuation are valid in emoji labels ("smiling face").
+            let next = q + String(c)
+            state = .browsing(query: next)
+            return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
+        case .colon:
+            let next = q + ":"
+            state = .browsing(query: next)
+            return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
+        case .backspace:
+            if q.isEmpty {
+                state = .idle
+                return TriggerOutput(action: .closeBrowser, consumesKey: true)
+            }
+            let next = String(q.dropLast())
+            state = .browsing(query: next)
+            return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
+        case .escape:
+            state = .idle
+            return TriggerOutput(action: .closeBrowser, consumesKey: true)
+        case .returnKey, .tabKey:
+            state = .idle
+            return TriggerOutput(action: .pickBrowser, consumesKey: true)
+        case .arrowUp:
+            return TriggerOutput(action: .moveBrowser(direction: .up), consumesKey: true)
+        case .arrowDown:
+            return TriggerOutput(action: .moveBrowser(direction: .down), consumesKey: true)
+        case .arrowLeft:
+            return TriggerOutput(action: .moveBrowser(direction: .left), consumesKey: true)
+        case .arrowRight:
+            return TriggerOutput(action: .moveBrowser(direction: .right), consumesKey: true)
+        case .focusChange:
+            state = .idle
+            return TriggerOutput(action: .closeBrowser, consumesKey: false)
+        case .cmdZ:
+            state = .idle
+            return TriggerOutput(action: .closeBrowser, consumesKey: false)
         }
     }
 

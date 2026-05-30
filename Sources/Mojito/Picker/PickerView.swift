@@ -6,7 +6,13 @@ struct PickerView: View {
     var body: some View {
         // Chrome lives on the panel (NSGlassEffectView / NSVisualEffectView)
         // so we match NSMenu pixel-faithfully.
-        if viewModel.compact {
+        if viewModel.expanded, let browser = viewModel.browser {
+            InlineBrowserView(
+                browser: browser,
+                onPick: { viewModel.onBrowserPick?($0) },
+                onCategory: { viewModel.onBrowserCategory?($0) }
+            )
+        } else if viewModel.compact {
             compactBar
         } else {
             VStack(spacing: 0) {

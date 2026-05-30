@@ -23,7 +23,7 @@ enum PrefsKey {
     static let allowedURLPatterns    = "mojito.allowURLPatterns"     // [String]
     static let usageCounts           = "mojito.usageCounts"          // [String: Int]  (hexcode → count)
     /// Hand-picked favorites, in display order. Surfaced when the user
-    /// types a bare `:` (see `browseOnColon`) and managed in Settings ▸
+    /// types a bare `:` (see `favoritesTrigger`) and managed in Settings ▸
     /// Favorites. `[String]` of emoji hexcodes.
     static let favoriteHexcodes      = "mojito.favorites"            // [String]  (hexcodes)
     /// How the favorites/most-used pill is summoned (`FavoritesTrigger` raw):

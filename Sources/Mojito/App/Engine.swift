@@ -16,6 +16,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .idle:          return "idle"
         case .capturing:     return "capturing"
         case .gifSearching:  return "gifSearching"
+        case .browsing:      return "browsing"
         }
     }
 
@@ -62,6 +63,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// undo entry.
     private var inputSeq: Int = 0
     private static let emoticonUndoWindow: TimeInterval = 3.0
+    /// Chars of typed `:` to erase before a browser pick is synthesized
+    /// (1 when opened from the pill's chevron, 0 from the menu).
+    private var browserDeleteCount: Int = 0
 
     init(database: EmojiDatabase, exclusions: ExclusionStore) {
         self.database = database
@@ -89,7 +93,23 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             guard let self, self.viewModel.compact else { return }
             guard index < self.viewModel.results.count else { return }
             self.viewModel.selectedIndex = index
-            self.insert(query: "", mode: .fromPicker, scope: .normal)
+            if self.viewModel.results[index].emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                self.expandToBrowser(deleteCount: 1)  // the typed `:`
+            } else {
+                self.insert(query: "", mode: .fromPicker, scope: .normal)
+            }
+        }
+
+        // Mouse pick / category tab inside the expanded grid.
+        viewModel.onBrowserPick = { [weak self] emoji in
+            guard let self else { return }
+            self.viewModel.browser?.select(emoji)
+            self.pickFromBrowser()
+        }
+        viewModel.onBrowserCategory = { [weak self] category in
+            guard let self else { return }
+            self.stateMachine.setBrowsingQuery("")
+            self.viewModel.browser?.scroll(to: category)
         }
 
         gifPickerWindow.onClickAway = { [weak self] in
@@ -432,7 +452,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                     self?.insert(query: q, mode: .exactMatch, scope: scope)
                 }
             case .fromPicker:
-                insert(query: q, mode: .fromPicker, scope: scope)
+                if viewModel.topResult?.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                    // Browse row: grow the panel into the grid instead of
+                    // inserting. Delete count covers the typed `:` (+ `::`).
+                    let leading = (scope == .symbolsOnly) ? 2 : 1
+                    expandToBrowser(deleteCount: q.count + leading)
+                } else {
+                    insert(query: q, mode: .fromPicker, scope: scope)
+                }
             }
 
         case .checkEmoticon(let q, let term):
@@ -584,6 +611,18 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         case .moveGifSelection(let direction):
             gifPickerWindow.move(direction)
+
+        case .refreshBrowser(let q):
+            viewModel.browser?.setQuery(q)
+
+        case .moveBrowser(let direction):
+            viewModel.browser?.move(direction)
+
+        case .pickBrowser:
+            pickFromBrowser()
+
+        case .closeBrowser:
+            collapseBrowser()
         }
     }
 
@@ -689,6 +728,53 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         return rows
     }
 
+    // MARK: - Full-library browser (the picker panel, grown)
+
+    /// Menu-bar entry: open the grid with nothing typed to erase.
+    func showBrowser() {
+        expandToBrowser(deleteCount: 0)
+    }
+
+    /// Grow the picker panel into the full grid and hand the keyboard to the
+    /// browser. `deleteCount` is the typed `:` erased when the user picks.
+    private func expandToBrowser(deleteCount: Int) {
+        browserDeleteCount = deleteCount
+        captureIsExcluded = false
+        stateMachine.enterBrowsing(query: "")
+        viewModel.browser = EmojiBrowserViewModel(database: database, favorites: favorites)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.viewModel.compact = false
+            self.viewModel.expanded = true
+            let anchor = CaretLocator.caretRect()
+            PickerContextStore.capture(caretOutcome: CaretLocator.lastOutcome, resolvedCaret: anchor)
+            DebugRecorder.record(.picker, "browserOpen")
+            self.pickerWindow.showExpanded(near: anchor)
+        }
+    }
+
+    private func pickFromBrowser() {
+        let emoji = viewModel.browser?.selectedEmoji
+        let delete = browserDeleteCount
+        collapseBrowser()
+        guard let emoji else { return }
+        TextInserter.replace(charactersToDelete: delete, with: characterWithSkinTone(emoji))
+        recordUsage(emoji: emoji)
+        SeasonalGates.fire(for: emoji)
+        DebugRecorder.record(.insert, "browserPick", ["del": "\(delete)"])
+    }
+
+    private func collapseBrowser() {
+        stateMachine.reset()
+        viewModel.reset()
+        pickerWindow.hide()
+        captureContext = nil
+        captureFocusSnapshot = nil
+        captureFocusPID = nil
+        captureIsExcluded = false
+        browserDeleteCount = 0
+    }
+
     private func updateResults(query: String, scope: CaptureScope) {
         // Empty query → the compact favorites pill; anything typed → the
         // vertical shortcode list.
@@ -748,13 +834,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             guard let scored = viewModel.topResult else { return }
             DebugRecorder.record(.insert, "fromPicker", ["scope": "\(scope)"])
             let charsToDelete = query.count + leadingColons
-            if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
-                // "Browse all emojis…" — hand off to the grid window. It
-                // deletes the typed `:` only when the user actually picks
-                // there, so cancelling leaves the text untouched.
-                EmojiBrowserController.shared.show(deleteCount: charsToDelete, targetPID: captureContext?.processID)
-                return
-            }
+            // The Browse sentinel is intercepted in `apply` before `insert`.
             if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
                 return
             }
