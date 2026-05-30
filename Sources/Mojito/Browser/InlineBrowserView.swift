@@ -6,23 +6,27 @@ import SwiftUI
 /// picks are typed straight in.
 ///
 /// No section titles (Apple dropped them too) — groups are separated by space
-/// and identified by the active tab + its tooltip.
+/// and identified by the active tab + its tooltip. Native `.help` tooltips
+/// don't fire in a non-key panel, so glyph names use a custom overlay.
 struct InlineBrowserView: View {
     @ObservedObject var browser: EmojiBrowserViewModel
     let onPick: (Emoji) -> Void
     let onCategory: (EmojiCategory) -> Void
 
     @State private var activeCategory: String?
+    @State private var hoverHex: String?
+    @State private var tooltipHex: String?
+    @State private var hoverWork: DispatchWorkItem?
 
     private static let space = "browserGrid"
-    private static let tabBarHeight: CGFloat = 38
+    private static let tabBarHeight: CGFloat = 44
+    private static let tabIconHeight: CGFloat = 30
     private let columns = Array(
         repeating: GridItem(.flexible(minimum: 32), spacing: 3),
         count: EmojiBrowserViewModel.columns
     )
     private var barTint: Color { Color(nsColor: .windowBackgroundColor) }
 
-    /// Sections paired with each glyph's flat selection index.
     private var indexedSections: [(section: BrowserSection, items: [(index: Int, emoji: Emoji)])] {
         var running = 0
         return browser.sections.map { section in
@@ -42,6 +46,22 @@ struct InlineBrowserView: View {
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
         .background(barTint)
+        // Rendered at the root so it can sit above the top row without being
+        // clipped by the scroll view (the old bug put it in the next group).
+        .overlayPreferenceValue(TooltipAnchorKey.self) { data in
+            GeometryReader { proxy in
+                if let data {
+                    let rect = proxy[data.anchor]
+                    tooltipBubble(data.text)
+                        .fixedSize()
+                        .position(
+                            x: min(max(rect.midX, 44), proxy.size.width - 44),
+                            y: max(rect.minY - 15, 16)
+                        )
+                }
+            }
+            .allowsHitTesting(false)
+        }
     }
 
     private var hairline: some View {
@@ -66,17 +86,7 @@ struct InlineBrowserView: View {
     private var gridWithBar: some View {
         ZStack(alignment: .bottom) {
             grid
-            // Floating frosted bar — the grid scrolls under it, blurred, with
-            // a short gradient so glyphs dissolve into it.
-            VStack(spacing: 0) {
-                LinearGradient(
-                    colors: [barTint.opacity(0), barTint.opacity(0.85)],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .frame(height: 12)
-                .allowsHitTesting(false)
-                categoryBar
-            }
+            categoryBar
         }
     }
 
@@ -115,8 +125,6 @@ struct InlineBrowserView: View {
         }
     }
 
-    /// Zero-height marker at the start of each group: the `scrollTo` target and
-    /// the position probe for the active tab.
     private func sectionAnchor(_ category: EmojiCategory) -> some View {
         Color.clear
             .frame(height: 0)
@@ -145,9 +153,45 @@ struct InlineBrowserView: View {
             )
             .id("cell-\(emoji.hexcode)")
             .contentShape(Rectangle())
-            .help(":\(emoji.primaryShortcode):")  // system tooltip
+            .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
+                tooltipHex == emoji.hexcode ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
+            }
             .onTapGesture { onPick(emoji) }
-            .onHover { if $0 { browser.selectedIndex = index } }
+            .onHover { hovering in
+                hoverWork?.cancel()
+                if hovering {
+                    browser.selectedIndex = index
+                    hoverHex = emoji.hexcode
+                    let hex = emoji.hexcode
+                    let work = DispatchWorkItem {
+                        if hoverHex == hex { tooltipHex = hex }
+                    }
+                    hoverWork = work
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+                } else {
+                    if hoverHex == emoji.hexcode { hoverHex = nil }
+                    if tooltipHex == emoji.hexcode { tooltipHex = nil }
+                }
+            }
+    }
+
+    /// Light gray box matching the macOS system tooltip.
+    private func tooltipBubble(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 11))
+            .foregroundStyle(.primary)
+            .lineLimit(1)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(Color(nsColor: .windowBackgroundColor))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.15))
+            )
+            .shadow(color: .black.opacity(0.18), radius: 3, y: 1)
     }
 
     private var emptyResults: some View {
@@ -187,17 +231,44 @@ struct InlineBrowserView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 8)
-        .frame(height: Self.tabBarHeight)
-        .background(.regularMaterial)
+        .frame(height: Self.tabIconHeight)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // Gradient runs the full bar height: the blurred grid fades in from
+        // the top of the bar down to the opaque strip the icons sit on.
+        .padding(.top, Self.tabBarHeight - Self.tabIconHeight)
+        .background(barBackground)
+    }
+
+    private var barBackground: some View {
+        ZStack {
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .mask(LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom))
+            LinearGradient(
+                colors: [barTint.opacity(0), barTint.opacity(0.55), barTint.opacity(0.95)],
+                startPoint: .top, endPoint: .bottom
+            )
+        }
     }
 }
 
-/// Reports each group's vertical offset in the grid's coordinate space so the
-/// active category tab can light up as you scroll.
 private struct SectionOffsetKey: PreferenceKey {
     static var defaultValue: [String: CGFloat] = [:]
     static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
         value.merge(nextValue()) { _, new in new }
+    }
+}
+
+/// Carries the hovered cell's bounds + name to the root tooltip overlay.
+private struct TooltipData {
+    let text: String
+    let anchor: Anchor<CGRect>
+}
+
+private struct TooltipAnchorKey: PreferenceKey {
+    static var defaultValue: TooltipData? = nil
+    static func reduce(value: inout TooltipData?, nextValue: () -> TooltipData?) {
+        value = nextValue() ?? value
     }
 }
 
