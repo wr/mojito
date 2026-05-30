@@ -5,45 +5,71 @@ import Foundation
 /// machine (the panel is non-key, like the inline picker), so search + grid
 /// navigation are set from the Engine rather than from focusable controls.
 ///
-/// Navigation model: **one category at a time** (like the iOS emoji
-/// keyboard). The tab bar *switches* which category is shown — it never
-/// scrolls a long combined list. This removes the whole class of
-/// `scrollTo`-to-an-offscreen-section bugs: a tab tap just swaps the dataset
-/// and resets to the top. The only scrolling left is within the current
-/// category (short) and incremental keyboard nav — `scrollTo`'s reliable case.
+/// Navigation model: **one continuous scrolling list** (like the macOS system
+/// emoji picker). Every category is a section in a single scroll view; the tab
+/// bar *jumps* to a section and highlights whichever section you've scrolled to.
+/// Cells carry a global flat index so keyboard nav + `scrollTo` address the
+/// whole library with one integer, while section headers carry the category as
+/// their scroll id.
 @MainActor
 final class EmojiBrowserViewModel: ObservableObject {
     /// Grid column count — keep in sync with the view's LazyVGrid.
     static let columns = 8
 
+    /// A single emoji cell carrying its global flat index as its identity —
+    /// the one id used for both `ForEach` and `scrollTo`. Avoiding a second
+    /// (`.id()`) identity is what stops SwiftUI's lazy diff from keeping stale
+    /// cells around and ghosting one section's glyphs over another's.
+    struct Cell: Identifiable {
+        let id: Int
+        let emoji: Emoji
+    }
+
+    /// One category's worth of cells. `startIndex` is the global index of its
+    /// first cell (used to park the keyboard selection on a tab jump).
+    struct Section: Identifiable {
+        let category: EmojiCategory
+        let cells: [Cell]
+        var id: EmojiCategory { category }
+        var startIndex: Int { cells.first?.id ?? 0 }
+    }
+
     @Published private(set) var query: String = ""
-    @Published var selectedCategory: EmojiCategory
+    /// Section currently at the top of the scroll view — drives the tab
+    /// highlight. Derived from scroll position, not set by tab taps directly.
+    @Published var activeCategory: EmojiCategory
     @Published var selectedIndex: Int = 0
-    /// Cell index to scroll into view; the view clears it to nil after
-    /// handling so the same index can be requested again.
+    /// Flat cell index to scroll into view (keyboard nav / reset to top). The
+    /// view clears it to nil after handling so the same index can repeat.
     @Published var scrollTarget: Int?
+    /// Category section to jump to (tab tap). Cleared by the view after the
+    /// jump so the same tab can be tapped twice.
+    @Published var categoryTarget: EmojiCategory?
 
     private let database: EmojiDatabase
     private let usage: [String: Int]
-    /// Emoji per category, prebuilt once at open.
-    private let byCategory: [EmojiCategory: [Emoji]]
-    /// Visible categories in tab order (only those with content).
-    let visibleCategories: [EmojiCategory]
+
+    /// Sections in display order (only those with content).
+    let sections: [Section]
+    /// Every emoji, in section order — the flat list keyboard nav addresses.
+    private let flat: [Emoji]
+
+    var visibleCategories: [EmojiCategory] { sections.map(\.category) }
 
     init(database: EmojiDatabase, favorites: FavoritesStore) {
         self.database = database
         self.usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
-        let (map, order) = Self.build(database: database, favorites: favorites, usage: self.usage)
-        self.byCategory = map
-        self.visibleCategories = order
-        self.selectedCategory = order.first ?? .smileysPeople
+        let built = Self.build(database: database, favorites: favorites, usage: self.usage)
+        self.sections = built
+        self.flat = built.flatMap { $0.cells.map(\.emoji) }
+        self.activeCategory = built.first?.category ?? .smileysPeople
     }
 
-    /// The emoji currently shown: search results when searching, else the
-    /// selected category's set.
+    /// The addressable list for selection + keyboard nav: search results when
+    /// searching, else the whole library in section order.
     var current: [Emoji] {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else { return byCategory[selectedCategory] ?? [] }
+        guard !trimmed.isEmpty else { return flat }
         return FuzzyMatcher.search(
             query: trimmed, in: database, usage: usage,
             corpus: .emojiOnly, useFrequencyBoost: true, limit: 240
@@ -66,13 +92,19 @@ final class EmojiBrowserViewModel: ObservableObject {
         scrollTarget = 0  // back to top on every query change
     }
 
-    /// Switch the shown category (tab tap). Clears any search and resets
-    /// to the top — no long-list scroll, so nothing can drift.
+    /// Tab tap: jump the scroll view to that category's section. Clears any
+    /// search and parks the keyboard selection at the section's first cell.
     func selectCategory(_ category: EmojiCategory) {
+        let wasSearching = isSearching
         query = ""
-        selectedCategory = category
-        selectedIndex = 0
-        scrollTarget = 0
+        if let section = sections.first(where: { $0.category == category }) {
+            selectedIndex = section.startIndex
+        }
+        // If we were searching the list was a flat result grid; rebuilding the
+        // sectioned list first, then jumping, keeps the target laid out.
+        activeCategory = category
+        categoryTarget = category
+        if wasSearching { scrollTarget = nil }
     }
 
     func move(_ direction: GifMoveDirection) {
@@ -96,18 +128,32 @@ final class EmojiBrowserViewModel: ObservableObject {
         }
     }
 
+    /// Update the active tab from live section-header offsets (in the scroll
+    /// view's coordinate space). The active section is the last header that has
+    /// reached / passed the top edge. Headers below the fold (and ones recycled
+    /// off the top) simply aren't in `offsets`; when none qualifies we keep the
+    /// current tab rather than snapping to whatever header happens to be onscreen.
+    func updateActiveCategory(from offsets: [EmojiCategory: CGFloat]) {
+        guard !isSearching, !offsets.isEmpty else { return }
+        let threshold: CGFloat = 1
+        let atOrAboveTop = offsets.filter { $0.value <= threshold }
+        guard let active = atOrAboveTop.max(by: { $0.value < $1.value })?.key else { return }
+        if active != activeCategory { activeCategory = active }
+    }
+
     private static func build(
         database: EmojiDatabase,
         favorites: FavoritesStore,
         usage: [String: Int]
-    ) -> (map: [EmojiCategory: [Emoji]], order: [EmojiCategory]) {
-        var map: [EmojiCategory: [Emoji]] = [:]
-        var order: [EmojiCategory] = []
+    ) -> [Section] {
+        var sections: [Section] = []
+        var cursor = 0
 
         func add(_ category: EmojiCategory, _ emoji: [Emoji]) {
             guard !emoji.isEmpty else { return }
-            map[category] = emoji
-            order.append(category)
+            let cells = emoji.enumerated().map { Cell(id: cursor + $0.offset, emoji: $0.element) }
+            sections.append(Section(category: category, cells: cells))
+            cursor += emoji.count
         }
 
         let mostUsed = usage
@@ -129,6 +175,6 @@ final class EmojiBrowserViewModel: ObservableObject {
         if UserDefaults.standard.bool(forKey: PrefsKey.symbolsEnabled) {
             add(.specialCharacters, SymbolsDatabase.indexed().map(\.emoji))
         }
-        return (map, order)
+        return sections
     }
 }
