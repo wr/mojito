@@ -237,6 +237,8 @@ struct InlineBrowserView: View {
         .padding(.top, 18)
         .padding(.bottom, 8)
         .background(barBackground)
+        // Eat clicks across the whole bar so they can't fall through to the grid.
+        .contentShape(Rectangle())
     }
 
     /// A frosted bar that stays glassy: just the blur, faded in from the top
@@ -254,13 +256,6 @@ struct InlineBrowserView: View {
                     startPoint: .top, endPoint: .bottom
                 )
             )
-    }
-}
-
-private struct SectionOffsetKey: PreferenceKey {
-    static var defaultValue: [String: CGFloat] = [:]
-    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
-        value.merge(nextValue()) { _, new in new }
     }
 }
 
