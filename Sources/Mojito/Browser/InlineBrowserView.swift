@@ -25,7 +25,6 @@ struct InlineBrowserView: View {
         repeating: GridItem(.flexible(minimum: 36), spacing: 3),
         count: EmojiBrowserViewModel.columns
     )
-    private var barTint: Color { Color(nsColor: .windowBackgroundColor) }
 
     private var indexedSections: [(section: BrowserSection, items: [(index: Int, emoji: Emoji)])] {
         var running = 0
@@ -45,7 +44,7 @@ struct InlineBrowserView: View {
             gridWithBar
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
-        .background(barTint)
+        // No solid background — let the panel's glass chrome show through.
         // Rendered at the root so it can sit above the top row without being
         // clipped by the scroll view (the old bug put it in the next group).
         .overlayPreferenceValue(TooltipAnchorKey.self) { data in
@@ -241,31 +240,21 @@ struct InlineBrowserView: View {
         .background(barBackground)
     }
 
-    /// A tall, severe gradient over a blurred base — the grid fades from fully
-    /// visible at the top of the bar to the opaque strip the icons sit on,
-    /// matching the macOS picker.
+    /// A frosted bar that stays glassy: just the blur, faded in from the top
+    /// of the bar so the grid dissolves into it (no opaque color layer).
     private var barBackground: some View {
-        ZStack {
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .mask(LinearGradient(
+        Rectangle()
+            .fill(.regularMaterial)
+            .mask(
+                LinearGradient(
                     stops: [
                         .init(color: .clear, location: 0.0),
-                        .init(color: .black, location: 0.5),
+                        .init(color: .black.opacity(0.85), location: 0.55),
                         .init(color: .black, location: 1.0),
                     ],
                     startPoint: .top, endPoint: .bottom
-                ))
-            LinearGradient(
-                stops: [
-                    .init(color: barTint.opacity(0), location: 0.0),
-                    .init(color: barTint.opacity(0.7), location: 0.45),
-                    .init(color: barTint, location: 0.72),
-                    .init(color: barTint, location: 1.0),
-                ],
-                startPoint: .top, endPoint: .bottom
+                )
             )
-        }
     }
 }
 

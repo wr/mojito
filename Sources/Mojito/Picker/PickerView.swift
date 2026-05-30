@@ -277,17 +277,15 @@ private struct CompactCell: View {
         .overlay(alignment: .bottomTrailing) {
             if showNumber, !isBrowse, index < 8 {
                 Text("\(index + 1)")
-                    .font(.system(size: 9, weight: .semibold, design: .rounded))
+                    .font(.system(size: 8, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
-                    .padding(.horizontal, 3)
-                    .padding(.vertical, 0.5)
+                    .opacity(0.7)
+                    .padding(.horizontal, 2)
                     .background(
-                        RoundedRectangle(cornerRadius: 3, style: .continuous)
-                            .fill(Color(nsColor: .windowBackgroundColor).opacity(0.9))
-                            .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous)
-                                .strokeBorder(Color.primary.opacity(0.12)))
+                        RoundedRectangle(cornerRadius: 2.5, style: .continuous)
+                            .fill(Color(nsColor: .windowBackgroundColor).opacity(0.5))
                     )
-                    .padding(2)
+                    .padding(1.5)
             }
         }
         .contentShape(Rectangle())
