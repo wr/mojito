@@ -103,6 +103,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.openSettings() }
             .store(in: &observers)
+
+        NotificationCenter.default.publisher(for: .mojitoShouldOpenBrowser)
+            .receive(on: RunLoop.main)
+            .sink { _ in
+                // Opened from the menu: insert into the frontmost app, nothing
+                // to delete (no `:` was typed).
+                EmojiBrowserController.shared.show(deleteCount: 0, targetPID: nil)
+            }
+            .store(in: &observers)
     }
 
     func applicationWillTerminate(_ notification: Notification) {

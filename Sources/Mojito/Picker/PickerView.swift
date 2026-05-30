@@ -122,7 +122,14 @@ private struct PickerRow: View {
     /// (dogcow) render an Image.
     @ViewBuilder
     private var leadingGlyph: some View {
-        if scored.emoji.hexcode == FuzzyMatcher.k03Hex,
+        if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+            return AnyView(
+                Image(systemName: "square.grid.2x2")
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 22, height: 22)
+            )
+        } else if scored.emoji.hexcode == FuzzyMatcher.k03Hex,
            let nsImage = Self.dogcowImage {
             // Template picks up the current foreground color.
             return AnyView(
@@ -147,7 +154,12 @@ private struct PickerRow: View {
 
     @ViewBuilder
     private var label: some View {
-        if FuzzyMatcher.rainbowHexcodes.contains(scored.emoji.hexcode) {
+        if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+            Text("Browse all emojis…")
+                .font(.system(size: 13))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+        } else if FuzzyMatcher.rainbowHexcodes.contains(scored.emoji.hexcode) {
             rainbowLabel(scored.matchedShortcode)
         } else if FuzzyMatcher.pinnedHexcodes.contains(scored.emoji.hexcode) {
             // Non-rainbow pinned eggs surface as `???` to stay a surprise.

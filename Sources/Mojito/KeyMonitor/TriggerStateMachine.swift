@@ -109,6 +109,20 @@ struct TriggerStateMachine {
     /// When true, `::` upgrades the capture to symbols-only instead of cancelling.
     var symbolsDoubleColonEnabled: Bool = false
 
+    /// When true, a bare `:` (no following name char yet) emits `.openPicker`
+    /// with an empty query so the Engine can surface favorites + most-used.
+    /// Default false keeps the pure state machine's legacy behavior; the
+    /// Engine flips it on from `PrefsKey.browseOnColon`.
+    var browseOnColonEnabled: Bool = false
+
+    /// True only once the empty-query favorites picker is actually on screen.
+    /// The Engine sets it after the (debounced) show and clears it on hide,
+    /// so navigation keys are claimed for the picker *only* while it's
+    /// visible — a bare `:` followed by a fast keystroke never hijacks the
+    /// arrow keys or Return. Cleared internally whenever capture leaves the
+    /// empty-query state.
+    var emptyPickerActive: Bool = false
+
     private var currentScope: CaptureScope = .normal
 
     private var konamiProgress: Int = 0
@@ -223,7 +237,10 @@ struct TriggerStateMachine {
         // Konami only runs in `.capturing(query: "")` (right after `:`).
         // Tracking it from idle would eat arrow keys globally and break
         // caret navigation. Fires on the final `A` — no closing `:`.
-        if case .capturing(let q) = state, q.isEmpty {
+        // Skipped while the empty-query favorites picker is visible, which
+        // owns the arrow keys; that picker only appears after a deliberate
+        // dwell, so fast arrow input still flows here.
+        if case .capturing(let q) = state, q.isEmpty, !emptyPickerActive {
             if konamiProgress < Self.konamiSequence.count,
                Self.konamiMatches(input, Self.konamiSequence[konamiProgress]) {
                 konamiProgress += 1
@@ -286,6 +303,16 @@ struct TriggerStateMachine {
             }
             currentScope = .normal
             state = .capturing(query: "")
+            // Not visible yet — the Engine flips this on after the debounced
+            // show. Clearing here keeps a prior capture's value from leaking
+            // into a fresh `:`.
+            emptyPickerActive = false
+            // Surface favorites + most-used on a bare `:`. The Engine
+            // debounces the actual show, so a follow-up keystroke (`:)`,
+            // `:smile`, …) cancels it before anything appears.
+            if browseOnColonEnabled {
+                return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: false)
+            }
             return TriggerOutput(action: .none, consumesKey: false)
 
         case (.idle, .backspace):
@@ -357,6 +384,10 @@ struct TriggerStateMachine {
         // MARK: capturing — name characters
 
         case (.capturing(let q), .nameChar(let c)):
+            // First typed char leaves the empty-query state — drop the
+            // favorites picker if it was up.
+            let wasEmptyPicker = emptyPickerActive
+            emptyPickerActive = false
             let next = q + String(c)
             state = .capturing(query: next)
             let threshold = pickerThreshold(for: currentScope, query: next)
@@ -364,7 +395,8 @@ struct TriggerStateMachine {
             if next.count < threshold {
                 // Keep capturing silently so a terminator can still fire
                 // `:D `, but don't surface the picker on a single char.
-                action = .none
+                // If favorites were showing, close them as typing begins.
+                action = wasEmptyPicker ? .closePicker : .none
             } else if q.count < threshold {
                 action = .openPicker(query: next, scope: currentScope)
             } else {
@@ -396,12 +428,14 @@ struct TriggerStateMachine {
         // MARK: capturing — picker navigation
 
         case (.capturing(let q), .arrowUp):
-            return q.isEmpty
+            // Empty query has no picker to drive *unless* the favorites
+            // picker is showing — then arrows navigate it.
+            return (q.isEmpty && !emptyPickerActive)
                 ? .passthrough
                 : TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
 
         case (.capturing(let q), .arrowDown):
-            return q.isEmpty
+            return (q.isEmpty && !emptyPickerActive)
                 ? .passthrough
                 : TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
 
@@ -410,6 +444,7 @@ struct TriggerStateMachine {
             // the picker is up. Empty-query state is just `:` alone — let
             // the arrow through and end capture.
             if q.isEmpty {
+                emptyPickerActive = false
                 state = .idle
                 return TriggerOutput(action: .closePicker, consumesKey: false)
             }
@@ -417,6 +452,15 @@ struct TriggerStateMachine {
 
         case (.capturing(let q), .returnKey), (.capturing(let q), .tabKey):
             if q.isEmpty {
+                // Favorites picker visible: Return/Tab picks the highlighted
+                // favorite (or the Browse row). Otherwise `:`+Return is just
+                // a literal colon — pass it through untouched.
+                if emptyPickerActive {
+                    emptyPickerActive = false
+                    state = .idle
+                    currentScope = .normal
+                    return TriggerOutput(action: .insertEmoji(query: "", mode: .fromPicker, scope: .normal), consumesKey: true)
+                }
                 state = .idle
                 currentScope = .normal
                 return TriggerOutput(action: .closePicker, consumesKey: false)
@@ -467,6 +511,7 @@ struct TriggerStateMachine {
     mutating func reset() {
         state = .idle
         currentScope = .normal
+        emptyPickerActive = false
         lastWasWordChar = false
         konamiProgress = 0
         idleWord = ""

@@ -22,6 +22,14 @@ enum PrefsKey {
     static let allowedBundleIDs      = "mojito.allowBundleIDs"       // [String]
     static let allowedURLPatterns    = "mojito.allowURLPatterns"     // [String]
     static let usageCounts           = "mojito.usageCounts"          // [String: Int]  (hexcode → count)
+    /// Hand-picked favorites, in display order. Surfaced when the user
+    /// types a bare `:` (see `browseOnColon`) and managed in Settings ▸
+    /// Favorites. `[String]` of emoji hexcodes.
+    static let favoriteHexcodes      = "mojito.favorites"            // [String]  (hexcodes)
+    /// When true, typing `:` and pausing pops the picker pre-filled with
+    /// favorites + most-used so Return inserts the top one. Off = `:` is
+    /// inert until you type a query.
+    static let browseOnColon         = "mojito.browseOnColon"
     /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
     /// Self-attested; no payment integration.

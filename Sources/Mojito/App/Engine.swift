@@ -21,6 +21,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
     private let database: EmojiDatabase
     private let exclusions: ExclusionStore
+    private let favorites = FavoritesStore.shared
     private let viewModel = PickerViewModel()
     private let pickerWindow: PickerWindow
     private let gifPickerWindow = GifPickerWindow()
@@ -50,6 +51,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var symbolsRequireDoubleColon: Bool
     private var gifSearchEnabled: Bool
     private var gifBypassExclusions: Bool
+    private var browseOnColon: Bool
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -71,7 +73,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
         self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
+        self.browseOnColon = (UserDefaults.standard.object(forKey: PrefsKey.browseOnColon) as? Bool) ?? true
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
+        self.stateMachine.browseOnColonEnabled = self.browseOnColon
 
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
@@ -124,7 +128,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
                 self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
                 self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
+                self.browseOnColon = (UserDefaults.standard.object(forKey: PrefsKey.browseOnColon) as? Bool) ?? true
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
+                self.stateMachine.browseOnColonEnabled = self.browseOnColon
             }
         }
     }
@@ -371,6 +377,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .closePicker:
             viewModel.reset()
             pickerWindow.hide()
+            stateMachine.emptyPickerActive = false
             // Backspacing below the picker threshold (or demoting `::` symbols
             // scope) emits .closePicker while the SM stays in .capturing. The
             // capture metadata — exclusion flag, focus snapshot — must survive
@@ -385,10 +392,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .openPicker(let q, let scope):
             if captureExcluded { break }
             updateResults(query: q, scope: scope)
-            // Defer one tick: the keystroke moves the caret in the focused
-            // app after the tap callback returns. AX returns stale coords if
-            // we ask before then.
-            scheduleRepositionAndShow()
+            if q.isEmpty {
+                // Bare `:` → favorites + most-used. Debounced so a follow-up
+                // keystroke (`:)`, `:smile`) cancels it before it flashes.
+                scheduleEmptyPickerShow()
+            } else {
+                // Defer one tick: the keystroke moves the caret in the focused
+                // app after the tap callback returns. AX returns stale coords if
+                // we ask before then.
+                scheduleRepositionAndShow()
+            }
 
         case .refreshPicker(let q, let scope):
             if captureExcluded { break }
@@ -605,9 +618,67 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         return false
     }
 
+    /// How long a bare `:` must dwell before the favorites picker appears.
+    /// Long enough that `:)` / `:D` / `:smile` never flash it; short enough
+    /// that an intentional pause feels responsive.
+    private static let emptyPickerDwell: TimeInterval = 0.22
+    /// Cap on rows in the bare-`:` picker (favorites + most-used), before the
+    /// trailing Browse row.
+    private static let emptyPickerLimit = 8
+
+    /// Debounced show for the bare-`:` favorites picker. A newer keystroke
+    /// advances `inputSeq`, so anything typed after the colon cancels this
+    /// before it fires. Only once it actually shows do we tell the state
+    /// machine to claim the arrow keys.
+    private func scheduleEmptyPickerShow() {
+        let seq = inputSeq
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.emptyPickerDwell) { [weak self] in
+            guard let self else { return }
+            guard self.inputSeq == seq else { return }
+            guard case .capturing(let q) = self.stateMachine.state, q.isEmpty else { return }
+            guard !self.viewModel.results.isEmpty else { return }
+            if self.focusHasChangedSinceCapture() {
+                self.cancelCapture()
+                return
+            }
+            let anchor = CaretLocator.caretRect()
+            PickerContextStore.capture(caretOutcome: CaretLocator.lastOutcome, resolvedCaret: anchor)
+            DebugRecorder.record(.picker, "openEmpty", ["results": "\(self.viewModel.results.count)"])
+            self.pickerWindow.show(near: anchor)
+            // Now the picker owns ↑↓ / Return for favorites selection.
+            self.stateMachine.emptyPickerActive = true
+        }
+    }
+
+    /// Bare-`:` corpus: favorites first (user order), then most-used emoji,
+    /// then a trailing "Browse all emojis…" row. Symbols + egg sentinels are
+    /// excluded from the most-used fill.
+    private func emptyQueryResults() -> [ScoredEmoji] {
+        var rows: [ScoredEmoji] = []
+        var seen = Set<String>()
+
+        for hex in favorites.hexcodes {
+            guard !seen.contains(hex), let emoji = database.byHexcode[hex] else { continue }
+            seen.insert(hex)
+            rows.append(ScoredEmoji(emoji: emoji, matchedShortcode: emoji.primaryShortcode))
+        }
+
+        let mostUsed = usage
+            .filter { $0.value > 0 && !$0.key.hasPrefix("SYM_") && !seen.contains($0.key) }
+            .sorted { $0.value > $1.value }
+        for (hex, _) in mostUsed {
+            guard rows.count < Self.emptyPickerLimit, let emoji = database.byHexcode[hex] else { continue }
+            seen.insert(hex)
+            rows.append(ScoredEmoji(emoji: emoji, matchedShortcode: emoji.primaryShortcode))
+        }
+
+        rows.append(EmojiBrowser.browseRow)
+        return rows
+    }
+
     private func updateResults(query: String, scope: CaptureScope) {
         guard !query.isEmpty else {
-            viewModel.update(query: "", results: [])
+            viewModel.update(query: "", results: emptyQueryResults())
             return
         }
         let results = FuzzyMatcher.search(
@@ -661,6 +732,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             guard let scored = viewModel.topResult else { return }
             DebugRecorder.record(.insert, "fromPicker", ["scope": "\(scope)"])
             let charsToDelete = query.count + leadingColons
+            if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                // "Browse all emojis…" — hand off to the grid window. It
+                // deletes the typed `:` only when the user actually picks
+                // there, so cancelling leaves the text untouched.
+                EmojiBrowserController.shared.show(deleteCount: charsToDelete, targetPID: captureContext?.processID)
+                return
+            }
             if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
                 return
             }

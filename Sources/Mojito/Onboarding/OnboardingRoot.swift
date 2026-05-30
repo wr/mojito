@@ -187,4 +187,6 @@ extension Notification.Name {
     static let mojitoShouldOpenSettings = Notification.Name("mojitoShouldOpenSettings")
     /// Re-runs guided setup without resetting onboarding state.
     static let mojitoShouldShowOnboarding = Notification.Name("mojitoShouldShowOnboarding")
+    /// Opens the full-library emoji browser window.
+    static let mojitoShouldOpenBrowser = Notification.Name("mojitoShouldOpenBrowser")
 }

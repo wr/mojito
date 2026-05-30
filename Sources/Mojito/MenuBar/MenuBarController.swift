@@ -144,6 +144,8 @@ final class MenuBarController {
         resumeItem = resume
 
         menu.addItem(.separator())
+        menu.addItem(NSMenuItem(title: String(localized: "Browse Emoji…"), action: #selector(MenuActions.openBrowser), keyEquivalent: "").configured(target: MenuActions.shared))
+        menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: String(localized: "Settings…"), action: #selector(MenuActions.openSettings), keyEquivalent: ",").configured(target: MenuActions.shared))
         // Option-held alternate — backdoor for re-running guided setup
         // without resetting onboarding state. Discoverability intentionally low.
@@ -230,6 +232,10 @@ final class MenuBarController {
         openSettings?()
     }
 
+    fileprivate func performOpenBrowser() {
+        NotificationCenter.default.post(name: .mojitoShouldOpenBrowser, object: nil)
+    }
+
     fileprivate func performShowOnboarding() {
         NotificationCenter.default.post(name: .mojitoShouldShowOnboarding, object: nil)
     }
@@ -257,6 +263,7 @@ private final class MenuActions: NSObject {
     @objc func pauseUntilTomorrow() { controller?.performPauseUntilTomorrow() }
     @objc func resume() { controller?.performResume() }
     @objc func openSettings() { controller?.performOpenSettings() }
+    @objc func openBrowser() { controller?.performOpenBrowser() }
     @objc func showOnboarding() { controller?.performShowOnboarding() }
     @objc func checkForUpdates() { controller?.performCheckForUpdates() }
 }

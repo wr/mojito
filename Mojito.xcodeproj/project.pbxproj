@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01491C879FFA29F7F655A6E3 /* FavoritesBrowseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BC327DAE8D5D1A43640CF2 /* FavoritesBrowseTests.swift */; };
+		035DFB816A1B13045CCBCECB /* FavoritesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5216FB90422FD6F65F8A1DC0 /* FavoritesStore.swift */; };
 		06082A2DD9E20456D2D20F2C /* ExclusionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 625433055302CF9B9053F885 /* ExclusionStoreTests.swift */; };
 		06E493068FD409A2B795BC56 /* s01.bin in Resources */ = {isa = PBXBuildFile; fileRef = DF0A9FF25BC996BC640A35A0 /* s01.bin */; };
 		07238FD3052A35E9FB70AA93 /* Fireworks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C81578D7A36FB7EA31D1985 /* Fireworks.swift */; };
@@ -23,6 +25,7 @@
 		28A1C045D2F7BBEC55E4A00A /* GifPickerWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FA9BBA311F77BEBE0C6A4 /* GifPickerWindow.swift */; };
 		29B4C683D96EE275A114B5FD /* SingleInstanceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137C5B7AB01C74DA68FE7B74 /* SingleInstanceCoordinator.swift */; };
 		29FCA4D30EFA3D817124178B /* FuzzyMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8851906565F70B7815640F /* FuzzyMatcher.swift */; };
+		2A7B6E8E3BC9171E1EA88437 /* EmojiBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45B43D8984A42AB322ECD4AE /* EmojiBrowserView.swift */; };
 		2B36C9A8EE648C8DC1836F33 /* EmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2009C3B36DF9228B873244 /* EmoticonTable.swift */; };
 		2B3FD6118D1C2D7AB0D24588 /* SymbolsDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6666150B793721D5095E72A8 /* SymbolsDatabase.swift */; };
 		2BF7E787E46AB243597A38CB /* VideoBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83366C0C02EF9F599EC2B65A /* VideoBlob.swift */; };
@@ -62,6 +65,7 @@
 		6A8EC5B13FA4A0AC0F338875 /* ConfettiSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB589505841013FF5EF5500 /* ConfettiSound.swift */; };
 		6B48E883C3B324C8ABB16C93 /* AmbientEmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */; };
 		6F9314FB48040BE582D87716 /* BlueScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD72EE1D10D399387F1DD1C8 /* BlueScreen.swift */; };
+		74C583E0BC3AE28AA4355F8A /* FavoritesSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E548A1EF83C74AEC6A91A926 /* FavoritesSettings.swift */; };
 		74CED6225633C087A96D7E9C /* DebugRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2928BC07BE26CF9B15F23D70 /* DebugRecorder.swift */; };
 		75008F5E9E8750E55512283C /* FzyScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */; };
 		751B7D80FF9EA3BA8B30B8FC /* EasterEggsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA756B434C9FED6B691D07B8 /* EasterEggsSettings.swift */; };
@@ -81,6 +85,7 @@
 		87F16A28F58C4854576DD450 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B06D1C751C2161A7A99DA1 /* AppDelegate.swift */; };
 		881B726A6871BA37651B06B0 /* GifClipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19FC0DC96883A143602E6668 /* GifClipboard.swift */; };
 		89AB6401CC7F94BCBF0D3437 /* s16.bin in Resources */ = {isa = PBXBuildFile; fileRef = E87A9C3A9251B8908CFB056A /* s16.bin */; };
+		8D584DDFB9305768A3547EAA /* EmojiBrowserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B79AAA76C55A5B4FB087A6 /* EmojiBrowserViewModel.swift */; };
 		8DC058D738EC5E540C69BE61 /* PickerContextSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DB3CE6896B4FB11651A14AD /* PickerContextSnapshot.swift */; };
 		8EE9F3A928A7AFDB16C6D9A2 /* OnboardingRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4512D76E20BD99269775200B /* OnboardingRoot.swift */; };
 		917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */; };
@@ -91,6 +96,7 @@
 		9E9309E8AF1F9D8B44213729 /* EmoticonTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */; };
 		9F45015A816323AF275F23ED /* DebugReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9E01A82260E8A38DF8D7EA /* DebugReport.swift */; };
 		A1C87132DCD9B263CA32BAAE /* WordleSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F82574CC8A6D051CF87D9B /* WordleSounds.swift */; };
+		A637DCA2905238217427E806 /* EmojiBrowserCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C001583E27CC71D9959055 /* EmojiBrowserCatalog.swift */; };
 		A9A15B339C05195BB45CC09F /* MyLegSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C4C16E01184684E33C3437 /* MyLegSound.swift */; };
 		A9CDDCEBAC41BF8676B8F2EC /* EasterEggTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3188FF1FD6559BF8E64C19CC /* EasterEggTracker.swift */; };
 		ABF54441D03140C8174E13A9 /* PrefsKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C66984ECCB4DB6B1A018452 /* PrefsKey.swift */; };
@@ -129,6 +135,7 @@
 		DF4F5EB36D764A99CAB8CADB /* WilhelmScream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 088608D6A2243D8E95953095 /* WilhelmScream.swift */; };
 		E29AE211BD536EA5FD09BF0E /* v11.bin in Resources */ = {isa = PBXBuildFile; fileRef = D3C7F5A4189B7652C993C384 /* v11.bin */; };
 		E3B84D347FB801B6A62E980D /* v06.bin in Resources */ = {isa = PBXBuildFile; fileRef = FACE9E8BAF08240551D5237A /* v06.bin */; };
+		E3D493B7202C424A6EEDFF22 /* EmojiBrowserController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 940FACA44E1A59C11BD5773D /* EmojiBrowserController.swift */; };
 		E41E62A3741D084E3630FDEC /* AudioBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DE1B7DD5243E817418580C /* AudioBlob.swift */; };
 		E4A22D4B3F3A0A818AEAA21E /* MoofSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186ED6EF6F678E8C3F082FD8 /* MoofSound.swift */; };
 		E539CB425388907B1CA7D3CE /* GifSearcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3CAFD7B83168FF01538FF4 /* GifSearcher.swift */; };
@@ -197,9 +204,11 @@
 		392847FD44ED870B7154ED09 /* s03.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s03.bin; sourceTree = "<group>"; };
 		42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcherTests.swift; sourceTree = "<group>"; };
 		4512D76E20BD99269775200B /* OnboardingRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingRoot.swift; sourceTree = "<group>"; };
+		45B43D8984A42AB322ECD4AE /* EmojiBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBrowserView.swift; sourceTree = "<group>"; };
 		463478D4F770642DDCBA5C8F /* Snowfall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snowfall.swift; sourceTree = "<group>"; };
 		4678DF22D8E1B41FC8359CF1 /* s09.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s09.bin; sourceTree = "<group>"; };
 		489170955CD25EB1DE2E681C /* OnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreens.swift; sourceTree = "<group>"; };
+		48BC327DAE8D5D1A43640CF2 /* FavoritesBrowseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesBrowseTests.swift; sourceTree = "<group>"; };
 		4BC763FD3C4773231C72CFDD /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
 		4E3A3B5079FC9275F5947104 /* PickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerView.swift; sourceTree = "<group>"; };
 		4F4CFB098FFC29AB8C8B9855 /* v09.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v09.bin; sourceTree = "<group>"; };
@@ -207,6 +216,7 @@
 		5111A1AB2B4D546A7D073563 /* s08.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s08.bin; sourceTree = "<group>"; };
 		51A28AC761A1481017B493E0 /* v01.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v01.bin; sourceTree = "<group>"; };
 		520ABC6E5EB064A7DF4041D3 /* DiscoveryFanfare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryFanfare.swift; sourceTree = "<group>"; };
+		5216FB90422FD6F65F8A1DC0 /* FavoritesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesStore.swift; sourceTree = "<group>"; };
 		52DF280ABF42475053B4EB56 /* MatrixRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixRain.swift; sourceTree = "<group>"; };
 		54037341F6A92839A94F3408 /* s04.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s04.bin; sourceTree = "<group>"; };
 		561D5F53503A9DDE7BE03430 /* KeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMonitor.swift; sourceTree = "<group>"; };
@@ -237,10 +247,12 @@
 		877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultExclusions.swift; sourceTree = "<group>"; };
 		8792D3A9CA964FE06B29F30F /* PrideWave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrideWave.swift; sourceTree = "<group>"; };
 		90F7DB616A5940BE3DE17B77 /* EggStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggStrings.swift; sourceTree = "<group>"; };
+		940FACA44E1A59C11BD5773D /* EmojiBrowserController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBrowserController.swift; sourceTree = "<group>"; };
 		947CA35F448BC012E3F73860 /* CeleryMan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CeleryMan.swift; sourceTree = "<group>"; };
 		94A31DD44ACC90D6CAC3A486 /* AchievementBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementBanner.swift; sourceTree = "<group>"; };
 		9528726096C90D6A0523B86F /* Emoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Emoji.swift; sourceTree = "<group>"; };
 		9658C9CF3396443D22FF4E28 /* WarpDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarpDrive.swift; sourceTree = "<group>"; };
+		96C001583E27CC71D9959055 /* EmojiBrowserCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBrowserCatalog.swift; sourceTree = "<group>"; };
 		9903710C7A46FB1BB47A47BA /* WarpSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarpSound.swift; sourceTree = "<group>"; };
 		9C81578D7A36FB7EA31D1985 /* Fireworks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fireworks.swift; sourceTree = "<group>"; };
 		9C90F0A490BC13D9CC5ADF90 /* s05.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s05.bin; sourceTree = "<group>"; };
@@ -272,6 +284,7 @@
 		C06E0C983CA81BD9B703651A /* s13.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s13.bin; sourceTree = "<group>"; };
 		C0C43AE82D06A067585D3882 /* FocusedElementCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusedElementCache.swift; sourceTree = "<group>"; };
 		C31E41F813A67872400E4942 /* AnimatedGifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGifView.swift; sourceTree = "<group>"; };
+		C3B79AAA76C55A5B4FB087A6 /* EmojiBrowserViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBrowserViewModel.swift; sourceTree = "<group>"; };
 		C410F8B7AF8493C098EA2AF1 /* ConfettiRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiRain.swift; sourceTree = "<group>"; };
 		C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPermissionsSettings.swift; sourceTree = "<group>"; };
 		C876AD00FBA92A6CA56ABD95 /* s07.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s07.bin; sourceTree = "<group>"; };
@@ -292,6 +305,7 @@
 		DF44D58B49F923004BEED6E7 /* FlyingToasters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlyingToasters.swift; sourceTree = "<group>"; };
 		E229DD4E9239183CD578F665 /* KonamiPayoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KonamiPayoff.swift; sourceTree = "<group>"; };
 		E25EC50F4D58E03E218947DF /* SymbolsDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolsDatabaseTests.swift; sourceTree = "<group>"; };
+		E548A1EF83C74AEC6A91A926 /* FavoritesSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesSettings.swift; sourceTree = "<group>"; };
 		E5E4119DFCFBCC4A92FEEB1C /* v02.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v02.bin; sourceTree = "<group>"; };
 		E6F0EF28CC67A6AB9FFF203F /* DiscoveryNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryNotifier.swift; sourceTree = "<group>"; };
 		E7D1F9E45C5D2C8B6FB43111 /* TrainGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainGame.swift; sourceTree = "<group>"; };
@@ -334,6 +348,7 @@
 				A1B842CBBD6C7466F9BA2786 /* EmojiDatabaseTests.swift */,
 				DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */,
 				625433055302CF9B9053F885 /* ExclusionStoreTests.swift */,
+				48BC327DAE8D5D1A43640CF2 /* FavoritesBrowseTests.swift */,
 				42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */,
 				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
 				9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */,
@@ -350,6 +365,7 @@
 				100317FDEDAED8905256B964 /* AboutSettings.swift */,
 				AA756B434C9FED6B691D07B8 /* EasterEggsSettings.swift */,
 				DD6171603CD5F5CC6ED9A636 /* ExclusionsSettings.swift */,
+				E548A1EF83C74AEC6A91A926 /* FavoritesSettings.swift */,
 				B3154DBEA72DA316E341C440 /* GeneralSettings.swift */,
 				C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */,
 				FFC142D2205F1C089F7524D2 /* SettingsRoot.swift */,
@@ -409,6 +425,7 @@
 			isa = PBXGroup;
 			children = (
 				ABDF9E60F36CAC7A465AC7B3 /* App */,
+				2648A064D2B1BCE76EC1B8C1 /* Browser */,
 				18DF0B1E60F36983A1C5C7C6 /* Context */,
 				4BBA47A36F86A6BF873E0BFE /* Debug */,
 				D822FEA7909C200A1E98FE7E /* EmojiDB */,
@@ -424,6 +441,17 @@
 				F61D3C78A8AF186D20FBC515 /* Util */,
 			);
 			path = Mojito;
+			sourceTree = "<group>";
+		};
+		2648A064D2B1BCE76EC1B8C1 /* Browser */ = {
+			isa = PBXGroup;
+			children = (
+				96C001583E27CC71D9959055 /* EmojiBrowserCatalog.swift */,
+				940FACA44E1A59C11BD5773D /* EmojiBrowserController.swift */,
+				45B43D8984A42AB322ECD4AE /* EmojiBrowserView.swift */,
+				C3B79AAA76C55A5B4FB087A6 /* EmojiBrowserViewModel.swift */,
+			);
+			path = Browser;
 			sourceTree = "<group>";
 		};
 		2ADF41D3FA4538C2D840B252 /* Onboarding */ = {
@@ -598,6 +626,7 @@
 				9528726096C90D6A0523B86F /* Emoji.swift */,
 				019FC9E40B9630700D2106CE /* EmojiDatabase.swift */,
 				6E2009C3B36DF9228B873244 /* EmoticonTable.swift */,
+				5216FB90422FD6F65F8A1DC0 /* FavoritesStore.swift */,
 				5A8851906565F70B7815640F /* FuzzyMatcher.swift */,
 				FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */,
 				F5C5BC5F015CABDD85262258 /* SeasonalGates.swift */,
@@ -843,12 +872,18 @@
 				2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */,
 				87514A922406A1535D7BCB42 /* EmbeddedGiphyKey.swift in Sources */,
 				AC7748989CE2B7D96CBB21FE /* Emoji.swift in Sources */,
+				A637DCA2905238217427E806 /* EmojiBrowserCatalog.swift in Sources */,
+				E3D493B7202C424A6EEDFF22 /* EmojiBrowserController.swift in Sources */,
+				2A7B6E8E3BC9171E1EA88437 /* EmojiBrowserView.swift in Sources */,
+				8D584DDFB9305768A3547EAA /* EmojiBrowserViewModel.swift in Sources */,
 				786D4AD196F221CD0F7887DA /* EmojiDatabase.swift in Sources */,
 				67560B8C0EC9028ED9659937 /* EmojiRain.swift in Sources */,
 				2B36C9A8EE648C8DC1836F33 /* EmoticonTable.swift in Sources */,
 				75BBF0FDC76C3BB733E4C6C8 /* Engine.swift in Sources */,
 				5AF2BEEBF0932EEC68173F6A /* ExclusionStore.swift in Sources */,
 				755312D29AEDF631AF9D98C5 /* ExclusionsSettings.swift in Sources */,
+				74C583E0BC3AE28AA4355F8A /* FavoritesSettings.swift in Sources */,
+				035DFB816A1B13045CCBCECB /* FavoritesStore.swift in Sources */,
 				07238FD3052A35E9FB70AA93 /* Fireworks.swift in Sources */,
 				BF8DBC3E1BD0A9EA4720C6DD /* FloppySound.swift in Sources */,
 				39B9D624EF57D466C90D82B6 /* FlyingToasters.swift in Sources */,
@@ -923,6 +958,7 @@
 				DD501615C4A6623E5BA03369 /* EmojiDatabaseTests.swift in Sources */,
 				9E9309E8AF1F9D8B44213729 /* EmoticonTableTests.swift in Sources */,
 				06082A2DD9E20456D2D20F2C /* ExclusionStoreTests.swift in Sources */,
+				01491C879FFA29F7F655A6E3 /* FavoritesBrowseTests.swift in Sources */,
 				4F9E4BA7A275583B07011809 /* FuzzyMatcherTests.swift in Sources */,
 				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
 				C025CD4AE30320C3FE69028A /* SeasonalGatesTests.swift in Sources */,
