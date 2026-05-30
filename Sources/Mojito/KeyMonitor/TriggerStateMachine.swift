@@ -111,8 +111,12 @@ enum TriggerAction: Equatable {
     case pickBrowser
     /// Close the browser grid (esc, backspace past empty, click-away).
     case closeBrowser
-    /// Grow the favorites pill into the full browser grid (↓ on the pill).
+    /// Grow the favorites pill into the full browser grid (↓/↑ on the pill).
     case expandBrowser
+    /// Pill quick-pick: insert the row at this index (digit 1–8 → 0–7).
+    case pickIndex(Int)
+    /// Close the pill and restore the swallowed `?` so `:?`+Esc leaves `:?`.
+    case closePickerRestoringQuestion
 }
 
 enum GifMoveDirection: Equatable { case left, right, up, down }
@@ -409,6 +413,12 @@ struct TriggerStateMachine {
         // MARK: capturing — name characters
 
         case (.capturing(let q), .nameChar(let c)):
+            // Pill quick-pick: while the pill is up, a digit 1–8 inserts that
+            // row directly (`:?3` → 3rd emoji). Swallowed so it doesn't start
+            // a search.
+            if emptyPickerActive, let digit = c.wholeNumberValue, (1...8).contains(digit) {
+                return TriggerOutput(action: .pickIndex(digit - 1), consumesKey: true)
+            }
             // First typed char leaves the empty-query state — drop the
             // favorites picker if it was up.
             let wasEmptyPicker = emptyPickerActive
@@ -454,9 +464,11 @@ struct TriggerStateMachine {
 
         case (.capturing(let q), .arrowUp):
             if q.isEmpty {
-                // Pill: ←→ navigate, ↓ expands; ↑ is a no-op. Without the
+                // Pill: both ↑ and ↓ expand into the full grid. Without the
                 // pill, ↑ on a bare `:` passes through (caret motion).
-                return emptyPickerActive ? .consume : .passthrough
+                return emptyPickerActive
+                    ? TriggerOutput(action: .expandBrowser, consumesKey: true)
+                    : .passthrough
             }
             return TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
 
@@ -516,9 +528,16 @@ struct TriggerStateMachine {
         // MARK: capturing — exits
 
         case (.capturing, .escape):
+            // `:?`+Esc should leave the literal `:?` — the `?` was swallowed
+            // when the pill opened, so ask the Engine to type it back.
+            let restoreQuestion = emptyPickerActive && favoritesTrigger == .question
+            emptyPickerActive = false
             state = .idle
             currentScope = .normal
-            return TriggerOutput(action: .closePicker, consumesKey: true)
+            return TriggerOutput(
+                action: restoreQuestion ? .closePickerRestoringQuestion : .closePicker,
+                consumesKey: true
+            )
 
         case (.capturing(let q), .cancelChar("?")) where q.isEmpty && favoritesTrigger == .question:
             // `:?` summons the favorites pill. Swallow the `?` so the focused

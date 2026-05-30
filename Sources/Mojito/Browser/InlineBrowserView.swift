@@ -10,7 +10,8 @@ struct InlineBrowserView: View {
     let onCategory: (EmojiCategory) -> Void
 
     @State private var activeCategory: String?
-    @State private var hoverName: String?
+    @State private var hoverHex: String?
+    @State private var tooltipHex: String?
     @State private var hoverWork: DispatchWorkItem?
 
     private static let space = "browserGrid"
@@ -40,13 +41,12 @@ struct InlineBrowserView: View {
             categoryBar
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
+        // Opaque so scrolling glyphs never show through any part of the chrome.
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 
-    /// Soft separator that reads on glass, unlike a full-contrast Divider.
     private var hairline: some View {
-        Rectangle()
-            .fill(Color.primary.opacity(0.06))
-            .frame(height: 1)
+        Rectangle().fill(Color.primary.opacity(0.08)).frame(height: 1)
     }
 
     private var searchHeader: some View {
@@ -91,35 +91,41 @@ struct InlineBrowserView: View {
             .coordinateSpace(name: Self.space)
             .onChange(of: browser.scrollTarget) { _, target in
                 guard let target else { return }
-                withAnimation(.easeOut(duration: 0.18)) {
-                    proxy.scrollTo(target, anchor: target.hasPrefix("cell-") ? nil : .top)
-                }
+                // Jump instantly — tab clicks shouldn't crawl.
+                proxy.scrollTo(target, anchor: target.hasPrefix("cell-") ? nil : .top)
             }
             .onPreferenceChange(HeaderOffsetKey.self) { positions in
                 guard browser.query.isEmpty else { activeCategory = nil; return }
-                // The pinned header sits at y≈0; pick the one closest to the
-                // pin line from at/above it.
                 let pinned = positions.filter { $0.value <= 4 }.max { $0.value < $1.value }
                 activeCategory = pinned?.key ?? positions.min { $0.value < $1.value }?.key
             }
-            .overlay(alignment: .bottom) { hoverReadout }
+            .overlayPreferenceValue(TooltipAnchorKey.self) { data in
+                GeometryReader { proxy in
+                    if let data {
+                        let rect = proxy[data.anchor]
+                        let nearTop = rect.minY < 30
+                        tooltipBubble(data.text)
+                            .fixedSize()
+                            .position(
+                                x: min(max(rect.midX, 46), proxy.size.width - 46),
+                                y: nearTop ? rect.maxY + 16 : rect.minY - 13
+                            )
+                    }
+                }
+                .allowsHitTesting(false)
+            }
         }
     }
 
-    @ViewBuilder
-    private var hoverReadout: some View {
-        if let hoverName {
-            Text(hoverName)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(Capsule().fill(.thickMaterial))
-                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.06)))
-                .padding(.bottom, 8)
-                .allowsHitTesting(false)
-                .transition(.opacity)
-        }
+    private func tooltipBubble(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 11, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white)
+            .lineLimit(1)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Capsule().fill(Color.black.opacity(0.85)))
+            .shadow(color: .black.opacity(0.25), radius: 4, y: 1)
     }
 
     private func cell(_ emoji: Emoji, index: Int) -> some View {
@@ -136,20 +142,28 @@ struct InlineBrowserView: View {
             )
             .id("cell-\(emoji.hexcode)")
             .contentShape(Rectangle())
+            .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
+                tooltipHex == emoji.hexcode ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
+            }
             .onTapGesture { onPick(emoji) }
             .onHover { hovering in
                 hoverWork?.cancel()
                 if hovering {
                     browser.selectedIndex = index
-                    // Reveal the shortcode after a dwell so people can learn it.
-                    let name = ":\(emoji.primaryShortcode):"
+                    hoverHex = emoji.hexcode
+                    let hex = emoji.hexcode
                     let work = DispatchWorkItem {
-                        withAnimation(.easeOut(duration: 0.12)) { hoverName = name }
+                        if hoverHex == hex {
+                            withAnimation(.easeOut(duration: 0.1)) { tooltipHex = hex }
+                        }
                     }
                     hoverWork = work
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
                 } else {
-                    withAnimation(.easeOut(duration: 0.12)) { hoverName = nil }
+                    if hoverHex == emoji.hexcode { hoverHex = nil }
+                    if tooltipHex == emoji.hexcode {
+                        withAnimation(.easeOut(duration: 0.1)) { tooltipHex = nil }
+                    }
                 }
             }
     }
@@ -162,8 +176,8 @@ struct InlineBrowserView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 12)
             .padding(.vertical, 5)
-            // Opaque enough that scrolling emoji don't tint the pinned header.
-            .background(.thickMaterial)
+            // Opaque so emoji scrolling under the pinned header don't tint it.
+            .background(Color(nsColor: .windowBackgroundColor))
             .id(category.id)
             .background(
                 GeometryReader { geo in
@@ -213,7 +227,7 @@ struct InlineBrowserView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
-        .background(.thickMaterial)
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 }
 
@@ -223,6 +237,19 @@ private struct HeaderOffsetKey: PreferenceKey {
     static var defaultValue: [String: CGFloat] = [:]
     static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
         value.merge(nextValue()) { _, new in new }
+    }
+}
+
+/// Carries the hovered cell's bounds + name to the tooltip overlay.
+private struct TooltipData {
+    let text: String
+    let anchor: Anchor<CGRect>
+}
+
+private struct TooltipAnchorKey: PreferenceKey {
+    static var defaultValue: TooltipData? = nil
+    static func reduce(value: inout TooltipData?, nextValue: () -> TooltipData?) {
+        value = nextValue() ?? value
     }
 }
 

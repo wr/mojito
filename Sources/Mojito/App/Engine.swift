@@ -655,8 +655,29 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             collapseBrowser()
 
         case .expandBrowser:
-            // ↓ on the pill — the typed `:` (1 char) is erased on pick.
+            // ↓/↑ on the pill — the typed `:` (1 char) is erased on pick.
             expandToBrowser(deleteCount: 1)
+
+        case .pickIndex(let index):
+            if captureExcluded { break }
+            guard index >= 0, index < viewModel.results.count else { break }
+            let scored = viewModel.results[index]
+            // Never quick-pick the trailing Browse chevron.
+            if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode { break }
+            viewModel.selectedIndex = index
+            insert(query: "", mode: .fromPicker, scope: .normal)
+
+        case .closePickerRestoringQuestion:
+            viewModel.reset()
+            pickerWindow.hide()
+            stateMachine.emptyPickerActive = false
+            captureContext = nil
+            captureFocusSnapshot = nil
+            captureFocusPID = nil
+            captureIsExcluded = false
+            // The `?` from `:?` was swallowed so the delete-count stayed 1;
+            // type it back so the focused app shows the literal `:?`.
+            TextInserter.replace(charactersToDelete: 0, with: "?")
         }
     }
 

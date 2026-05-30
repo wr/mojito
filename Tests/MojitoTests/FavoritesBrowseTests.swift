@@ -28,10 +28,10 @@ struct TriggerStateMachineBrowseTests {
         var sm = TriggerStateMachine()
         sm.favoritesTrigger = .question
         let colon = sm.handle(.colon)
-        #expect(colon.action == .none)  // bare `:` is inert in `:?` mode
+        #expect(colon.action == .none)
         let q = sm.handle(.cancelChar("?"))
         #expect(q.action == .openPicker(query: "", scope: .normal))
-        #expect(q.consumesKey == true)  // the `?` is swallowed
+        #expect(q.consumesKey == true)
         #expect(sm.state == .capturing(query: ""))
     }
 
@@ -74,12 +74,55 @@ struct TriggerStateMachineBrowseTests {
         #expect(left.action == .moveSelection(delta: -1))
         #expect(left.consumesKey == true)
 
+        // Both ↑ and ↓ expand into the full grid.
         let up = sm.handle(.arrowUp)
-        #expect(up.action == .none)
+        #expect(up.action == .expandBrowser)
         #expect(up.consumesKey == true)
         let down = sm.handle(.arrowDown)
         #expect(down.action == .expandBrowser)
         #expect(down.consumesKey == true)
+    }
+
+    @Test func pillDigitQuickPicks() {
+        var sm = TriggerStateMachine()
+        sm.favoritesTrigger = .question
+        _ = sm.handle(.colon)
+        _ = sm.handle(.cancelChar("?"))
+        sm.emptyPickerActive = true
+        let three = sm.handle(.nameChar("3"))
+        #expect(three.action == .pickIndex(2))  // 1-based digit → 0-based index
+        #expect(three.consumesKey == true)
+    }
+
+    @Test func pillLetterStillStartsSearch() {
+        var sm = TriggerStateMachine()
+        sm.favoritesTrigger = .colon
+        _ = sm.handle(.colon)
+        sm.emptyPickerActive = true
+        let out = sm.handle(.nameChar("a"))
+        #expect(out.action == .closePicker)  // a non-digit dismisses to search
+        #expect(sm.state == .capturing(query: "a"))
+    }
+
+    @Test func questionPillEscapeRestoresQuestionMark() {
+        var sm = TriggerStateMachine()
+        sm.favoritesTrigger = .question
+        _ = sm.handle(.colon)
+        _ = sm.handle(.cancelChar("?"))
+        sm.emptyPickerActive = true
+        let esc = sm.handle(.escape)
+        #expect(esc.action == .closePickerRestoringQuestion)
+        #expect(esc.consumesKey == true)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func colonPillEscapeIsPlainClose() {
+        var sm = TriggerStateMachine()
+        sm.favoritesTrigger = .colon
+        _ = sm.handle(.colon)
+        sm.emptyPickerActive = true
+        let esc = sm.handle(.escape)
+        #expect(esc.action == .closePicker)
     }
 
     @Test func visiblePillReturnInsertsSelected() {
@@ -91,17 +134,6 @@ struct TriggerStateMachineBrowseTests {
         #expect(ret.action == .insertEmoji(query: "", mode: .fromPicker, scope: .normal))
         #expect(ret.consumesKey == true)
         #expect(sm.state == .idle)
-    }
-
-    @Test func typingDismissesVisiblePill() {
-        var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
-        _ = sm.handle(.colon)
-        sm.emptyPickerActive = true
-        let out = sm.handle(.nameChar("s"))
-        #expect(out.action == .closePicker)
-        #expect(sm.state == .capturing(query: "s"))
-        #expect(sm.emptyPickerActive == false)
     }
 
     @Test func normalThresholdStillOpensAfterFavoritesDismissal() {
@@ -143,7 +175,7 @@ struct TriggerStateMachineBrowseTests {
 
         let c = sm.handle(.nameChar("c"))
         #expect(c.action == .refreshBrowser(query: "c"))
-        #expect(c.consumesKey == true)  // typing never leaks to the focused app
+        #expect(c.consumesKey == true)
         _ = sm.handle(.nameChar("a"))
         let space = sm.handle(.cancelChar(" "))
         #expect(space.action == .refreshBrowser(query: "ca "))
@@ -223,8 +255,8 @@ struct FavoritesStoreTests {
         let b = db.all[2].hexcode
         store.add(fav)
         let top = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: [a: 3, b: 10])
-        #expect(top.first?.hexcode == fav)                  // favorite first
-        #expect(top.dropFirst().map(\.hexcode).prefix(2) == [b, a])  // then usage desc
+        #expect(top.first?.hexcode == fav)
+        #expect(top.dropFirst().map(\.hexcode).prefix(2) == [b, a])
     }
 
     @Test func topEmojiIsDeterministicAcrossCalls() {
@@ -233,10 +265,10 @@ struct FavoritesStoreTests {
         let store = makeStore()
         let x = db.all[0].hexcode
         let y = db.all[1].hexcode
-        let usage = [x: 5, y: 5]  // tie — must resolve the same way every time
+        let usage = [x: 5, y: 5]
         let first = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: usage).map(\.hexcode)
         let second = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: usage).map(\.hexcode)
         #expect(first == second)
-        #expect(Array(first.prefix(2)) == [min(x, y), max(x, y)])  // hexcode tie-break
+        #expect(Array(first.prefix(2)) == [min(x, y), max(x, y)])
     }
 }

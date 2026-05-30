@@ -121,6 +121,12 @@ final class EmojiBrowserViewModel: ObservableObject {
                 sections.append(BrowserSection(category: category, emoji: emoji))
             }
         }
+
+        // Typographic symbols (★ ⌘ ⌥ …) get their own ⌘ tab at the end.
+        let symbols = SymbolsDatabase.indexed().map(\.emoji)
+        if !symbols.isEmpty {
+            sections.append(BrowserSection(category: .specialCharacters, emoji: symbols))
+        }
         return sections
     }
 }
