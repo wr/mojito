@@ -6,8 +6,8 @@ import SwiftUI
 /// picks are typed straight in.
 ///
 /// No section titles (Apple dropped them too) — groups are separated by space
-/// and identified by the active tab + its tooltip. Native `.help` tooltips
-/// don't fire in a non-key panel, so glyph names use a custom overlay.
+/// and identified by the active tab + a hover tooltip. The panel is non-key,
+/// so native `.help` tooltips don't fire; glyph names use a custom overlay.
 struct InlineBrowserView: View {
     @ObservedObject var browser: EmojiBrowserViewModel
     let onPick: (Emoji) -> Void
@@ -17,8 +17,8 @@ struct InlineBrowserView: View {
     @State private var hoverIndex: Int?
     @State private var tooltipIndex: Int?
     @State private var hoverWork: DispatchWorkItem?
-    /// The caret only blinks after the user clicks the search row (or starts
-    /// typing) — otherwise an always-blinking caret reads as a focused field.
+    /// The caret only blinks once the search row is clicked (or text exists),
+    /// so it doesn't imply a focusable field before then.
     @State private var searchClicked = false
 
     private static let space = "browserGrid"
@@ -47,15 +47,13 @@ struct InlineBrowserView: View {
             gridWithBar
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
-        // No solid background — let the panel's glass chrome show through.
-        // Rendered at the root so it can sit above the top row without being
-        // clipped by the scroll view (the old bug put it in the next group).
+        // Tooltip drawn at the root so it can sit above the top row without
+        // being clipped by the scroll view.
         .overlayPreferenceValue(TooltipAnchorKey.self) { data in
             GeometryReader { proxy in
                 if let data {
                     let rect = proxy[data.anchor]
                     tooltipBubble(data.text)
-                        .fixedSize()
                         .position(
                             x: min(max(rect.midX, 44), proxy.size.width - 44),
                             y: max(rect.minY - 15, 16)
@@ -70,14 +68,17 @@ struct InlineBrowserView: View {
         Rectangle().fill(Color.primary.opacity(0.08)).frame(height: 1)
     }
 
+    // MARK: Search row
+
     private var searchHeader: some View {
-        let showCaret = searchClicked || !browser.query.isEmpty
-        return HStack(spacing: 3) {
+        HStack(spacing: 3) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
                 .padding(.trailing, 3)
             Text(browser.query).foregroundStyle(.primary)
-            if showCaret { caret }
+            // Caret reserves its slot always (hidden via opacity) so showing
+            // it on click doesn't shift the placeholder.
+            caret
             if browser.query.isEmpty {
                 Text("Type to search emoji").foregroundStyle(.tertiary)
             }
@@ -90,18 +91,19 @@ struct InlineBrowserView: View {
         .onTapGesture { searchClicked = true }
     }
 
-    /// A blinking caret — the search isn't a focusable field (the panel is
-    /// non-key, fed by the global tap), so this signals that typing works.
-    /// Hidden until the row is clicked so it doesn't imply a focused field.
     private var caret: some View {
-        TimelineView(.periodic(from: .now, by: 0.6)) { context in
+        let visible = searchClicked || !browser.query.isEmpty
+        return TimelineView(.periodic(from: .now, by: 0.6)) { context in
             let on = Int(context.date.timeIntervalSince1970 / 0.6) % 2 == 0
             RoundedRectangle(cornerRadius: 1, style: .continuous)
                 .fill(Color.accentColor)
                 .frame(width: 2, height: 17)
-                .opacity(on ? 1 : 0)
+                .opacity(visible && on ? 1 : 0)
         }
+        .frame(width: 2)  // fixed slot — no layout shift when it appears
     }
+
+    // MARK: Grid
 
     private var gridWithBar: some View {
         ZStack(alignment: .bottom) {
@@ -118,24 +120,7 @@ struct InlineBrowserView: View {
                         emptyResults
                     } else {
                         ForEach(indexedSections, id: \.section.id) { entry in
-                            LazyVGrid(columns: columns, spacing: 3) {
-                                ForEach(entry.items, id: \.emoji.hexcode) { item in
-                                    cell(item.emoji, index: item.index)
-                                }
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.bottom, 16)  // gap between groups
-                            // Whole-section scroll anchor (reliable, unlike a
-                            // deep lazy cell) + position probe for the active tab.
-                            .id("sect-\(entry.section.category.id)")
-                            .background(
-                                GeometryReader { geo in
-                                    Color.clear.preference(
-                                        key: SectionTopKey.self,
-                                        value: [entry.section.category.id: geo.frame(in: .named(Self.space)).minY]
-                                    )
-                                }
-                            )
+                            grp(entry)
                         }
                     }
                 }
@@ -145,18 +130,39 @@ struct InlineBrowserView: View {
             .coordinateSpace(name: Self.space)
             .onPreferenceChange(SectionTopKey.self) { tops in
                 guard browser.query.isEmpty else { activeCategory = nil; return }
-                // Active = the group whose top is at/just above the viewport
-                // top; fall back to the first group when everything's below.
                 let atTop = tops.filter { $0.value <= 16 }.max { $0.value < $1.value }
                 activeCategory = atTop?.key ?? tops.min { $0.value < $1.value }?.key
             }
             .onChange(of: browser.scrollTarget) { _, target in
                 guard let target else { return }
-                // "sect-…" → align that group to the top (tab click);
-                // "cell-N" → just keep the cell visible (keyboard nav).
-                proxy.scrollTo(target, anchor: target.hasPrefix("sect-") ? .top : nil)
+                switch target {
+                case .section(let c): proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
+                case .cell(let i):    proxy.scrollTo(BrowserScroll.cell(i), anchor: nil)
+                }
+                // Clear so the same target can be requested again later.
+                DispatchQueue.main.async { browser.scrollTarget = nil }
             }
         }
+    }
+
+    /// One section group: its grid + the scroll anchor + the active-tab probe.
+    private func grp(_ entry: (section: BrowserSection, items: [(index: Int, emoji: Emoji)])) -> some View {
+        LazyVGrid(columns: columns, spacing: 3) {
+            ForEach(entry.items, id: \.emoji.hexcode) { item in
+                cell(item.emoji, index: item.index)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.bottom, 16)  // gap between groups
+        .id(BrowserScroll.section(entry.section.category))
+        .background(
+            GeometryReader { geo in
+                Color.clear.preference(
+                    key: SectionTopKey.self,
+                    value: [entry.section.category.id: geo.frame(in: .named(Self.space)).minY]
+                )
+            }
+        )
     }
 
     private func cell(_ emoji: Emoji, index: Int) -> some View {
@@ -172,9 +178,7 @@ struct InlineBrowserView: View {
                 RoundedRectangle(cornerRadius: 9, style: .continuous)
                     .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
             )
-            // Index, not hexcode: the same emoji can appear in two sections,
-            // so a hexcode id is ambiguous (the tooltip anchored to the wrong copy).
-            .id("cell-\(index)")
+            .id(BrowserScroll.cell(index))
             .contentShape(Rectangle())
             .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
                 tooltipIndex == index ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
@@ -197,12 +201,13 @@ struct InlineBrowserView: View {
             }
     }
 
-    /// Light gray box matching the macOS system tooltip.
+    /// Light box matching the macOS system tooltip.
     private func tooltipBubble(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 11))
             .foregroundStyle(.primary)
             .lineLimit(1)
+            .fixedSize()
             .padding(.horizontal, 7)
             .padding(.vertical, 3)
             .background(
@@ -229,13 +234,13 @@ struct InlineBrowserView: View {
         .padding(.vertical, 56)
     }
 
+    // MARK: Tab bar
+
     private var categoryBar: some View {
         HStack(spacing: 1) {
             ForEach(browser.visibleCategories) { category in
-                // Active reflects the last tab tapped (cleared while searching).
                 let isActive = browser.query.isEmpty && activeCategory == category.id
                 Button {
-                    activeCategory = category.id
                     onCategory(category)
                 } label: {
                     Image(systemName: category.tabSymbol)
@@ -256,12 +261,10 @@ struct InlineBrowserView: View {
         .padding(.horizontal, 8)
         .frame(height: Self.tabIconHeight)
         .frame(maxWidth: .infinity, alignment: .leading)
-        // Tall gradient region above the icons + breathing room below them.
-        .padding(.top, 18)
-        .padding(.bottom, 8)
+        .padding(.top, 18)   // tall gradient region above the icons
+        .padding(.bottom, 8) // breathing room below
         .background(barBackground)
-        // Eat clicks across the whole bar so they can't fall through to the grid.
-        .contentShape(Rectangle())
+        .contentShape(Rectangle())  // eat clicks so they don't hit the grid
     }
 
     /// A frosted bar that stays glassy: just the blur, faded in from the top

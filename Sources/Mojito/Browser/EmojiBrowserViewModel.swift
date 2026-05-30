@@ -8,6 +8,13 @@ struct BrowserSection: Identifiable {
     var id: String { category.id }
 }
 
+/// A scroll request from the view model to the grid. A typed value (not a
+/// parsed string) so the target always matches a real view `.id`.
+enum BrowserScroll: Hashable {
+    case section(EmojiCategory)  // tab click → align group to top
+    case cell(Int)              // keyboard nav → keep selected cell visible
+}
+
 /// Drives the in-panel emoji browser. Input arrives via the trigger state
 /// machine (the panel is non-key, like the inline picker), so search + grid
 /// navigation are set from the Engine rather than from focusable controls.
@@ -19,13 +26,13 @@ final class EmojiBrowserViewModel: ObservableObject {
     @Published private(set) var query: String = ""
     @Published private(set) var sections: [BrowserSection] = []
     @Published var selectedIndex: Int = 0
-    /// Bumped to ask the view to scroll a category header / cell into view.
-    @Published var scrollTarget: String?
+    /// Set to ask the view to scroll; the view clears it back to nil after
+    /// handling, so re-requesting the same target fires again.
+    @Published var scrollTarget: BrowserScroll?
 
     private let database: EmojiDatabase
     private let usage: [String: Int]
     private let baseSections: [BrowserSection]
-    private var scrollNonce = 0
 
     init(database: EmojiDatabase, favorites: FavoritesStore) {
         self.database = database
@@ -58,13 +65,11 @@ final class EmojiBrowserViewModel: ObservableObject {
         switch direction {
         case .left:  next -= 1
         case .right: next += 1
-        case .up:    next -= EmojiBrowserViewModel.columns
-        case .down:  next += EmojiBrowserViewModel.columns
+        case .up:    next -= Self.columns
+        case .down:  next += Self.columns
         }
         selectedIndex = min(max(next, 0), count - 1)
-        // Scroll by flat index — the same emoji can appear in two sections
-        // (e.g. Frequently Used + its category), so hexcode isn't unique.
-        scrollTarget = "cell-\(selectedIndex)"
+        scrollTarget = .cell(selectedIndex)
     }
 
     /// Mouse pick: snap the selection to the clicked glyph.
@@ -76,11 +81,7 @@ final class EmojiBrowserViewModel: ObservableObject {
 
     func scroll(to category: EmojiCategory) {
         if !query.isEmpty { setQuery("") }  // rebuilds `sections`
-        // Target the whole section group (has real height) rather than a deep
-        // lazy cell, which scrolls unreliably. The `#nonce` suffix makes the
-        // value change even when re-tapping the same tab, so onChange refires.
-        scrollNonce += 1
-        scrollTarget = "sect-\(category.id)#\(scrollNonce)"
+        scrollTarget = .section(category)
     }
 
     private func recompute() {

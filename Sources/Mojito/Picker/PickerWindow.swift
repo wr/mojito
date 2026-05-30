@@ -309,8 +309,8 @@ final class PickerWindow {
     }
 }
 
-/// The pill's number-hotkey tooltip: the shortcode with a faint trailing
-/// hotkey digit. Kept light — a slim capsule, small type.
+/// The pill's number-hotkey tooltip — matches the browser's glyph tooltip
+/// (light box, 1px border, soft shadow) with a faint trailing hotkey digit.
 private struct PillTooltipLabel: View {
     let number: Int
     let name: String
@@ -318,12 +318,20 @@ private struct PillTooltipLabel: View {
     var body: some View {
         (Text(name).foregroundStyle(.primary)
          + Text("  \(number)").foregroundStyle(.tertiary))
-            .font(.system(size: 10.5))
-            .padding(.horizontal, 7)
-            .padding(.vertical, 2.5)
-            .background(.regularMaterial, in: Capsule())
-            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
+            .font(.system(size: 11))
+            .lineLimit(1)
             .fixedSize()
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(Color(nsColor: .windowBackgroundColor))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.15))
+            )
+            .shadow(color: .black.opacity(0.18), radius: 3, y: 1)
     }
 }
 
