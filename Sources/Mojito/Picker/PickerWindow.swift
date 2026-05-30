@@ -13,6 +13,10 @@ final class PickerWindow {
     private let chrome: NSView
     private var clickMonitorLocal: Any?
     private var clickMonitorGlobal: Any?
+    /// Separate panel for the pill's number-hotkey tooltip — the pill panel
+    /// is too short to host a label above its cells without clipping.
+    private var tooltipPanel: NSPanel?
+    private var pillTooltipWork: DispatchWorkItem?
 
     init(viewModel: PickerViewModel) {
         self.viewModel = viewModel
@@ -39,6 +43,78 @@ final class PickerWindow {
         // Glass; pre-26 falls back to NSVisualEffectView `.menu`.
         self.chrome = Self.makeChrome(hosting: hostingView)
         panel.contentView = chrome
+
+        viewModel.onPillHover = { [weak self] index in
+            self?.handlePillHover(index)
+        }
+    }
+
+    // MARK: - Pill number-hotkey tooltip
+
+    private func handlePillHover(_ index: Int?) {
+        pillTooltipWork?.cancel()
+        guard let index, index < 8, index < viewModel.results.count else {
+            hidePillTooltip()
+            return
+        }
+        let scored = viewModel.results[index]
+        guard scored.emoji.hexcode != EmojiBrowser.sentinelHexcode else {
+            hidePillTooltip()
+            return
+        }
+        let name = ":\(scored.emoji.primaryShortcode):"
+        let work = DispatchWorkItem { [weak self] in
+            self?.showPillTooltip(index: index, number: index + 1, name: name)
+        }
+        pillTooltipWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+    }
+
+    private func showPillTooltip(index: Int, number: Int, name: String) {
+        guard viewModel.isVisible, viewModel.compact else { return }
+        let hosting = NSHostingView(rootView: PillTooltipLabel(number: number, name: name))
+        let size = hosting.fittingSize
+
+        let tip: NSPanel
+        if let existing = tooltipPanel {
+            tip = existing
+        } else {
+            tip = NSPanel(
+                contentRect: NSRect(origin: .zero, size: size),
+                styleMask: [.borderless, .nonactivatingPanel],
+                backing: .buffered, defer: false
+            )
+            tip.isFloatingPanel = true
+            tip.level = .floating
+            tip.isOpaque = false
+            tip.backgroundColor = .clear
+            tip.hasShadow = true
+            tip.ignoresMouseEvents = true  // never interrupt the hover
+            tip.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
+            tooltipPanel = tip
+        }
+        tip.appearance = NSApp.effectiveAppearance
+        tip.contentView = hosting
+
+        // Centered above cell `index` of the pill.
+        let cellCenterX = panel.frame.minX + PickerLayout.compactPadding
+            + CGFloat(index) * (PickerLayout.compactCell + PickerLayout.compactSpacing)
+            + PickerLayout.compactCell / 2
+        var origin = CGPoint(x: cellCenterX - size.width / 2, y: panel.frame.maxY + 4)
+        let screen = NSScreen.screens.first { $0.frame.intersects(panel.frame) } ?? NSScreen.main
+        if let visible = screen?.visibleFrame {
+            origin.x = min(max(origin.x, visible.minX + 4), visible.maxX - size.width - 4)
+            if origin.y + size.height > visible.maxY {
+                origin.y = panel.frame.minY - size.height - 4  // flip below
+            }
+        }
+        tip.setFrame(CGRect(origin: origin, size: size), display: true)
+        tip.orderFront(nil)
+    }
+
+    private func hidePillTooltip() {
+        pillTooltipWork?.cancel()
+        tooltipPanel?.orderOut(nil)
     }
 
     /// Vertical list uses the menu corner radius; the compact pill is a
@@ -80,6 +156,7 @@ final class PickerWindow {
 
     /// Anchors near the caret rect, or the mouse if nil.
     func show(near caret: CGRect?) {
+        hidePillTooltip()  // clear any stale tooltip; re-shows on hover
         let anchor = caret ?? mouseAnchor()
         // Follow the live system appearance. A borderless panel created once
         // and reused otherwise stays pinned to its launch-time appearance, so
@@ -104,6 +181,7 @@ final class PickerWindow {
     /// screen (the pill), it unfolds from the pill's top-left with an eased
     /// animation; otherwise it just appears at full size near the caret.
     func showExpanded(near caret: CGRect?) {
+        hidePillTooltip()
         panel.appearance = NSApp.effectiveAppearance
         setCornerRadius(BrowserLayout.cornerRadius)
         let size = CGSize(width: BrowserLayout.width, height: BrowserLayout.height)
@@ -146,6 +224,7 @@ final class PickerWindow {
         panel.orderOut(nil)
         viewModel.isVisible = false
         removeClickMonitors()
+        hidePillTooltip()
     }
 
     // MARK: - Click-away
@@ -227,6 +306,38 @@ final class PickerWindow {
     private func mouseAnchor() -> CGRect {
         let mouse = NSEvent.mouseLocation
         return CGRect(x: mouse.x, y: mouse.y, width: 1, height: 16)
+    }
+}
+
+/// The pill's number-hotkey tooltip: a keycap number + the shortcode.
+private struct PillTooltipLabel: View {
+    let number: Int
+    let name: String
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text("\(number)")
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .foregroundStyle(.primary)
+                .frame(minWidth: 13)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 1.5)
+                .background(
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .fill(Color.primary.opacity(0.1))
+                )
+            Text(name)
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.12))
+        )
+        .fixedSize()
     }
 }
 

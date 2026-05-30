@@ -2,8 +2,6 @@ import SwiftUI
 
 struct PickerView: View {
     @ObservedObject var viewModel: PickerViewModel
-    /// Reveals the 1–8 number-hotkey badges while the mouse is over the pill.
-    @State private var pillHovered = false
 
     var body: some View {
         // Chrome lives on the panel (NSGlassEffectView / NSVisualEffectView)
@@ -40,14 +38,12 @@ struct PickerView: View {
                         .frame(height: PickerLayout.compactCell * 0.55)
                         .padding(.horizontal, 1)
                 }
-                CompactCell(scored: scored, index: index, viewModel: viewModel, showNumber: pillHovered)
+                CompactCell(scored: scored, index: index, viewModel: viewModel)
             }
         }
         .padding(.horizontal, PickerLayout.compactPadding)
         .frame(height: PickerLayout.compactHeight)
         .fixedSize()
-        // Hovering anywhere over the pill reveals all the 1–8 hotkey badges.
-        .onHover { pillHovered = $0 }
     }
 
     private var resultsList: some View {
@@ -254,8 +250,6 @@ private struct CompactCell: View {
     let scored: ScoredEmoji
     let index: Int
     @ObservedObject var viewModel: PickerViewModel
-    /// Reveal the 1–8 number-hotkey badge (`:?N`) while the pill is hovered.
-    var showNumber: Bool = false
 
     var body: some View {
         let isSelected = index == viewModel.selectedIndex
@@ -274,25 +268,12 @@ private struct CompactCell: View {
             }
         }
         .frame(width: PickerLayout.compactCell, height: PickerLayout.compactCell)
-        .overlay(alignment: .bottomTrailing) {
-            if showNumber, !isBrowse, index < 8 {
-                Text("\(index + 1)")
-                    .font(.system(size: 8, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .opacity(0.7)
-                    .padding(.horizontal, 2)
-                    .background(
-                        RoundedRectangle(cornerRadius: 2.5, style: .continuous)
-                            .fill(Color(nsColor: .windowBackgroundColor).opacity(0.5))
-                    )
-                    .padding(1.5)
-            }
-        }
         .contentShape(Rectangle())
-        .help(isBrowse ? String(localized: "Browse all emojis…") : ":\(scored.emoji.primaryShortcode):")
         .onTapGesture { viewModel.onActivate?(index) }
         .onHover { hovering in
             if hovering { viewModel.selectedIndex = index }
+            // Drives the number-hotkey tooltip panel (only for real emoji cells).
+            viewModel.onPillHover?(hovering && !isBrowse ? index : nil)
         }
     }
 
