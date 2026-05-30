@@ -19,12 +19,13 @@ final class EmojiBrowserViewModel: ObservableObject {
     @Published private(set) var query: String = ""
     @Published private(set) var sections: [BrowserSection] = []
     @Published var selectedIndex: Int = 0
-    /// Bumped to ask the view to scroll a category header into view.
+    /// Bumped to ask the view to scroll a category header / cell into view.
     @Published var scrollTarget: String?
 
     private let database: EmojiDatabase
     private let usage: [String: Int]
     private let baseSections: [BrowserSection]
+    private var scrollNonce = 0
 
     init(database: EmojiDatabase, favorites: FavoritesStore) {
         self.database = database
@@ -57,8 +58,8 @@ final class EmojiBrowserViewModel: ObservableObject {
         switch direction {
         case .left:  next -= 1
         case .right: next += 1
-        case .up:    next -= Self.columns
-        case .down:  next += Self.columns
+        case .up:    next -= EmojiBrowserViewModel.columns
+        case .down:  next += EmojiBrowserViewModel.columns
         }
         selectedIndex = min(max(next, 0), count - 1)
         // Scroll by flat index — the same emoji can appear in two sections
@@ -75,16 +76,11 @@ final class EmojiBrowserViewModel: ObservableObject {
 
     func scroll(to category: EmojiCategory) {
         if !query.isEmpty { setQuery("") }  // rebuilds `sections`
-        // Scroll to the category's first real cell (by flat index) — a
-        // zero-height section anchor scrolls unreliably in a lazy list.
-        var running = 0
-        for section in sections {
-            if section.category == category {
-                scrollTarget = "top:cell-\(running)"  // align section to the top
-                return
-            }
-            running += section.emoji.count
-        }
+        // Target the whole section group (has real height) rather than a deep
+        // lazy cell, which scrolls unreliably. The `#nonce` suffix makes the
+        // value change even when re-tapping the same tab, so onChange refires.
+        scrollNonce += 1
+        scrollTarget = "sect-\(category.id)#\(scrollNonce)"
     }
 
     private func recompute() {

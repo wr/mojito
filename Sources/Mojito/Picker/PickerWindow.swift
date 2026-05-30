@@ -309,35 +309,21 @@ final class PickerWindow {
     }
 }
 
-/// The pill's number-hotkey tooltip: a keycap number + the shortcode.
+/// The pill's number-hotkey tooltip: the shortcode with a faint trailing
+/// hotkey digit. Kept light — a slim capsule, small type.
 private struct PillTooltipLabel: View {
     let number: Int
     let name: String
 
     var body: some View {
-        HStack(spacing: 6) {
-            Text("\(number)")
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
-                .frame(minWidth: 13)
-                .padding(.horizontal, 4)
-                .padding(.vertical, 1.5)
-                .background(
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .fill(Color.primary.opacity(0.1))
-                )
-            Text(name)
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.12))
-        )
-        .fixedSize()
+        (Text(name).foregroundStyle(.primary)
+         + Text("  \(number)").foregroundStyle(.tertiary))
+            .font(.system(size: 10.5))
+            .padding(.horizontal, 7)
+            .padding(.vertical, 2.5)
+            .background(.regularMaterial, in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
+            .fixedSize()
     }
 }
 

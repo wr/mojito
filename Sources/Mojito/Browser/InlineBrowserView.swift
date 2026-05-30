@@ -17,7 +17,11 @@ struct InlineBrowserView: View {
     @State private var hoverIndex: Int?
     @State private var tooltipIndex: Int?
     @State private var hoverWork: DispatchWorkItem?
+    /// The caret only blinks after the user clicks the search row (or starts
+    /// typing) — otherwise an always-blinking caret reads as a focused field.
+    @State private var searchClicked = false
 
+    private static let space = "browserGrid"
     private static let tabBarHeight: CGFloat = 56
     private static let tabIconHeight: CGFloat = 30
     private let columns = Array(
@@ -67,12 +71,13 @@ struct InlineBrowserView: View {
     }
 
     private var searchHeader: some View {
-        HStack(spacing: 3) {
+        let showCaret = searchClicked || !browser.query.isEmpty
+        return HStack(spacing: 3) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
                 .padding(.trailing, 3)
             Text(browser.query).foregroundStyle(.primary)
-            caret
+            if showCaret { caret }
             if browser.query.isEmpty {
                 Text("Type to search emoji").foregroundStyle(.tertiary)
             }
@@ -81,10 +86,13 @@ struct InlineBrowserView: View {
         .font(.system(size: 14))
         .padding(.horizontal, 12)
         .frame(height: 36)
+        .contentShape(Rectangle())
+        .onTapGesture { searchClicked = true }
     }
 
     /// A blinking caret — the search isn't a focusable field (the panel is
     /// non-key, fed by the global tap), so this signals that typing works.
+    /// Hidden until the row is clicked so it doesn't imply a focused field.
     private var caret: some View {
         TimelineView(.periodic(from: .now, by: 0.6)) { context in
             let on = Int(context.date.timeIntervalSince1970 / 0.6) % 2 == 0
@@ -117,21 +125,36 @@ struct InlineBrowserView: View {
                             }
                             .padding(.horizontal, 8)
                             .padding(.bottom, 16)  // gap between groups
+                            // Whole-section scroll anchor (reliable, unlike a
+                            // deep lazy cell) + position probe for the active tab.
+                            .id("sect-\(entry.section.category.id)")
+                            .background(
+                                GeometryReader { geo in
+                                    Color.clear.preference(
+                                        key: SectionTopKey.self,
+                                        value: [entry.section.category.id: geo.frame(in: .named(Self.space)).minY]
+                                    )
+                                }
+                            )
                         }
                     }
                 }
                 .padding(.top, 8)
                 .padding(.bottom, Self.tabBarHeight + 4)  // clear the floating bar
             }
+            .coordinateSpace(name: Self.space)
+            .onPreferenceChange(SectionTopKey.self) { tops in
+                guard browser.query.isEmpty else { activeCategory = nil; return }
+                // Active = the group whose top is at/just above the viewport
+                // top; fall back to the first group when everything's below.
+                let atTop = tops.filter { $0.value <= 16 }.max { $0.value < $1.value }
+                activeCategory = atTop?.key ?? tops.min { $0.value < $1.value }?.key
+            }
             .onChange(of: browser.scrollTarget) { _, target in
                 guard let target else { return }
-                // "top:cell-N" → align section to the top (tab click);
+                // "sect-…" → align that group to the top (tab click);
                 // "cell-N" → just keep the cell visible (keyboard nav).
-                if target.hasPrefix("top:") {
-                    proxy.scrollTo(String(target.dropFirst(4)), anchor: .top)
-                } else {
-                    proxy.scrollTo(target, anchor: nil)
-                }
+                proxy.scrollTo(target, anchor: target.hasPrefix("sect-") ? .top : nil)
             }
         }
     }
@@ -256,6 +279,15 @@ struct InlineBrowserView: View {
                     startPoint: .top, endPoint: .bottom
                 )
             )
+    }
+}
+
+/// Each group's top offset in the scroll viewport, so the active tab can
+/// track the scroll position.
+private struct SectionTopKey: PreferenceKey {
+    static var defaultValue: [String: CGFloat] = [:]
+    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
+        value.merge(nextValue()) { _, new in new }
     }
 }
 
