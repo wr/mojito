@@ -25,11 +25,8 @@ struct InlineBrowserView: View {
     private static let tabBarHeight: CGFloat = 56
     private static let tabIconHeight: CGFloat = 30
     private static let cellSpacing: CGFloat = 3
+    private static let cellHeight: CGFloat = 40
     private static let groupGap: CGFloat = 28
-    private let columns = Array(
-        repeating: GridItem(.flexible(minimum: 36), spacing: cellSpacing),
-        count: EmojiBrowserViewModel.columns
-    )
 
     private var indexedSections: [(section: BrowserSection, items: [(index: Int, emoji: Emoji)])] {
         var running = 0
@@ -117,12 +114,12 @@ struct InlineBrowserView: View {
     private var grid: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                // Outer stack is NOT lazy: each section's LazyVGrid reports its
-                // full height up front, so section offsets are deterministic and
-                // `scrollTo(.section)` lands exactly (a LazyVStack estimates
-                // offscreen sections, which made tab clicks miss + accumulate
-                // error on re-click). The inner grids stay lazy, so cells are
-                // still only built when visible.
+                // Deliberately NON-lazy (plain VStack of manual rows, no
+                // LazyVGrid). The corpus is fixed (~1900 glyphs), so laying it
+                // all out costs a small one-time hit on open but makes every
+                // row's offset *real* — that's what makes `scrollTo` exact and
+                // the active-tab tracking truthful. Lazy height estimation was
+                // the root of the drifting-scroll bug.
                 VStack(alignment: .leading, spacing: Self.groupGap) {
                     if browser.sections.isEmpty {
                         emptyResults
@@ -143,34 +140,38 @@ struct InlineBrowserView: View {
             }
             .onChange(of: browser.scrollTarget) { _, target in
                 guard let target else { return }
+                // Offsets are real (non-lazy), so a single scrollTo lands exactly.
                 switch target {
-                case .section(let c):
-                    // Two passes: the first scroll materializes the lazy rows
-                    // between here and the target (so SwiftUI learns their real
-                    // heights), the second lands precisely. One pass alone
-                    // overshoots/undershoots because offscreen rows are
-                    // estimated. No layout pinning, so nothing overlaps.
-                    proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
-                    DispatchQueue.main.async {
-                        withAnimation(.easeOut(duration: 0.12)) {
-                            proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
-                        }
-                    }
-                case .cell(let i):
-                    proxy.scrollTo(BrowserScroll.cell(i), anchor: nil)
+                case .section(let c): proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
+                case .cell(let i):    proxy.scrollTo(BrowserScroll.cell(i), anchor: nil)
                 }
-                // Clear (next tick) so the same target can re-fire later.
                 DispatchQueue.main.async { browser.scrollTarget = nil }
             }
         }
     }
 
-    /// One section group: its grid + the scroll anchor + the active-tab probe.
-    /// The grid is pinned to its exact height so offsets stay deterministic.
+    /// Chunk a section's items into rows of `columns`.
+    private func rows(_ items: [(index: Int, emoji: Emoji)]) -> [[(index: Int, emoji: Emoji)]] {
+        stride(from: 0, to: items.count, by: EmojiBrowserViewModel.columns).map {
+            Array(items[$0 ..< min($0 + EmojiBrowserViewModel.columns, items.count)])
+        }
+    }
+
+    /// One section group: non-lazy rows + the scroll anchor + active-tab probe.
     private func grp(_ entry: (section: BrowserSection, items: [(index: Int, emoji: Emoji)])) -> some View {
-        LazyVGrid(columns: columns, spacing: Self.cellSpacing) {
-            ForEach(entry.items, id: \.emoji.hexcode) { item in
-                cell(item.emoji, index: item.index)
+        VStack(alignment: .leading, spacing: Self.cellSpacing) {
+            ForEach(Array(rows(entry.items).enumerated()), id: \.offset) { _, row in
+                HStack(spacing: Self.cellSpacing) {
+                    ForEach(row, id: \.emoji.hexcode) { item in
+                        cell(item.emoji, index: item.index)
+                    }
+                    // Pad a short final row so cells stay column-aligned.
+                    if row.count < EmojiBrowserViewModel.columns {
+                        ForEach(0 ..< (EmojiBrowserViewModel.columns - row.count), id: \.self) { _ in
+                            Color.clear.frame(maxWidth: .infinity).frame(height: Self.cellHeight)
+                        }
+                    }
+                }
             }
         }
         .padding(.horizontal, 8)
@@ -193,7 +194,7 @@ struct InlineBrowserView: View {
         return Text(glyph)
             .font(.system(size: 25))  // match the pill's glyph size
             .frame(maxWidth: .infinity)
-            .frame(height: 40)
+            .frame(height: Self.cellHeight)
             .background(
                 RoundedRectangle(cornerRadius: 9, style: .continuous)
                     .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
