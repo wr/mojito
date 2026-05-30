@@ -24,10 +24,22 @@ struct InlineBrowserView: View {
     private static let space = "browserGrid"
     private static let tabBarHeight: CGFloat = 56
     private static let tabIconHeight: CGFloat = 30
+    private static let cellHeight: CGFloat = 40
+    private static let cellSpacing: CGFloat = 3
+    private static let groupGap: CGFloat = 28
     private let columns = Array(
-        repeating: GridItem(.flexible(minimum: 36), spacing: 3),
+        repeating: GridItem(.flexible(minimum: 36), spacing: cellSpacing),
         count: EmojiBrowserViewModel.columns
     )
+
+    /// Exact height of a section's grid from its row count. A LazyVGrid
+    /// reports an estimated (collapsed) height until its cells render, which
+    /// threw off `scrollTo` for offscreen sections; pinning the height makes
+    /// every section's offset deterministic while cells stay lazy.
+    private func sectionHeight(_ count: Int) -> CGFloat {
+        let rows = max(1, Int(ceil(Double(count) / Double(EmojiBrowserViewModel.columns))))
+        return CGFloat(rows) * Self.cellHeight + CGFloat(rows - 1) * Self.cellSpacing
+    }
 
     private var indexedSections: [(section: BrowserSection, items: [(index: Int, emoji: Emoji)])] {
         var running = 0
@@ -121,7 +133,7 @@ struct InlineBrowserView: View {
                 // offscreen sections, which made tab clicks miss + accumulate
                 // error on re-click). The inner grids stay lazy, so cells are
                 // still only built when visible.
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: Self.groupGap) {
                     if browser.sections.isEmpty {
                         emptyResults
                     } else {
@@ -152,12 +164,14 @@ struct InlineBrowserView: View {
     }
 
     /// One section group: its grid + the scroll anchor + the active-tab probe.
+    /// The grid is pinned to its exact height so offsets stay deterministic.
     private func grp(_ entry: (section: BrowserSection, items: [(index: Int, emoji: Emoji)])) -> some View {
-        LazyVGrid(columns: columns, spacing: 3) {
+        LazyVGrid(columns: columns, spacing: Self.cellSpacing) {
             ForEach(entry.items, id: \.emoji.hexcode) { item in
                 cell(item.emoji, index: item.index)
             }
         }
+        .frame(height: sectionHeight(entry.items.count), alignment: .top)
         .padding(.horizontal, 8)
         .id(BrowserScroll.section(entry.section.category))
         .background(
