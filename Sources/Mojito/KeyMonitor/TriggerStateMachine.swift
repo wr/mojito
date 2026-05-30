@@ -111,6 +111,8 @@ enum TriggerAction: Equatable {
     case pickBrowser
     /// Close the browser grid (esc, backspace past empty, click-away).
     case closeBrowser
+    /// Grow the favorites pill into the full browser grid (↓ on the pill).
+    case expandBrowser
 }
 
 enum GifMoveDirection: Equatable { case left, right, up, down }
@@ -451,16 +453,21 @@ struct TriggerStateMachine {
         // MARK: capturing — picker navigation
 
         case (.capturing(let q), .arrowUp):
-            // Empty query has no picker to drive *unless* the favorites
-            // picker is showing — then arrows navigate it.
-            return (q.isEmpty && !emptyPickerActive)
-                ? .passthrough
-                : TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
+            if q.isEmpty {
+                // Pill: ←→ navigate, ↓ expands; ↑ is a no-op. Without the
+                // pill, ↑ on a bare `:` passes through (caret motion).
+                return emptyPickerActive ? .consume : .passthrough
+            }
+            return TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
 
         case (.capturing(let q), .arrowDown):
-            return (q.isEmpty && !emptyPickerActive)
-                ? .passthrough
-                : TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
+            if q.isEmpty {
+                // Pill: ↓ grows it into the full browser grid.
+                return emptyPickerActive
+                    ? TriggerOutput(action: .expandBrowser, consumesKey: true)
+                    : .passthrough
+            }
+            return TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
 
         case (.capturing(let q), .arrowLeft):
             // The compact favorites pill is horizontal — ←/→ drive its

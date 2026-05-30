@@ -1,4 +1,5 @@
 import AppKit
+import QuartzCore
 import SwiftUI
 
 @MainActor
@@ -99,22 +100,46 @@ final class PickerWindow {
         show(near: caret)
     }
 
-    /// Grow (or open) the panel into the full browser grid. Animates the
-    /// frame when already on screen — the pill→grid expansion.
+    /// Grow (or open) the panel into the full browser grid. When already on
+    /// screen (the pill), it unfolds from the pill's top-left with an eased
+    /// animation; otherwise it just appears at full size near the caret.
     func showExpanded(near caret: CGRect?) {
         panel.appearance = NSApp.effectiveAppearance
         setCornerRadius(BrowserLayout.cornerRadius)
         let size = CGSize(width: BrowserLayout.width, height: BrowserLayout.height)
-        let anchor = caret ?? mouseAnchor()
-        let frame = positionedFrame(anchor: anchor, size: size)
+
         if panel.isVisible {
-            panel.setFrame(frame, display: true, animate: true)
+            let current = panel.frame
+            let target = clampToVisible(
+                CGRect(x: current.minX, y: current.maxY - size.height, width: size.width, height: size.height),
+                on: current
+            )
+            NSAnimationContext.runAnimationGroup { ctx in
+                ctx.duration = 0.22
+                ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                panel.animator().setFrame(target, display: true)
+            }
         } else {
+            let anchor = caret ?? mouseAnchor()
+            let frame = positionedFrame(anchor: anchor, size: size)
             panel.setFrame(frame, display: true)
             panel.orderFrontRegardless()
         }
         viewModel.isVisible = true
         installClickMonitors()
+    }
+
+    /// Keep a frame fully on the screen that hosts `reference`.
+    private func clampToVisible(_ frame: CGRect, on reference: CGRect) -> CGRect {
+        let screen = NSScreen.screens.first { $0.frame.intersects(reference) }
+            ?? NSScreen.main ?? NSScreen.screens.first!
+        let visible = screen.visibleFrame
+        var f = frame
+        if f.maxX > visible.maxX { f.origin.x = visible.maxX - f.width - 8 }
+        if f.minX < visible.minX { f.origin.x = visible.minX + 8 }
+        if f.maxY > visible.maxY { f.origin.y = visible.maxY - f.height - 8 }
+        if f.minY < visible.minY { f.origin.y = visible.minY + 8 }
+        return f
     }
 
     func hide() {

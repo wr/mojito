@@ -1,4 +1,5 @@
 import SwiftUI
+import KeyboardShortcuts
 
 /// Manage the favorites surfaced when the user types a bare `:`. Add by
 /// searching, remove with one click. (Starring lives here, not in the
@@ -35,10 +36,18 @@ struct FavoritesSettingsView: View {
                         Text(trigger.settingsLabel).tag(trigger.rawValue)
                     }
                 }
-                Text("Pops your favorites and most-used emoji. Return inserts the first; ←→ pick another; the ⌄ opens the full browser.")
+                Text("Pops your favorites and most-used emoji. Return inserts the first; ←→ pick another; ↓ (or the ⌄) opens the full browser.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Section {
+                KeyboardShortcuts.Recorder("Open emoji browser", name: .showEmojiBrowser)
+            } footer: {
+                Text("A global hotkey to open the full emoji browser anywhere.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
 
             Section {

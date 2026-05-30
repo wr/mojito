@@ -29,12 +29,19 @@ struct InlineBrowserView: View {
     var body: some View {
         VStack(spacing: 0) {
             searchHeader
-            Divider()
+            hairline
             grid
-            Divider()
+            hairline
             categoryBar
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
+    }
+
+    /// Soft separator that reads on glass, unlike a full-contrast Divider.
+    private var hairline: some View {
+        Rectangle()
+            .fill(Color.primary.opacity(0.06))
+            .frame(height: 1)
     }
 
     private var searchHeader: some View {
@@ -97,8 +104,8 @@ struct InlineBrowserView: View {
             .font(.system(size: 22))
             .frame(width: 34, height: 34)
             .background(
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .fill(isSelected ? Color.accentColor : Color.clear)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
             )
             .id("cell-\(emoji.hexcode)")
             .contentShape(Rectangle())
@@ -115,7 +122,9 @@ struct InlineBrowserView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
-            .background(.bar)
+            // Blur the content scrolling under the pinned header (glassy),
+            // rather than the opaque white `.bar` band.
+            .background(.ultraThinMaterial)
     }
 
     private var emptyResults: some View {

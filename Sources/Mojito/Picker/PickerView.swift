@@ -255,12 +255,13 @@ private struct CompactCell: View {
         let isSelected = index == viewModel.selectedIndex
         let isBrowse = scored.emoji.hexcode == EmojiBrowser.sentinelHexcode
         ZStack {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(isSelected ? Color.accentColor : Color.clear)
+            // Match the vertical menu's neutral selection (not accent blue).
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
             if isBrowse {
                 Image(systemName: "chevron.down")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(isSelected ? Color.white : Color.secondary)
+                    .foregroundStyle(isSelected ? Color.primary : Color.secondary)
             } else {
                 Text(glyph)
                     .font(.system(size: 21))

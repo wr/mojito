@@ -44,6 +44,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var captureIsExcluded: Bool = false
     private var usage: [String: Int]
     private var workspaceObserver: NSObjectProtocol?
+    private var spaceObserver: NSObjectProtocol?
     private var prefsObserver: NSObjectProtocol?
     /// Cached because `FuzzyMatcher.search` reads them on every keystroke and
     /// direct UserDefaults reads are a measurable per-keystroke cost.
@@ -138,6 +139,20 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
         }
 
+        // Switching Spaces (incl. into a fullscreen app) should dismiss any
+        // open surface — the panel joins all Spaces, so without this the
+        // browser/pill would linger on the new desktop.
+        spaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.viewModel.isVisible else { return }
+                self.cancelCapture()
+            }
+        }
+
         // Spotlight, system panels, and in-app field jumps don't fire
         // didActivateApplicationNotification reliably — AX does, synchronously.
         FocusedElementCache.shared.onFocusChange = { [weak self] in
@@ -169,6 +184,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         if let obs = workspaceObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(obs)
         }
+        if let obs = spaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(obs)
+        }
         if let obs = prefsObserver {
             NotificationCenter.default.removeObserver(obs)
         }
@@ -180,9 +198,17 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // Our own panel briefly looking frontmost is not a real app switch.
         if bundleID == Bundle.main.bundleIdentifier { return }
         pendingEmoticonUndo = nil
-        guard case .capturing = stateMachine.state else { return }
-        guard bundleID != captureContext?.bundleID else { return }
-        cancelCapture()
+        switch stateMachine.state {
+        case .capturing:
+            guard bundleID != captureContext?.bundleID else { return }
+            cancelCapture()
+        case .browsing:
+            // Close the browser when another app (incl. a fullscreen app)
+            // takes over.
+            cancelCapture()
+        default:
+            break
+        }
     }
 
     private func handleFocusChanged() {
@@ -214,6 +240,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         captureFocusSnapshot = nil
         captureFocusPID = nil
         captureIsExcluded = false
+        browserDeleteCount = 0
         DebugRecorder.record(.picker, "cancel")
     }
 
@@ -623,6 +650,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         case .closeBrowser:
             collapseBrowser()
+
+        case .expandBrowser:
+            // ↓ on the pill — the typed `:` (1 char) is erased on pick.
+            expandToBrowser(deleteCount: 1)
         }
     }
 
