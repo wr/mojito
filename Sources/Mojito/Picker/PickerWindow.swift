@@ -239,8 +239,9 @@ enum PickerLayout {
 
     // Compact horizontal bar (bare-`:` favorites), styled like the macOS
     // predictive emoji strip: a capsule of cells, selected one filled.
-    static let compactCell: CGFloat = 34
+    // Sized so the "top 8" reads as a row of 8 generous glyphs + the chevron.
+    static let compactCell: CGFloat = 40
     static let compactSpacing: CGFloat = 2
-    static let compactPadding: CGFloat = 5
+    static let compactPadding: CGFloat = 6
     static var compactHeight: CGFloat { compactCell + compactPadding * 2 }
 }

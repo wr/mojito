@@ -256,15 +256,15 @@ private struct CompactCell: View {
         let isBrowse = scored.emoji.hexcode == EmojiBrowser.sentinelHexcode
         ZStack {
             // Match the vertical menu's neutral selection (not accent blue).
-            RoundedRectangle(cornerRadius: 9, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
             if isBrowse {
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(isSelected ? Color.primary : Color.secondary)
             } else {
                 Text(glyph)
-                    .font(.system(size: 21))
+                    .font(.system(size: 25))
             }
         }
         .frame(width: PickerLayout.compactCell, height: PickerLayout.compactCell)

@@ -4,21 +4,23 @@ import SwiftUI
 /// window). Driven by the trigger state machine through `EmojiBrowserViewModel`
 /// — the panel stays non-key so the focused app keeps its insertion point and
 /// picks are typed straight in.
+///
+/// No section titles (Apple dropped them too) — groups are separated by space
+/// and identified by the active tab + its tooltip.
 struct InlineBrowserView: View {
     @ObservedObject var browser: EmojiBrowserViewModel
     let onPick: (Emoji) -> Void
     let onCategory: (EmojiCategory) -> Void
 
     @State private var activeCategory: String?
-    @State private var hoverHex: String?
-    @State private var tooltipHex: String?
-    @State private var hoverWork: DispatchWorkItem?
 
     private static let space = "browserGrid"
+    private static let tabBarHeight: CGFloat = 38
     private let columns = Array(
         repeating: GridItem(.flexible(minimum: 32), spacing: 3),
         count: EmojiBrowserViewModel.columns
     )
+    private var barTint: Color { Color(nsColor: .windowBackgroundColor) }
 
     /// Sections paired with each glyph's flat selection index.
     private var indexedSections: [(section: BrowserSection, items: [(index: Int, emoji: Emoji)])] {
@@ -36,13 +38,10 @@ struct InlineBrowserView: View {
         VStack(spacing: 0) {
             searchHeader
             hairline
-            grid
-            hairline
-            categoryBar
+            gridWithBar
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
-        // Opaque so scrolling glyphs never show through any part of the chrome.
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(barTint)
     }
 
     private var hairline: some View {
@@ -64,68 +63,72 @@ struct InlineBrowserView: View {
         .frame(height: 36)
     }
 
-    private var grid: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 6, pinnedViews: [.sectionHeaders]) {
-                    if browser.sections.isEmpty {
-                        emptyResults
-                    } else {
-                        ForEach(indexedSections, id: \.section.id) { entry in
-                            Section {
-                                LazyVGrid(columns: columns, spacing: 3) {
-                                    ForEach(entry.items, id: \.emoji.hexcode) { item in
-                                        cell(item.emoji, index: item.index)
-                                    }
-                                }
-                                .padding(.horizontal, 8)
-                                .padding(.bottom, 4)
-                            } header: {
-                                sectionHeader(entry.section.category)
-                            }
-                        }
-                    }
-                }
-                .padding(.top, 2)
-            }
-            .coordinateSpace(name: Self.space)
-            .onChange(of: browser.scrollTarget) { _, target in
-                guard let target else { return }
-                // Jump instantly — tab clicks shouldn't crawl.
-                proxy.scrollTo(target, anchor: target.hasPrefix("cell-") ? nil : .top)
-            }
-            .onPreferenceChange(HeaderOffsetKey.self) { positions in
-                guard browser.query.isEmpty else { activeCategory = nil; return }
-                let pinned = positions.filter { $0.value <= 4 }.max { $0.value < $1.value }
-                activeCategory = pinned?.key ?? positions.min { $0.value < $1.value }?.key
-            }
-            .overlayPreferenceValue(TooltipAnchorKey.self) { data in
-                GeometryReader { proxy in
-                    if let data {
-                        let rect = proxy[data.anchor]
-                        let nearTop = rect.minY < 30
-                        tooltipBubble(data.text)
-                            .fixedSize()
-                            .position(
-                                x: min(max(rect.midX, 46), proxy.size.width - 46),
-                                y: nearTop ? rect.maxY + 16 : rect.minY - 13
-                            )
-                    }
-                }
+    private var gridWithBar: some View {
+        ZStack(alignment: .bottom) {
+            grid
+            // Floating frosted bar — the grid scrolls under it, blurred, with
+            // a short gradient so glyphs dissolve into it.
+            VStack(spacing: 0) {
+                LinearGradient(
+                    colors: [barTint.opacity(0), barTint.opacity(0.85)],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .frame(height: 12)
                 .allowsHitTesting(false)
+                categoryBar
             }
         }
     }
 
-    private func tooltipBubble(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 11, weight: .semibold, design: .rounded))
-            .foregroundStyle(.white)
-            .lineLimit(1)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Capsule().fill(Color.black.opacity(0.85)))
-            .shadow(color: .black.opacity(0.25), radius: 4, y: 1)
+    private var grid: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    if browser.sections.isEmpty {
+                        emptyResults
+                    } else {
+                        ForEach(indexedSections, id: \.section.id) { entry in
+                            sectionAnchor(entry.section.category)
+                            LazyVGrid(columns: columns, spacing: 3) {
+                                ForEach(entry.items, id: \.emoji.hexcode) { item in
+                                    cell(item.emoji, index: item.index)
+                                }
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.bottom, 16)  // gap between groups
+                        }
+                    }
+                }
+                .padding(.top, 8)
+                .padding(.bottom, Self.tabBarHeight + 4)  // clear the floating bar
+            }
+            .coordinateSpace(name: Self.space)
+            .onChange(of: browser.scrollTarget) { _, target in
+                guard let target else { return }
+                proxy.scrollTo(target, anchor: target.hasPrefix("cell-") ? nil : .top)
+            }
+            .onPreferenceChange(SectionOffsetKey.self) { positions in
+                guard browser.query.isEmpty else { activeCategory = nil; return }
+                let above = positions.filter { $0.value <= 12 }.max { $0.value < $1.value }
+                activeCategory = above?.key ?? positions.min { $0.value < $1.value }?.key
+            }
+        }
+    }
+
+    /// Zero-height marker at the start of each group: the `scrollTo` target and
+    /// the position probe for the active tab.
+    private func sectionAnchor(_ category: EmojiCategory) -> some View {
+        Color.clear
+            .frame(height: 0)
+            .id(category.id)
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(
+                        key: SectionOffsetKey.self,
+                        value: [category.id: geo.frame(in: .named(Self.space)).minY]
+                    )
+                }
+            )
     }
 
     private func cell(_ emoji: Emoji, index: Int) -> some View {
@@ -142,51 +145,9 @@ struct InlineBrowserView: View {
             )
             .id("cell-\(emoji.hexcode)")
             .contentShape(Rectangle())
-            .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
-                tooltipHex == emoji.hexcode ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
-            }
+            .help(":\(emoji.primaryShortcode):")  // system tooltip
             .onTapGesture { onPick(emoji) }
-            .onHover { hovering in
-                hoverWork?.cancel()
-                if hovering {
-                    browser.selectedIndex = index
-                    hoverHex = emoji.hexcode
-                    let hex = emoji.hexcode
-                    let work = DispatchWorkItem {
-                        if hoverHex == hex {
-                            withAnimation(.easeOut(duration: 0.1)) { tooltipHex = hex }
-                        }
-                    }
-                    hoverWork = work
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
-                } else {
-                    if hoverHex == emoji.hexcode { hoverHex = nil }
-                    if tooltipHex == emoji.hexcode {
-                        withAnimation(.easeOut(duration: 0.1)) { tooltipHex = nil }
-                    }
-                }
-            }
-    }
-
-    private func sectionHeader(_ category: EmojiCategory) -> some View {
-        Text(category.title)
-            .font(.system(size: 11, weight: .semibold))
-            .foregroundStyle(.secondary)
-            .textCase(.uppercase)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 5)
-            // Opaque so emoji scrolling under the pinned header don't tint it.
-            .background(Color(nsColor: .windowBackgroundColor))
-            .id(category.id)
-            .background(
-                GeometryReader { geo in
-                    Color.clear.preference(
-                        key: HeaderOffsetKey.self,
-                        value: [category.id: geo.frame(in: .named(Self.space)).minY]
-                    )
-                }
-            )
+            .onHover { if $0 { browser.selectedIndex = index } }
     }
 
     private var emptyResults: some View {
@@ -226,30 +187,17 @@ struct InlineBrowserView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .frame(height: Self.tabBarHeight)
+        .background(.regularMaterial)
     }
 }
 
-/// Reports each section header's vertical offset in the grid's coordinate
-/// space so the active category tab can light up as you scroll.
-private struct HeaderOffsetKey: PreferenceKey {
+/// Reports each group's vertical offset in the grid's coordinate space so the
+/// active category tab can light up as you scroll.
+private struct SectionOffsetKey: PreferenceKey {
     static var defaultValue: [String: CGFloat] = [:]
     static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
         value.merge(nextValue()) { _, new in new }
-    }
-}
-
-/// Carries the hovered cell's bounds + name to the tooltip overlay.
-private struct TooltipData {
-    let text: String
-    let anchor: Anchor<CGRect>
-}
-
-private struct TooltipAnchorKey: PreferenceKey {
-    static var defaultValue: TooltipData? = nil
-    static func reduce(value: inout TooltipData?, nextValue: () -> TooltipData?) {
-        value = nextValue() ?? value
     }
 }
 
