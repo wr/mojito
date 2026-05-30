@@ -24,22 +24,12 @@ struct InlineBrowserView: View {
     private static let space = "browserGrid"
     private static let tabBarHeight: CGFloat = 56
     private static let tabIconHeight: CGFloat = 30
-    private static let cellHeight: CGFloat = 40
     private static let cellSpacing: CGFloat = 3
     private static let groupGap: CGFloat = 28
     private let columns = Array(
         repeating: GridItem(.flexible(minimum: 36), spacing: cellSpacing),
         count: EmojiBrowserViewModel.columns
     )
-
-    /// Exact height of a section's grid from its row count. A LazyVGrid
-    /// reports an estimated (collapsed) height until its cells render, which
-    /// threw off `scrollTo` for offscreen sections; pinning the height makes
-    /// every section's offset deterministic while cells stay lazy.
-    private func sectionHeight(_ count: Int) -> CGFloat {
-        let rows = max(1, Int(ceil(Double(count) / Double(EmojiBrowserViewModel.columns))))
-        return CGFloat(rows) * Self.cellHeight + CGFloat(rows - 1) * Self.cellSpacing
-    }
 
     private var indexedSections: [(section: BrowserSection, items: [(index: Int, emoji: Emoji)])] {
         var running = 0
@@ -154,8 +144,20 @@ struct InlineBrowserView: View {
             .onChange(of: browser.scrollTarget) { _, target in
                 guard let target else { return }
                 switch target {
-                case .section(let c): proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
-                case .cell(let i):    proxy.scrollTo(BrowserScroll.cell(i), anchor: nil)
+                case .section(let c):
+                    // Two passes: the first scroll materializes the lazy rows
+                    // between here and the target (so SwiftUI learns their real
+                    // heights), the second lands precisely. One pass alone
+                    // overshoots/undershoots because offscreen rows are
+                    // estimated. No layout pinning, so nothing overlaps.
+                    proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
+                    DispatchQueue.main.async {
+                        withAnimation(.easeOut(duration: 0.12)) {
+                            proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
+                        }
+                    }
+                case .cell(let i):
+                    proxy.scrollTo(BrowserScroll.cell(i), anchor: nil)
                 }
                 // Clear (next tick) so the same target can re-fire later.
                 DispatchQueue.main.async { browser.scrollTarget = nil }
@@ -171,7 +173,6 @@ struct InlineBrowserView: View {
                 cell(item.emoji, index: item.index)
             }
         }
-        .frame(height: sectionHeight(entry.items.count), alignment: .top)
         .padding(.horizontal, 8)
         .id(BrowserScroll.section(entry.section.category))
         .background(
