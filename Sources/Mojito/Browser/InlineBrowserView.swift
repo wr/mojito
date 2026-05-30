@@ -5,9 +5,11 @@ import SwiftUI
 /// — the panel stays non-key so the focused app keeps its insertion point and
 /// picks are typed straight in.
 ///
-/// No section titles (Apple dropped them too) — groups are separated by space
-/// and identified by the active tab + a hover tooltip. The panel is non-key,
-/// so native `.help` tooltips don't fire; glyph names use a custom overlay.
+/// Rendering uses the canonical `LazyVStack(pinnedViews: [.sectionHeaders])`
+/// pattern: cells are lazy (fast to open over ~1900 glyphs) and the pinned
+/// section headers are real laid-out views, so `scrollTo(header)` is exact —
+/// no estimation, no drift. The panel is non-key, so native `.help` tooltips
+/// don't fire; glyph names use a custom root overlay.
 struct InlineBrowserView: View {
     @ObservedObject var browser: EmojiBrowserViewModel
     let onPick: (Emoji) -> Void
@@ -22,11 +24,11 @@ struct InlineBrowserView: View {
     @State private var searchClicked = false
 
     private static let space = "browserGrid"
-    private static let tabBarHeight: CGFloat = 56
-    private static let tabIconHeight: CGFloat = 30
-    private static let cellSpacing: CGFloat = 3
     private static let cellHeight: CGFloat = 40
-    private static let groupGap: CGFloat = 28
+    private let columns = Array(
+        repeating: GridItem(.flexible(minimum: 36), spacing: 3),
+        count: EmojiBrowserViewModel.columns
+    )
 
     private var indexedSections: [(section: BrowserSection, items: [(index: Int, emoji: Emoji)])] {
         var running = 0
@@ -43,7 +45,9 @@ struct InlineBrowserView: View {
         VStack(spacing: 0) {
             searchHeader
             hairline
-            gridWithBar
+            grid
+            hairline
+            categoryBar
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
         // Tooltip drawn at the root so it can sit above the top row without
@@ -75,9 +79,7 @@ struct InlineBrowserView: View {
                 .foregroundStyle(.secondary)
                 .padding(.trailing, 3)
             Text(browser.query).foregroundStyle(.primary)
-            // Caret reserves its slot always (hidden via opacity) so showing
-            // it on click doesn't shift the placeholder.
-            caret
+            caret  // fixed slot — shows on click, never shifts the placeholder
             if browser.query.isEmpty {
                 Text("Type to search emoji").foregroundStyle(.tertiary)
             }
@@ -99,48 +101,45 @@ struct InlineBrowserView: View {
                 .frame(width: 2, height: 17)
                 .opacity(visible && on ? 1 : 0)
         }
-        .frame(width: 2)  // fixed slot — no layout shift when it appears
+        .frame(width: 2)
     }
 
     // MARK: Grid
 
-    private var gridWithBar: some View {
-        ZStack(alignment: .bottom) {
-            grid
-            categoryBar
-        }
-    }
-
     private var grid: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                // Deliberately NON-lazy (plain VStack of manual rows, no
-                // LazyVGrid). The corpus is fixed (~1900 glyphs), so laying it
-                // all out costs a small one-time hit on open but makes every
-                // row's offset *real* — that's what makes `scrollTo` exact and
-                // the active-tab tracking truthful. Lazy height estimation was
-                // the root of the drifting-scroll bug.
-                VStack(alignment: .leading, spacing: Self.groupGap) {
+                LazyVStack(alignment: .leading, spacing: 6, pinnedViews: [.sectionHeaders]) {
                     if browser.sections.isEmpty {
                         emptyResults
                     } else {
                         ForEach(indexedSections, id: \.section.id) { entry in
-                            grp(entry)
+                            Section {
+                                LazyVGrid(columns: columns, spacing: 3) {
+                                    ForEach(entry.items, id: \.emoji.hexcode) { item in
+                                        cell(item.emoji, index: item.index)
+                                    }
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.bottom, 10)
+                            } header: {
+                                sectionHeader(entry.section.category)
+                            }
                         }
                     }
                 }
-                .padding(.top, 8)
-                .padding(.bottom, Self.tabBarHeight + 4)  // clear the floating bar
+                .padding(.bottom, 6)
             }
             .coordinateSpace(name: Self.space)
             .onPreferenceChange(SectionTopKey.self) { tops in
                 guard browser.query.isEmpty else { activeCategory = nil; return }
-                let atTop = tops.filter { $0.value <= 16 }.max { $0.value < $1.value }
-                activeCategory = atTop?.key ?? tops.min { $0.value < $1.value }?.key
+                // Active = the section whose header is pinned at/above the top.
+                let pinned = tops.filter { $0.value <= 4 }.max { $0.value < $1.value }
+                activeCategory = pinned?.key ?? tops.min { $0.value < $1.value }?.key
             }
             .onChange(of: browser.scrollTarget) { _, target in
                 guard let target else { return }
-                // Offsets are real (non-lazy), so a single scrollTo lands exactly.
+                // The pinned header is a real view, so scrollTo lands exactly.
                 switch target {
                 case .section(let c): proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
                 case .cell(let i):    proxy.scrollTo(BrowserScroll.cell(i), anchor: nil)
@@ -150,40 +149,25 @@ struct InlineBrowserView: View {
         }
     }
 
-    /// Chunk a section's items into rows of `columns`.
-    private func rows(_ items: [(index: Int, emoji: Emoji)]) -> [[(index: Int, emoji: Emoji)]] {
-        stride(from: 0, to: items.count, by: EmojiBrowserViewModel.columns).map {
-            Array(items[$0 ..< min($0 + EmojiBrowserViewModel.columns, items.count)])
-        }
-    }
-
-    /// One section group: non-lazy rows + the scroll anchor + active-tab probe.
-    private func grp(_ entry: (section: BrowserSection, items: [(index: Int, emoji: Emoji)])) -> some View {
-        VStack(alignment: .leading, spacing: Self.cellSpacing) {
-            ForEach(Array(rows(entry.items).enumerated()), id: \.offset) { _, row in
-                HStack(spacing: Self.cellSpacing) {
-                    ForEach(row, id: \.emoji.hexcode) { item in
-                        cell(item.emoji, index: item.index)
-                    }
-                    // Pad a short final row so cells stay column-aligned.
-                    if row.count < EmojiBrowserViewModel.columns {
-                        ForEach(0 ..< (EmojiBrowserViewModel.columns - row.count), id: \.self) { _ in
-                            Color.clear.frame(maxWidth: .infinity).frame(height: Self.cellHeight)
-                        }
-                    }
+    private func sectionHeader(_ category: EmojiCategory) -> some View {
+        Text(category.title)
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundStyle(.secondary)
+            .textCase(.uppercase)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 5)
+            // Opaque so scrolling glyphs don't show through the pinned header.
+            .background(Color(nsColor: .windowBackgroundColor))
+            .id(BrowserScroll.section(category))
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(
+                        key: SectionTopKey.self,
+                        value: [category.id: geo.frame(in: .named(Self.space)).minY]
+                    )
                 }
-            }
-        }
-        .padding(.horizontal, 8)
-        .id(BrowserScroll.section(entry.section.category))
-        .background(
-            GeometryReader { geo in
-                Color.clear.preference(
-                    key: SectionTopKey.self,
-                    value: [entry.section.category.id: geo.frame(in: .named(Self.space)).minY]
-                )
-            }
-        )
+            )
     }
 
     private func cell(_ emoji: Emoji, index: Int) -> some View {
@@ -222,7 +206,6 @@ struct InlineBrowserView: View {
             }
     }
 
-    /// Light box matching the macOS system tooltip.
     private func tooltipBubble(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 11))
@@ -280,34 +263,13 @@ struct InlineBrowserView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 8)
-        .frame(height: Self.tabIconHeight)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 18)   // tall gradient region above the icons
-        .padding(.bottom, 8) // breathing room below
-        .background(barBackground)
-        .contentShape(Rectangle())  // eat clicks so they don't hit the grid
-    }
-
-    /// A frosted bar that stays glassy: just the blur, faded in from the top
-    /// of the bar so the grid dissolves into it (no opaque color layer).
-    private var barBackground: some View {
-        Rectangle()
-            .fill(.regularMaterial)
-            .mask(
-                LinearGradient(
-                    stops: [
-                        .init(color: .clear, location: 0.0),
-                        .init(color: .black.opacity(0.85), location: 0.55),
-                        .init(color: .black, location: 1.0),
-                    ],
-                    startPoint: .top, endPoint: .bottom
-                )
-            )
+        .padding(.vertical, 6)
+        .background(.regularMaterial)
     }
 }
 
-/// Each group's top offset in the scroll viewport, so the active tab can
-/// track the scroll position.
+/// Each section header's offset in the scroll viewport, so the active tab can
+/// track scroll position.
 private struct SectionTopKey: PreferenceKey {
     static var defaultValue: [String: CGFloat] = [:]
     static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
