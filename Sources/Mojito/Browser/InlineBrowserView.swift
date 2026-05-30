@@ -115,7 +115,13 @@ struct InlineBrowserView: View {
     private var grid: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
+                // Outer stack is NOT lazy: each section's LazyVGrid reports its
+                // full height up front, so section offsets are deterministic and
+                // `scrollTo(.section)` lands exactly (a LazyVStack estimates
+                // offscreen sections, which made tab clicks miss + accumulate
+                // error on re-click). The inner grids stay lazy, so cells are
+                // still only built when visible.
+                VStack(alignment: .leading, spacing: 14) {
                     if browser.sections.isEmpty {
                         emptyResults
                     } else {
@@ -139,7 +145,7 @@ struct InlineBrowserView: View {
                 case .section(let c): proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
                 case .cell(let i):    proxy.scrollTo(BrowserScroll.cell(i), anchor: nil)
                 }
-                // Clear so the same target can be requested again later.
+                // Clear (next tick) so the same target can re-fire later.
                 DispatchQueue.main.async { browser.scrollTarget = nil }
             }
         }
@@ -153,7 +159,6 @@ struct InlineBrowserView: View {
             }
         }
         .padding(.horizontal, 8)
-        .padding(.bottom, 16)  // gap between groups
         .id(BrowserScroll.section(entry.section.category))
         .background(
             GeometryReader { geo in
