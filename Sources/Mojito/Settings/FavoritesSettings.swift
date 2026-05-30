@@ -7,6 +7,7 @@ import KeyboardShortcuts
 struct FavoritesSettingsView: View {
     @StateObject private var favorites = FavoritesStore.shared
     @AppStorage(PrefsKey.favoritesTrigger) private var triggerRaw: String = FavoritesTrigger.question.rawValue
+    @AppStorage(PrefsKey.favoritesTriggerSurface) private var surfaceRaw: String = FavoritesTriggerSurface.pill.rawValue
     @State private var search: String = ""
 
     private let database = EmojiDatabase.shared
@@ -30,13 +31,20 @@ struct FavoritesSettingsView: View {
 
     var body: some View {
         Form {
-            Section {
-                Picker("Show favorites pill", selection: $triggerRaw) {
+            Section("Quick access") {
+                Picker("Trigger", selection: $triggerRaw) {
                     ForEach(FavoritesTrigger.allCases) { trigger in
                         Text(trigger.settingsLabel).tag(trigger.rawValue)
                     }
                 }
-                Text("Pops your favorites and most-used emoji. Return inserts the first; ←→ pick another; ↓ (or the ⌄) opens the full browser.")
+                if triggerRaw != FavoritesTrigger.off.rawValue {
+                    Picker("Shows", selection: $surfaceRaw) {
+                        ForEach(FavoritesTriggerSurface.allCases) { surface in
+                            Text(surface.settingsLabel).tag(surface.rawValue)
+                        }
+                    }
+                }
+                Text("The pill pops your favorites + most-used (Return inserts the first; ←→ pick another; ↓ opens the full browser).")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

@@ -102,7 +102,7 @@ final class EmojiBrowserViewModel: ObservableObject {
 
         let mostUsed = usage
             .filter { $0.value > 0 && !$0.key.hasPrefix("SYM_") }
-            .sorted { $0.value > $1.value }
+            .sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
             .prefix(24)
             .compactMap { database.byHexcode[$0.key] }
         if !mostUsed.isEmpty {

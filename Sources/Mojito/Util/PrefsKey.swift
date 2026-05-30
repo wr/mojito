@@ -29,6 +29,9 @@ enum PrefsKey {
     /// How the favorites/most-used pill is summoned (`FavoritesTrigger` raw):
     /// `off`, `colon` (bare `:` + dwell), or `question` (`:?`).
     static let favoritesTrigger      = "mojito.favoritesTrigger"
+    /// What the trigger shows (`FavoritesTriggerSurface` raw): the `pill` or
+    /// the full `browser` grid.
+    static let favoritesTriggerSurface = "mojito.favoritesTriggerSurface"
     /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
     /// Self-attested; no payment integration.

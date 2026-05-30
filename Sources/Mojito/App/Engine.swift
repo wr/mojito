@@ -54,6 +54,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var gifSearchEnabled: Bool
     private var gifBypassExclusions: Bool
     private var favoritesTrigger: FavoritesTrigger
+    private var favoritesTriggerSurface: FavoritesTriggerSurface
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -79,6 +80,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
         self.favoritesTrigger = FavoritesTrigger.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTrigger))
+        self.favoritesTriggerSurface = FavoritesTriggerSurface.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTriggerSurface))
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
         self.stateMachine.favoritesTrigger = self.favoritesTrigger
 
@@ -174,6 +176,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
                 self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
                 self.favoritesTrigger = FavoritesTrigger.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTrigger))
+                self.favoritesTriggerSurface = FavoritesTriggerSurface.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTriggerSurface))
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
                 self.stateMachine.favoritesTrigger = self.favoritesTrigger
             }
@@ -719,11 +722,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             guard let self else { return }
             guard self.inputSeq == seq else { return }
             guard case .capturing(let q) = self.stateMachine.state, q.isEmpty else { return }
-            guard !self.viewModel.results.isEmpty else { return }
             if self.focusHasChangedSinceCapture() {
                 self.cancelCapture()
                 return
             }
+            // The trigger can jump straight to the full grid instead of the pill.
+            if self.favoritesTriggerSurface == .browser {
+                self.expandToBrowser(deleteCount: 1)  // the typed `:`
+                return
+            }
+            guard !self.viewModel.results.isEmpty else { return }
             let anchor = CaretLocator.caretRect()
             PickerContextStore.capture(caretOutcome: CaretLocator.lastOutcome, resolvedCaret: anchor)
             DebugRecorder.record(.picker, "openEmpty", ["results": "\(self.viewModel.results.count)"])
@@ -737,24 +745,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// then a trailing "Browse all emojis…" row. Symbols + egg sentinels are
     /// excluded from the most-used fill.
     private func emptyQueryResults() -> [ScoredEmoji] {
-        var rows: [ScoredEmoji] = []
-        var seen = Set<String>()
-
-        for hex in favorites.hexcodes {
-            guard !seen.contains(hex), let emoji = database.byHexcode[hex] else { continue }
-            seen.insert(hex)
-            rows.append(ScoredEmoji(emoji: emoji, matchedShortcode: emoji.primaryShortcode))
-        }
-
-        let mostUsed = usage
-            .filter { $0.value > 0 && !$0.key.hasPrefix("SYM_") && !seen.contains($0.key) }
-            .sorted { $0.value > $1.value }
-        for (hex, _) in mostUsed {
-            guard rows.count < Self.emptyPickerLimit, let emoji = database.byHexcode[hex] else { continue }
-            seen.insert(hex)
-            rows.append(ScoredEmoji(emoji: emoji, matchedShortcode: emoji.primaryShortcode))
-        }
-
+        var rows = TopEmoji
+            .ordered(limit: Self.emptyPickerLimit, database: database, favorites: favorites, usage: usage)
+            .map { ScoredEmoji(emoji: $0, matchedShortcode: $0.primaryShortcode) }
         rows.append(EmojiBrowser.browseRow)
         return rows
     }

@@ -213,4 +213,30 @@ struct FavoritesStoreTests {
         let second = FavoritesStore(defaults: suite)
         #expect(second.hexcodes == ["2764", "1F44D"])
     }
+
+    @Test func topEmojiPutsFavoritesFirstThenUsage() {
+        let db = EmojiDatabase.shared
+        guard db.all.count >= 3 else { return }
+        let store = makeStore()
+        let fav = db.all[0].hexcode
+        let a = db.all[1].hexcode
+        let b = db.all[2].hexcode
+        store.add(fav)
+        let top = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: [a: 3, b: 10])
+        #expect(top.first?.hexcode == fav)                  // favorite first
+        #expect(top.dropFirst().map(\.hexcode).prefix(2) == [b, a])  // then usage desc
+    }
+
+    @Test func topEmojiIsDeterministicAcrossCalls() {
+        let db = EmojiDatabase.shared
+        guard db.all.count >= 2 else { return }
+        let store = makeStore()
+        let x = db.all[0].hexcode
+        let y = db.all[1].hexcode
+        let usage = [x: 5, y: 5]  // tie — must resolve the same way every time
+        let first = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: usage).map(\.hexcode)
+        let second = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: usage).map(\.hexcode)
+        #expect(first == second)
+        #expect(Array(first.prefix(2)) == [min(x, y), max(x, y)])  // hexcode tie-break
+    }
 }

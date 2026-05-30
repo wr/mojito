@@ -25,6 +25,60 @@ enum FavoritesTrigger: String, CaseIterable, Identifiable {
     }
 }
 
+/// What the trigger surfaces: the compact pill or the full browser grid.
+enum FavoritesTriggerSurface: String, CaseIterable, Identifiable {
+    case pill
+    case browser
+
+    var id: String { rawValue }
+
+    var settingsLabel: String {
+        switch self {
+        case .pill:    return String(localized: "Favorites pill")
+        case .browser: return String(localized: "Full emoji browser")
+        }
+    }
+
+    static func from(_ raw: String?) -> FavoritesTriggerSurface {
+        raw.flatMap(FavoritesTriggerSurface.init(rawValue:)) ?? .pill
+    }
+}
+
+/// Single source of truth for the "top emoji" list — favorites first (in the
+/// user's order), then most-used. Used by both the pill and the About stat so
+/// they always agree. The usage sort breaks ties by hexcode so the order is
+/// deterministic (a plain `.sorted` over a dictionary is not).
+@MainActor
+enum TopEmoji {
+    static func ordered(
+        limit: Int,
+        database: EmojiDatabase,
+        favorites: FavoritesStore,
+        usage: [String: Int]
+    ) -> [Emoji] {
+        var out: [Emoji] = []
+        var seen = Set<String>()
+
+        for hex in favorites.hexcodes {
+            guard !seen.contains(hex), let emoji = database.byHexcode[hex] else { continue }
+            seen.insert(hex)
+            out.append(emoji)
+            if out.count >= limit { return out }
+        }
+
+        let mostUsed = usage
+            .filter { $0.value > 0 && !$0.key.hasPrefix("SYM_") && !seen.contains($0.key) }
+            .sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
+        for (hex, _) in mostUsed {
+            guard let emoji = database.byHexcode[hex] else { continue }
+            seen.insert(hex)
+            out.append(emoji)
+            if out.count >= limit { return out }
+        }
+        return out
+    }
+}
+
 /// Ordered list of hand-picked favorite emoji (by hexcode). Surfaced when
 /// the user types a bare `:` and managed in Settings ▸ Favorites. Mirrors
 /// `ExclusionStore`'s shape: a `@Published` model that mirrors itself into
