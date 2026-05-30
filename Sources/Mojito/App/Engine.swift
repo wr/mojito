@@ -111,8 +111,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
         viewModel.onBrowserCategory = { [weak self] category in
             guard let self else { return }
+            // Switching category clears any in-progress search, so keep the
+            // state machine's browser query in sync.
             self.stateMachine.setBrowsingQuery("")
-            self.viewModel.browser?.scroll(to: category)
+            self.viewModel.browser?.selectCategory(category)
         }
 
         gifPickerWindow.onClickAway = { [weak self] in

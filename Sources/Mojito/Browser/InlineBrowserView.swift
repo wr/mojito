@@ -5,17 +5,16 @@ import SwiftUI
 /// — the panel stays non-key so the focused app keeps its insertion point and
 /// picks are typed straight in.
 ///
-/// Rendering uses the canonical `LazyVStack(pinnedViews: [.sectionHeaders])`
-/// pattern: cells are lazy (fast to open over ~1900 glyphs) and the pinned
-/// section headers are real laid-out views, so `scrollTo(header)` is exact —
-/// no estimation, no drift. The panel is non-key, so native `.help` tooltips
-/// don't fire; glyph names use a custom root overlay.
+/// Shows **one category at a time** (like the iOS emoji keyboard): the tab bar
+/// switches which category is displayed; it never scrolls a long combined list.
+/// So there's no `scrollTo`-to-offscreen-section to drift — a tab tap just
+/// swaps the dataset and resets to the top. The panel is non-key, so native
+/// `.help` tooltips don't fire; glyph names use a custom root overlay.
 struct InlineBrowserView: View {
     @ObservedObject var browser: EmojiBrowserViewModel
     let onPick: (Emoji) -> Void
     let onCategory: (EmojiCategory) -> Void
 
-    @State private var activeCategory: String?
     @State private var hoverIndex: Int?
     @State private var tooltipIndex: Int?
     @State private var hoverWork: DispatchWorkItem?
@@ -23,22 +22,15 @@ struct InlineBrowserView: View {
     /// so it doesn't imply a focusable field before then.
     @State private var searchClicked = false
 
-    private static let space = "browserGrid"
     private static let cellHeight: CGFloat = 40
     private let columns = Array(
         repeating: GridItem(.flexible(minimum: 36), spacing: 3),
         count: EmojiBrowserViewModel.columns
     )
 
-    private var indexedSections: [(section: BrowserSection, items: [(index: Int, emoji: Emoji)])] {
-        var running = 0
-        return browser.sections.map { section in
-            let items = section.emoji.map { emoji -> (Int, Emoji) in
-                defer { running += 1 }
-                return (running, emoji)
-            }
-            return (section, items)
-        }
+    /// Current emoji paired with their flat selection index.
+    private var items: [(index: Int, emoji: Emoji)] {
+        Array(browser.current.enumerated()).map { ($0.offset, $0.element) }
     }
 
     var body: some View {
@@ -104,70 +96,35 @@ struct InlineBrowserView: View {
         .frame(width: 2)
     }
 
-    // MARK: Grid
+    // MARK: Grid (one category)
 
     private var grid: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 6, pinnedViews: [.sectionHeaders]) {
-                    if browser.sections.isEmpty {
-                        emptyResults
-                    } else {
-                        ForEach(indexedSections, id: \.section.id) { entry in
-                            Section {
-                                LazyVGrid(columns: columns, spacing: 3) {
-                                    ForEach(entry.items, id: \.emoji.hexcode) { item in
-                                        cell(item.emoji, index: item.index)
-                                    }
-                                }
-                                .padding(.horizontal, 8)
-                                .padding(.bottom, 10)
-                            } header: {
-                                sectionHeader(entry.section.category)
-                            }
+                if items.isEmpty {
+                    emptyResults
+                } else {
+                    LazyVGrid(columns: columns, spacing: 3) {
+                        ForEach(items, id: \.emoji.hexcode) { item in
+                            cell(item.emoji, index: item.index)
                         }
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 8)
                 }
-                .padding(.bottom, 6)
-            }
-            .coordinateSpace(name: Self.space)
-            .onPreferenceChange(SectionTopKey.self) { tops in
-                guard browser.query.isEmpty else { activeCategory = nil; return }
-                // Active = the section whose header is pinned at/above the top.
-                let pinned = tops.filter { $0.value <= 4 }.max { $0.value < $1.value }
-                activeCategory = pinned?.key ?? tops.min { $0.value < $1.value }?.key
             }
             .onChange(of: browser.scrollTarget) { _, target in
                 guard let target else { return }
-                // The pinned header is a real view, so scrollTo lands exactly.
-                switch target {
-                case .section(let c): proxy.scrollTo(BrowserScroll.section(c), anchor: .top)
-                case .cell(let i):    proxy.scrollTo(BrowserScroll.cell(i), anchor: nil)
-                }
+                // Only ever scrolls within the current (short) category — to
+                // the top on switch, or to an adjacent cell on keyboard nav.
+                proxy.scrollTo(target, anchor: target == 0 ? .top : nil)
                 DispatchQueue.main.async { browser.scrollTarget = nil }
             }
+            // Reset to top whenever the shown category changes.
+            .onChange(of: browser.selectedCategory) { _, _ in
+                proxy.scrollTo(0, anchor: .top)
+            }
         }
-    }
-
-    private func sectionHeader(_ category: EmojiCategory) -> some View {
-        Text(category.title)
-            .font(.system(size: 11, weight: .semibold))
-            .foregroundStyle(.secondary)
-            .textCase(.uppercase)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 5)
-            // Opaque so scrolling glyphs don't show through the pinned header.
-            .background(Color(nsColor: .windowBackgroundColor))
-            .id(BrowserScroll.section(category))
-            .background(
-                GeometryReader { geo in
-                    Color.clear.preference(
-                        key: SectionTopKey.self,
-                        value: [category.id: geo.frame(in: .named(Self.space)).minY]
-                    )
-                }
-            )
     }
 
     private func cell(_ emoji: Emoji, index: Int) -> some View {
@@ -183,7 +140,7 @@ struct InlineBrowserView: View {
                 RoundedRectangle(cornerRadius: 9, style: .continuous)
                     .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
             )
-            .id(BrowserScroll.cell(index))
+            .id(index)
             .contentShape(Rectangle())
             .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
                 tooltipIndex == index ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
@@ -243,7 +200,8 @@ struct InlineBrowserView: View {
     private var categoryBar: some View {
         HStack(spacing: 1) {
             ForEach(browser.visibleCategories) { category in
-                let isActive = browser.query.isEmpty && activeCategory == category.id
+                // Active = the shown category (cleared while searching).
+                let isActive = !browser.isSearching && browser.selectedCategory == category
                 Button {
                     onCategory(category)
                 } label: {
@@ -265,15 +223,6 @@ struct InlineBrowserView: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
         .background(.regularMaterial)
-    }
-}
-
-/// Each section header's offset in the scroll viewport, so the active tab can
-/// track scroll position.
-private struct SectionTopKey: PreferenceKey {
-    static var defaultValue: [String: CGFloat] = [:]
-    static func reduce(value: inout [String: CGFloat], nextValue: () -> [String: CGFloat]) {
-        value.merge(nextValue()) { _, new in new }
     }
 }
 

@@ -1,65 +1,82 @@
 import Combine
 import Foundation
 
-/// One labelled block in the browser grid.
-struct BrowserSection: Identifiable {
-    let category: EmojiCategory
-    let emoji: [Emoji]
-    var id: String { category.id }
-}
-
-/// A scroll request from the view model to the grid. A typed value (not a
-/// parsed string) so the target always matches a real view `.id`.
-enum BrowserScroll: Hashable {
-    case section(EmojiCategory)  // tab click → align group to top
-    case cell(Int)              // keyboard nav → keep selected cell visible
-}
-
 /// Drives the in-panel emoji browser. Input arrives via the trigger state
 /// machine (the panel is non-key, like the inline picker), so search + grid
 /// navigation are set from the Engine rather than from focusable controls.
+///
+/// Navigation model: **one category at a time** (like the iOS emoji
+/// keyboard). The tab bar *switches* which category is shown — it never
+/// scrolls a long combined list. This removes the whole class of
+/// `scrollTo`-to-an-offscreen-section bugs: a tab tap just swaps the dataset
+/// and resets to the top. The only scrolling left is within the current
+/// category (short) and incremental keyboard nav — `scrollTo`'s reliable case.
 @MainActor
 final class EmojiBrowserViewModel: ObservableObject {
-    /// Fixed grid width — keep in sync with the LazyVGrid column count.
+    /// Grid column count — keep in sync with the view's LazyVGrid.
     static let columns = 8
 
     @Published private(set) var query: String = ""
-    @Published private(set) var sections: [BrowserSection] = []
+    @Published var selectedCategory: EmojiCategory
     @Published var selectedIndex: Int = 0
-    /// Set to ask the view to scroll; the view clears it back to nil after
-    /// handling, so re-requesting the same target fires again.
-    @Published var scrollTarget: BrowserScroll?
+    /// Cell index to scroll into view; the view clears it to nil after
+    /// handling so the same index can be requested again.
+    @Published var scrollTarget: Int?
 
     private let database: EmojiDatabase
     private let usage: [String: Int]
-    private let baseSections: [BrowserSection]
+    /// Emoji per category, prebuilt once at open.
+    private let byCategory: [EmojiCategory: [Emoji]]
+    /// Visible categories in tab order (only those with content).
+    let visibleCategories: [EmojiCategory]
 
     init(database: EmojiDatabase, favorites: FavoritesStore) {
         self.database = database
         self.usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
-        self.baseSections = Self.buildSections(database: database, favorites: favorites, usage: self.usage)
-        self.sections = baseSections
+        let (map, order) = Self.build(database: database, favorites: favorites, usage: self.usage)
+        self.byCategory = map
+        self.visibleCategories = order
+        self.selectedCategory = order.first ?? .smileysPeople
     }
 
-    /// Flattened emoji across all sections, in display order — the space the
-    /// selection index moves through.
-    var flat: [Emoji] { sections.flatMap(\.emoji) }
+    /// The emoji currently shown: search results when searching, else the
+    /// selected category's set.
+    var current: [Emoji] {
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return byCategory[selectedCategory] ?? [] }
+        return FuzzyMatcher.search(
+            query: trimmed, in: database, usage: usage,
+            corpus: .emojiOnly, useFrequencyBoost: true, limit: 240
+        )
+        .map(\.emoji)
+        .filter { database.byHexcode[$0.hexcode] != nil }  // drop egg/sentinel rows
+    }
+
+    var isSearching: Bool { !query.trimmingCharacters(in: .whitespaces).isEmpty }
 
     var selectedEmoji: Emoji? {
-        let f = flat
-        guard f.indices.contains(selectedIndex) else { return f.first }
-        return f[selectedIndex]
+        let items = current
+        guard items.indices.contains(selectedIndex) else { return items.first }
+        return items[selectedIndex]
     }
-
-    var visibleCategories: [EmojiCategory] { baseSections.map(\.category) }
 
     func setQuery(_ newQuery: String) {
         query = newQuery
-        recompute()
+        selectedIndex = 0
+        scrollTarget = 0  // back to top on every query change
+    }
+
+    /// Switch the shown category (tab tap). Clears any search and resets
+    /// to the top — no long-list scroll, so nothing can drift.
+    func selectCategory(_ category: EmojiCategory) {
+        query = ""
+        selectedCategory = category
+        selectedIndex = 0
+        scrollTarget = 0
     }
 
     func move(_ direction: GifMoveDirection) {
-        let count = flat.count
+        let count = current.count
         guard count > 0 else { return }
         var next = selectedIndex
         switch direction {
@@ -69,75 +86,49 @@ final class EmojiBrowserViewModel: ObservableObject {
         case .down:  next += Self.columns
         }
         selectedIndex = min(max(next, 0), count - 1)
-        scrollTarget = .cell(selectedIndex)
+        scrollTarget = selectedIndex  // adjacent cell — scrollTo's safe case
     }
 
     /// Mouse pick: snap the selection to the clicked glyph.
     func select(_ emoji: Emoji) {
-        if let idx = flat.firstIndex(where: { $0.hexcode == emoji.hexcode }) {
+        if let idx = current.firstIndex(where: { $0.hexcode == emoji.hexcode }) {
             selectedIndex = idx
         }
     }
 
-    func scroll(to category: EmojiCategory) {
-        if !query.isEmpty { setQuery("") }  // rebuilds `sections`
-        scrollTarget = .section(category)
-    }
-
-    private func recompute() {
-        let trimmed = query.trimmingCharacters(in: .whitespaces)
-        if trimmed.isEmpty {
-            sections = baseSections
-        } else {
-            let hits = FuzzyMatcher.search(
-                query: trimmed, in: database, usage: usage,
-                corpus: .emojiOnly, useFrequencyBoost: true, limit: 240
-            )
-            .map(\.emoji)
-            .filter { database.byHexcode[$0.hexcode] != nil }  // drop egg/sentinel rows
-            sections = hits.isEmpty ? [] : [BrowserSection(category: .smileysPeople, emoji: hits)]
-        }
-        selectedIndex = 0
-    }
-
-    private static func buildSections(
+    private static func build(
         database: EmojiDatabase,
         favorites: FavoritesStore,
         usage: [String: Int]
-    ) -> [BrowserSection] {
-        var sections: [BrowserSection] = []
+    ) -> (map: [EmojiCategory: [Emoji]], order: [EmojiCategory]) {
+        var map: [EmojiCategory: [Emoji]] = [:]
+        var order: [EmojiCategory] = []
+
+        func add(_ category: EmojiCategory, _ emoji: [Emoji]) {
+            guard !emoji.isEmpty else { return }
+            map[category] = emoji
+            order.append(category)
+        }
 
         let mostUsed = usage
             .filter { $0.value > 0 && !$0.key.hasPrefix("SYM_") }
             .sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
             .prefix(24)
             .compactMap { database.byHexcode[$0.key] }
-        if !mostUsed.isEmpty {
-            sections.append(BrowserSection(category: .frequentlyUsed, emoji: Array(mostUsed)))
-        }
+        add(.frequentlyUsed, Array(mostUsed))
 
-        let favEmoji = favorites.hexcodes.compactMap { database.byHexcode[$0] }
-        if !favEmoji.isEmpty {
-            sections.append(BrowserSection(category: .favorites, emoji: favEmoji))
-        }
+        add(.favorites, favorites.hexcodes.compactMap { database.byHexcode[$0] })
 
         for category in EmojiCategory.allCases where !category.isDynamic {
             let groups = Set(category.groups)
-            let emoji = database.all.filter { groups.contains($0.group) }
-            if !emoji.isEmpty {
-                sections.append(BrowserSection(category: category, emoji: emoji))
-            }
+            add(category, database.all.filter { groups.contains($0.group) })
         }
 
-        // Typographic symbols (★ ⌘ ⌥ …) get their own ⌘ tab — but only when
-        // the Symbols feature is on. Building them does a CoreText font sweep
-        // (slow) and the corpus is large, so it's hidden by default.
+        // Typographic symbols (★ ⌘ ⌥ …) only when the Symbols feature is on —
+        // the CoreText sweep is slow and the corpus is large.
         if UserDefaults.standard.bool(forKey: PrefsKey.symbolsEnabled) {
-            let symbols = SymbolsDatabase.indexed().map(\.emoji)
-            if !symbols.isEmpty {
-                sections.append(BrowserSection(category: .specialCharacters, emoji: symbols))
-            }
+            add(.specialCharacters, SymbolsDatabase.indexed().map(\.emoji))
         }
-        return sections
+        return (map, order)
     }
 }
