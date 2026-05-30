@@ -74,8 +74,17 @@ final class EmojiBrowserViewModel: ObservableObject {
     }
 
     func scroll(to category: EmojiCategory) {
-        if !query.isEmpty { setQuery("") }
-        scrollTarget = category.id
+        if !query.isEmpty { setQuery("") }  // rebuilds `sections`
+        // Scroll to the category's first real cell (by flat index) — a
+        // zero-height section anchor scrolls unreliably in a lazy list.
+        var running = 0
+        for section in sections {
+            if section.category == category {
+                scrollTarget = "top:cell-\(running)"  // align section to the top
+                return
+            }
+            running += section.emoji.count
+        }
     }
 
     private func recompute() {
@@ -123,10 +132,14 @@ final class EmojiBrowserViewModel: ObservableObject {
             }
         }
 
-        // Typographic symbols (★ ⌘ ⌥ …) get their own ⌘ tab at the end.
-        let symbols = SymbolsDatabase.indexed().map(\.emoji)
-        if !symbols.isEmpty {
-            sections.append(BrowserSection(category: .specialCharacters, emoji: symbols))
+        // Typographic symbols (★ ⌘ ⌥ …) get their own ⌘ tab — but only when
+        // the Symbols feature is on. Building them does a CoreText font sweep
+        // (slow) and the corpus is large, so it's hidden by default.
+        if UserDefaults.standard.bool(forKey: PrefsKey.symbolsEnabled) {
+            let symbols = SymbolsDatabase.indexed().map(\.emoji)
+            if !symbols.isEmpty {
+                sections.append(BrowserSection(category: .specialCharacters, emoji: symbols))
+            }
         }
         return sections
     }

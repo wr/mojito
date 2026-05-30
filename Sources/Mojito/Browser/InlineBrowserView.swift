@@ -18,7 +18,6 @@ struct InlineBrowserView: View {
     @State private var tooltipIndex: Int?
     @State private var hoverWork: DispatchWorkItem?
 
-    private static let space = "browserGrid"
     private static let tabBarHeight: CGFloat = 56
     private static let tabIconHeight: CGFloat = 30
     private let columns = Array(
@@ -68,18 +67,32 @@ struct InlineBrowserView: View {
     }
 
     private var searchHeader: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+        HStack(spacing: 3) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+                .padding(.trailing, 3)
+            Text(browser.query).foregroundStyle(.primary)
+            caret
             if browser.query.isEmpty {
                 Text("Type to search emoji").foregroundStyle(.tertiary)
-            } else {
-                Text(browser.query).foregroundStyle(.primary)
             }
             Spacer(minLength: 0)
         }
         .font(.system(size: 14))
         .padding(.horizontal, 12)
         .frame(height: 36)
+    }
+
+    /// A blinking caret — the search isn't a focusable field (the panel is
+    /// non-key, fed by the global tap), so this signals that typing works.
+    private var caret: some View {
+        TimelineView(.periodic(from: .now, by: 0.6)) { context in
+            let on = Int(context.date.timeIntervalSince1970 / 0.6) % 2 == 0
+            RoundedRectangle(cornerRadius: 1, style: .continuous)
+                .fill(Color.accentColor)
+                .frame(width: 2, height: 17)
+                .opacity(on ? 1 : 0)
+        }
     }
 
     private var gridWithBar: some View {
@@ -97,7 +110,6 @@ struct InlineBrowserView: View {
                         emptyResults
                     } else {
                         ForEach(indexedSections, id: \.section.id) { entry in
-                            sectionAnchor(entry.section.category)
                             LazyVGrid(columns: columns, spacing: 3) {
                                 ForEach(entry.items, id: \.emoji.hexcode) { item in
                                     cell(item.emoji, index: item.index)
@@ -111,31 +123,17 @@ struct InlineBrowserView: View {
                 .padding(.top, 8)
                 .padding(.bottom, Self.tabBarHeight + 4)  // clear the floating bar
             }
-            .coordinateSpace(name: Self.space)
             .onChange(of: browser.scrollTarget) { _, target in
                 guard let target else { return }
-                proxy.scrollTo(target, anchor: target.hasPrefix("cell-") ? nil : .top)
-            }
-            .onPreferenceChange(SectionOffsetKey.self) { positions in
-                guard browser.query.isEmpty else { activeCategory = nil; return }
-                let above = positions.filter { $0.value <= 12 }.max { $0.value < $1.value }
-                activeCategory = above?.key ?? positions.min { $0.value < $1.value }?.key
+                // "top:cell-N" → align section to the top (tab click);
+                // "cell-N" → just keep the cell visible (keyboard nav).
+                if target.hasPrefix("top:") {
+                    proxy.scrollTo(String(target.dropFirst(4)), anchor: .top)
+                } else {
+                    proxy.scrollTo(target, anchor: nil)
+                }
             }
         }
-    }
-
-    private func sectionAnchor(_ category: EmojiCategory) -> some View {
-        Color.clear
-            .frame(height: 0)
-            .id(category.id)
-            .background(
-                GeometryReader { geo in
-                    Color.clear.preference(
-                        key: SectionOffsetKey.self,
-                        value: [category.id: geo.frame(in: .named(Self.space)).minY]
-                    )
-                }
-            )
     }
 
     private func cell(_ emoji: Emoji, index: Int) -> some View {
@@ -211,7 +209,8 @@ struct InlineBrowserView: View {
     private var categoryBar: some View {
         HStack(spacing: 1) {
             ForEach(browser.visibleCategories) { category in
-                let isActive = activeCategory == category.id
+                // Active reflects the last tab tapped (cleared while searching).
+                let isActive = browser.query.isEmpty && activeCategory == category.id
                 Button {
                     activeCategory = category.id
                     onCategory(category)
