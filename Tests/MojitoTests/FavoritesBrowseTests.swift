@@ -58,6 +58,14 @@ struct TriggerStateMachineBrowseTests {
         #expect(up.action == .moveSelection(delta: -1))
         #expect(up.consumesKey == true)
 
+        // The pill is horizontal — ←/→ navigate it too.
+        let right = sm.handle(.arrowRight)
+        #expect(right.action == .moveSelection(delta: 1))
+        #expect(right.consumesKey == true)
+        let left = sm.handle(.arrowLeft)
+        #expect(left.action == .moveSelection(delta: -1))
+        #expect(left.consumesKey == true)
+
         let ret = sm.handle(.returnKey)
         #expect(ret.action == .insertEmoji(query: "", mode: .fromPicker, scope: .normal))
         #expect(ret.consumesKey == true)
@@ -83,6 +91,17 @@ struct TriggerStateMachineBrowseTests {
         _ = sm.handle(.nameChar("s"))           // dismisses favorites
         let out = sm.handle(.nameChar("o"))     // crosses the 2-char threshold
         #expect(out.action == .openPicker(query: "so", scope: .normal))
+    }
+
+    @Test func arrowSideKeysEndCaptureWhenPillNotVisible() {
+        // Without the pill up, ← on a bare `:` still escapes the colon.
+        var sm = TriggerStateMachine()
+        sm.browseOnColonEnabled = true
+        _ = sm.handle(.colon)
+        let left = sm.handle(.arrowLeft)
+        #expect(left.action == .closePicker)
+        #expect(left.consumesKey == false)
+        #expect(sm.state == .idle)
     }
 
     @Test func resetClearsEmptyPickerFlag() {

@@ -7,6 +7,13 @@ final class PickerViewModel: ObservableObject {
     @Published var results: [ScoredEmoji] = []
     @Published var selectedIndex: Int = 0
     @Published var isVisible: Bool = false
+    /// True for the bare-`:` favorites surface, which renders as a compact
+    /// horizontal pill instead of the vertical shortcode list.
+    @Published var compact: Bool = false
+
+    /// Mouse-pick from the picker (compact bar cells). The Engine sets this;
+    /// the index is the cell tapped.
+    var onActivate: ((Int) -> Void)?
 
     var topResult: ScoredEmoji? {
         guard !results.isEmpty, selectedIndex < results.count else { return nil }
@@ -34,5 +41,6 @@ final class PickerViewModel: ObservableObject {
         results = []
         selectedIndex = 0
         isVisible = false
+        compact = false
     }
 }

@@ -6,16 +6,38 @@ struct PickerView: View {
     var body: some View {
         // Chrome lives on the panel (NSGlassEffectView / NSVisualEffectView)
         // so we match NSMenu pixel-faithfully.
-        VStack(spacing: 0) {
-            if viewModel.results.isEmpty {
-                emptyState
-            } else {
-                resultsList
-                Divider().opacity(0.3)
-                footer
+        if viewModel.compact {
+            compactBar
+        } else {
+            VStack(spacing: 0) {
+                if viewModel.results.isEmpty {
+                    emptyState
+                } else {
+                    resultsList
+                    Divider().opacity(0.3)
+                    footer
+                }
+            }
+            .frame(width: PickerLayout.width)
+        }
+    }
+
+    /// Bare-`:` favorites pill: a single horizontal row of emoji cells with
+    /// a trailing chevron (the Browse row) that expands to the full grid.
+    private var compactBar: some View {
+        HStack(spacing: PickerLayout.compactSpacing) {
+            ForEach(Array(viewModel.results.enumerated()), id: \.offset) { index, scored in
+                if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                    Divider()
+                        .frame(height: PickerLayout.compactCell * 0.55)
+                        .padding(.horizontal, 1)
+                }
+                CompactCell(scored: scored, index: index, viewModel: viewModel)
             }
         }
-        .frame(width: PickerLayout.width)
+        .padding(.horizontal, PickerLayout.compactPadding)
+        .frame(height: PickerLayout.compactHeight)
+        .fixedSize()
     }
 
     private var resultsList: some View {
@@ -213,6 +235,44 @@ private struct PickerRow: View {
             + Text(suffix).foregroundStyle(.secondary)
             + Text(verbatim: ":").foregroundStyle(.secondary)
         )
+    }
+}
+
+/// One cell in the compact favorites pill: an emoji (or the Browse chevron),
+/// selected one filled with the accent color like the macOS predictive strip.
+private struct CompactCell: View {
+    let scored: ScoredEmoji
+    let index: Int
+    @ObservedObject var viewModel: PickerViewModel
+
+    var body: some View {
+        let isSelected = index == viewModel.selectedIndex
+        let isBrowse = scored.emoji.hexcode == EmojiBrowser.sentinelHexcode
+        ZStack {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(isSelected ? Color.accentColor : Color.clear)
+            if isBrowse {
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(isSelected ? Color.white : Color.secondary)
+            } else {
+                Text(glyph)
+                    .font(.system(size: 21))
+            }
+        }
+        .frame(width: PickerLayout.compactCell, height: PickerLayout.compactCell)
+        .contentShape(Rectangle())
+        .help(isBrowse ? String(localized: "Browse all emojis…") : ":\(scored.emoji.primaryShortcode):")
+        .onTapGesture { viewModel.onActivate?(index) }
+        .onHover { hovering in
+            if hovering { viewModel.selectedIndex = index }
+        }
+    }
+
+    private var glyph: String {
+        scored.emoji.supportsSkinTone
+            ? SkinTone.current.apply(to: scored.emoji.character)
+            : scored.emoji.character
     }
 }
 

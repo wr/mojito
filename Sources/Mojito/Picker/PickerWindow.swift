@@ -9,6 +9,7 @@ final class PickerWindow {
     private let panel: NSPanel
     private let hostingView: NSHostingView<PickerView>
     private let viewModel: PickerViewModel
+    private let chrome: NSView
     private var clickMonitorLocal: Any?
     private var clickMonitorGlobal: Any?
 
@@ -35,7 +36,18 @@ final class PickerWindow {
 
         // Tahoe's NSGlassEffectView matches NSMenu / NSPopover's Liquid
         // Glass; pre-26 falls back to NSVisualEffectView `.menu`.
-        panel.contentView = Self.makeChrome(hosting: hostingView)
+        self.chrome = Self.makeChrome(hosting: hostingView)
+        panel.contentView = chrome
+    }
+
+    /// Vertical list uses the menu corner radius; the compact pill is a
+    /// capsule (radius = half its height).
+    private func setCornerRadius(_ radius: CGFloat) {
+        if #available(macOS 26.0, *), let glass = chrome as? NSGlassEffectView {
+            glass.cornerRadius = radius
+        } else {
+            chrome.layer?.cornerRadius = radius
+        }
     }
 
     private static func makeChrome(hosting: NSHostingView<PickerView>) -> NSView {
@@ -69,6 +81,7 @@ final class PickerWindow {
     func show(near caret: CGRect?) {
         let anchor = caret ?? mouseAnchor()
         let size = preferredSize()
+        setCornerRadius(viewModel.compact ? size.height / 2 : PickerLayout.cornerRadius)
         let frame = positionedFrame(anchor: anchor, size: size)
 
         panel.setFrame(frame, display: true)
@@ -116,6 +129,15 @@ final class PickerWindow {
     // MARK: - Layout
 
     private func preferredSize() -> CGSize {
+        if viewModel.compact {
+            let count = max(viewModel.results.count, 1)
+            // Each cell + inter-cell spacing + side padding. The Browse cell
+            // also carries a thin leading divider (~3pt) — pad for it.
+            let cells = CGFloat(count) * PickerLayout.compactCell
+            let gaps = CGFloat(max(count - 1, 0)) * PickerLayout.compactSpacing
+            let width = cells + gaps + PickerLayout.compactPadding * 2 + 4
+            return CGSize(width: width, height: PickerLayout.compactHeight)
+        }
         let rowHeight: CGFloat = PickerLayout.rowHeight
         let footerHeight: CGFloat = PickerLayout.footerHeight
         let verticalPadding: CGFloat = 6
@@ -167,4 +189,11 @@ enum PickerLayout {
     static let footerHeight: CGFloat = 26
     static let maxVisibleRows: Int = 6
     static let cornerRadius: CGFloat = 10
+
+    // Compact horizontal bar (bare-`:` favorites), styled like the macOS
+    // predictive emoji strip: a capsule of cells, selected one filled.
+    static let compactCell: CGFloat = 34
+    static let compactSpacing: CGFloat = 2
+    static let compactPadding: CGFloat = 5
+    static var compactHeight: CGFloat { compactCell + compactPadding * 2 }
 }

@@ -82,6 +82,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             self?.cancelCapture()
         }
 
+        // Mouse-pick on a compact favorites-pill cell — same resolution path
+        // as Return on the bar (insert the cell, or open Browse for the
+        // chevron). Only fires while the empty-query pill is up.
+        viewModel.onActivate = { [weak self] index in
+            guard let self, self.viewModel.compact else { return }
+            guard index < self.viewModel.results.count else { return }
+            self.viewModel.selectedIndex = index
+            self.insert(query: "", mode: .fromPicker, scope: .normal)
+        }
+
         gifPickerWindow.onClickAway = { [weak self] in
             self?.gifPickerWindow.hide()
             self?.stateMachine.reset()
@@ -677,6 +687,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     private func updateResults(query: String, scope: CaptureScope) {
+        // Empty query → the compact favorites pill; anything typed → the
+        // vertical shortcode list.
+        viewModel.compact = query.isEmpty
         guard !query.isEmpty else {
             viewModel.update(query: "", results: emptyQueryResults())
             return

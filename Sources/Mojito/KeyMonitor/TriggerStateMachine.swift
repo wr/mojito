@@ -439,12 +439,25 @@ struct TriggerStateMachine {
                 ? .passthrough
                 : TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
 
-        case (.capturing(let q), .arrowLeft), (.capturing(let q), .arrowRight):
-            // Eat ← / → so the caret can't drift out of `:query` while
-            // the picker is up. Empty-query state is just `:` alone — let
-            // the arrow through and end capture.
+        case (.capturing(let q), .arrowLeft):
+            // The compact favorites pill is horizontal — ←/→ drive its
+            // selection while it's visible.
+            if emptyPickerActive {
+                return TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
+            }
+            // Otherwise eat ← / → so the caret can't drift out of `:query`,
+            // or end capture if we're sitting on a bare `:`.
             if q.isEmpty {
-                emptyPickerActive = false
+                state = .idle
+                return TriggerOutput(action: .closePicker, consumesKey: false)
+            }
+            return .consume
+
+        case (.capturing(let q), .arrowRight):
+            if emptyPickerActive {
+                return TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
+            }
+            if q.isEmpty {
                 state = .idle
                 return TriggerOutput(action: .closePicker, consumesKey: false)
             }
