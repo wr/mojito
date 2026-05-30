@@ -1,6 +1,30 @@
 import Combine
 import Foundation
 
+/// How the favorites/most-used pill is summoned.
+enum FavoritesTrigger: String, CaseIterable, Identifiable {
+    /// Never auto-shown (the pill only ever appears via the menu/browser).
+    case off
+    /// A bare `:` that dwells ~¼s.
+    case colon
+    /// An explicit `:?` (the `?` is swallowed).
+    case question
+
+    var id: String { rawValue }
+
+    var settingsLabel: String {
+        switch self {
+        case .off:      return String(localized: "Off")
+        case .colon:    return String(localized: "When I type “:” and pause")
+        case .question: return String(localized: "When I type “:?”")
+        }
+    }
+
+    static func from(_ raw: String?) -> FavoritesTrigger {
+        raw.flatMap(FavoritesTrigger.init(rawValue:)) ?? .question
+    }
+}
+
 /// Ordered list of hand-picked favorite emoji (by hexcode). Surfaced when
 /// the user types a bare `:` and managed in Settings ▸ Favorites. Mirrors
 /// `ExclusionStore`'s shape: a `@Published` model that mirrors itself into

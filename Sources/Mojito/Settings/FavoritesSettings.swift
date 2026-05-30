@@ -5,7 +5,7 @@ import SwiftUI
 /// picker, by design.)
 struct FavoritesSettingsView: View {
     @StateObject private var favorites = FavoritesStore.shared
-    @AppStorage(PrefsKey.browseOnColon) private var browseOnColon: Bool = true
+    @AppStorage(PrefsKey.favoritesTrigger) private var triggerRaw: String = FavoritesTrigger.question.rawValue
     @State private var search: String = ""
 
     private let database = EmojiDatabase.shared
@@ -30,16 +30,15 @@ struct FavoritesSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Toggle(isOn: $browseOnColon) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Show favorites when you type `:`")
-                        Text("Type a colon and pause to pop your favorites and most-used emoji. Return inserts the first; ↑↓ pick another.")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                Picker("Show favorites pill", selection: $triggerRaw) {
+                    ForEach(FavoritesTrigger.allCases) { trigger in
+                        Text(trigger.settingsLabel).tag(trigger.rawValue)
                     }
                 }
-                .toggleStyle(.switch)
+                Text("Pops your favorites and most-used emoji. Return inserts the first; ←→ pick another; the ⌄ opens the full browser.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Section {

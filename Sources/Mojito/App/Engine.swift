@@ -51,7 +51,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var symbolsRequireDoubleColon: Bool
     private var gifSearchEnabled: Bool
     private var gifBypassExclusions: Bool
-    private var browseOnColon: Bool
+    private var favoritesTrigger: FavoritesTrigger
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -73,9 +73,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
         self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
-        self.browseOnColon = (UserDefaults.standard.object(forKey: PrefsKey.browseOnColon) as? Bool) ?? true
+        self.favoritesTrigger = FavoritesTrigger.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTrigger))
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-        self.stateMachine.browseOnColonEnabled = self.browseOnColon
+        self.stateMachine.favoritesTrigger = self.favoritesTrigger
 
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
@@ -138,9 +138,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
                 self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
                 self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
-                self.browseOnColon = (UserDefaults.standard.object(forKey: PrefsKey.browseOnColon) as? Bool) ?? true
+                self.favoritesTrigger = FavoritesTrigger.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTrigger))
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-                self.stateMachine.browseOnColonEnabled = self.browseOnColon
+                self.stateMachine.favoritesTrigger = self.favoritesTrigger
             }
         }
     }
@@ -642,7 +642,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// machine to claim the arrow keys.
     private func scheduleEmptyPickerShow() {
         let seq = inputSeq
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.emptyPickerDwell) { [weak self] in
+        // `:?` is an explicit gesture — show promptly; bare `:` dwells so it
+        // doesn't flash during `:)` / `:smile`.
+        let dwell = (favoritesTrigger == .question) ? 0.0 : Self.emptyPickerDwell
+        DispatchQueue.main.asyncAfter(deadline: .now() + dwell) { [weak self] in
             guard let self else { return }
             guard self.inputSeq == seq else { return }
             guard case .capturing(let q) = self.stateMachine.state, q.isEmpty else { return }

@@ -26,10 +26,9 @@ enum PrefsKey {
     /// types a bare `:` (see `browseOnColon`) and managed in Settings ▸
     /// Favorites. `[String]` of emoji hexcodes.
     static let favoriteHexcodes      = "mojito.favorites"            // [String]  (hexcodes)
-    /// When true, typing `:` and pausing pops the picker pre-filled with
-    /// favorites + most-used so Return inserts the top one. Off = `:` is
-    /// inert until you type a query.
-    static let browseOnColon         = "mojito.browseOnColon"
+    /// How the favorites/most-used pill is summoned (`FavoritesTrigger` raw):
+    /// `off`, `colon` (bare `:` + dwell), or `question` (`:?`).
+    static let favoritesTrigger      = "mojito.favoritesTrigger"
     /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
     /// Self-attested; no payment integration.

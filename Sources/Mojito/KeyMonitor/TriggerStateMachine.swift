@@ -109,11 +109,10 @@ struct TriggerStateMachine {
     /// When true, `::` upgrades the capture to symbols-only instead of cancelling.
     var symbolsDoubleColonEnabled: Bool = false
 
-    /// When true, a bare `:` (no following name char yet) emits `.openPicker`
-    /// with an empty query so the Engine can surface favorites + most-used.
-    /// Default false keeps the pure state machine's legacy behavior; the
-    /// Engine flips it on from `PrefsKey.browseOnColon`.
-    var browseOnColonEnabled: Bool = false
+    /// How the favorites pill is summoned. Default `.off` keeps the pure
+    /// state machine's legacy behavior; the Engine sets it from
+    /// `PrefsKey.favoritesTrigger`.
+    var favoritesTrigger: FavoritesTrigger = .off
 
     /// True only once the empty-query favorites picker is actually on screen.
     /// The Engine sets it after the (debounced) show and clears it on hide,
@@ -309,8 +308,9 @@ struct TriggerStateMachine {
             emptyPickerActive = false
             // Surface favorites + most-used on a bare `:`. The Engine
             // debounces the actual show, so a follow-up keystroke (`:)`,
-            // `:smile`, …) cancels it before anything appears.
-            if browseOnColonEnabled {
+            // `:smile`, …) cancels it before anything appears. The `:?`
+            // variant fires from the cancelChar branch instead.
+            if favoritesTrigger == .colon {
                 return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: false)
             }
             return TriggerOutput(action: .none, consumesKey: false)
@@ -489,6 +489,12 @@ struct TriggerStateMachine {
             state = .idle
             currentScope = .normal
             return TriggerOutput(action: .closePicker, consumesKey: true)
+
+        case (.capturing(let q), .cancelChar("?")) where q.isEmpty && favoritesTrigger == .question:
+            // `:?` summons the favorites pill. Swallow the `?` so the focused
+            // app only ever holds the `:` — deleted on pick, exactly like the
+            // bare-`:` variant, so the insert delete-count stays 1.
+            return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: true)
 
         case (.capturing(let q), .cancelChar(let c)):
             // Symbols-only skips emoticons entirely (it's an emoji feature).

@@ -80,6 +80,10 @@ final class PickerWindow {
     /// Anchors near the caret rect, or the mouse if nil.
     func show(near caret: CGRect?) {
         let anchor = caret ?? mouseAnchor()
+        // Follow the live system appearance. A borderless panel created once
+        // and reused otherwise stays pinned to its launch-time appearance, so
+        // the picker looked stuck in light mode after a dark-mode switch.
+        panel.appearance = NSApp.effectiveAppearance
         let size = preferredSize()
         setCornerRadius(viewModel.compact ? size.height / 2 : PickerLayout.cornerRadius)
         let frame = positionedFrame(anchor: anchor, size: size)
