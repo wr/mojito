@@ -14,15 +14,15 @@ struct InlineBrowserView: View {
     let onCategory: (EmojiCategory) -> Void
 
     @State private var activeCategory: String?
-    @State private var hoverHex: String?
-    @State private var tooltipHex: String?
+    @State private var hoverIndex: Int?
+    @State private var tooltipIndex: Int?
     @State private var hoverWork: DispatchWorkItem?
 
     private static let space = "browserGrid"
-    private static let tabBarHeight: CGFloat = 44
+    private static let tabBarHeight: CGFloat = 56
     private static let tabIconHeight: CGFloat = 30
     private let columns = Array(
-        repeating: GridItem(.flexible(minimum: 32), spacing: 3),
+        repeating: GridItem(.flexible(minimum: 36), spacing: 3),
         count: EmojiBrowserViewModel.columns
     )
     private var barTint: Color { Color(nsColor: .windowBackgroundColor) }
@@ -145,32 +145,34 @@ struct InlineBrowserView: View {
             ? SkinTone.current.apply(to: emoji.character)
             : emoji.character
         return Text(glyph)
-            .font(.system(size: 22))
-            .frame(width: 34, height: 34)
+            .font(.system(size: 25))  // match the pill's glyph size
+            .frame(maxWidth: .infinity)
+            .frame(height: 40)
             .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
                     .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
             )
-            .id("cell-\(emoji.hexcode)")
+            // Index, not hexcode: the same emoji can appear in two sections,
+            // so a hexcode id is ambiguous (the tooltip anchored to the wrong copy).
+            .id("cell-\(index)")
             .contentShape(Rectangle())
             .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
-                tooltipHex == emoji.hexcode ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
+                tooltipIndex == index ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
             }
             .onTapGesture { onPick(emoji) }
             .onHover { hovering in
                 hoverWork?.cancel()
                 if hovering {
                     browser.selectedIndex = index
-                    hoverHex = emoji.hexcode
-                    let hex = emoji.hexcode
+                    hoverIndex = index
                     let work = DispatchWorkItem {
-                        if hoverHex == hex { tooltipHex = hex }
+                        if hoverIndex == index { tooltipIndex = index }
                     }
                     hoverWork = work
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
                 } else {
-                    if hoverHex == emoji.hexcode { hoverHex = nil }
-                    if tooltipHex == emoji.hexcode { tooltipHex = nil }
+                    if hoverIndex == index { hoverIndex = nil }
+                    if tooltipIndex == index { tooltipIndex = nil }
                 }
             }
     }
@@ -233,19 +235,34 @@ struct InlineBrowserView: View {
         .padding(.horizontal, 8)
         .frame(height: Self.tabIconHeight)
         .frame(maxWidth: .infinity, alignment: .leading)
-        // Gradient runs the full bar height: the blurred grid fades in from
-        // the top of the bar down to the opaque strip the icons sit on.
-        .padding(.top, Self.tabBarHeight - Self.tabIconHeight)
+        // Tall gradient region above the icons + breathing room below them.
+        .padding(.top, 18)
+        .padding(.bottom, 8)
         .background(barBackground)
     }
 
+    /// A tall, severe gradient over a blurred base — the grid fades from fully
+    /// visible at the top of the bar to the opaque strip the icons sit on,
+    /// matching the macOS picker.
     private var barBackground: some View {
         ZStack {
             Rectangle()
                 .fill(.ultraThinMaterial)
-                .mask(LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom))
+                .mask(LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0.0),
+                        .init(color: .black, location: 0.5),
+                        .init(color: .black, location: 1.0),
+                    ],
+                    startPoint: .top, endPoint: .bottom
+                ))
             LinearGradient(
-                colors: [barTint.opacity(0), barTint.opacity(0.55), barTint.opacity(0.95)],
+                stops: [
+                    .init(color: barTint.opacity(0), location: 0.0),
+                    .init(color: barTint.opacity(0.7), location: 0.45),
+                    .init(color: barTint, location: 0.72),
+                    .init(color: barTint, location: 1.0),
+                ],
                 startPoint: .top, endPoint: .bottom
             )
         }

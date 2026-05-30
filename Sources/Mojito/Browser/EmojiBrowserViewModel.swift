@@ -14,7 +14,7 @@ struct BrowserSection: Identifiable {
 @MainActor
 final class EmojiBrowserViewModel: ObservableObject {
     /// Fixed grid width — keep in sync with the LazyVGrid column count.
-    static let columns = 9
+    static let columns = 8
 
     @Published private(set) var query: String = ""
     @Published private(set) var sections: [BrowserSection] = []
@@ -61,8 +61,9 @@ final class EmojiBrowserViewModel: ObservableObject {
         case .down:  next += Self.columns
         }
         selectedIndex = min(max(next, 0), count - 1)
-        // Keep the selected glyph in view.
-        if let hex = selectedEmoji?.hexcode { scrollTarget = "cell-\(hex)" }
+        // Scroll by flat index — the same emoji can appear in two sections
+        // (e.g. Frequently Used + its category), so hexcode isn't unique.
+        scrollTarget = "cell-\(selectedIndex)"
     }
 
     /// Mouse pick: snap the selection to the clicked glyph.
