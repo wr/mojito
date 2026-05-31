@@ -1,19 +1,33 @@
 import SwiftUI
+import KeyboardShortcuts
 
-/// The "Quick Access" section of General settings: how the pill is triggered,
-/// what it surfaces, and the 8 editable slots (each auto/most-used or a pinned
-/// emoji).
+/// "Quick access" — how the pill is summoned and the global browser hotkey.
 struct QuickAccessSection: View {
     @AppStorage(PrefsKey.favoritesTrigger) private var triggerRaw: String = FavoritesTrigger.question.rawValue
     @AppStorage(PrefsKey.favoritesTriggerSurface) private var surfaceRaw: String = FavoritesTriggerSurface.pill.rawValue
 
     var body: some View {
         Section {
-            Picker("Trigger", selection: $triggerRaw) {
-                ForEach(FavoritesTrigger.allCases) { trigger in
-                    Text(trigger.settingsLabel).tag(trigger.rawValue)
+            LabeledContent("Quick access shortcut") {
+                Menu {
+                    ForEach(FavoritesTrigger.allCases) { trigger in
+                        Button {
+                            triggerRaw = trigger.rawValue
+                        } label: {
+                            if trigger.rawValue == triggerRaw {
+                                Label(trigger.settingsLabel, systemImage: "checkmark")
+                            } else {
+                                Text(trigger.settingsLabel)
+                            }
+                        }
+                    }
+                } label: {
+                    triggerCaps(FavoritesTrigger.from(triggerRaw))
                 }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
             }
+
             if triggerRaw != FavoritesTrigger.off.rawValue {
                 Picker("Shows", selection: $surfaceRaw) {
                     ForEach(FavoritesTriggerSurface.allCases) { surface in
@@ -21,23 +35,42 @@ struct QuickAccessSection: View {
                     }
                 }
             }
-            QuickAccessGrid()
+
+            LabeledContent("Emoji browser shortcut") {
+                KeyboardShortcuts.Recorder("", name: .showEmojiBrowser)
+            }
         } header: {
             Text("Quick access")
         } footer: {
-            Text("Each slot auto-fills with your most-used emoji, or click one to pin a specific emoji. Return inserts the first; ←→ pick another; ↓ opens the full browser.")
+            Text("Type the shortcut to pop the Top 8 below. Return inserts the first; ←→ pick another; ↓ opens the full browser.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
+
+    @ViewBuilder
+    private func triggerCaps(_ trigger: FavoritesTrigger) -> some View {
+        switch trigger {
+        case .off:
+            Text("Off").foregroundStyle(.secondary)
+        case .colon:
+            HStack(spacing: 4) {
+                KeyCap(":")
+                Text("then pause").font(.callout).foregroundStyle(.secondary)
+            }
+        case .question:
+            HStack(spacing: 3) { KeyCap(":"); KeyCap("?") }
+        }
+    }
 }
 
-private struct EditingSlot: Identifiable { let id: Int }
-
-private struct QuickAccessGrid: View {
+/// "Top 8" — the editable Quick Access slots. Each is auto (most-used) or
+/// pinned to a specific emoji.
+struct TopEightSection: View {
     @StateObject private var store = QuickAccessStore.shared
     @State private var editing: EditingSlot?
+    @State private var hovered: Int?
     private let database = EmojiDatabase.shared
 
     private var usage: [String: Int] {
@@ -46,44 +79,41 @@ private struct QuickAccessGrid: View {
 
     var body: some View {
         let slots = QuickAccess.resolvedPerSlot(store: store, database: database, usage: usage)
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                ForEach(0..<QuickAccessStore.slotCount, id: \.self) { index in
-                    slotCell(index: index, slot: slots[index])
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    ForEach(0..<QuickAccessStore.slotCount, id: \.self) { index in
+                        slotCell(index: index, slot: slots[index])
+                    }
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
-            }
-            HStack(alignment: .firstTextBaseline) {
-                Text("Click a slot to pin an emoji; ↺ resets it to most-used.")
-                    .font(.callout)
-                    .foregroundStyle(.tertiary)
-                Spacer()
-                if store.hasPins {
-                    Button("Reset all") { store.resetAll() }
-                        .buttonStyle(.borderless)
+                HStack(alignment: .firstTextBaseline) {
+                    Text("Click a slot to pin a specific emoji; hover a pinned slot to reset it.")
                         .font(.callout)
+                        .foregroundStyle(.tertiary)
+                    Spacer()
+                    if store.hasPins {
+                        Button("Reset all") { store.resetAll() }
+                            .buttonStyle(.borderless)
+                            .font(.callout)
+                    }
                 }
             }
+            .padding(.vertical, 2)
+        } header: {
+            Text("Top 8")
         }
-        .padding(.vertical, 2)
         .sheet(item: $editing) { slot in
-            EmojiPickerSheet { emoji in store.pin(emoji.hexcode, at: slot.id) }
+            QuickAccessBrowserSheet { emoji in store.pin(emoji.hexcode, at: slot.id) }
         }
     }
 
     private func slotCell(index: Int, slot: ResolvedSlot) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.primary.opacity(slot.pinned ? 0.10 : 0.05))
-            if slot.pinned {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(Color.accentColor.opacity(0.5), lineWidth: 1.5)
-            }
+                .fill(Color.primary.opacity(0.06))
             if let emoji = slot.emoji {
-                // Auto-fill is dimmed so pinned slots read as deliberate.
-                Text(displayGlyph(emoji))
-                    .font(.system(size: 22))
-                    .opacity(slot.pinned ? 1 : 0.4)
+                Text(displayGlyph(emoji)).font(.system(size: 22))
             } else {
                 Image(systemName: "plus")
                     .font(.system(size: 13, weight: .semibold))
@@ -93,20 +123,35 @@ private struct QuickAccessGrid: View {
         .frame(width: 38, height: 38)
         .contentShape(Rectangle())
         .onTapGesture { editing = EditingSlot(id: index) }
-        .overlay(alignment: .topTrailing) {
-            if slot.pinned {
-                Button { store.reset(at: index) } label: {
-                    Image(systemName: "arrow.uturn.backward.circle.fill")
-                        .font(.system(size: 13))
+        .onHover { inside in hovered = inside ? index : (hovered == index ? nil : hovered) }
+        .overlay(alignment: .topTrailing) { badge(index: index, slot: slot) }
+        .help(slotHelp(slot))
+    }
+
+    /// Pinned slots show a pin; hovering one swaps it for a reset control.
+    @ViewBuilder
+    private func badge(index: Int, slot: ResolvedSlot) -> some View {
+        if slot.pinned {
+            Group {
+                if hovered == index {
+                    Button { store.reset(at: index) } label: {
+                        Image(systemName: "arrow.uturn.backward.circle.fill")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                            .background(Circle().fill(Color(nsColor: .windowBackgroundColor)))
+                    }
+                    .buttonStyle(.plain)
+                    .help("Reset to most-used")
+                } else {
+                    Image(systemName: "pin.fill")
+                        .font(.system(size: 8, weight: .semibold))
                         .foregroundStyle(.secondary)
+                        .padding(3)
                         .background(Circle().fill(Color(nsColor: .windowBackgroundColor)))
                 }
-                .buttonStyle(.plain)
-                .offset(x: 6, y: -6)
-                .help("Reset to most-used")
             }
+            .offset(x: 6, y: -6)
         }
-        .help(slotHelp(slot))
     }
 
     private func slotHelp(_ slot: ResolvedSlot) -> String {
@@ -121,29 +166,17 @@ private struct QuickAccessGrid: View {
     }
 }
 
-/// A searchable emoji grid presented as a sheet — used to pin a Quick Access
-/// slot. (A real `TextField` here; the in-panel browser's search is driven by
-/// the event tap, which Settings doesn't have.)
-struct EmojiPickerSheet: View {
+struct EditingSlot: Identifiable { let id: Int }
+
+/// Pins a slot using the same emoji browser the rest of the app uses, hosted
+/// in a sheet (with its search field made editable for the key window).
+private struct QuickAccessBrowserSheet: View {
     let onPick: (Emoji) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var query: String = ""
-    private let database = EmojiDatabase.shared
-    private let columns = Array(repeating: GridItem(.flexible(minimum: 32), spacing: 4), count: 10)
-
-    private var results: [Emoji] {
-        let trimmed = query.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else {
-            return database.all.sorted { $0.order < $1.order }
-        }
-        return FuzzyMatcher.search(
-            query: trimmed, in: database, usage: [:],
-            corpus: .emojiOnly, useFrequencyBoost: false, limit: 120
-        )
-        .map(\.emoji)
-        .filter { database.byHexcode[$0.hexcode] != nil }
-    }
+    @StateObject private var browser = EmojiBrowserViewModel(
+        database: .shared, quickAccess: .shared
+    )
 
     var body: some View {
         VStack(spacing: 0) {
@@ -154,49 +187,37 @@ struct EmojiPickerSheet: View {
                     .keyboardShortcut(.cancelAction)
             }
             .padding(.horizontal, 14)
-            .padding(.top, 14)
-            .padding(.bottom, 10)
-
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Search emoji", text: $query)
-                    .textFieldStyle(.plain)
-            }
-            .padding(.horizontal, 14)
-            .padding(.bottom, 10)
-
+            .padding(.vertical, 12)
             Divider()
-
-            ScrollView {
-                if results.isEmpty {
-                    Text("No emoji matching “\(query)”")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
-                } else {
-                    LazyVGrid(columns: columns, spacing: 4) {
-                        ForEach(results, id: \.hexcode) { emoji in
-                            Button {
-                                onPick(emoji)
-                                dismiss()
-                            } label: {
-                                Text(displayGlyph(emoji))
-                                    .font(.system(size: 24))
-                                    .frame(width: 36, height: 36)
-                            }
-                            .buttonStyle(.plain)
-                            .help(":\(emoji.primaryShortcode):")
-                        }
-                    }
-                    .padding(10)
-                }
-            }
+            InlineBrowserView(
+                browser: browser,
+                onPick: { emoji in onPick(emoji); dismiss() },
+                onCategory: { browser.selectCategory($0) },
+                editableSearch: true
+            )
         }
-        .frame(width: 460, height: 460)
+        .frame(width: BrowserLayout.width, height: BrowserLayout.height + 48)
     }
+}
 
-    private func displayGlyph(_ emoji: Emoji) -> String {
-        emoji.supportsSkinTone ? SkinTone.current.apply(to: emoji.character) : emoji.character
+/// A small keycap, e.g. `:` or `?`, for the trigger display.
+private struct KeyCap: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 12, weight: .medium, design: .rounded))
+            .frame(minWidth: 15)
+            .padding(.horizontal, 5)
+            .padding(.vertical, 2)
+            .background(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(Color.primary.opacity(0.08))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.12))
+            )
     }
 }

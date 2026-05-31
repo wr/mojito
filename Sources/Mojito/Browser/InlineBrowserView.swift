@@ -18,11 +18,17 @@ struct InlineBrowserView: View {
     @ObservedObject var browser: EmojiBrowserViewModel
     let onPick: (Emoji) -> Void
     let onCategory: (EmojiCategory) -> Void
+    /// In the live panel the search row is display-only (the event tap feeds it).
+    /// Hosted in a key window (the Settings slot picker), it becomes a real
+    /// editable `TextField`.
+    var editableSearch: Bool = false
 
     @State private var hoverIndex: Int?
     @State private var tooltipIndex: Int?
     @State private var hoverWork: DispatchWorkItem?
     @State private var tooltipSize: CGSize = .zero
+    @State private var typedQuery = ""
+    @FocusState private var searchFieldFocused: Bool
     /// The caret only blinks once the search row is clicked (or text exists),
     /// so it doesn't imply a focusable field before then.
     @State private var searchClicked = false
@@ -86,10 +92,17 @@ struct InlineBrowserView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
                 .padding(.trailing, 3)
-            Text(browser.query).foregroundStyle(.primary)
-            caret  // fixed slot — shows on click, never shifts the placeholder
-            if browser.query.isEmpty {
-                Text("Type to search emoji").foregroundStyle(.tertiary)
+            if editableSearch {
+                TextField("Search emoji", text: $typedQuery)
+                    .textFieldStyle(.plain)
+                    .focused($searchFieldFocused)
+                    .onChange(of: typedQuery) { _, value in browser.setQuery(value) }
+            } else {
+                Text(browser.query).foregroundStyle(.primary)
+                caret  // fixed slot — shows on click, never shifts the placeholder
+                if browser.query.isEmpty {
+                    Text("Type to search emoji").foregroundStyle(.tertiary)
+                }
             }
             Spacer(minLength: 0)
         }
@@ -97,7 +110,10 @@ struct InlineBrowserView: View {
         .padding(.horizontal, 12)
         .frame(height: 36)
         .contentShape(Rectangle())
-        .onTapGesture { searchClicked = true }
+        .onTapGesture {
+            searchClicked = true
+            if editableSearch { searchFieldFocused = true }
+        }
     }
 
     private var caret: some View {

@@ -1245,9 +1245,6 @@
         }
       }
     },
-    ":%@:" : {
-
-    },
     "???" : {
       "comment" : "Placeholder shown in About → Easter eggs for an entry the user hasn't discovered yet. Should stay short and visually act as 'three unknowns'.",
       "localizations" : {
@@ -3504,7 +3501,7 @@
         }
       }
     },
-    "Click a slot to pin an emoji; ↺ resets it to most-used." : {
+    "Click a slot to pin a specific emoji; hover a pinned slot to reset it." : {
 
     },
     "Close" : {
@@ -4410,9 +4407,6 @@
         }
       }
     },
-    "Each slot auto-fills with your most-used emoji, or click one to pin a specific emoji. Return inserts the first; ←→ pick another; ↓ opens the full browser." : {
-
-    },
     "Easter egg discovered" : {
       "localizations" : {
         "ar" : {
@@ -4860,6 +4854,9 @@
           }
         }
       }
+    },
+    "Emoji browser shortcut" : {
+
     },
     "Exclusions" : {
       "localizations" : {
@@ -6562,6 +6559,7 @@
       }
     },
     "Keyboard shortcuts" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7582,9 +7580,6 @@
     "Off" : {
 
     },
-    "Open emoji browser" : {
-
-    },
     "Open settings" : {
       "localizations" : {
         "ar" : {
@@ -8036,6 +8031,9 @@
         }
       }
     },
+    "Pausing" : {
+
+    },
     "Permissions" : {
       "localizations" : {
         "ar" : {
@@ -8151,11 +8149,7 @@
     "Pick an emoji" : {
 
     },
-    "Press a pause shortcut again while paused to resume." : {
-
-    },
     "Press the same shortcut again while paused to resume." : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -8724,6 +8718,9 @@
 
     },
     "Quick access pill" : {
+
+    },
+    "Quick access shortcut" : {
 
     },
     "Quit %@" : {
@@ -11227,10 +11224,10 @@
         }
       }
     },
-    "Travel & Places" : {
+    "Top 8" : {
 
     },
-    "Trigger" : {
+    "Travel & Places" : {
 
     },
     "Type `:::` then a search term to insert a GIF from Giphy." : {
@@ -11569,6 +11566,9 @@
           }
         }
       }
+    },
+    "Type the shortcut to pop the Top 8 below. Return inserts the first; ←→ pick another; ↓ opens the full browser." : {
+
     },
     "Type to search GIFs." : {
       "localizations" : {
@@ -13725,6 +13725,9 @@
       }
     },
     "only in the apps & sites below" : {
+
+    },
+    "then pause" : {
 
     }
   },
