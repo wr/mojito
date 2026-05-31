@@ -22,6 +22,7 @@ struct InlineBrowserView: View {
     @State private var hoverIndex: Int?
     @State private var tooltipIndex: Int?
     @State private var hoverWork: DispatchWorkItem?
+    @State private var tooltipSize: CGSize = .zero
     /// The caret only blinks once the search row is clicked (or text exists),
     /// so it doesn't imply a focusable field before then.
     @State private var searchClicked = false
@@ -44,16 +45,27 @@ struct InlineBrowserView: View {
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
         // Tooltip drawn at the root so it can sit above the top row without
-        // being clipped by the scroll view.
+        // being clipped by the scroll view. Clamps to the panel using the
+        // bubble's measured width and flips below near the search row, so long
+        // shortcodes never overflow an edge.
         .overlayPreferenceValue(TooltipAnchorKey.self) { data in
             GeometryReader { proxy in
                 if let data {
-                    let rect = proxy[data.anchor]
-                    tooltipBubble(data.text)
-                        .position(
-                            x: min(max(rect.midX, 44), proxy.size.width - 44),
-                            y: max(rect.minY - 15, 16)
-                        )
+                    let cell = proxy[data.anchor]
+                    let margin: CGFloat = 6
+                    let halfW = tooltipSize.width / 2
+                    let x = min(max(cell.midX, halfW + margin), proxy.size.width - halfW - margin)
+                    let fitsAbove = cell.minY - margin - tooltipSize.height >= 40
+                    let y = fitsAbove
+                        ? cell.minY - margin - tooltipSize.height / 2
+                        : cell.maxY + margin + tooltipSize.height / 2
+                    EmojiTooltip(name: data.text)
+                        .background(GeometryReader { g in
+                            Color.clear
+                                .onAppear { tooltipSize = g.size }
+                                .onChange(of: g.size) { _, s in tooltipSize = s }
+                        })
+                        .position(x: x, y: y)
                 }
             }
             .allowsHitTesting(false)
@@ -201,25 +213,6 @@ struct InlineBrowserView: View {
                     if tooltipIndex == index { tooltipIndex = nil }
                 }
             }
-    }
-
-    private func tooltipBubble(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 11))
-            .foregroundStyle(.primary)
-            .lineLimit(1)
-            .fixedSize()
-            .padding(.horizontal, 7)
-            .padding(.vertical, 3)
-            .background(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color(nsColor: .windowBackgroundColor))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.15))
-            )
-            .shadow(color: .black.opacity(0.18), radius: 3, y: 1)
     }
 
     private var emptyResults: some View {

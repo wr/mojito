@@ -64,15 +64,22 @@ final class PickerWindow {
         }
         let name = ":\(scored.emoji.primaryShortcode):"
         let work = DispatchWorkItem { [weak self] in
-            self?.showPillTooltip(index: index, number: index + 1, name: name)
+            self?.showPillTooltip(index: index, name: name)
         }
         pillTooltipWork = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
     }
 
-    private func showPillTooltip(index: Int, number: Int, name: String) {
+    /// Transparent margin around the bubble so its (soft, SwiftUI) shadow has
+    /// room to render inside the tooltip window instead of being clipped — the
+    /// window's own AppKit `hasShadow` is off so the pill matches the browser's
+    /// in-panel tooltip exactly.
+    private static let tooltipShadowPad: CGFloat = 6
+
+    private func showPillTooltip(index: Int, name: String) {
         guard viewModel.isVisible, viewModel.compact else { return }
-        let hosting = NSHostingView(rootView: PillTooltipLabel(number: number, name: name))
+        let pad = Self.tooltipShadowPad
+        let hosting = NSHostingView(rootView: EmojiTooltip(name: name).padding(pad))
         let size = hosting.fittingSize
 
         let tip: NSPanel
@@ -88,7 +95,7 @@ final class PickerWindow {
             tip.level = .floating
             tip.isOpaque = false
             tip.backgroundColor = .clear
-            tip.hasShadow = true
+            tip.hasShadow = false  // bubble carries its own soft SwiftUI shadow
             tip.ignoresMouseEvents = true  // never interrupt the hover
             tip.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
             tooltipPanel = tip
@@ -96,16 +103,19 @@ final class PickerWindow {
         tip.appearance = NSApp.effectiveAppearance
         tip.contentView = hosting
 
-        // Centered above cell `index` of the pill.
+        // Centered above cell `index` of the pill. `pad` is the transparent
+        // shadow margin baked into the window, so offset by it to keep the
+        // bubble's visual gap above the pill constant.
+        let gap: CGFloat = 4
         let cellCenterX = panel.frame.minX + PickerLayout.compactPadding
             + CGFloat(index) * (PickerLayout.compactCell + PickerLayout.compactSpacing)
             + PickerLayout.compactCell / 2
-        var origin = CGPoint(x: cellCenterX - size.width / 2, y: panel.frame.maxY + 4)
+        var origin = CGPoint(x: cellCenterX - size.width / 2, y: panel.frame.maxY + gap - pad)
         let screen = NSScreen.screens.first { $0.frame.intersects(panel.frame) } ?? NSScreen.main
         if let visible = screen?.visibleFrame {
             origin.x = min(max(origin.x, visible.minX + 4), visible.maxX - size.width - 4)
-            if origin.y + size.height > visible.maxY {
-                origin.y = panel.frame.minY - size.height - 4  // flip below
+            if origin.y + size.height - pad > visible.maxY {
+                origin.y = panel.frame.minY - gap - size.height + pad  // flip below
             }
         }
         tip.setFrame(CGRect(origin: origin, size: size), display: true)
@@ -309,41 +319,29 @@ final class PickerWindow {
     }
 }
 
-/// The pill's number-hotkey tooltip — matches the browser's glyph tooltip
-/// (light box, 1px border, soft shadow). The hotkey digit sits in a small
-/// keycap so the "press N" affordance reads clearly.
-private struct PillTooltipLabel: View {
-    let number: Int
+/// Shared tooltip chrome for the pill and the browser grid so the two read
+/// identically. A custom view, not a system tooltip: the picker panel is
+/// non-key, so AppKit suppresses native `.help` tooltips on it.
+struct EmojiTooltip: View {
     let name: String
 
     var body: some View {
-        HStack(spacing: 5) {
-            Text(name)
-                .foregroundStyle(.primary)
-            Text("\(number)")
-                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 4)
-                .padding(.vertical, 1)
-                .background(
-                    RoundedRectangle(cornerRadius: 3, style: .continuous)
-                        .fill(Color.primary.opacity(0.08))
-                )
-        }
-        .font(.system(size: 11))
-        .lineLimit(1)
-        .fixedSize()
-        .padding(.horizontal, 7)
-        .padding(.vertical, 4)
-        .background(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(Color(nsColor: .windowBackgroundColor))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.12))
-        )
-        .shadow(color: .black.opacity(0.16), radius: 3, y: 1)
+        Text(name)
+            .foregroundStyle(.primary)
+            .font(.system(size: 11))
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(Color(nsColor: .windowBackgroundColor))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.15))
+            )
+            .shadow(color: .black.opacity(0.18), radius: 3, y: 1)
     }
 }
 
