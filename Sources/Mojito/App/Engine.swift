@@ -218,7 +218,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
     private func handleFocusChanged() {
         pendingEmoticonUndo = nil
-        guard case .capturing = stateMachine.state else { return }
+        // The browser owns the keyboard while open and a pick is synthesized
+        // into whatever field is focused, so an AX focus change (in-app field
+        // jump, Spotlight) means our target moved — dismiss it, exactly as a
+        // capture does. Cross-app switches are handled by handleAppActivated.
+        switch stateMachine.state {
+        case .capturing, .browsing: break
+        default: return
+        }
         guard let snapshot = captureFocusSnapshot else {
             cancelCapture()
             return
@@ -238,6 +245,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     private func cancelCapture() {
+        // `:?` swallowed the `?` so the field shows only `:`. Esc types it back
+        // via a dedicated action; every other dismissal (click-away, focus/app
+        // switch, Space change) lands here, so restore it too — but only while
+        // focus is still on the capture's field, else the synthetic `?` would
+        // land in whatever the user clicked into.
+        let restoreQuestion = stateMachine.emptyPickerActive
+            && favoritesTrigger == .question
+            && !focusHasChangedSinceCapture()
         stateMachine.reset()
         viewModel.reset()
         pickerWindow.hide()
@@ -246,6 +261,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         captureFocusPID = nil
         captureIsExcluded = false
         browserDeleteCount = 0
+        if restoreQuestion {
+            TextInserter.replace(charactersToDelete: 0, with: "?")
+        }
         DebugRecorder.record(.picker, "cancel")
     }
 
@@ -759,7 +777,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             PickerContextStore.capture(caretOutcome: CaretLocator.lastOutcome, resolvedCaret: anchor)
             DebugRecorder.record(.picker, "openEmpty", ["results": "\(self.viewModel.results.count)"])
             self.pickerWindow.show(near: anchor)
-            // Now the picker owns ↑↓ / Return for favorites selection.
+            // Now the picker owns ↑↓ / Return for favorites selection. The
+            // emoji-row count (excludes the trailing Browse row) bounds the
+            // digit quick-pick so an out-of-range digit starts a search.
+            self.stateMachine.pillEmojiCount = max(0, self.viewModel.results.count - 1)
             self.stateMachine.emptyPickerActive = true
         }
     }
@@ -777,9 +798,29 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
     // MARK: - Full-library browser (the picker panel, grown)
 
-    /// Menu-bar entry: open the grid with nothing typed to erase.
+    /// Menu-bar / global-hotkey entry. These fire independently of the event
+    /// tap, so — unlike the `:` paths — they must explicitly honor pause +
+    /// permissions (`isActive` is false then), refuse to act in a secure field,
+    /// and clear any GIF picker that's up. If a `:query` capture is in flight,
+    /// that text is already in the field and must be erased on pick.
     func showBrowser() {
-        expandToBrowser(deleteCount: 0)
+        guard isActive else { return }
+        let context = AppContextDetector.current()
+        if context.focusedFieldIsSecure {
+            DebugRecorder.record(.engine, "secureFieldBlocked")
+            return
+        }
+        gifPickerWindow.hide()
+        let deleteCount: Int
+        if case .capturing(let q) = stateMachine.state {
+            deleteCount = q.count + 1  // the typed `:query`
+        } else {
+            deleteCount = 0
+        }
+        captureContext = context
+        captureFocusSnapshot = FocusedElementCache.shared.element
+        captureFocusPID = FocusedElementCache.shared.focusedPID
+        expandToBrowser(deleteCount: deleteCount)
     }
 
     /// Grow the picker panel into the full grid and hand the keyboard to the

@@ -89,9 +89,24 @@ struct TriggerStateMachineBrowseTests {
         _ = sm.handle(.colon)
         _ = sm.handle(.cancelChar("?"))
         sm.emptyPickerActive = true
+        sm.pillEmojiCount = 8
         let three = sm.handle(.nameChar("3"))
         #expect(three.action == .pickIndex(2))  // 1-based digit → 0-based index
         #expect(three.consumesKey == true)
+    }
+
+    @Test func pillOutOfRangeDigitStartsSearch() {
+        var sm = TriggerStateMachine()
+        sm.favoritesTrigger = .question
+        _ = sm.handle(.colon)
+        _ = sm.handle(.cancelChar("?"))
+        sm.emptyPickerActive = true
+        sm.pillEmojiCount = 2  // only two favorites shown
+        let five = sm.handle(.nameChar("5"))
+        // Beyond the row count → not a quick-pick; the digit falls through to a
+        // normal search instead of being swallowed.
+        #expect(five.action == .closePicker)
+        #expect(sm.state == .capturing(query: "5"))
     }
 
     @Test func pillLetterStillStartsSearch() {

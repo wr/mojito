@@ -140,6 +140,12 @@ struct TriggerStateMachine {
     /// empty-query state.
     var emptyPickerActive: Bool = false
 
+    /// Selectable emoji rows in the pill (excludes the trailing Browse row).
+    /// The Engine sets it alongside `emptyPickerActive`; it bounds the digit
+    /// quick-pick so an out-of-range digit falls through to a normal search
+    /// instead of being swallowed.
+    var pillEmojiCount: Int = 0
+
     private var currentScope: CaptureScope = .normal
 
     private var konamiProgress: Int = 0
@@ -416,7 +422,8 @@ struct TriggerStateMachine {
             // Pill quick-pick: while the pill is up, a digit 1–8 inserts that
             // row directly (`:?3` → 3rd emoji). Swallowed so it doesn't start
             // a search.
-            if emptyPickerActive, let digit = c.wholeNumberValue, (1...8).contains(digit) {
+            if emptyPickerActive, let digit = c.wholeNumberValue,
+               digit >= 1, digit <= min(8, pillEmojiCount) {
                 return TriggerOutput(action: .pickIndex(digit - 1), consumesKey: true)
             }
             // First typed char leaves the empty-query state — drop the
@@ -596,6 +603,7 @@ struct TriggerStateMachine {
         state = .idle
         currentScope = .normal
         emptyPickerActive = false
+        pillEmojiCount = 0
         lastWasWordChar = false
         konamiProgress = 0
         idleWord = ""
