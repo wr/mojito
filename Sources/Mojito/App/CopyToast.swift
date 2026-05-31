@@ -15,14 +15,15 @@ enum CopyToast {
         panel.appearance = NSApp.effectiveAppearance
         panel.contentView = hosting
 
-        let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
+        // Anchor near the mouse — centered on the cursor, just above it.
+        let mouse = NSEvent.mouseLocation
+        let screen = NSScreen.screens.first { $0.frame.contains(mouse) } ?? NSScreen.main
+        var origin = CGPoint(x: mouse.x - size.width / 2, y: mouse.y + 18)
         if let visible = screen?.visibleFrame {
-            let origin = CGPoint(
-                x: visible.midX - size.width / 2,
-                y: visible.minY + visible.height * 0.22
-            )
-            panel.setFrame(CGRect(origin: origin, size: size), display: true)
+            origin.x = min(max(origin.x, visible.minX + 8), visible.maxX - size.width - 8)
+            origin.y = min(max(origin.y, visible.minY + 8), visible.maxY - size.height - 8)
         }
+        panel.setFrame(CGRect(origin: origin, size: size), display: true)
 
         panel.alphaValue = 0
         panel.orderFrontRegardless()

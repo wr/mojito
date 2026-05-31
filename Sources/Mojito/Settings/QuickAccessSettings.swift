@@ -51,14 +51,16 @@ struct QuickAccessSection: View {
                     }
                 }
                 .padding(6)
-                .background(.regularMaterial, in: Capsule())
-                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
+                .background(
+                    Capsule()
+                        .fill(Color(nsColor: .textBackgroundColor))
+                        .shadow(color: .black.opacity(0.12), radius: 4, y: 1)
+                )
 
                 Spacer(minLength: 0)
 
                 if store.hasPins {
                     Button("Reset") { store.resetAll() }
-                        .controlSize(.small)
                 }
             }
             Text("Click a slot to pin a specific emoji or symbol. Quick Access defaults to your most-used emoji.")
@@ -71,10 +73,19 @@ struct QuickAccessSection: View {
 
     private func slotCell(index: Int, slot: ResolvedSlot) -> some View {
         let isHovered = hovered == index
+        let isFirst = index == 0
+        let isLast = index == QuickAccessStore.slotCount - 1
         return ZStack {
             if isHovered {
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .fill(Color(nsColor: .unemphasizedSelectedContentBackgroundColor))
+                // End cells round their outer edge to nest in the capsule ends.
+                UnevenRoundedRectangle(
+                    topLeadingRadius: isFirst ? 20 : 9,
+                    bottomLeadingRadius: isFirst ? 20 : 9,
+                    bottomTrailingRadius: isLast ? 20 : 9,
+                    topTrailingRadius: isLast ? 20 : 9,
+                    style: .continuous
+                )
+                .fill(Color(nsColor: .unemphasizedSelectedContentBackgroundColor))
             }
             if let emoji = slot.emoji {
                 Text(displayGlyph(emoji)).font(.system(size: 25))
