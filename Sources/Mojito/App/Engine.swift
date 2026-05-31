@@ -389,6 +389,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 DebugRecorder.record(.engine, "secureFieldBlocked")
                 return false
             }
+            // No editable field → nothing to autocomplete into; leave the `:`
+            // alone so the pill/search never pops up where a pick would no-op.
+            if !context.focusedFieldIsEditable {
+                DebugRecorder.record(.engine, "noEditableField")
+                return false
+            }
             captureContext = context
             captureIsExcluded = exclusions.isExcluded(bundleID: context.bundleID, url: context.url)
             DebugRecorder.record(.engine, "colon", [
@@ -814,12 +820,27 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private func pickFromBrowser() {
         let emoji = viewModel.browser?.selectedEmoji
         let delete = browserDeleteCount
+        // Opened via the global hotkey with no text field focused (e.g. from
+        // the Finder) — copy to the clipboard instead of typing into nothing.
+        let editable = captureContext?.focusedFieldIsEditable ?? true
         collapseBrowser()
         guard let emoji else { return }
-        TextInserter.replace(charactersToDelete: delete, with: characterWithSkinTone(emoji))
+        let glyph = characterWithSkinTone(emoji)
+        if editable {
+            TextInserter.replace(charactersToDelete: delete, with: glyph)
+        } else {
+            copyToClipboard(glyph)
+        }
         recordUsage(emoji: emoji)
         SeasonalGates.fire(for: emoji)
-        DebugRecorder.record(.insert, "browserPick", ["del": "\(delete)"])
+        DebugRecorder.record(.insert, "browserPick", ["del": "\(delete)", "copied": "\(!editable)"])
+    }
+
+    private func copyToClipboard(_ string: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(string, forType: .string)
+        DebugRecorder.record(.insert, "clipboardCopy")
     }
 
     private func collapseBrowser() {
