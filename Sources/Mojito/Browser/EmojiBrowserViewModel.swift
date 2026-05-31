@@ -110,15 +110,57 @@ final class EmojiBrowserViewModel: ObservableObject {
     func move(_ direction: GifMoveDirection) {
         let count = current.count
         guard count > 0 else { return }
-        var next = selectedIndex
-        switch direction {
-        case .left:  next -= 1
-        case .right: next += 1
-        case .up:    next -= Self.columns
-        case .down:  next += Self.columns
+        // Search results are one flat grid (no headers), so simple column
+        // stepping lands directly above/below.
+        if isSearching {
+            var next = selectedIndex
+            switch direction {
+            case .left:  next -= 1
+            case .right: next += 1
+            case .up:    next -= Self.columns
+            case .down:  next += Self.columns
+            }
+            selectedIndex = min(max(next, 0), count - 1)
+        } else {
+            // Sectioned grid: every section header starts a fresh row, so the
+            // flat index resets to column 0 at each seam. Step ↑/↓ by column,
+            // not by a flat ±8, so the selection tracks straight up/down.
+            selectedIndex = sectionedTarget(from: selectedIndex, direction: direction)
         }
-        selectedIndex = min(max(next, 0), count - 1)
-        scrollTarget = selectedIndex  // adjacent cell — scrollTo's safe case
+        scrollTarget = selectedIndex
+    }
+
+    /// Column-preserving ↑/↓ (and clamped flat ←/→) across the sectioned grid.
+    private func sectionedTarget(from index: Int, direction: GifMoveDirection) -> Int {
+        let cols = Self.columns
+        guard let s = sections.firstIndex(where: {
+            index >= $0.startIndex && index < $0.startIndex + $0.cells.count
+        }) else { return index }
+        let section = sections[s]
+        let local = index - section.startIndex
+        let column = local % cols
+
+        switch direction {
+        case .left:
+            return max(index - 1, 0)
+        case .right:
+            return min(index + 1, flat.count - 1)
+        case .down:
+            if local + cols < section.cells.count {
+                return index + cols  // next row, same section
+            }
+            guard s + 1 < sections.count else { return index }
+            let next = sections[s + 1]
+            return next.startIndex + min(column, next.cells.count - 1)
+        case .up:
+            if local >= cols {
+                return index - cols  // previous row, same section
+            }
+            guard s > 0 else { return index }
+            let prev = sections[s - 1]
+            let lastRowStart = ((prev.cells.count - 1) / cols) * cols
+            return prev.startIndex + min(lastRowStart + column, prev.cells.count - 1)
+        }
     }
 
     /// Mouse pick: snap the selection to the clicked glyph.
