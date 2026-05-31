@@ -4404,7 +4404,7 @@
         }
       }
     },
-    "Each slot fills with one of your most-used emoji. Click a slot to pin a specific one instead; hover a pinned slot to set it back to most-used." : {
+    "Each slot fills with one of your most-used emoji. Click a slot to pin a specific one; hover a pinned slot to set it back." : {
 
     },
     "Easter egg discovered" : {
@@ -8711,9 +8711,6 @@
     "Quick access" : {
 
     },
-    "Quick access shortcut" : {
-
-    },
     "Quit %@" : {
       "localizations" : {
         "ar" : {
@@ -11212,10 +11209,10 @@
         }
       }
     },
-    "Top 8" : {
+    "Travel & Places" : {
 
     },
-    "Travel & Places" : {
+    "Type" : {
 
     },
     "Type `:::` then a search term to insert a GIF from Giphy." : {
@@ -13704,6 +13701,9 @@
       }
     },
     "only in the apps & sites below" : {
+
+    },
+    "to pop your most-used emoji." : {
 
     }
   },

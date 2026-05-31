@@ -78,8 +78,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-        // The Quick Access pill is summoned by a hardcoded `:?`.
-        self.stateMachine.quickAccessTrigger = "?"
+        // The pill is summoned by `:?` when Quick Access is enabled.
+        let qaEnabled = (UserDefaults.standard.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
+        self.stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
 
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
@@ -175,6 +176,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
                 self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
+                let qaEnabled = (UserDefaults.standard.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
+                self.stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
             }
         }
     }

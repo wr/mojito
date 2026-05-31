@@ -66,8 +66,6 @@ struct GeneralSettingsView: View {
 
             QuickAccessSection()
 
-            TopEightSection()
-
             Section("GIFs and Symbols") {
                 Toggle(isOn: $gifSearchEnabled) {
                     TitleAndCaption(

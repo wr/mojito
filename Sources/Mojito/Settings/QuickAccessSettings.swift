@@ -1,23 +1,10 @@
 import SwiftUI
 import KeyboardShortcuts
 
-/// "Quick access" — the (fixed) `:?` trigger and the global browser hotkey.
+/// "Quick access" — the `:?` pill toggle, its 8 editable slots, and the global
+/// emoji-browser hotkey.
 struct QuickAccessSection: View {
-    var body: some View {
-        Section("Quick access") {
-            LabeledContent("Quick access shortcut") {
-                HStack(spacing: 4) { KeyCap(":"); KeyCap("?") }
-            }
-            LabeledContent("Emoji browser shortcut") {
-                KeyboardShortcuts.Recorder("", name: .showEmojiBrowser)
-            }
-        }
-    }
-}
-
-/// "Top 8" — the editable Quick Access slots. Each fills with a most-used
-/// emoji unless the user pins a specific one.
-struct TopEightSection: View {
+    @AppStorage(PrefsKey.quickAccessEnabled) private var enabled: Bool = true
     @StateObject private var store = QuickAccessStore.shared
     @State private var editing: EditingSlot?
     @State private var hovered: Int?
@@ -28,35 +15,56 @@ struct TopEightSection: View {
     }
 
     var body: some View {
+        Section("Quick access") {
+            Toggle(isOn: $enabled) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Quick access")
+                    HStack(spacing: 4) {
+                        Text("Type").font(.callout).foregroundStyle(.secondary)
+                        KeyCap(":"); KeyCap("?")
+                        Text("to pop your most-used emoji.")
+                            .font(.callout).foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .toggleStyle(.switch)
+
+            if enabled {
+                slotGrid
+            }
+
+            LabeledContent("Emoji browser shortcut") {
+                KeyboardShortcuts.Recorder("", name: .showEmojiBrowser)
+            }
+        }
+        .sheet(item: $editing) { slot in
+            QuickAccessBrowserSheet { emoji in store.pin(emoji.hexcode, at: slot.id) }
+        }
+    }
+
+    private var slotGrid: some View {
         let slots = QuickAccess.resolvedPerSlot(store: store, database: database, usage: usage)
-        Section {
+        return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 ForEach(0..<QuickAccessStore.slotCount, id: \.self) { index in
                     slotCell(index: index, slot: slots[index])
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.vertical, 6)
-        } header: {
-            HStack(spacing: 8) {
-                Text("Top 8")
-                Spacer()
+            HStack(alignment: .firstTextBaseline) {
+                Text("Each slot fills with one of your most-used emoji. Click a slot to pin a specific one; hover a pinned slot to set it back.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 12)
                 if store.hasPins {
                     Button("Reset all") { store.resetAll() }
                         .buttonStyle(.borderless)
                         .font(.callout)
-                        .textCase(nil)
                 }
             }
-        } footer: {
-            Text("Each slot fills with one of your most-used emoji. Click a slot to pin a specific one instead; hover a pinned slot to set it back to most-used.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
-        .sheet(item: $editing) { slot in
-            QuickAccessBrowserSheet { emoji in store.pin(emoji.hexcode, at: slot.id) }
-        }
+        .padding(.vertical, 4)
     }
 
     private func slotCell(index: Int, slot: ResolvedSlot) -> some View {
@@ -151,20 +159,20 @@ private struct QuickAccessBrowserSheet: View {
     }
 }
 
-/// A small keycap, e.g. `:` or `?`, for the shortcut display.
+/// A small keycap, e.g. `:` or `?`.
 private struct KeyCap: View {
     let text: String
     init(_ text: String) { self.text = text }
 
     var body: some View {
         Text(text)
-            .font(.system(size: 13, weight: .medium, design: .rounded))
-            .frame(minWidth: 18)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
+            .font(.system(size: 12, weight: .medium, design: .rounded))
+            .frame(minWidth: 16)
+            .padding(.horizontal, 5)
+            .padding(.vertical, 2)
             .background(
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color.primary.opacity(0.08))
+                    .fill(Color.primary.opacity(0.10))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
