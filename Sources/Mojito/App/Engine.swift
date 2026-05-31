@@ -814,20 +814,24 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private func pickFromBrowser() {
         let emoji = viewModel.browser?.selectedEmoji
         let delete = browserDeleteCount
-        // Opened via the global hotkey with no text field focused (e.g. from
-        // the Finder) — copy to the clipboard instead of typing into nothing.
+        // Copy instead of typing when there's no editable field (e.g. the
+        // browser was opened over the Finder) or the focused app/site is
+        // excluded — the user opened the browser explicitly, so we still want
+        // to hand them the glyph, just not synthesize it into an app they've
+        // told Mojito to stay out of.
         let editable = captureContext?.focusedFieldIsEditable ?? true
+        let copy = !editable || captureExcluded
         collapseBrowser()
         guard let emoji else { return }
         let glyph = characterWithSkinTone(emoji)
-        if editable {
-            TextInserter.replace(charactersToDelete: delete, with: glyph)
-        } else {
+        if copy {
             copyToClipboard(glyph)
+        } else {
+            TextInserter.replace(charactersToDelete: delete, with: glyph)
         }
         recordUsage(emoji: emoji)
         SeasonalGates.fire(for: emoji)
-        DebugRecorder.record(.insert, "browserPick", ["del": "\(delete)", "copied": "\(!editable)"])
+        DebugRecorder.record(.insert, "browserPick", ["del": "\(delete)", "copied": "\(copy)"])
     }
 
     private func copyToClipboard(_ string: String) {
