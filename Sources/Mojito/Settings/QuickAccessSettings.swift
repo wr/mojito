@@ -1,8 +1,8 @@
 import SwiftUI
 import KeyboardShortcuts
 
-/// "Quick Access" — the `:?` pill toggle, its 8 editable slots, and the global
-/// emoji-browser hotkey.
+/// The `:?` pill toggle, its 8 editable slots (styled like the pill itself),
+/// and the global emoji-browser hotkey. No section header — the toggle names it.
 struct QuickAccessSection: View {
     @AppStorage(PrefsKey.quickAccessEnabled) private var enabled: Bool = true
     @StateObject private var store = QuickAccessStore.shared
@@ -16,7 +16,7 @@ struct QuickAccessSection: View {
     }
 
     var body: some View {
-        Section("Quick Access") {
+        Section {
             Toggle(isOn: $enabled) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Quick Access")
@@ -43,15 +43,22 @@ struct QuickAccessSection: View {
     private var slotGrid: some View {
         let slots = QuickAccess.resolvedPerSlot(store: store, database: database, usage: usage)
         return VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 7) {
-                ForEach(0..<QuickAccessStore.slotCount, id: \.self) { index in
-                    slotCell(index: index, slot: slots[index])
+            HStack(spacing: 10) {
+                // Mirror the live pill: a glassy capsule of cells.
+                HStack(spacing: 2) {
+                    ForEach(0..<QuickAccessStore.slotCount, id: \.self) { index in
+                        slotCell(index: index, slot: slots[index])
+                    }
                 }
-                Spacer(minLength: 10)
+                .padding(6)
+                .background(.regularMaterial, in: Capsule())
+                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08)))
+
+                Spacer(minLength: 0)
+
                 if store.hasPins {
                     Button("Reset") { store.resetAll() }
-                        .buttonStyle(.borderless)
-                        .font(.callout)
+                        .controlSize(.small)
                 }
             }
             Text("Click a slot to pin a specific emoji or symbol. Quick Access defaults to your most-used emoji.")
@@ -64,23 +71,25 @@ struct QuickAccessSection: View {
 
     private func slotCell(index: Int, slot: ResolvedSlot) -> some View {
         let isHovered = hovered == index
-        return RoundedRectangle(cornerRadius: 9, style: .continuous)
-            .fill(Color.primary.opacity(isHovered ? 0.12 : 0.05))
-            .frame(width: 40, height: 40)
-            .overlay {
-                if let emoji = slot.emoji {
-                    Text(displayGlyph(emoji)).font(.system(size: 23))
-                } else {
-                    Image(systemName: "plus")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.tertiary)
-                }
+        return ZStack {
+            if isHovered {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .fill(Color(nsColor: .unemphasizedSelectedContentBackgroundColor))
             }
-            .overlay(alignment: .topTrailing) { cornerControl(index: index, slot: slot).padding(3) }
-            .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
-            .onTapGesture { editing = EditingSlot(id: index) }
-            .onHover { inside in hovered = inside ? index : (hovered == index ? nil : hovered) }
-            .help(slotHelp(slot))
+            if let emoji = slot.emoji {
+                Text(displayGlyph(emoji)).font(.system(size: 25))
+            } else {
+                Image(systemName: "plus")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .frame(width: 40, height: 40)
+        .overlay(alignment: .topTrailing) { cornerControl(index: index, slot: slot).padding(2) }
+        .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+        .onTapGesture { editing = EditingSlot(id: index) }
+        .onHover { inside in hovered = inside ? index : (hovered == index ? nil : hovered) }
+        .help(slotHelp(slot))
     }
 
     /// Pinned slots wear a subtle orange pin; hovering one swaps it for an

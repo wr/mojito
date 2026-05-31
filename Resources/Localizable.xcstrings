@@ -3501,6 +3501,9 @@
         }
       }
     },
+    "Click a slot to pin a specific emoji or symbol. Quick Access defaults to your most-used emoji." : {
+
+    },
     "Close" : {
 
     },
@@ -3727,6 +3730,9 @@
           }
         }
       }
+    },
+    "Copied to clipboard" : {
+
     },
     "Copied!" : {
       "localizations" : {
@@ -4404,9 +4410,6 @@
         }
       }
     },
-    "Each slot fills with one of your most-used emoji. Click a slot to pin a specific one; hover a pinned slot to set it back." : {
-
-    },
     "Easter egg discovered" : {
       "localizations" : {
         "ar" : {
@@ -4743,6 +4746,9 @@
         }
       }
     },
+    "Emoji Browser shortcut" : {
+
+    },
     "Emoji autocompleted" : {
       "localizations" : {
         "ar" : {
@@ -4854,9 +4860,6 @@
           }
         }
       }
-    },
-    "Emoji browser shortcut" : {
-
     },
     "Exclusions" : {
       "localizations" : {
@@ -8708,9 +8711,6 @@
     "Quick Access" : {
 
     },
-    "Quick access" : {
-
-    },
     "Quit %@" : {
       "localizations" : {
         "ar" : {
@@ -9271,7 +9271,7 @@
         }
       }
     },
-    "Reset all" : {
+    "Reset" : {
 
     },
     "Reset all easter egg progress?" : {
@@ -9609,6 +9609,9 @@
           }
         }
       }
+    },
+    "Reset to most-used" : {
+
     },
     "Resume" : {
       "localizations" : {
@@ -9949,9 +9952,6 @@
           }
         }
       }
-    },
-    "Set back to most-used" : {
-
     },
     "Settings…" : {
       "localizations" : {
@@ -11212,7 +11212,7 @@
     "Travel & Places" : {
 
     },
-    "Type" : {
+    "Type :? to quickly access your top emoji" : {
 
     },
     "Type `:::` then a search term to insert a GIF from Giphy." : {
@@ -13701,9 +13701,6 @@
       }
     },
     "only in the apps & sites below" : {
-
-    },
-    "to pop your most-used emoji." : {
 
     }
   },
