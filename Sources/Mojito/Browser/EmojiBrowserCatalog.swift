@@ -22,12 +22,11 @@ enum EmojiBrowser {
     }
 }
 
-/// Sections shown down the browser grid. The first two are dynamic (driven
-/// by usage + favorites); the rest map onto emojibase group numbers.
+/// Sections shown down the browser grid. Quick Access is dynamic (the 8
+/// pill slots); the rest map onto emojibase group numbers.
 /// emojibase groups: 0 Smileys, 1 People, 2 Component (skipped), 3 Animals,
 /// 4 Food, 5 Travel, 6 Activities, 7 Objects, 8 Symbols, 9 Flags.
 enum EmojiCategory: String, CaseIterable, Identifiable {
-    case frequentlyUsed
     case quickAccess
     case smileysPeople
     case animalsNature
@@ -47,7 +46,7 @@ enum EmojiCategory: String, CaseIterable, Identifiable {
     /// (usage / favorites) and symbols sections.
     var groups: [Int] {
         switch self {
-        case .frequentlyUsed, .quickAccess, .specialCharacters: return []
+        case .quickAccess, .specialCharacters: return []
         case .smileysPeople: return [0, 1]
         case .animalsNature: return [3]
         case .foodDrink:     return [4]
@@ -63,7 +62,6 @@ enum EmojiCategory: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .frequentlyUsed:    return String(localized: "Frequently Used")
         case .quickAccess:       return String(localized: "Quick Access")
         case .smileysPeople:     return String(localized: "Smileys & People")
         case .animalsNature:     return String(localized: "Animals & Nature")
@@ -80,7 +78,6 @@ enum EmojiCategory: String, CaseIterable, Identifiable {
     /// SF Symbol shown in the bottom category tab bar.
     var tabSymbol: String {
         switch self {
-        case .frequentlyUsed:    return "clock"
         case .quickAccess:       return "star.fill"
         case .smileysPeople:     return "face.smiling"
         case .animalsNature:     return "leaf"

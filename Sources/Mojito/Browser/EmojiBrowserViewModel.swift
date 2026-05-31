@@ -198,16 +198,8 @@ final class EmojiBrowserViewModel: ObservableObject {
             cursor += emoji.count
         }
 
-        // Quick Access first (mirrors the bare-`:` pill), then the broader
-        // most-used list, then the categories.
+        // Quick Access first (mirrors the bare-`:` pill), then the categories.
         add(.quickAccess, QuickAccess.resolved(store: quickAccess, database: database, usage: usage))
-
-        let mostUsed = usage
-            .filter { $0.value > 0 && !$0.key.hasPrefix("SYM_") }
-            .sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
-            .prefix(24)
-            .compactMap { database.byHexcode[$0.key] }
-        add(.frequentlyUsed, Array(mostUsed))
 
         for category in EmojiCategory.allCases where !category.isDynamic {
             let groups = Set(category.groups)
