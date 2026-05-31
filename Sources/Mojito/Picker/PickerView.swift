@@ -254,10 +254,20 @@ private struct CompactCell: View {
     var body: some View {
         let isSelected = index == viewModel.selectedIndex
         let isBrowse = scored.emoji.hexcode == EmojiBrowser.sentinelHexcode
+        let isFirst = index == 0
+        let isLast = index == viewModel.results.count - 1
         ZStack {
-            // Match the vertical menu's neutral selection (not accent blue).
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
+            // Segmented-control style: the end cells' outer corners hug the
+            // pill's capsule end (semicircle), inner corners stay a normal
+            // rounded rect. Middle cells are an even rounded square.
+            UnevenRoundedRectangle(
+                topLeadingRadius: isFirst ? 20 : 10,
+                bottomLeadingRadius: isFirst ? 20 : 10,
+                bottomTrailingRadius: isLast ? 20 : 10,
+                topTrailingRadius: isLast ? 20 : 10,
+                style: .continuous
+            )
+            .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
             if isBrowse {
                 Image(systemName: "chevron.down")
                     .font(.system(size: 13, weight: .semibold))
