@@ -99,6 +99,13 @@ enum SymbolsDatabase {
             guard let runFont = attrs[kCTFontAttributeName as NSString] else { return false }
             let name = CTFontCopyPostScriptName(runFont as! CTFont) as String
             if name == "LastResort" { return false }
+            // Even with VS15 appended (see `textPresentation`), color-only
+            // scalars (✅ ✨ ✊ ✏ …) have no monochrome glyph, so Core Text
+            // resolves them to Apple Color Emoji — they'd render as color
+            // emoji among the text-style symbols. Drop them; they're already
+            // reachable in the emoji categories. Scalars with a real text glyph
+            // (♈︎, ✂︎, …) resolve to a text font and stay.
+            if name.contains("Emoji") { return false }
         }
         return true
     }
