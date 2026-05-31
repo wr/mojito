@@ -1,50 +1,6 @@
 import Combine
 import Foundation
 
-/// How the Quick Access pill is summoned. The Engine reads this from
-/// `PrefsKey.favoritesTrigger`.
-enum FavoritesTrigger: String, CaseIterable, Identifiable {
-    /// Never auto-shown (the pill only ever appears via the menu/browser).
-    case off
-    /// A bare `:` that dwells ~¼s.
-    case colon
-    /// An explicit `:?` (the `?` is swallowed).
-    case question
-
-    var id: String { rawValue }
-
-    var settingsLabel: String {
-        switch self {
-        case .off:      return String(localized: "Off")
-        case .colon:    return String(localized: "When I type “:” and pause")
-        case .question: return String(localized: "When I type “:?”")
-        }
-    }
-
-    static func from(_ raw: String?) -> FavoritesTrigger {
-        raw.flatMap(FavoritesTrigger.init(rawValue:)) ?? .question
-    }
-}
-
-/// What the trigger surfaces — the compact pill or the full browser grid.
-enum FavoritesTriggerSurface: String, CaseIterable, Identifiable {
-    case pill
-    case browser
-
-    var id: String { rawValue }
-
-    var settingsLabel: String {
-        switch self {
-        case .pill:    return String(localized: "Quick access pill")
-        case .browser: return String(localized: "Full emoji browser")
-        }
-    }
-
-    static func from(_ raw: String?) -> FavoritesTriggerSurface {
-        raw.flatMap(FavoritesTriggerSurface.init(rawValue:)) ?? .pill
-    }
-}
-
 /// The bare-`:` Quick Access row: a fixed set of 8 slots, each either **auto**
 /// (filled from most-used) or **pinned** to a specific emoji. Persisted as an
 /// 8-element `[String]` where `""` marks an auto slot.

@@ -127,10 +127,11 @@ struct TriggerStateMachine {
     /// When true, `::` upgrades the capture to symbols-only instead of cancelling.
     var symbolsDoubleColonEnabled: Bool = false
 
-    /// How the favorites pill is summoned. Default `.off` keeps the pure
-    /// state machine's legacy behavior; the Engine sets it from
-    /// `PrefsKey.favoritesTrigger`.
-    var favoritesTrigger: FavoritesTrigger = .off
+    /// The character that, typed right after a bare `:`, opens the Quick Access
+    /// pill (e.g. `?` → `:?`). `nil` disables it. The Engine sets it from
+    /// `PrefsKey.quickAccessTriggerChar`. Must be a `.cancelChar`-class glyph
+    /// (punctuation/symbol) since it's matched in the cancelChar branch.
+    var quickAccessTrigger: Character?
 
     /// True only once the empty-query favorites picker is actually on screen.
     /// The Engine sets it after the (debounced) show and clears it on hide,
@@ -341,13 +342,9 @@ struct TriggerStateMachine {
             // show. Clearing here keeps a prior capture's value from leaking
             // into a fresh `:`.
             emptyPickerActive = false
-            // Surface favorites + most-used on a bare `:`. The Engine
-            // debounces the actual show, so a follow-up keystroke (`:)`,
-            // `:smile`, …) cancels it before anything appears. The `:?`
-            // variant fires from the cancelChar branch instead.
-            if favoritesTrigger == .colon {
-                return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: false)
-            }
+            // A bare `:` just starts capturing; the Quick Access pill is
+            // summoned by the trigger char that follows (`:?`), handled in the
+            // cancelChar branch below.
             return TriggerOutput(action: .none, consumesKey: false)
 
         case (.idle, .backspace):
@@ -537,7 +534,7 @@ struct TriggerStateMachine {
         case (.capturing, .escape):
             // `:?`+Esc should leave the literal `:?` — the `?` was swallowed
             // when the pill opened, so ask the Engine to type it back.
-            let restoreQuestion = emptyPickerActive && favoritesTrigger == .question
+            let restoreQuestion = emptyPickerActive && quickAccessTrigger != nil
             emptyPickerActive = false
             state = .idle
             currentScope = .normal
@@ -546,10 +543,10 @@ struct TriggerStateMachine {
                 consumesKey: true
             )
 
-        case (.capturing(let q), .cancelChar("?")) where q.isEmpty && favoritesTrigger == .question:
-            // `:?` summons the favorites pill. Swallow the `?` so the focused
-            // app only ever holds the `:` — deleted on pick, exactly like the
-            // bare-`:` variant, so the insert delete-count stays 1.
+        case (.capturing(let q), .cancelChar(let c)) where q.isEmpty && quickAccessTrigger == c:
+            // `:<trigger>` (e.g. `:?`) summons the Quick Access pill. Swallow
+            // the trigger char so the focused app only ever holds the `:` —
+            // deleted on pick, so the insert delete-count stays 1.
             return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: true)
 
         case (.capturing(let q), .cancelChar(let c)):

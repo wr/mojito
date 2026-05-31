@@ -1,66 +1,35 @@
 import SwiftUI
 import KeyboardShortcuts
 
-/// "Quick access" — how the pill is summoned and the global browser hotkey.
+/// "Quick access" — the `:`-trigger shortcut and the global browser hotkey.
 struct QuickAccessSection: View {
-    @AppStorage(PrefsKey.favoritesTrigger) private var triggerRaw: String = FavoritesTrigger.question.rawValue
-    @AppStorage(PrefsKey.favoritesTriggerSurface) private var surfaceRaw: String = FavoritesTriggerSurface.pill.rawValue
+    @AppStorage(PrefsKey.quickAccessTriggerChar) private var triggerChar: String = "?"
 
     var body: some View {
-        Section {
+        Section("Quick access") {
             LabeledContent("Quick access shortcut") {
-                Menu {
-                    ForEach(FavoritesTrigger.allCases) { trigger in
-                        Button {
-                            triggerRaw = trigger.rawValue
-                        } label: {
-                            if trigger.rawValue == triggerRaw {
-                                Label(trigger.settingsLabel, systemImage: "checkmark")
-                            } else {
-                                Text(trigger.settingsLabel)
+                HStack(spacing: 5) {
+                    KeyCap(":")
+                    Text("+").font(.system(size: 12)).foregroundStyle(.tertiary)
+                    TextField("?", text: $triggerChar)
+                        .textFieldStyle(.roundedBorder)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 40)
+                        .onChange(of: triggerChar) { _, new in
+                            // A single punctuation/symbol char (letters/digits
+                            // would shadow `:`-search; `:` would clash with `::`).
+                            let valid = new.filter {
+                                !($0.isLetter || $0.isNumber || $0.isWhitespace || "_-+:".contains($0))
                             }
+                            let result = String(valid.suffix(1))
+                            if result != new { triggerChar = result }
                         }
-                    }
-                } label: {
-                    triggerCaps(FavoritesTrigger.from(triggerRaw))
-                }
-                .menuStyle(.borderlessButton)
-                .fixedSize()
-            }
-
-            if triggerRaw != FavoritesTrigger.off.rawValue {
-                Picker("Shows", selection: $surfaceRaw) {
-                    ForEach(FavoritesTriggerSurface.allCases) { surface in
-                        Text(surface.settingsLabel).tag(surface.rawValue)
-                    }
                 }
             }
 
             LabeledContent("Emoji browser shortcut") {
                 KeyboardShortcuts.Recorder("", name: .showEmojiBrowser)
             }
-        } header: {
-            Text("Quick access")
-        } footer: {
-            Text("Type the shortcut to pop the Top 8 below. Return inserts the first; ←→ pick another; ↓ opens the full browser.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    @ViewBuilder
-    private func triggerCaps(_ trigger: FavoritesTrigger) -> some View {
-        switch trigger {
-        case .off:
-            Text("Off").foregroundStyle(.secondary)
-        case .colon:
-            HStack(spacing: 4) {
-                KeyCap(":")
-                Text("then pause").font(.callout).foregroundStyle(.secondary)
-            }
-        case .question:
-            HStack(spacing: 3) { KeyCap(":"); KeyCap("?") }
         }
     }
 }
@@ -80,17 +49,18 @@ struct TopEightSection: View {
     var body: some View {
         let slots = QuickAccess.resolvedPerSlot(store: store, database: database, usage: usage)
         Section {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 6) {
                     ForEach(0..<QuickAccessStore.slotCount, id: \.self) { index in
                         slotCell(index: index, slot: slots[index])
+                            .frame(maxWidth: .infinity)
                     }
-                    Spacer(minLength: 0)
                 }
                 HStack(alignment: .firstTextBaseline) {
-                    Text("Click a slot to pin a specific emoji; hover a pinned slot to reset it.")
+                    Text("Click a slot to pin a specific emoji. Hover a pinned slot to reset it back to your most frequently used.")
                         .font(.callout)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                     if store.hasPins {
                         Button("Reset all") { store.resetAll() }
@@ -99,7 +69,7 @@ struct TopEightSection: View {
                     }
                 }
             }
-            .padding(.vertical, 2)
+            .padding(.vertical, 4)
         } header: {
             Text("Top 8")
         }
@@ -110,17 +80,17 @@ struct TopEightSection: View {
 
     private func slotCell(index: Int, slot: ResolvedSlot) -> some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(Color.primary.opacity(0.06))
             if let emoji = slot.emoji {
-                Text(displayGlyph(emoji)).font(.system(size: 22))
+                Text(displayGlyph(emoji)).font(.system(size: 28))
             } else {
                 Image(systemName: "plus")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
         }
-        .frame(width: 38, height: 38)
+        .frame(width: 50, height: 50)
         .contentShape(Rectangle())
         .onTapGesture { editing = EditingSlot(id: index) }
         .onHover { inside in hovered = inside ? index : (hovered == index ? nil : hovered) }
@@ -128,7 +98,7 @@ struct TopEightSection: View {
         .help(slotHelp(slot))
     }
 
-    /// Pinned slots show a pin; hovering one swaps it for a reset control.
+    /// Pinned slots show a red pin; hovering swaps it for a reset control.
     @ViewBuilder
     private func badge(index: Int, slot: ResolvedSlot) -> some View {
         if slot.pinned {
@@ -136,7 +106,7 @@ struct TopEightSection: View {
                 if hovered == index {
                     Button { store.reset(at: index) } label: {
                         Image(systemName: "arrow.uturn.backward.circle.fill")
-                            .font(.system(size: 13))
+                            .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                             .background(Circle().fill(Color(nsColor: .windowBackgroundColor)))
                     }
@@ -144,10 +114,10 @@ struct TopEightSection: View {
                     .help("Reset to most-used")
                 } else {
                     Image(systemName: "pin.fill")
-                        .font(.system(size: 8, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .padding(3)
-                        .background(Circle().fill(Color(nsColor: .windowBackgroundColor)))
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(4)
+                        .background(Circle().fill(Color.red))
                 }
             }
             .offset(x: 6, y: -6)
@@ -200,23 +170,23 @@ private struct QuickAccessBrowserSheet: View {
     }
 }
 
-/// A small keycap, e.g. `:` or `?`, for the trigger display.
+/// A small keycap, e.g. `:`, for the trigger display.
 private struct KeyCap: View {
     let text: String
     init(_ text: String) { self.text = text }
 
     var body: some View {
         Text(text)
-            .font(.system(size: 12, weight: .medium, design: .rounded))
-            .frame(minWidth: 15)
-            .padding(.horizontal, 5)
-            .padding(.vertical, 2)
+            .font(.system(size: 13, weight: .medium, design: .rounded))
+            .frame(minWidth: 16)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
             .background(
-                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
                     .fill(Color.primary.opacity(0.08))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.12))
             )
     }

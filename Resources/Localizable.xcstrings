@@ -1245,6 +1245,12 @@
         }
       }
     },
+    "+" : {
+
+    },
+    "?" : {
+
+    },
     "???" : {
       "comment" : "Placeholder shown in About → Easter eggs for an entry the user hasn't discovered yet. Should stay short and visually act as 'three unknowns'.",
       "localizations" : {
@@ -3501,7 +3507,7 @@
         }
       }
     },
-    "Click a slot to pin a specific emoji; hover a pinned slot to reset it." : {
+    "Click a slot to pin a specific emoji. Hover a pinned slot to reset it back to your most frequently used." : {
 
     },
     "Close" : {
@@ -4977,9 +4983,6 @@
 
     },
     "Frequently Used" : {
-
-    },
-    "Full emoji browser" : {
 
     },
     "Funded by donations" : {
@@ -7577,9 +7580,6 @@
     "Objects" : {
 
     },
-    "Off" : {
-
-    },
     "Open settings" : {
       "localizations" : {
         "ar" : {
@@ -8715,9 +8715,6 @@
 
     },
     "Quick access" : {
-
-    },
-    "Quick access pill" : {
 
     },
     "Quick access shortcut" : {
@@ -10304,9 +10301,6 @@
         }
       }
     },
-    "Shows" : {
-
-    },
     "Skin tone" : {
       "localizations" : {
         "ar" : {
@@ -11567,9 +11561,6 @@
         }
       }
     },
-    "Type the shortcut to pop the Top 8 below. Return inserts the first; ←→ pick another; ↓ opens the full browser." : {
-
-    },
     "Type to search GIFs." : {
       "localizations" : {
         "ar" : {
@@ -12700,12 +12691,6 @@
         }
       }
     },
-    "When I type “:?”" : {
-
-    },
-    "When I type “:” and pause" : {
-
-    },
     "You're all set" : {
       "localizations" : {
         "ar" : {
@@ -13725,9 +13710,6 @@
       }
     },
     "only in the apps & sites below" : {
-
-    },
-    "then pause" : {
 
     }
   },

@@ -8,25 +8,16 @@ import Foundation
 /// never hijacks the keyboard.
 struct TriggerStateMachineBrowseTests {
 
-    @Test func bareColonOpensPillWhenColonTrigger() {
-        var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
-        let out = sm.handle(.colon)
-        #expect(sm.state == .capturing(query: ""))
-        #expect(out.action == .openPicker(query: "", scope: .normal))
-        #expect(out.consumesKey == false)
-    }
-
-    @Test func bareColonStaysInertWhenOff() {
-        var sm = TriggerStateMachine()  // favoritesTrigger defaults .off
+    @Test func bareColonStaysInert() {
+        var sm = TriggerStateMachine()  // no trigger char set
         let out = sm.handle(.colon)
         #expect(out.action == .none)
         #expect(sm.state == .capturing(query: ""))
     }
 
-    @Test func questionMarkOpensPillAndSwallowsItWhenQuestionTrigger() {
+    @Test func triggerCharOpensPillAndSwallowsIt() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .question
+        sm.quickAccessTrigger = "?"
         let colon = sm.handle(.colon)
         #expect(colon.action == .none)
         let q = sm.handle(.cancelChar("?"))
@@ -35,9 +26,17 @@ struct TriggerStateMachineBrowseTests {
         #expect(sm.state == .capturing(query: ""))
     }
 
-    @Test func questionMarkIsLiteralWhenColonTrigger() {
+    @Test func customTriggerCharOpensPill() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
+        sm.quickAccessTrigger = ";"
+        _ = sm.handle(.colon)
+        let semi = sm.handle(.cancelChar(";"))
+        #expect(semi.action == .openPicker(query: "", scope: .normal))
+        #expect(semi.consumesKey == true)
+    }
+
+    @Test func questionMarkIsLiteralWhenTriggerOff() {
+        var sm = TriggerStateMachine()  // no trigger char
         _ = sm.handle(.colon)
         let q = sm.handle(.cancelChar("?"))
         #expect(q.action == .checkEmoticon(query: "", terminator: "?"))
@@ -45,7 +44,6 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func arrowsPassThroughUntilPillVisible() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
         _ = sm.handle(.colon)
         let down = sm.handle(.arrowDown)
         #expect(down.action == .none)
@@ -54,7 +52,6 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func returnIsLiteralUntilPillVisible() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
         _ = sm.handle(.colon)
         let ret = sm.handle(.returnKey)
         #expect(ret.action == .closePicker)
@@ -63,7 +60,6 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func visiblePillNavigatesAndExpands() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
         _ = sm.handle(.colon)
         sm.emptyPickerActive = true
 
@@ -85,7 +81,7 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func pillDigitQuickPicks() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .question
+        sm.quickAccessTrigger = "?"
         _ = sm.handle(.colon)
         _ = sm.handle(.cancelChar("?"))
         sm.emptyPickerActive = true
@@ -97,7 +93,7 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func pillOutOfRangeDigitStartsSearch() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .question
+        sm.quickAccessTrigger = "?"
         _ = sm.handle(.colon)
         _ = sm.handle(.cancelChar("?"))
         sm.emptyPickerActive = true
@@ -111,7 +107,6 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func pillLetterStillStartsSearch() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
         _ = sm.handle(.colon)
         sm.emptyPickerActive = true
         let out = sm.handle(.nameChar("a"))
@@ -121,7 +116,7 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func questionPillEscapeRestoresQuestionMark() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .question
+        sm.quickAccessTrigger = "?"
         _ = sm.handle(.colon)
         _ = sm.handle(.cancelChar("?"))
         sm.emptyPickerActive = true
@@ -131,9 +126,8 @@ struct TriggerStateMachineBrowseTests {
         #expect(sm.state == .idle)
     }
 
-    @Test func colonPillEscapeIsPlainClose() {
-        var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
+    @Test func pillEscapeIsPlainCloseWhenTriggerOff() {
+        var sm = TriggerStateMachine()  // no trigger char → nothing to restore
         _ = sm.handle(.colon)
         sm.emptyPickerActive = true
         let esc = sm.handle(.escape)
@@ -142,7 +136,6 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func visiblePillReturnInsertsSelected() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
         _ = sm.handle(.colon)
         sm.emptyPickerActive = true
         let ret = sm.handle(.returnKey)
@@ -153,7 +146,6 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func normalThresholdStillOpensAfterFavoritesDismissal() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
         _ = sm.handle(.colon)
         sm.emptyPickerActive = true
         _ = sm.handle(.nameChar("s"))
@@ -163,7 +155,6 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func arrowSideKeysEndCaptureWhenPillNotVisible() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
         _ = sm.handle(.colon)
         let left = sm.handle(.arrowLeft)
         #expect(left.action == .closePicker)
@@ -173,7 +164,6 @@ struct TriggerStateMachineBrowseTests {
 
     @Test func resetClearsEmptyPickerFlag() {
         var sm = TriggerStateMachine()
-        sm.favoritesTrigger = .colon
         _ = sm.handle(.colon)
         sm.emptyPickerActive = true
         sm.reset()

@@ -22,17 +22,13 @@ enum PrefsKey {
     static let allowedBundleIDs      = "mojito.allowBundleIDs"       // [String]
     static let allowedURLPatterns    = "mojito.allowURLPatterns"     // [String]
     static let usageCounts           = "mojito.usageCounts"          // [String: Int]  (hexcode → count)
-    /// The 8 Quick Access slots surfaced on a bare `:` (see `favoritesTrigger`)
-    /// and managed in Settings ▸ General ▸ Quick Access. An 8-element `[String]`
-    /// where `""` is an auto (most-used) slot and any other value is a pinned
-    /// emoji hexcode.
+    /// The 8 Quick Access slots surfaced on `:<trigger>` and managed in
+    /// Settings ▸ General. An 8-element `[String]` where `""` is an auto
+    /// (most-used) slot and any other value is a pinned emoji hexcode.
     static let quickAccessSlots      = "mojito.quickAccess"          // [String]  (8 slots; "" = auto)
-    /// How the Quick Access pill is summoned (`FavoritesTrigger` raw):
-    /// `off`, `colon` (bare `:` + dwell), or `question` (`:?`).
-    static let favoritesTrigger      = "mojito.favoritesTrigger"
-    /// What the trigger shows (`FavoritesTriggerSurface` raw): the `pill` or
-    /// the full `browser` grid.
-    static let favoritesTriggerSurface = "mojito.favoritesTriggerSurface"
+    /// Single character typed after `:` to open the Quick Access pill (default
+    /// `?`). Empty disables it.
+    static let quickAccessTriggerChar = "mojito.quickAccessTriggerChar"
     /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
     /// Self-attested; no payment integration.

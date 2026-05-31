@@ -53,8 +53,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var symbolsRequireDoubleColon: Bool
     private var gifSearchEnabled: Bool
     private var gifBypassExclusions: Bool
-    private var favoritesTrigger: FavoritesTrigger
-    private var favoritesTriggerSurface: FavoritesTriggerSurface
+    /// Char typed after `:` to summon the Quick Access pill (default `?`;
+    /// empty = off). Mirrored to the state machine's `quickAccessTrigger`.
+    private var quickAccessTriggerChar: String
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -79,10 +80,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
         self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
-        self.favoritesTrigger = FavoritesTrigger.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTrigger))
-        self.favoritesTriggerSurface = FavoritesTriggerSurface.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTriggerSurface))
+        self.quickAccessTriggerChar = UserDefaults.standard.string(forKey: PrefsKey.quickAccessTriggerChar) ?? "?"
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-        self.stateMachine.favoritesTrigger = self.favoritesTrigger
+        self.stateMachine.quickAccessTrigger = self.quickAccessTriggerChar.first
 
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
@@ -177,10 +177,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
                 self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
                 self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
-                self.favoritesTrigger = FavoritesTrigger.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTrigger))
-                self.favoritesTriggerSurface = FavoritesTriggerSurface.from(UserDefaults.standard.string(forKey: PrefsKey.favoritesTriggerSurface))
+                self.quickAccessTriggerChar = UserDefaults.standard.string(forKey: PrefsKey.quickAccessTriggerChar) ?? "?"
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-                self.stateMachine.favoritesTrigger = self.favoritesTrigger
+                self.stateMachine.quickAccessTrigger = self.quickAccessTriggerChar.first
             }
         }
     }
@@ -685,9 +684,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureFocusSnapshot = nil
             captureFocusPID = nil
             captureIsExcluded = false
-            // The `?` from `:?` was swallowed so the delete-count stayed 1;
-            // type it back so the focused app shows the literal `:?`.
-            TextInserter.replace(charactersToDelete: 0, with: "?")
+            // The trigger char (`?` by default) was swallowed; type it back so
+            // the focused app shows the literal `:?` after Esc.
+            TextInserter.replace(charactersToDelete: 0, with: quickAccessTriggerChar)
         }
     }
 
@@ -732,31 +731,18 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         return false
     }
 
-    /// How long a bare `:` must dwell before the Quick Access pill appears.
-    /// Long enough that `:)` / `:D` / `:smile` never flash it; short enough
-    /// that an intentional pause feels responsive.
-    private static let emptyPickerDwell: TimeInterval = 0.22
-
-    /// Debounced show for the bare-`:` favorites picker. A newer keystroke
-    /// advances `inputSeq`, so anything typed after the colon cancels this
-    /// before it fires. Only once it actually shows do we tell the state
-    /// machine to claim the arrow keys.
+    /// Show for the Quick Access pill, deferred one tick so the swallowed
+    /// trigger char is processed and the caret has settled first. A newer
+    /// keystroke advances `inputSeq`, cancelling this before it fires. Only
+    /// once it actually shows do we tell the state machine to claim the arrows.
     private func scheduleEmptyPickerShow() {
         let seq = inputSeq
-        // `:?` is an explicit gesture — show promptly; bare `:` dwells so it
-        // doesn't flash during `:)` / `:smile`.
-        let dwell = (favoritesTrigger == .question) ? 0.0 : Self.emptyPickerDwell
-        DispatchQueue.main.asyncAfter(deadline: .now() + dwell) { [weak self] in
+        DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             guard self.inputSeq == seq else { return }
             guard case .capturing(let q) = self.stateMachine.state, q.isEmpty else { return }
             if self.focusHasChangedSinceCapture() {
                 self.cancelCapture()
-                return
-            }
-            // The trigger can jump straight to the full grid instead of the pill.
-            if self.favoritesTriggerSurface == .browser {
-                self.expandToBrowser(deleteCount: 1)  // the typed `:`
                 return
             }
             guard !self.viewModel.results.isEmpty else { return }
