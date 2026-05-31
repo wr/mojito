@@ -45,7 +45,9 @@ final class GifPickerWindow {
         panel.hasShadow = true
         panel.hidesOnDeactivate = false
         panel.becomesKeyOnlyIfNeeded = false
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
+        // Not `.canJoinAllSpaces` — see PickerWindow: it flashes onto the Space
+        // you swipe to before the Space-change observer dismisses it.
+        panel.collectionBehavior = [.fullScreenAuxiliary, .transient]
 
         let view = GifPickerView(
             viewModel: viewModel,

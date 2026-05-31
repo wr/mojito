@@ -152,8 +152,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated {
-                guard let self, self.viewModel.isVisible else { return }
-                self.cancelCapture()
+                guard let self, self.viewModel.isVisible || self.gifPickerWindow.isVisible else { return }
+                self.cancelCapture()  // also hides the GIF picker
             }
         }
 
@@ -245,25 +245,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     private func cancelCapture() {
-        // `:?` swallowed the `?` so the field shows only `:`. Esc types it back
-        // via a dedicated action; every other dismissal (click-away, focus/app
-        // switch, Space change) lands here, so restore it too — but only while
-        // focus is still on the capture's field, else the synthetic `?` would
-        // land in whatever the user clicked into.
-        let restoreQuestion = stateMachine.emptyPickerActive
-            && favoritesTrigger == .question
-            && !focusHasChangedSinceCapture()
         stateMachine.reset()
         viewModel.reset()
         pickerWindow.hide()
+        gifPickerWindow.hide()
         captureContext = nil
         captureFocusSnapshot = nil
         captureFocusPID = nil
         captureIsExcluded = false
         browserDeleteCount = 0
-        if restoreQuestion {
-            TextInserter.replace(charactersToDelete: 0, with: "?")
-        }
         DebugRecorder.record(.picker, "cancel")
     }
 

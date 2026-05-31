@@ -37,7 +37,11 @@ final class PickerWindow {
         panel.hasShadow = true
         panel.hidesOnDeactivate = false
         panel.becomesKeyOnlyIfNeeded = true
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
+        // Not `.canJoinAllSpaces`: a panel on every Space flashes onto the
+        // destination Space during a swipe before the Space-change observer can
+        // dismiss it. `.fullScreenAuxiliary` still lets it overlay a fullscreen
+        // app's Space when shown there.
+        panel.collectionBehavior = [.fullScreenAuxiliary, .transient]
 
         // Tahoe's NSGlassEffectView matches NSMenu / NSPopover's Liquid
         // Glass; pre-26 falls back to NSVisualEffectView `.menu`.
