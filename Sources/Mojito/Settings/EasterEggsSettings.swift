@@ -4,7 +4,6 @@ import AppKit
 struct EasterEggsSettingsView: View {
     /// Observed so `clearUsageStats()` re-renders the stats block.
     @EnvironmentObject private var engine: Engine
-    @State private var justCopied = false
     /// Bumped on `.easterEggDiscovered` so the section re-renders while open.
     @State private var easterEggsTick: Int = 0
 
@@ -24,24 +23,12 @@ struct EasterEggsSettingsView: View {
         usageCounts.values.reduce(0, +)
     }
 
-    private var topEmoji: [String] {
-        usageCounts
-            .sorted { lhs, rhs in
-                if lhs.value != rhs.value { return lhs.value > rhs.value }
-                return lhs.key < rhs.key
-            }
-            .prefix(8)
-            .compactMap { EmojiDatabase.shared.byHexcode[$0.key]?.character }
-    }
-
     var body: some View {
         Form {
             Section("Stats") {
                 LabeledContent("User since", value: firstLaunchDate)
                     .padding(.vertical, rowPadding)
                 LabeledContent("Emoji autocompleted", value: "\(totalAutocompleted)")
-                    .padding(.vertical, rowPadding)
-                topEightRow
                     .padding(.vertical, rowPadding)
                 HStack {
                     Text("Danger zone")
@@ -163,53 +150,6 @@ struct EasterEggsSettingsView: View {
         .frame(width: tileSize, height: tileSize)
     }
 
-    // MARK: - Top 8 (tile row)
-
-    private var topEightRow: some View {
-        VStack(alignment: .trailing, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                Text("Your top 8")
-                Spacer()
-                if topEmoji.isEmpty {
-                    Text("Type some emoji and they'll show up here.")
-                        .font(.callout)
-                        .foregroundStyle(.tertiary)
-                } else {
-                    HStack(spacing: 4) {
-                        ForEach(0..<8, id: \.self) { index in
-                            Group {
-                                if index < topEmoji.count {
-                                    Text(topEmoji[index])
-                                        .font(.system(size: 22))
-                                } else {
-                                    Color.clear
-                                }
-                            }
-                            .frame(width: 30, height: 30)
-                            .background(
-                                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                    .fill(Color.primary.opacity(0.06))
-                            )
-                        }
-                    }
-                }
-            }
-            Button(justCopied ? "Copied!" : "Copy") {
-                copyTopEmoji()
-            }
-            .disabled(topEmoji.isEmpty)
-        }
-    }
-
-    private func copyTopEmoji() {
-        let payload = "My top 8 emoji: \(topEmoji.joined())"
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(payload, forType: .string)
-        justCopied = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-            justCopied = false
-        }
-    }
 }
 
 // MARK: - Reset eggs button

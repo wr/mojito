@@ -56,10 +56,10 @@ final class EmojiBrowserViewModel: ObservableObject {
 
     var visibleCategories: [EmojiCategory] { sections.map(\.category) }
 
-    init(database: EmojiDatabase, favorites: FavoritesStore) {
+    init(database: EmojiDatabase, quickAccess: QuickAccessStore) {
         self.database = database
         self.usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
-        let built = Self.build(database: database, favorites: favorites, usage: self.usage)
+        let built = Self.build(database: database, quickAccess: quickAccess, usage: self.usage)
         self.sections = built
         self.flat = built.flatMap { $0.cells.map(\.emoji) }
         self.activeCategory = built.first?.category ?? .smileysPeople
@@ -185,7 +185,7 @@ final class EmojiBrowserViewModel: ObservableObject {
 
     private static func build(
         database: EmojiDatabase,
-        favorites: FavoritesStore,
+        quickAccess: QuickAccessStore,
         usage: [String: Int]
     ) -> [Section] {
         var sections: [Section] = []
@@ -198,14 +198,16 @@ final class EmojiBrowserViewModel: ObservableObject {
             cursor += emoji.count
         }
 
+        // Quick Access first (mirrors the bare-`:` pill), then the broader
+        // most-used list, then the categories.
+        add(.quickAccess, QuickAccess.resolved(store: quickAccess, database: database, usage: usage))
+
         let mostUsed = usage
             .filter { $0.value > 0 && !$0.key.hasPrefix("SYM_") }
             .sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
             .prefix(24)
             .compactMap { database.byHexcode[$0.key] }
         add(.frequentlyUsed, Array(mostUsed))
-
-        add(.favorites, favorites.hexcodes.compactMap { database.byHexcode[$0] })
 
         for category in EmojiCategory.allCases where !category.isDynamic {
             let groups = Set(category.groups)

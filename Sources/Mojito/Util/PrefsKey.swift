@@ -22,11 +22,12 @@ enum PrefsKey {
     static let allowedBundleIDs      = "mojito.allowBundleIDs"       // [String]
     static let allowedURLPatterns    = "mojito.allowURLPatterns"     // [String]
     static let usageCounts           = "mojito.usageCounts"          // [String: Int]  (hexcode → count)
-    /// Hand-picked favorites, in display order. Surfaced when the user
-    /// types a bare `:` (see `favoritesTrigger`) and managed in Settings ▸
-    /// Favorites. `[String]` of emoji hexcodes.
-    static let favoriteHexcodes      = "mojito.favorites"            // [String]  (hexcodes)
-    /// How the favorites/most-used pill is summoned (`FavoritesTrigger` raw):
+    /// The 8 Quick Access slots surfaced on a bare `:` (see `favoritesTrigger`)
+    /// and managed in Settings ▸ General ▸ Quick Access. An 8-element `[String]`
+    /// where `""` is an auto (most-used) slot and any other value is a pinned
+    /// emoji hexcode.
+    static let quickAccessSlots      = "mojito.quickAccess"          // [String]  (8 slots; "" = auto)
+    /// How the Quick Access pill is summoned (`FavoritesTrigger` raw):
     /// `off`, `colon` (bare `:` + dwell), or `question` (`:?`).
     static let favoritesTrigger      = "mojito.favoritesTrigger"
     /// What the trigger shows (`FavoritesTriggerSurface` raw): the `pill` or

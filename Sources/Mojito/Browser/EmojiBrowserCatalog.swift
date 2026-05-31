@@ -28,7 +28,7 @@ enum EmojiBrowser {
 /// 4 Food, 5 Travel, 6 Activities, 7 Objects, 8 Symbols, 9 Flags.
 enum EmojiCategory: String, CaseIterable, Identifiable {
     case frequentlyUsed
-    case favorites
+    case quickAccess
     case smileysPeople
     case animalsNature
     case foodDrink
@@ -47,7 +47,7 @@ enum EmojiCategory: String, CaseIterable, Identifiable {
     /// (usage / favorites) and symbols sections.
     var groups: [Int] {
         switch self {
-        case .frequentlyUsed, .favorites, .specialCharacters: return []
+        case .frequentlyUsed, .quickAccess, .specialCharacters: return []
         case .smileysPeople: return [0, 1]
         case .animalsNature: return [3]
         case .foodDrink:     return [4]
@@ -64,7 +64,7 @@ enum EmojiCategory: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .frequentlyUsed:    return String(localized: "Frequently Used")
-        case .favorites:         return String(localized: "Favorites")
+        case .quickAccess:       return String(localized: "Quick Access")
         case .smileysPeople:     return String(localized: "Smileys & People")
         case .animalsNature:     return String(localized: "Animals & Nature")
         case .foodDrink:         return String(localized: "Food & Drink")
@@ -81,7 +81,7 @@ enum EmojiCategory: String, CaseIterable, Identifiable {
     var tabSymbol: String {
         switch self {
         case .frequentlyUsed:    return "clock"
-        case .favorites:         return "star.fill"
+        case .quickAccess:       return "star.fill"
         case .smileysPeople:     return "face.smiling"
         case .animalsNature:     return "leaf"
         case .foodDrink:         return "fork.knife"

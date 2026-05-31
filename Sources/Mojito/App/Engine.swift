@@ -22,7 +22,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
     private let database: EmojiDatabase
     private let exclusions: ExclusionStore
-    private let favorites = FavoritesStore.shared
+    private let quickAccess = QuickAccessStore.shared
     private let viewModel = PickerViewModel()
     private let pickerWindow: PickerWindow
     private let gifPickerWindow = GifPickerWindow()
@@ -732,13 +732,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         return false
     }
 
-    /// How long a bare `:` must dwell before the favorites picker appears.
+    /// How long a bare `:` must dwell before the Quick Access pill appears.
     /// Long enough that `:)` / `:D` / `:smile` never flash it; short enough
     /// that an intentional pause feels responsive.
     private static let emptyPickerDwell: TimeInterval = 0.22
-    /// Cap on rows in the bare-`:` picker (favorites + most-used), before the
-    /// trailing Browse row.
-    private static let emptyPickerLimit = 8
 
     /// Debounced show for the bare-`:` favorites picker. A newer keystroke
     /// advances `inputSeq`, so anything typed after the colon cancels this
@@ -775,12 +772,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
     }
 
-    /// Bare-`:` corpus: favorites first (user order), then most-used emoji,
-    /// then a trailing "Browse all emojis…" row. Symbols + egg sentinels are
-    /// excluded from the most-used fill.
+    /// Bare-`:` corpus: the 8 Quick Access slots (pinned glyphs + most-used
+    /// auto-fill), then a trailing "Browse all emojis…" row.
     private func emptyQueryResults() -> [ScoredEmoji] {
-        var rows = TopEmoji
-            .ordered(limit: Self.emptyPickerLimit, database: database, favorites: favorites, usage: usage)
+        var rows = QuickAccess
+            .resolved(store: quickAccess, database: database, usage: usage)
             .map { ScoredEmoji(emoji: $0, matchedShortcode: $0.primaryShortcode) }
         rows.append(EmojiBrowser.browseRow)
         return rows
@@ -819,7 +815,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         browserDeleteCount = deleteCount
         captureIsExcluded = false
         stateMachine.enterBrowsing(query: "")
-        viewModel.browser = EmojiBrowserViewModel(database: database, favorites: favorites)
+        viewModel.browser = EmojiBrowserViewModel(database: database, quickAccess: quickAccess)
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.viewModel.compact = false

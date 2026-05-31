@@ -224,65 +224,87 @@ struct TriggerStateMachineBrowseTests {
 }
 
 @MainActor
-struct FavoritesStoreTests {
-    private func makeStore() -> FavoritesStore {
-        let suite = UserDefaults(suiteName: "mojito.tests.favorites.\(UUID().uuidString)")!
-        return FavoritesStore(defaults: suite)
+struct QuickAccessStoreTests {
+    private func makeStore() -> QuickAccessStore {
+        let suite = UserDefaults(suiteName: "mojito.tests.quickaccess.\(UUID().uuidString)")!
+        return QuickAccessStore(defaults: suite)
     }
 
-    @Test func addDedupesAndToggleRemoves() {
+    @Test func startsAllAuto() {
         let store = makeStore()
-        #expect(store.hexcodes.isEmpty)
-        store.add("1F600")
-        store.add("1F600")
-        #expect(store.hexcodes == ["1F600"])
-        store.toggle("1F601")
-        #expect(store.hexcodes == ["1F600", "1F601"])
-        store.toggle("1F600")
-        #expect(store.hexcodes == ["1F601"])
-        #expect(store.isFavorite("1F601"))
-        #expect(!store.isFavorite("1F600"))
+        #expect(store.slots.count == QuickAccessStore.slotCount)
+        #expect(store.slots.allSatisfy { $0 == nil })
+        #expect(!store.hasPins)
     }
 
-    @Test func moveMatchesSwiftUIContract() {
+    @Test func pinResetAndDedup() {
         let store = makeStore()
-        ["A", "B", "C", "D"].forEach { store.add($0) }
-        store.move(fromOffsets: IndexSet(integer: 0), toOffset: 3)
-        #expect(store.hexcodes == ["B", "C", "A", "D"])
+        store.pin("1F600", at: 0)
+        #expect(store.slots[0] == "1F600")
+        #expect(store.hasPins)
+        // Re-pinning the same glyph elsewhere clears the old slot.
+        store.pin("1F600", at: 3)
+        #expect(store.slots[0] == nil)
+        #expect(store.slots[3] == "1F600")
+        store.reset(at: 3)
+        #expect(store.slots[3] == nil)
+        #expect(!store.hasPins)
+    }
+
+    @Test func resetAllClearsPins() {
+        let store = makeStore()
+        store.pin("A", at: 1)
+        store.pin("B", at: 2)
+        store.resetAll()
+        #expect(store.slots.allSatisfy { $0 == nil })
     }
 
     @Test func persistsAcrossInstances() {
-        let suiteName = "mojito.tests.favorites.persist.\(UUID().uuidString)"
+        let suiteName = "mojito.tests.quickaccess.persist.\(UUID().uuidString)"
         let suite = UserDefaults(suiteName: suiteName)!
-        let first = FavoritesStore(defaults: suite)
-        first.add("2764")
-        first.add("1F44D")
-        let second = FavoritesStore(defaults: suite)
-        #expect(second.hexcodes == ["2764", "1F44D"])
+        let first = QuickAccessStore(defaults: suite)
+        first.pin("2764", at: 2)
+        let second = QuickAccessStore(defaults: suite)
+        #expect(second.slots[2] == "2764")
+        #expect(second.slots.filter { $0 != nil }.count == 1)
     }
 
-    @Test func topEmojiPutsFavoritesFirstThenUsage() {
+    @Test func resolvedKeepsPinAtSlotAndAutoFillsMostUsed() {
         let db = EmojiDatabase.shared
         guard db.all.count >= 3 else { return }
         let store = makeStore()
-        let fav = db.all[0].hexcode
+        let pin = db.all[0].hexcode
         let a = db.all[1].hexcode
         let b = db.all[2].hexcode
-        store.add(fav)
-        let top = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: [a: 3, b: 10])
-        #expect(top.first?.hexcode == fav)
-        #expect(top.dropFirst().map(\.hexcode).prefix(2) == [b, a])
+        store.pin(pin, at: 1)
+        // slot 0 auto → top most-used (b:10), slot 1 pinned, slot 2 auto → next (a:3)
+        let resolved = QuickAccess.resolved(store: store, database: db, usage: [a: 3, b: 10]).map(\.hexcode)
+        #expect(resolved.count >= 3)
+        #expect(resolved[0] == b)
+        #expect(resolved[1] == pin)
+        #expect(resolved[2] == a)
     }
 
-    @Test func topEmojiIsDeterministicAcrossCalls() {
+    @Test func resolvedExcludesPinnedFromAutoFill() {
+        let db = EmojiDatabase.shared
+        guard db.all.count >= 1 else { return }
+        let store = makeStore()
+        let x = db.all[0].hexcode
+        store.pin(x, at: 0)
+        // x is also the most-used — it must not also appear in an auto slot.
+        let resolved = QuickAccess.resolved(store: store, database: db, usage: [x: 99]).map(\.hexcode)
+        #expect(resolved.filter { $0 == x }.count == 1)
+    }
+
+    @Test func resolvedIsDeterministic() {
         let db = EmojiDatabase.shared
         guard db.all.count >= 2 else { return }
         let store = makeStore()
         let x = db.all[0].hexcode
         let y = db.all[1].hexcode
         let usage = [x: 5, y: 5]
-        let first = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: usage).map(\.hexcode)
-        let second = TopEmoji.ordered(limit: 8, database: db, favorites: store, usage: usage).map(\.hexcode)
+        let first = QuickAccess.resolved(store: store, database: db, usage: usage).map(\.hexcode)
+        let second = QuickAccess.resolved(store: store, database: db, usage: usage).map(\.hexcode)
         #expect(first == second)
         #expect(Array(first.prefix(2)) == [min(x, y), max(x, y)])
     }
