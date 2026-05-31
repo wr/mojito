@@ -1,13 +1,14 @@
 import SwiftUI
 import KeyboardShortcuts
 
-/// "Quick access" — the `:?` pill toggle, its 8 editable slots, and the global
+/// "Quick Access" — the `:?` pill toggle, its 8 editable slots, and the global
 /// emoji-browser hotkey.
 struct QuickAccessSection: View {
     @AppStorage(PrefsKey.quickAccessEnabled) private var enabled: Bool = true
     @StateObject private var store = QuickAccessStore.shared
     @State private var editing: EditingSlot?
     @State private var hovered: Int?
+    @State private var resetHovered = false
     private let database = EmojiDatabase.shared
 
     private var usage: [String: Int] {
@@ -15,16 +16,13 @@ struct QuickAccessSection: View {
     }
 
     var body: some View {
-        Section("Quick access") {
+        Section("Quick Access") {
             Toggle(isOn: $enabled) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Quick access")
-                    HStack(spacing: 4) {
-                        Text("Type").font(.callout).foregroundStyle(.secondary)
-                        KeyCap(":"); KeyCap("?")
-                        Text("to pop your most-used emoji.")
-                            .font(.callout).foregroundStyle(.secondary)
-                    }
+                    Text("Quick Access")
+                    Text("Type :? to quickly access your top emoji")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
             }
             .toggleStyle(.switch)
@@ -33,7 +31,7 @@ struct QuickAccessSection: View {
                 slotGrid
             }
 
-            LabeledContent("Emoji browser shortcut") {
+            LabeledContent("Emoji Browser shortcut") {
                 KeyboardShortcuts.Recorder("", name: .showEmojiBrowser)
             }
         }
@@ -45,71 +43,69 @@ struct QuickAccessSection: View {
     private var slotGrid: some View {
         let slots = QuickAccess.resolvedPerSlot(store: store, database: database, usage: usage)
         return VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
+            HStack(spacing: 7) {
                 ForEach(0..<QuickAccessStore.slotCount, id: \.self) { index in
                     slotCell(index: index, slot: slots[index])
-                        .frame(maxWidth: .infinity)
                 }
-            }
-            HStack(alignment: .firstTextBaseline) {
-                Text("Each slot fills with one of your most-used emoji. Click a slot to pin a specific one; hover a pinned slot to set it back.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 12)
+                Spacer(minLength: 10)
                 if store.hasPins {
-                    Button("Reset all") { store.resetAll() }
+                    Button("Reset") { store.resetAll() }
                         .buttonStyle(.borderless)
                         .font(.callout)
                 }
             }
+            Text("Click a slot to pin a specific emoji or symbol. Quick Access defaults to your most-used emoji.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.vertical, 4)
     }
 
     private func slotCell(index: Int, slot: ResolvedSlot) -> some View {
         let isHovered = hovered == index
-        return RoundedRectangle(cornerRadius: 11, style: .continuous)
+        return RoundedRectangle(cornerRadius: 9, style: .continuous)
             .fill(Color.primary.opacity(isHovered ? 0.12 : 0.05))
-            .frame(width: 50, height: 50)
+            .frame(width: 40, height: 40)
             .overlay {
                 if let emoji = slot.emoji {
-                    Text(displayGlyph(emoji)).font(.system(size: 28))
+                    Text(displayGlyph(emoji)).font(.system(size: 23))
                 } else {
                     Image(systemName: "plus")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.tertiary)
                 }
             }
-            .overlay(alignment: .topTrailing) { cornerControl(index: index, slot: slot) }
-            .contentShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+            .overlay(alignment: .topTrailing) { cornerControl(index: index, slot: slot).padding(3) }
+            .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
             .onTapGesture { editing = EditingSlot(id: index) }
             .onHover { inside in hovered = inside ? index : (hovered == index ? nil : hovered) }
             .help(slotHelp(slot))
     }
 
-    /// Pinned slots wear a red pin; hovering one swaps it for a reset button.
+    /// Pinned slots wear a subtle orange pin; hovering one swaps it for an
+    /// `×` button whose background darkens on hover to read as clickable.
     @ViewBuilder
     private func cornerControl(index: Int, slot: ResolvedSlot) -> some View {
         if slot.pinned {
-            Group {
-                if hovered == index {
-                    Button { store.reset(at: index) } label: {
-                        Image(systemName: "arrow.uturn.backward.circle.fill")
-                            .font(.system(size: 15))
-                            .foregroundStyle(.secondary, Color(nsColor: .windowBackgroundColor))
-                    }
-                    .buttonStyle(.plain)
-                    .help("Set back to most-used")
-                } else {
-                    Image(systemName: "pin.fill")
-                        .font(.system(size: 8, weight: .bold))
+            if hovered == index {
+                Button { store.reset(at: index) } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 7, weight: .bold))
                         .foregroundStyle(.white)
-                        .padding(3)
-                        .background(Circle().fill(.red))
+                        .padding(4)
+                        .background(Circle().fill(Color.black.opacity(resetHovered ? 0.7 : 0.45)))
                 }
+                .buttonStyle(.plain)
+                .onHover { resetHovered = $0 }
+                .help("Reset to most-used")
+            } else {
+                Image(systemName: "pin.fill")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(.orange)
+                    .padding(3)
+                    .background(Circle().fill(Color.orange.opacity(0.18)))
             }
-            .padding(4)
         }
     }
 
@@ -156,27 +152,5 @@ private struct QuickAccessBrowserSheet: View {
             )
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height + 48)
-    }
-}
-
-/// A small keycap, e.g. `:` or `?`.
-private struct KeyCap: View {
-    let text: String
-    init(_ text: String) { self.text = text }
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 12, weight: .medium, design: .rounded))
-            .frame(minWidth: 16)
-            .padding(.horizontal, 5)
-            .padding(.vertical, 2)
-            .background(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color.primary.opacity(0.10))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.12))
-            )
     }
 }
