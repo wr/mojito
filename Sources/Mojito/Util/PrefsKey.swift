@@ -26,9 +26,6 @@ enum PrefsKey {
     /// Settings ▸ General. An 8-element `[String]` where `""` is an auto
     /// (most-used) slot and any other value is a pinned emoji hexcode.
     static let quickAccessSlots      = "mojito.quickAccess"          // [String]  (8 slots; "" = auto)
-    /// Single character typed after `:` to open the Quick Access pill (default
-    /// `?`). Empty disables it.
-    static let quickAccessTriggerChar = "mojito.quickAccessTriggerChar"
     /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
     /// Self-attested; no payment integration.

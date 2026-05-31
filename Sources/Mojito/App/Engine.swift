@@ -53,9 +53,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var symbolsRequireDoubleColon: Bool
     private var gifSearchEnabled: Bool
     private var gifBypassExclusions: Bool
-    /// Char typed after `:` to summon the Quick Access pill (default `?`;
-    /// empty = off). Mirrored to the state machine's `quickAccessTrigger`.
-    private var quickAccessTriggerChar: String
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -80,9 +77,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
         self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
-        self.quickAccessTriggerChar = UserDefaults.standard.string(forKey: PrefsKey.quickAccessTriggerChar) ?? "?"
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-        self.stateMachine.quickAccessTrigger = self.quickAccessTriggerChar.first
+        // The Quick Access pill is summoned by a hardcoded `:?`.
+        self.stateMachine.quickAccessTrigger = "?"
 
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
@@ -177,9 +174,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
                 self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
                 self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
-                self.quickAccessTriggerChar = UserDefaults.standard.string(forKey: PrefsKey.quickAccessTriggerChar) ?? "?"
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-                self.stateMachine.quickAccessTrigger = self.quickAccessTriggerChar.first
             }
         }
     }
@@ -684,9 +679,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureFocusSnapshot = nil
             captureFocusPID = nil
             captureIsExcluded = false
-            // The trigger char (`?` by default) was swallowed; type it back so
-            // the focused app shows the literal `:?` after Esc.
-            TextInserter.replace(charactersToDelete: 0, with: quickAccessTriggerChar)
+            // The `?` from `:?` was swallowed; type it back so the focused app
+            // shows the literal `:?` after Esc.
+            TextInserter.replace(charactersToDelete: 0, with: "?")
         }
     }
 
