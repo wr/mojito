@@ -30,17 +30,26 @@ struct InlineBrowserView: View {
     private static let scrollSpace = "browserScroll"
     private static let cellHeight: CGFloat = 40
     private static let rowSpacing: CGFloat = 3
+    /// Tab bar height (icon row). The grid scrolls under it, so the scroll
+    /// content is inset by this much at the bottom.
+    private static let tabBarHeight: CGFloat = 38
+    /// Soft fade zone above the icons where the glass ramps in from clear.
+    private static let tabBarFade: CGFloat = 26
     private let columns = Array(
         repeating: GridItem(.flexible(minimum: 36), spacing: 3),
         count: EmojiBrowserViewModel.columns
     )
 
     var body: some View {
-        VStack(spacing: 0) {
-            searchHeader
-            hairline
-            grid
-            hairline
+        // The grid fills down to the bottom edge and scrolls *under* the tab
+        // bar, which floats on top as a liquid-glass strip (like the macOS
+        // system emoji picker) so emoji blur through it.
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                searchHeader
+                hairline
+                grid
+            }
             categoryBar
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
@@ -138,7 +147,9 @@ struct InlineBrowserView: View {
                         }
                     }
                     .padding(.horizontal, 8)
-                    .padding(.bottom, 8)
+                    // Clear the floating tab bar (icons + fade zone) so the
+                    // last rows can scroll out from under it.
+                    .padding(.bottom, Self.tabBarHeight + Self.tabBarFade + 6)
                 }
             }
             .coordinateSpace(name: Self.scrollSpace)
@@ -231,6 +242,14 @@ struct InlineBrowserView: View {
     // MARK: Tab bar
 
     private var categoryBar: some View {
+        ZStack(alignment: .bottom) {
+            tabBarBackdrop
+            tabBarIcons
+        }
+        .frame(height: Self.tabBarHeight + Self.tabBarFade)
+    }
+
+    private var tabBarIcons: some View {
         HStack(spacing: 1) {
             ForEach(browser.visibleCategories) { category in
                 // Active = the section scrolled to the top (cleared while searching).
@@ -254,8 +273,38 @@ struct InlineBrowserView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(.regularMaterial)
+        .frame(height: Self.tabBarHeight)
+    }
+
+    /// Glass/material masked by a vertical gradient so it fades *in* toward the
+    /// bottom — no hard top edge. Emoji scrolling under it blur and dim away as
+    /// they approach the icons, matching the native picker's bottom bar.
+    private var tabBarBackdrop: some View {
+        Rectangle().fill(.clear)
+            .modifier(TabBarGlass())
+            .mask(
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0),
+                        .init(color: .black, location: 0.55),
+                        .init(color: .black, location: 1),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+    }
+}
+
+/// Liquid-glass backdrop for the floating tab bar (Tahoe `glassEffect`),
+/// falling back to a translucent material pre-26 so emoji still show through.
+private struct TabBarGlass: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 26.0, *) {
+            content.glassEffect(.regular, in: .rect)
+        } else {
+            content.background(.ultraThinMaterial)
+        }
     }
 }
 
