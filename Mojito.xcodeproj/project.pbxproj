@@ -158,6 +158,7 @@
 		FD15928FE17F78588821135E /* Rickroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69B54539CBE867AD7AEBC39 /* Rickroll.swift */; };
 		FE1196787A788B1187BD9934 /* s13.bin in Resources */ = {isa = PBXBuildFile; fileRef = C06E0C983CA81BD9B703651A /* s13.bin */; };
 		FEC590B7DADC53EF948E7677 /* FocusedElementCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0C43AE82D06A067585D3882 /* FocusedElementCache.swift */; };
+		FFB109C762E7363A39A54111 /* CopyToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A715249597A84C409C6B93D2 /* CopyToast.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -260,6 +261,7 @@
 		A1DA7C9FD3286A7839BA642D /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		A3781043056BF9F399D00EDD /* s02.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s02.bin; sourceTree = "<group>"; };
 		A5F51678D17218A59CCE7DF9 /* QuickAccessSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAccessSettings.swift; sourceTree = "<group>"; };
+		A715249597A84C409C6B93D2 /* CopyToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyToast.swift; sourceTree = "<group>"; };
 		A891A50B1E32BC1A8B549268 /* AppContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContext.swift; sourceTree = "<group>"; };
 		A95B18F07DF8191434998363 /* PickerWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerWindow.swift; sourceTree = "<group>"; };
 		A9B20045EAB017F589F4A7A1 /* SnakeGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnakeGame.swift; sourceTree = "<group>"; };
@@ -533,6 +535,7 @@
 				C060B27E6970531BEBA3673E /* ChooChooSound.swift */,
 				C410F8B7AF8493C098EA2AF1 /* ConfettiRain.swift */,
 				7EB589505841013FF5EF5500 /* ConfettiSound.swift */,
+				A715249597A84C409C6B93D2 /* CopyToast.swift */,
 				151DC25F7CEE4F3BE8F23650 /* CRTPowerOff.swift */,
 				2361376F2801DB575F27B480 /* DialupSound.swift */,
 				520ABC6E5EB064A7DF4041D3 /* DiscoveryFanfare.swift */,
@@ -853,6 +856,7 @@
 				D7FD72169491380D742F69BC /* ChooChooSound.swift in Sources */,
 				F46B89A2E807D259981405E5 /* ConfettiRain.swift in Sources */,
 				6A8EC5B13FA4A0AC0F338875 /* ConfettiSound.swift in Sources */,
+				FFB109C762E7363A39A54111 /* CopyToast.swift in Sources */,
 				74CED6225633C087A96D7E9C /* DebugRecorder.swift in Sources */,
 				9F45015A816323AF275F23ED /* DebugReport.swift in Sources */,
 				4949BE63FAD5A5FC2573CFE1 /* DefaultExclusions.swift in Sources */,

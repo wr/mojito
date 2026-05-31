@@ -389,12 +389,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 DebugRecorder.record(.engine, "secureFieldBlocked")
                 return false
             }
-            // No editable field → nothing to autocomplete into; leave the `:`
-            // alone so the pill/search never pops up where a pick would no-op.
-            if !context.focusedFieldIsEditable {
-                DebugRecorder.record(.engine, "noEditableField")
-                return false
-            }
             captureContext = context
             captureIsExcluded = exclusions.isExcluded(bundleID: context.bundleID, url: context.url)
             DebugRecorder.record(.engine, "colon", [
@@ -840,6 +834,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setString(string, forType: .string)
+        CopyToast.show(string)
         DebugRecorder.record(.insert, "clipboardCopy")
     }
 
