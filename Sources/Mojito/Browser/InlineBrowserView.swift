@@ -41,16 +41,10 @@ struct InlineBrowserView: View {
     )
 
     var body: some View {
-        // The grid fills down to the bottom edge and scrolls *under* the tab
-        // bar, which floats on top as a liquid-glass strip (like the macOS
-        // system emoji picker) so emoji blur through it.
-        ZStack(alignment: .bottom) {
-            VStack(spacing: 0) {
-                searchHeader
-                hairline
-                grid
-            }
-            categoryBar
+        VStack(spacing: 0) {
+            searchHeader
+            hairline
+            grid
         }
         .frame(width: BrowserLayout.width, height: BrowserLayout.height)
         // Tooltip drawn at the root so it can sit above the top row without
@@ -122,7 +116,10 @@ struct InlineBrowserView: View {
 
     /// One `LazyVGrid` for the whole library (sectioned) or the flat search
     /// results. A single lazy container recycles cells correctly — splitting it
-    /// per section is what let one section's glyphs ghost over another's.
+    /// per section is what let one section's glyphs ghost over another's. The
+    /// tab bar is a bottom `safeAreaInset`: content scrolls *under* it (so emoji
+    /// blur through the glass) while `scrollTo` keeps keyboard-selected cells
+    /// above it instead of leaving them hidden behind it.
     private var grid: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -147,11 +144,11 @@ struct InlineBrowserView: View {
                         }
                     }
                     .padding(.horizontal, 8)
-                    // Clear the floating tab bar (icons + fade zone) so the
-                    // last rows can scroll out from under it.
-                    .padding(.bottom, Self.tabBarHeight + Self.tabBarFade + 6)
+                    .padding(.top, 2)
+                    .padding(.bottom, 8)
                 }
             }
+            .safeAreaInset(edge: .bottom, spacing: 0) { categoryBar }
             .coordinateSpace(name: Self.scrollSpace)
             // Active tab follows the scroll position.
             .onPreferenceChange(SectionOffsetKey.self) { offsets in
