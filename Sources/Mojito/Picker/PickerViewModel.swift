@@ -39,22 +39,13 @@ final class PickerViewModel: ObservableObject {
     }
 
     func selectNext() {
-        let n = selectableCount
-        guard n > 0 else { return }
-        selectedIndex = (selectedIndex + 1) % n
+        guard !results.isEmpty else { return }
+        selectedIndex = (selectedIndex + 1) % results.count
     }
 
     func selectPrevious() {
-        let n = selectableCount
-        guard n > 0 else { return }
-        selectedIndex = (selectedIndex - 1 + n) % n
-    }
-
-    /// Pill ←/→ wrap over the emoji rows only — never the trailing Browse
-    /// chevron (which is reached via ↓ or a click instead).
-    private var selectableCount: Int {
-        guard let last = results.last else { return 0 }
-        return last.emoji.hexcode == EmojiBrowser.sentinelHexcode ? results.count - 1 : results.count
+        guard !results.isEmpty else { return }
+        selectedIndex = (selectedIndex - 1 + results.count) % results.count
     }
 
     func reset() {
