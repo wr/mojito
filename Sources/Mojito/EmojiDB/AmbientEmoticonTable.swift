@@ -20,11 +20,40 @@ enum AmbientEmoticonTable {
         "<-":   "←",
         "<->":  "↔",
         "=>":   "⇒",
+        "<=":   "⇐",
         "<=>":  "⇔",
     ]
 
     static func emoji(for word: String) -> String? {
         map[word]
+    }
+
+    /// The arrow family — the only ambient emoticons allowed to fire when
+    /// typed flush against text (`Foo->Bar`), matched as a trailing suffix of
+    /// the buffer. Everything else stays boundary-gated so it can't eat into
+    /// prose. Derived as the keys built solely from arrow punctuation, so it
+    /// tracks the map automatically.
+    private static let arrowChars: Set<Character> = ["-", "<", ">", "="]
+    static let arrowKeys: Set<String> = Set(map.keys.filter { $0.allSatisfy(arrowChars.contains) })
+
+    /// The longest arrow key that is a suffix of `buffer`, if any. Lets the
+    /// state machine pull `->` out of `Foo->` without a leading boundary.
+    static func arrowSuffix(of buffer: String) -> String? {
+        var best: String?
+        for key in arrowKeys where buffer.hasSuffix(key) {
+            if best == nil || key.count > best!.count { best = key }
+        }
+        return best
+    }
+
+    /// True if appending more chars to `arrow` could still reach a longer
+    /// arrow key (`<-` → `<->`, `<=` → `<=>`) — used to defer firing the
+    /// shorter match until the next keystroke decides.
+    static func hasLongerArrow(extending arrow: String) -> Bool {
+        for key in arrowKeys where key.count > arrow.count && key.hasPrefix(arrow) {
+            return true
+        }
+        return false
     }
 
     /// Fire the moment a non-alphanumeric-led entry completes (`<3`,

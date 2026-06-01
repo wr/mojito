@@ -452,15 +452,16 @@ struct TriggerStateMachineTests {
     }
 
     @Test func ambientLeftArrowFiresOnTerminator() {
-        // Space after `<-` resolves the pending fire through the normal
-        // terminator path — the Engine's `checkAmbientEmoticon` finds
-        // `<-` in the table and replaces with `← `.
+        // A space can't extend `<-` to `<->`, so the deferred fire resolves
+        // immediately: the arrow is emitted and the terminator rides along as
+        // `trailing` (→ `← `). The space is consumed and re-emitted by the
+        // Engine, hence consumesKey == true.
         var sm = TriggerStateMachine()
         _ = sm.handle(.cancelChar("<"))
         _ = sm.handle(.nameChar("-"))
         let out = sm.handle(.cancelChar(" "))
-        #expect(out.action == .checkAmbientEmoticon(word: "<-", terminator: " "))
-        #expect(out.consumesKey == false)
+        #expect(out.action == .insertAmbientEmoticon(word: "<-", trailing: " "))
+        #expect(out.consumesKey == true)
     }
 
     @Test func ambientDoubleArrowFiresOnEqualsGreaterThan() {
@@ -472,14 +473,74 @@ struct TriggerStateMachineTests {
     }
 
     @Test func ambientLeftRightDoubleArrowAccumulatesFreely() {
-        // `<=` isn't in the table, so the buffer accumulates without a
-        // deferral and `<=>` fires once it completes.
+        // `<=` is itself an arrow (`⇐`) but defers because `<=>` (`⇔`) extends
+        // it — so the `=` holds the fire pending, and the trailing `>` resolves
+        // to the longer `<=>`.
         var sm = TriggerStateMachine()
         _ = sm.handle(.cancelChar("<"))
         let mid = sm.handle(.cancelChar("="))
         #expect(mid.action == .none)
         let out = sm.handle(.cancelChar(">"))
         #expect(out.action == .insertAmbientEmoticon(word: "<=>", trailing: ""))
+    }
+
+    @Test func ambientLeftDoubleArrowFiresWithTrailingOnNonExtendingChar() {
+        // `<=` deferred for `<=>`; a non-extending char collapses it to `⇐`
+        // and carries the char as trailing (parallels `<-` → `←x`).
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("<"))
+        _ = sm.handle(.cancelChar("="))
+        let out = sm.handle(.nameChar("x"))
+        #expect(out.action == .insertAmbientEmoticon(word: "<=", trailing: "x"))
+        #expect(out.consumesKey == true)
+    }
+
+    // MARK: ambient arrows flush against text (no surrounding spaces)
+
+    /// Type a string char-by-char from idle, classifying each char the way the
+    /// KeyMonitor would (name chars vs. cancel chars), and return the last
+    /// non-passthrough action seen. Lets the adjacency tests read as the
+    /// literal thing the user types.
+    private func lastAmbientAction(typing text: String) -> TriggerAction {
+        var sm = TriggerStateMachine()
+        var last: TriggerAction = .none
+        let nameChars = Set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+")
+        for ch in text {
+            let out = nameChars.contains(ch) ? sm.handle(.nameChar(ch)) : sm.handle(.cancelChar(ch))
+            if out.action != .none { last = out.action }
+        }
+        return last
+    }
+
+    @Test func ambientRightArrowFiresFlushAfterWord() {
+        // `Foo->` with no leading space: the `->` is pulled off the end and
+        // only those two chars are deleted, leaving `Foo`.
+        #expect(lastAmbientAction(typing: "Foo->") == .insertAmbientEmoticon(word: "->", trailing: ""))
+    }
+
+    @Test func ambientDoubleArrowFiresFlushAfterWord() {
+        #expect(lastAmbientAction(typing: "Foo=>") == .insertAmbientEmoticon(word: "=>", trailing: ""))
+    }
+
+    @Test func ambientLeftRightArrowFiresFlushAfterWord() {
+        // `Foo<->` → the deferred `<-` extends to `<->` and fires `↔`.
+        #expect(lastAmbientAction(typing: "Foo<->") == .insertAmbientEmoticon(word: "<->", trailing: ""))
+    }
+
+    @Test func ambientLeftArrowFiresFlushBetweenWords() {
+        // `Foo<-B`: `<-` defers, then the `B` (non-extending) collapses it to
+        // `←` carrying `B` as trailing — `Foo←B`.
+        #expect(lastAmbientAction(typing: "Foo<-B") == .insertAmbientEmoticon(word: "<-", trailing: "B"))
+    }
+
+    @Test func ambientLeftDoubleArrowFiresFlushBetweenWords() {
+        #expect(lastAmbientAction(typing: "Foo<=B") == .insertAmbientEmoticon(word: "<=", trailing: "B"))
+    }
+
+    @Test func nonArrowEmoticonStaysBoundaryGatedFlushAfterWord() {
+        // Per the chosen scope (arrows only), `<3` flush against a word does
+        // NOT fire — `Hi<3` stays literal.
+        #expect(lastAmbientAction(typing: "Hi<3") == .none)
     }
 
     @Test func ambientTerminatorChecksWordThenResetsBuffer() {
