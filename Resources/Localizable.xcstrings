@@ -11215,9 +11215,6 @@
     "Travel & Places" : {
 
     },
-    "Type :? to quickly access your top emoji" : {
-
-    },
     "Type `:::` then a search term to insert a GIF from Giphy." : {
       "localizations" : {
         "ar" : {
@@ -11329,6 +11326,9 @@
           }
         }
       }
+    },
+    "Type `:?` to quickly access your top emoji" : {
+
     },
     "Type `:` to search for any emoji or symbol in seconds." : {
       "localizations" : {

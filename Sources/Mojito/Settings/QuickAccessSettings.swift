@@ -21,7 +21,7 @@ struct QuickAccessSection: View {
             Toggle(isOn: $enabled) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Quick Access")
-                    Text("Type :? to quickly access your top emoji")
+                    Text("Type `:?` to quickly access your top emoji")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
