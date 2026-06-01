@@ -154,6 +154,9 @@ struct EasterEggsSettingsView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(.green)
+                Image(systemName: "info.circle")
+                    .foregroundStyle(.tertiary)
+                    .help(egg.hint)
             }
         }
     }
