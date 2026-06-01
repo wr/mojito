@@ -547,7 +547,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 if self.inputSeq != seqAtDispatch { self.pendingEmoticonUndo = nil }
             }
 
-        case .insertAmbientEmoticon(let word):
+        case .insertAmbientEmoticon(let word, let trailing):
             let context = AppContextDetector.current()
             if exclusions.isExcluded(bundleID: context.bundleID, url: context.url) { break }
             // No terminator; the last char of `word` was the trigger and
@@ -555,7 +555,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             let seqAtDispatch = inputSeq
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
                 guard let self else { return }
-                self.handleAmbientEmoticonImmediate(word: word)
+                self.handleAmbientEmoticonImmediate(word: word, trailing: trailing)
                 if self.inputSeq != seqAtDispatch { self.pendingEmoticonUndo = nil }
             }
 
@@ -1241,20 +1241,26 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     /// Immediate-fire ambient: the whole word is the emoticon body, no
-    /// trailing terminator. Delete `word.count` and replace with the emoji.
-    private func handleAmbientEmoticonImmediate(word: String) {
+    /// trailing terminator. Delete `word.count` chars in the focused app
+    /// and insert `emoji + trailing`. `trailing` is non-empty only when
+    /// the state machine deferred firing a shorter match (`<-`) and the
+    /// next char (`x` in `<-x`) failed to extend it to a longer one
+    /// (`<->`) — that char was consumed and is re-emitted here so the
+    /// final field reads `←x` instead of `<←`.
+    private func handleAmbientEmoticonImmediate(word: String, trailing: String) {
         let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
         guard enabled, let emoji = AmbientEmoticonTable.emoji(for: word) else {
             pendingEmoticonUndo = nil
             return
         }
         DebugRecorder.record(.emoticon, "ambientImmediate")
-        TextInserter.replace(charactersToDelete: word.count, with: emoji)
+        let replacement = emoji + trailing
+        TextInserter.replace(charactersToDelete: word.count, with: replacement)
         bumpEmoticonCounter()
 
         pendingEmoticonUndo = EmoticonUndo(
-            emojiInserted: emoji,
-            originalText: word,
+            emojiInserted: replacement,
+            originalText: word + trailing,
             insertedAt: Date(),
             pid: FocusedElementCache.shared.focusedPID
         )

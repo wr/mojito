@@ -16,6 +16,14 @@ struct AmbientEmoticonTableTests {
         #expect(AmbientEmoticonTable.emoji(for: "B)") == "😎")
     }
 
+    @Test func arrowsMapToUnicodeGlyphs() {
+        #expect(AmbientEmoticonTable.emoji(for: "->") == "→")
+        #expect(AmbientEmoticonTable.emoji(for: "<-") == "←")
+        #expect(AmbientEmoticonTable.emoji(for: "<->") == "↔")
+        #expect(AmbientEmoticonTable.emoji(for: "=>") == "⇒")
+        #expect(AmbientEmoticonTable.emoji(for: "<=>") == "⇔")
+    }
+
     @Test func caseVariantsAreSeparateKeys() {
         // "XD"/"xD" are registered; "Xd"/"xd" are not.
         #expect(AmbientEmoticonTable.emoji(for: "Xd") == nil)
@@ -31,6 +39,30 @@ struct AmbientEmoticonTableTests {
         #expect(AmbientEmoticonTable.shouldFireImmediately("<3"))
         #expect(AmbientEmoticonTable.shouldFireImmediately("</3"))
         #expect(AmbientEmoticonTable.shouldFireImmediately(">:)"))
+        #expect(AmbientEmoticonTable.shouldFireImmediately("->"))
+        #expect(AmbientEmoticonTable.shouldFireImmediately("<-"))
+        #expect(AmbientEmoticonTable.shouldFireImmediately("<->"))
+        #expect(AmbientEmoticonTable.shouldFireImmediately("=>"))
+        #expect(AmbientEmoticonTable.shouldFireImmediately("<=>"))
+    }
+
+    @Test func hasLongerMatchFindsTableExtensions() {
+        // `<-` is in the table and so is `<->` — the state machine uses
+        // this to defer firing `←` while `↔` is still reachable.
+        #expect(AmbientEmoticonTable.hasLongerMatch(for: "<-"))
+        // `>` has both `>:)` and `>:(` as longer entries.
+        #expect(AmbientEmoticonTable.hasLongerMatch(for: ">"))
+        // `<=` isn't itself in the table but extends to `<=>`.
+        #expect(AmbientEmoticonTable.hasLongerMatch(for: "<="))
+    }
+
+    @Test func hasLongerMatchReturnsFalseForTerminalEntries() {
+        // No table key strictly extends these.
+        #expect(!AmbientEmoticonTable.hasLongerMatch(for: "<->"))
+        #expect(!AmbientEmoticonTable.hasLongerMatch(for: "<=>"))
+        #expect(!AmbientEmoticonTable.hasLongerMatch(for: "->"))
+        #expect(!AmbientEmoticonTable.hasLongerMatch(for: "=>"))
+        #expect(!AmbientEmoticonTable.hasLongerMatch(for: ""))
     }
 
     @Test func letterOrNumberLedWaitsForTerminator() {

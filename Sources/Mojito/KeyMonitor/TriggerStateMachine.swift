@@ -86,8 +86,12 @@ enum TriggerAction: Equatable {
     /// `AmbientEmoticonTable` and replaces with `emoji + terminator`.
     case checkAmbientEmoticon(word: String, terminator: Character)
     /// Ambient match that doesn't need a terminator (e.g. `<3`, `>:)`).
-    /// Engine deletes `word.count` and replaces with the emoji.
-    case insertAmbientEmoticon(word: String)
+    /// Engine deletes `word.count` and replaces with `emoji + trailing`.
+    /// `trailing` is non-empty when a deferred shorter match (`<-`) fires
+    /// because the following char (`x` in `<-x`) didn't extend it to a
+    /// longer one (`<->`); the state machine consumes that char so it
+    /// can be re-emitted after the emoji.
+    case insertAmbientEmoticon(word: String, trailing: String)
     /// User typed `:::` (three colons within `gifTripleColonWindow`).
     /// The colons stay in the focused app — they're deleted alongside
     /// the query only when the user picks a GIF. Backspacing through
@@ -188,6 +192,14 @@ struct TriggerStateMachine {
 
     private var lastIdleKeystrokeAt: Date? = nil
 
+    /// A complete ambient match whose fire we've held back because some
+    /// strictly-longer key in the table also starts with it (e.g. `<-` is
+    /// in the map, but so is `<->` — fire too early and the user can never
+    /// reach `↔`). Resolves on the very next idle keystroke: if it extends
+    /// toward the longer match, normal accumulation takes over; otherwise
+    /// the pending word fires now with that extra char carried as `trailing`.
+    private var pendingImmediateFire: (word: String, emoji: String)?
+
     /// Sliding window of recent colon timestamps used to detect `:::`
     /// (the GIF-search trigger) regardless of the current capture state.
     private var recentColonTimes: [Date] = []
@@ -204,11 +216,15 @@ struct TriggerStateMachine {
 
     mutating func handle(_ input: TriggerInput) -> TriggerOutput {
         // Drop a stale ambient word after too long a pause (covers
-        // click-to-move-caret followed by delayed typing).
+        // click-to-move-caret followed by delayed typing). A deferred
+        // fire is dropped without firing — the user moved on, and we'd
+        // have no way to emit the held action without also dropping
+        // whatever input arrived next.
         if let last = lastIdleKeystrokeAt,
            Date().timeIntervalSince(last) > Self.emoticonMaxIdle {
             idleWord = ""
             lastIdleKeystrokeAt = nil
+            pendingImmediateFire = nil
         }
 
         let output = process(input)
@@ -263,6 +279,7 @@ struct TriggerStateMachine {
                 konamiProgress = 0
                 idleWord = ""
                 lastIdleKeystrokeAt = nil
+                pendingImmediateFire = nil
                 return TriggerOutput(action: .openGifPicker, consumesKey: false)
             }
         } else {
@@ -336,6 +353,7 @@ struct TriggerStateMachine {
             }
             idleWord = ""
             lastIdleKeystrokeAt = nil
+            pendingImmediateFire = nil
             if lastWasWordChar {
                 // "5:35" / "foo:bar" — don't trigger.
                 return .passthrough
@@ -356,9 +374,13 @@ struct TriggerStateMachine {
                 idleWord = String(idleWord.dropLast())
                 lastIdleKeystrokeAt = idleWord.isEmpty ? nil : Date()
             }
+            pendingImmediateFire = nil
             return .passthrough
 
         case (.idle, .nameChar(let c)):
+            if let fire = resolvePendingFire(with: c) {
+                return fire
+            }
             idleWord += String(c)
             lastIdleKeystrokeAt = Date()
             if let fire = checkImmediateAmbientFire() {
@@ -372,6 +394,7 @@ struct TriggerStateMachine {
                 let word = idleWord
                 idleWord = ""
                 lastIdleKeystrokeAt = nil
+                pendingImmediateFire = nil
                 if word.isEmpty {
                     return .passthrough
                 }
@@ -382,6 +405,9 @@ struct TriggerStateMachine {
             }
             // Non-terminator punctuation (`<`, `>`, `)`, `(`, `_`, …) is
             // part of an emoticon body. Append and keep accumulating.
+            if let fire = resolvePendingFire(with: c) {
+                return fire
+            }
             idleWord += String(c)
             lastIdleKeystrokeAt = Date()
             if let fire = checkImmediateAmbientFire() {
@@ -394,6 +420,7 @@ struct TriggerStateMachine {
             // motion or context switch. Drop the buffer.
             idleWord = ""
             lastIdleKeystrokeAt = nil
+            pendingImmediateFire = nil
             return .passthrough
 
         // MARK: capturing — colon
@@ -611,6 +638,7 @@ struct TriggerStateMachine {
         lastIdleKeystrokeAt = nil
         lastCaptureKeystrokeAt = nil
         recentColonTimes.removeAll()
+        pendingImmediateFire = nil
     }
 
     /// 2 chars in the normal corpus so `:D` / `:s` don't briefly flash the
@@ -732,13 +760,46 @@ struct TriggerStateMachine {
     }
 
     /// Fire if `idleWord` is a complete ambient that needs no terminator.
+    /// When a strictly-longer key also matches the buffer, hold the fire
+    /// in `pendingImmediateFire` so the next keystroke gets the chance to
+    /// reach the longer match.
     private mutating func checkImmediateAmbientFire() -> TriggerOutput? {
-        guard AmbientEmoticonTable.shouldFireImmediately(idleWord) else {
+        guard AmbientEmoticonTable.shouldFireImmediately(idleWord),
+              let emoji = AmbientEmoticonTable.emoji(for: idleWord) else {
+            return nil
+        }
+        if AmbientEmoticonTable.hasLongerMatch(for: idleWord) {
+            pendingImmediateFire = (word: idleWord, emoji: emoji)
             return nil
         }
         let word = idleWord
         idleWord = ""
         lastIdleKeystrokeAt = nil
-        return TriggerOutput(action: .insertAmbientEmoticon(word: word), consumesKey: false)
+        pendingImmediateFire = nil
+        return TriggerOutput(
+            action: .insertAmbientEmoticon(word: word, trailing: ""),
+            consumesKey: false
+        )
+    }
+
+    /// Resolve a pending deferred fire against an incoming idle char. If
+    /// the char extends the pending toward a longer table entry, returns
+    /// `nil` and the caller continues normal accumulation. Otherwise the
+    /// pending fires now, consuming `c` and carrying it as `trailing` so
+    /// the engine can re-emit it after the inserted emoji.
+    private mutating func resolvePendingFire(with c: Character) -> TriggerOutput? {
+        guard let pending = pendingImmediateFire else { return nil }
+        let combined = pending.word + String(c)
+        let extendsToward = AmbientEmoticonTable.shouldFireImmediately(combined)
+            || AmbientEmoticonTable.hasLongerMatch(for: combined)
+        if extendsToward { return nil }
+        let word = pending.word
+        pendingImmediateFire = nil
+        idleWord = ""
+        lastIdleKeystrokeAt = nil
+        return TriggerOutput(
+            action: .insertAmbientEmoticon(word: word, trailing: String(c)),
+            consumesKey: true
+        )
     }
 }

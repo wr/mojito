@@ -16,6 +16,11 @@ enum AmbientEmoticonTable {
         "B)":   "😎",
         "O_o":  "😳",
         "o_O":  "😳",
+        "->":   "→",
+        "<-":   "←",
+        "<->":  "↔",
+        "=>":   "⇒",
+        "<=>":  "⇔",
     ]
 
     static func emoji(for word: String) -> String? {
@@ -29,6 +34,17 @@ enum AmbientEmoticonTable {
         guard let first = word.first else { return false }
         if first.isLetter || first.isNumber { return false }
         return map[word] != nil
+    }
+
+    /// True if some map key is strictly longer than `prefix` and starts
+    /// with it — used by the state machine to defer firing a complete
+    /// shorter match (`<-`) when a longer one (`<->`) might still arrive.
+    static func hasLongerMatch(for prefix: String) -> Bool {
+        guard !prefix.isEmpty else { return false }
+        for key in map.keys where key.count > prefix.count && key.hasPrefix(prefix) {
+            return true
+        }
+        return false
     }
 
     /// First-char prefixes that may legitimately continue with `:` (so
