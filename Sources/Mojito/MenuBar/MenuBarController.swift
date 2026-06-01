@@ -13,6 +13,7 @@ final class MenuBarController {
     private weak var resumeItem: NSMenuItem?
     private weak var pauseHourItem: NSMenuItem?
     private weak var pauseTomorrowItem: NSMenuItem?
+    private weak var browseItem: NSMenuItem?
 
     func install(
         engine: Engine,
@@ -144,7 +145,9 @@ final class MenuBarController {
         resumeItem = resume
 
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: String(localized: "Browse Emoji…"), action: #selector(MenuActions.openBrowser), keyEquivalent: "").configured(target: MenuActions.shared))
+        let browse = NSMenuItem(title: String(localized: "Browse Emoji…"), action: #selector(MenuActions.openBrowser), keyEquivalent: "").configured(target: MenuActions.shared)
+        menu.addItem(browse)
+        browseItem = browse
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: String(localized: "Settings…"), action: #selector(MenuActions.openSettings), keyEquivalent: ",").configured(target: MenuActions.shared))
         // Option-held alternate — backdoor for re-running guided setup
@@ -172,6 +175,9 @@ final class MenuBarController {
         pauseHourItem?.isHidden = isPaused
         pauseTomorrowItem?.isHidden = isPaused
         resumeItem?.isHidden = !isPaused
+        // Browser insertion goes dark when paused / permissions are missing
+        // (showBrowser guards on isActive), so the item shouldn't look live.
+        browseItem?.isEnabled = engine?.isActive ?? false
     }
 
     private func refreshUpdatesItem(hasError: Bool) {

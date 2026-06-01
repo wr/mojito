@@ -220,8 +220,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // jump, Spotlight) means our target moved — dismiss it, exactly as a
         // capture does. Cross-app switches are handled by handleAppActivated.
         switch stateMachine.state {
-        case .capturing, .browsing: break
-        default: return
+        case .capturing:
+            break
+        case .browsing:
+            // The browser can be opened over a no-focus context (e.g. the
+            // Finder, to copy a glyph) — there's no captured field to drift
+            // away from, so a stray focus change must not self-dismiss it.
+            if captureFocusSnapshot == nil { return }
+        default:
+            return
         }
         guard let snapshot = captureFocusSnapshot else {
             cancelCapture()

@@ -65,6 +65,12 @@ enum AppContextDetector {
     /// positively non-text control, reads as false.
     private static func focusedFieldIsEditable() -> Bool {
         guard let focused = resolveFocusedElement() else { return false }
+        // Role first: a positively non-text element (e.g. a read-only label
+        // that still exposes a selection range) has nowhere to type.
+        if let role = copyString(focused, kAXRoleAttribute) {
+            if nonTextRoles.contains(role) { return false }
+            if editableRoles.contains(role) { return true }
+        }
         // Settable value (native + most web/Electron inputs).
         var settable: DarwinBoolean = false
         if AXUIElementIsAttributeSettable(focused, kAXValueAttribute as CFString, &settable) == .success,
@@ -76,9 +82,8 @@ enum AppContextDetector {
         if AXUIElementCopyAttributeValue(focused, kAXSelectedTextRangeAttribute as CFString, &rangeRef) == .success {
             return true
         }
-        guard let role = copyString(focused, kAXRoleAttribute) else { return true }
-        if editableRoles.contains(role) { return true }
-        return !nonTextRoles.contains(role)
+        // Unreadable role or an opaque container — lean editable.
+        return true
     }
 
     /// The focused element from the cache, falling back to a synchronous
