@@ -54,12 +54,18 @@ enum AchievementBanner {
         panel.backgroundColor = .clear
         panel.hasShadow = false  // SwiftUI draws its own shadow under the capsule
         panel.alphaValue = 1.0
-        panel.ignoresMouseEvents = true
+        // Clickable: only the pill takes hits (it sets its own content shape);
+        // the transparent margin reports no SwiftUI hit, so clicks there fall
+        // through to whatever is underneath.
+        panel.ignoresMouseEvents = false
         panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.popUpMenuWindow)))
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
 
         let controller = BannerController()
-        let host = NSHostingView(rootView: BannerView(egg: egg, controller: controller))
+        let host = NSHostingView(rootView: BannerView(egg: egg, controller: controller, onTap: {
+            NotificationCenter.default.post(name: .mojitoRevealEasterEgg, object: egg.rawValue)
+            beginExit(panel, controller)
+        }))
         host.translatesAutoresizingMaskIntoConstraints = false
         let container = NSView(frame: NSRect(origin: .zero, size: panelSize))
         container.addSubview(host)
@@ -74,21 +80,27 @@ enum AchievementBanner {
         currentPanel = panel
 
         // Entry + exit are both SwiftUI-driven scale springs in BannerView.
-        // After the hold, flip `visible` to false to play the shrink-down,
-        // then order the panel out once the spring has settled.
+        // After the hold, play the shrink-down and order the panel out. A
+        // click on the pill can call `beginExit` earlier; the guard inside
+        // makes the later hold-timer fire a no-op.
         DispatchQueue.main.asyncAfter(deadline: .now() + holdDuration) {
+            MainActor.assumeIsolated { beginExit(panel, controller) }
+        }
+    }
+
+    /// Plays the shrink-down, orders the panel out, and advances the queue.
+    /// Reentrancy-safe: claims `currentPanel` immediately so a second call
+    /// (click racing the hold timer, or a double-click) is a no-op.
+    private static func beginExit(_ panel: NSPanel, _ controller: BannerController) {
+        guard currentPanel === panel else { return }
+        currentPanel = nil
+        withAnimation(.easeIn(duration: 0.22)) {
+            controller.visible = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
             MainActor.assumeIsolated {
-                guard currentPanel === panel else { return }
-                withAnimation(.easeIn(duration: 0.22)) {
-                    controller.visible = false
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + exitDuration) {
-                    MainActor.assumeIsolated {
-                        panel.orderOut(nil)
-                        if currentPanel === panel { currentPanel = nil }
-                        showNext()
-                    }
-                }
+                panel.orderOut(nil)
+                showNext()
             }
         }
     }
@@ -97,8 +109,9 @@ enum AchievementBanner {
 private struct BannerView: View {
     let egg: EasterEgg
     @ObservedObject var controller: BannerController
+    let onTap: () -> Void
 
-    var body: some View {
+    private var pill: some View {
         HStack(spacing: 8) {
             Text(egg.emojiGlyph ?? "🎉")
                 .font(.system(size: 20))
@@ -122,16 +135,25 @@ private struct BannerView: View {
                 .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
         )
         .fixedSize()  // pill width hugs content
-        // Bouncy scale-pop in/out from center. Both axes scale together so
-        // the pill grows from a tiny dot into its resting size with an
-        // elastic overshoot, and shrinks back to a dot on dismiss.
-        .scaleEffect(controller.visible ? 1.0 : 0.0, anchor: .center)
-        .opacity(controller.visible ? 1.0 : 0.0)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)  // center pill within the oversized panel stage
-        .onAppear {
-            withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) {
-                controller.visible = true
+        .contentShape(Capsule())  // hits confined to the pill, not the margin
+    }
+
+    var body: some View {
+        pill
+            .onTapGesture { onTap() }
+            .onHover { inside in
+                if inside { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
             }
-        }
+            // Bouncy scale-pop in/out from center. Both axes scale together so
+            // the pill grows from a tiny dot into its resting size with an
+            // elastic overshoot, and shrinks back to a dot on dismiss.
+            .scaleEffect(controller.visible ? 1.0 : 0.0, anchor: .center)
+            .opacity(controller.visible ? 1.0 : 0.0)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)  // center pill within the oversized panel stage
+            .onAppear {
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) {
+                    controller.visible = true
+                }
+            }
     }
 }

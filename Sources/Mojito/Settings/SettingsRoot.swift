@@ -29,6 +29,7 @@ struct SettingsRoot: View {
 
     @State private var selection: Tab = .general
     @State private var hostWindow: NSWindow?
+    @ObservedObject private var nav = SettingsNavigator.shared
 
     var body: some View {
         NavigationSplitView {
@@ -61,6 +62,16 @@ struct SettingsRoot: View {
         .onChange(of: selection) { _, new in
             hostWindow?.title = new.title
         }
+        .onAppear { applyRequestedTab() }
+        .onChange(of: nav.requestedTab) { _, _ in applyRequestedTab() }
+    }
+
+    /// Honors a pending tab request from `SettingsNavigator`, then clears it so
+    /// a plain Settings open still defaults to General.
+    private func applyRequestedTab() {
+        guard let tab = nav.requestedTab else { return }
+        selection = tab
+        nav.requestedTab = nil
     }
 }
 

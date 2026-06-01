@@ -6,6 +6,10 @@ struct EasterEggsSettingsView: View {
     @EnvironmentObject private var engine: Engine
     /// Bumped on `.easterEggDiscovered` so the section re-renders while open.
     @State private var easterEggsTick: Int = 0
+    @ObservedObject private var nav = SettingsNavigator.shared
+    /// Row currently flashing (banner-click reveal), and its animated tint.
+    @State private var flashEgg: String?
+    @State private var flashOpacity: Double = 0
 
     private let rowPadding: CGFloat = 2
 
@@ -24,24 +28,54 @@ struct EasterEggsSettingsView: View {
     }
 
     var body: some View {
-        Form {
-            Section("Stats") {
-                LabeledContent("User since", value: firstLaunchDate)
+        ScrollViewReader { proxy in
+            Form {
+                Section("Stats") {
+                    LabeledContent("User since", value: firstLaunchDate)
+                        .padding(.vertical, rowPadding)
+                    LabeledContent("Emoji autocompleted", value: "\(totalAutocompleted)")
+                        .padding(.vertical, rowPadding)
+                    HStack {
+                        Text("Danger zone")
+                        Spacer()
+                        ClearStatsButton(isDisabled: totalAutocompleted == 0)
+                    }
                     .padding(.vertical, rowPadding)
-                LabeledContent("Emoji autocompleted", value: "\(totalAutocompleted)")
-                    .padding(.vertical, rowPadding)
-                HStack {
-                    Text("Danger zone")
-                    Spacer()
-                    ClearStatsButton(isDisabled: totalAutocompleted == 0)
                 }
-                .padding(.vertical, rowPadding)
-            }
 
-            easterEggsSection
+                easterEggsSection
+            }
+            .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .onAppear { consumeReveal(proxy) }
+            .onChange(of: nav.reveal) { _, _ in consumeReveal(proxy) }
         }
-        .formStyle(.grouped)
-        .scrollContentBackground(.hidden)
+    }
+
+    /// Scroll the banner-clicked egg into view and flash its row. A no-op
+    /// unless `SettingsNavigator` has a pending reveal for a visible egg;
+    /// clears the request once handled so it doesn't re-fire.
+    private func consumeReveal(_ proxy: ScrollViewProxy) {
+        guard let request = nav.reveal else { return }
+        nav.reveal = nil
+        let id = request.eggID
+        guard EasterEggTracker.visibleCases.contains(where: { $0.id == id }) else { return }
+        // Defer a tick so a freshly-mounted list has laid out its rows.
+        DispatchQueue.main.async {
+            withAnimation(.easeInOut(duration: 0.35)) {
+                proxy.scrollTo(id, anchor: .center)
+            }
+            // Commit the lit tint first; animate it away on the next tick so
+            // the two state writes don't coalesce into a no-op render.
+            flashEgg = id
+            flashOpacity = 0.5
+            DispatchQueue.main.async {
+                // Ends dim: 0.5 → 0 → 0.5 → 0 (odd count settles on the target).
+                withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
+                    flashOpacity = 0
+                }
+            }
+        }
     }
 
     // MARK: - Easter eggs
@@ -60,6 +94,8 @@ struct EasterEggsSettingsView: View {
                 easterEggRow(egg, discovered: EasterEggTracker.isDiscovered(egg))
                     .padding(.vertical, rowPadding)
                     .padding(.leading, EasterEggTracker.isChildKeyword(egg) ? 20 : 0)
+                    .background(flashBackground(for: egg))
+                    .id(egg.id)
             }
             HStack {
                 Text("Danger zone")
@@ -77,6 +113,17 @@ struct EasterEggsSettingsView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .easterEggDiscovered)) { _ in
             easterEggsTick &+= 1
+        }
+    }
+
+    /// Transient tint behind a row being revealed from a banner click.
+    @ViewBuilder
+    private func flashBackground(for egg: EasterEgg) -> some View {
+        if flashEgg == egg.id {
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(Color.accentColor.opacity(flashOpacity))
+                .padding(.horizontal, -8)
+                .allowsHitTesting(false)
         }
     }
 
