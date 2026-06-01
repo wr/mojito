@@ -166,9 +166,10 @@ final class GifPickerWindow {
     private func handlePick(_ asset: GifAsset, paste: Bool, deleteCount: Int) {
         copyTask?.cancel()
         let url = asset.originalURL
+        let name = viewModel.query
         hide()
         copyTask = Task {
-            let copied = await GifClipboard.copy(from: url)
+            let copied = await GifClipboard.copy(from: url, name: name)
             await MainActor.run {
                 if copied { onGifInserted?() }
                 guard copied, paste else { return }
