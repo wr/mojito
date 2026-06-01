@@ -55,6 +55,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case k49
     case k50
     case k51
+    case k52
 
     var id: String { rawValue }
 
@@ -111,6 +112,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k49: return "Wordle"
         case .k50: return "Disk Optimizer"
         case .k51: return "Last Call"
+        case .k52: return "Alcoholic"
         }
     }
 
@@ -169,6 +171,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k49: return "`\(EggStrings.k49)` — six guesses, one word."
         case .k50: return "`\(EggStrings.k50)` — tidying clusters, one seek at a time."
         case .k51: return "Solve the word, then survive the bonus round."
+        case .k52: return "Manually clicked Check for Updates."
         }
     }
 
@@ -225,6 +228,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k49: return "Green, yellow, gray — six tries."
         case .k50: return "Those little colored blocks, all out of order."
         case .k51: return "Solve it to see what comes next."
+        case .k52: return "Just one more check. Then maybe one more."
         }
     }
 
@@ -280,6 +284,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k49: return "🟩"
         case .k50: return "💽"
         case .k51: return "🍹"
+        case .k52: return "🍺"
         }
     }
 
@@ -377,6 +382,7 @@ enum EasterEggTracker {
         .k36, .k37, .k38, .k39, .k40, .k41,
         .k42,
         .k43, .k44, .k45, .k46, .k47, .k48,
+        .k52,
     ]
     private static let achievementSet: Set<EasterEgg> = Set(achievements)
 
