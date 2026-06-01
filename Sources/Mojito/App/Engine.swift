@@ -814,13 +814,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private func pickFromBrowser() {
         let emoji = viewModel.browser?.selectedEmoji
         let delete = browserDeleteCount
-        // Copy instead of typing when there's no editable field (e.g. the
-        // browser was opened over the Finder) or the focused app/site is
-        // excluded — the user opened the browser explicitly, so we still want
-        // to hand them the glyph, just not synthesize it into an app they've
-        // told Mojito to stay out of.
-        let editable = captureContext?.focusedFieldIsEditable ?? true
-        let copy = !editable || captureExcluded
+        // Copy instead of typing only when there's nowhere to type (e.g. the
+        // browser was opened over the Finder). The exclusion list doesn't apply
+        // here — the global hotkey is an explicit action, so a pick types into
+        // the focused field even in excluded apps.
+        let copy = !(captureContext?.focusedFieldIsEditable ?? true)
         collapseBrowser()
         guard let emoji else { return }
         let glyph = characterWithSkinTone(emoji)

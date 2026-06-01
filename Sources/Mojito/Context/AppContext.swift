@@ -48,20 +48,37 @@ enum AppContextDetector {
         "AXTextField", "AXTextArea", "AXComboBox", "AXSearchField", "AXSecureTextField",
     ]
 
-    /// True when the focused element looks like it accepts typed text.
-    /// Errs toward `true` when the element exists but is opaque (don't break
-    /// quirky-AX text views); only a positively non-editable element — or no
-    /// focused element at all — reads as false.
+    /// Controls/containers with no caret — a pick here has nowhere to go.
+    /// Anything *not* listed (web areas, plain groups, unknown roles) leans
+    /// toward editable: minimal browsers often hand back the web-view container
+    /// instead of the focused field, and synthetic keystrokes still land there.
+    private static let nonTextRoles: Set<String> = [
+        "AXButton", "AXStaticText", "AXImage", "AXMenuItem", "AXMenuButton",
+        "AXCheckBox", "AXRadioButton", "AXPopUpButton", "AXSlider", "AXLink",
+        "AXList", "AXTable", "AXOutline", "AXScrollArea", "AXRow", "AXCell",
+        "AXColumn", "AXToolbar", "AXTabGroup",
+    ]
+
+    /// True when the focused element can accept typed text. Biased toward
+    /// `true` (the browser hotkey is explicit, and synthetic keystrokes land in
+    /// fields AX can't fully describe); only no focused element at all, or a
+    /// positively non-text control, reads as false.
     private static func focusedFieldIsEditable() -> Bool {
         guard let focused = resolveFocusedElement() else { return false }
-        // Strongest signal: a settable value (native + most web/Electron inputs).
+        // Settable value (native + most web/Electron inputs).
         var settable: DarwinBoolean = false
         if AXUIElementIsAttributeSettable(focused, kAXValueAttribute as CFString, &settable) == .success,
            settable.boolValue {
             return true
         }
+        // A selectable text range = a caret (incl. WebKit text areas).
+        var rangeRef: AnyObject?
+        if AXUIElementCopyAttributeValue(focused, kAXSelectedTextRangeAttribute as CFString, &rangeRef) == .success {
+            return true
+        }
         guard let role = copyString(focused, kAXRoleAttribute) else { return true }
-        return editableRoles.contains(role)
+        if editableRoles.contains(role) { return true }
+        return !nonTextRoles.contains(role)
     }
 
     /// The focused element from the cache, falling back to a synchronous
