@@ -377,7 +377,7 @@ struct TriggerStateMachineTests {
         var sm = TriggerStateMachine()
         _ = sm.handle(.cancelChar("<"))
         let out = sm.handle(.nameChar("3"))
-        #expect(out.action == .insertAmbientEmoticon(word: "<3"))
+        #expect(out.action == .insertAmbientEmoticon(word: "<3", trailing: ""))
         #expect(out.consumesKey == false)
         #expect(sm.state == .idle)
     }
@@ -403,7 +403,83 @@ struct TriggerStateMachineTests {
         #expect(colon.action == .none)
         #expect(sm.state == .idle)
         let out = sm.handle(.cancelChar(")"))
-        #expect(out.action == .insertAmbientEmoticon(word: ">:)"))
+        #expect(out.action == .insertAmbientEmoticon(word: ">:)", trailing: ""))
+    }
+
+    @Test func ambientRightArrowFiresOnHyphenGreaterThan() {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.nameChar("-"))
+        let out = sm.handle(.cancelChar(">"))
+        #expect(out.action == .insertAmbientEmoticon(word: "->", trailing: ""))
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func ambientLeftArrowDefersUntilNextChar() {
+        // `<-` is in the table, but so is `<->` — firing `←` on completion
+        // would make `↔` unreachable. So `<-` alone holds the fire pending
+        // until the next keystroke decides between continuing the longer
+        // match and falling back to the shorter one.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("<"))
+        let out = sm.handle(.nameChar("-"))
+        #expect(out.action == .none)
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func ambientLeftRightArrowFiresOnPendingExtension() {
+        // `<-` deferred; the trailing `>` completes `<->` and fires `↔`.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("<"))
+        _ = sm.handle(.nameChar("-"))
+        let out = sm.handle(.cancelChar(">"))
+        #expect(out.action == .insertAmbientEmoticon(word: "<->", trailing: ""))
+        #expect(out.consumesKey == false)
+    }
+
+    @Test func ambientLeftArrowFiresWithTrailingOnNonExtendingChar() {
+        // `<-` deferred; a non-extending char (`x`) collapses the pending
+        // fire and is carried as `trailing` so the engine can insert `←x`
+        // instead of `<←` (which is what naïve delete-from-end would give
+        // once `x` had passed through to the focused app).
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("<"))
+        _ = sm.handle(.nameChar("-"))
+        let out = sm.handle(.nameChar("x"))
+        #expect(out.action == .insertAmbientEmoticon(word: "<-", trailing: "x"))
+        #expect(out.consumesKey == true)
+    }
+
+    @Test func ambientLeftArrowFiresOnTerminator() {
+        // Space after `<-` resolves the pending fire through the normal
+        // terminator path — the Engine's `checkAmbientEmoticon` finds
+        // `<-` in the table and replaces with `← `.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("<"))
+        _ = sm.handle(.nameChar("-"))
+        let out = sm.handle(.cancelChar(" "))
+        #expect(out.action == .checkAmbientEmoticon(word: "<-", terminator: " "))
+        #expect(out.consumesKey == false)
+    }
+
+    @Test func ambientDoubleArrowFiresOnEqualsGreaterThan() {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("="))
+        let out = sm.handle(.cancelChar(">"))
+        #expect(out.action == .insertAmbientEmoticon(word: "=>", trailing: ""))
+        #expect(out.consumesKey == false)
+    }
+
+    @Test func ambientLeftRightDoubleArrowAccumulatesFreely() {
+        // `<=` isn't in the table, so the buffer accumulates without a
+        // deferral and `<=>` fires once it completes.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("<"))
+        let mid = sm.handle(.cancelChar("="))
+        #expect(mid.action == .none)
+        let out = sm.handle(.cancelChar(">"))
+        #expect(out.action == .insertAmbientEmoticon(word: "<=>", trailing: ""))
     }
 
     @Test func ambientTerminatorChecksWordThenResetsBuffer() {
