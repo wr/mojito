@@ -64,3 +64,13 @@ struct Emoji: Decodable, Identifiable, Hashable {
         case localizedShortcodes = "l"
     }
 }
+
+extension Emoji {
+    /// The glyph with the user's chosen skin tone applied, or the bare glyph
+    /// when this emoji has no skin-tone variants (symbols, sentinels, ZWJ
+    /// sequences that don't take a modifier). The single place insertion and
+    /// every preview cell resolve a tone.
+    var tonedGlyph: String {
+        supportsSkinTone ? SkinTone.current.apply(to: character) : character
+    }
+}

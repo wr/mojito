@@ -170,9 +170,7 @@ private struct PickerRow: View {
             )
         } else {
             // Preview with the user's chosen skin tone.
-            let display = scored.emoji.supportsSkinTone
-                ? SkinTone.current.apply(to: scored.emoji.character)
-                : scored.emoji.character
+            let display = scored.emoji.tonedGlyph
             return AnyView(
                 Text(display)
                     .font(.system(size: 18))
@@ -288,9 +286,7 @@ private struct CompactCell: View {
     }
 
     private var glyph: String {
-        scored.emoji.supportsSkinTone
-            ? SkinTone.current.apply(to: scored.emoji.character)
-            : scored.emoji.character
+        scored.emoji.tonedGlyph
     }
 }
 

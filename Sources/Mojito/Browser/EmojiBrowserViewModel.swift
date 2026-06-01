@@ -63,13 +63,20 @@ final class EmojiBrowserViewModel: ObservableObject {
         self.symbolsEnabled = UserDefaults.standard.bool(forKey: PrefsKey.symbolsEnabled)
         let built = Self.build(database: database, quickAccess: quickAccess, usage: self.usage)
         self.sections = built
-        self.flat = built.flatMap { $0.cells.map(\.emoji) }
+        let flat = built.flatMap { $0.cells.map(\.emoji) }
+        self.flat = flat
+        self.current = flat  // query starts empty → whole library
         self.activeCategory = built.first?.category ?? .smileysPeople
     }
 
     /// The addressable list for selection + keyboard nav: search results when
-    /// searching, else the whole library in section order.
-    var current: [Emoji] {
+    /// searching, else the whole library in section order. Cached — recomputed
+    /// only when the query changes (setQuery/selectCategory). The view body
+    /// reads it several times per render, so it must not re-run the fuzzy
+    /// search on each access.
+    @Published private(set) var current: [Emoji]
+
+    private func computeCurrent() -> [Emoji] {
         let trimmed = query.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return flat }
         return FuzzyMatcher.search(
@@ -92,6 +99,7 @@ final class EmojiBrowserViewModel: ObservableObject {
 
     func setQuery(_ newQuery: String) {
         query = newQuery
+        current = computeCurrent()
         selectedIndex = 0
         scrollTarget = 0  // back to top on every query change
     }
@@ -101,6 +109,7 @@ final class EmojiBrowserViewModel: ObservableObject {
     func selectCategory(_ category: EmojiCategory) {
         let wasSearching = isSearching
         query = ""
+        current = computeCurrent()  // → whole library
         if let section = sections.first(where: { $0.category == category }) {
             selectedIndex = section.startIndex
         }
