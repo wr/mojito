@@ -5,6 +5,20 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.2.0
+
+**New**
+
+- **Browse all emojis** (#68) — a full grid covering the whole library. Open it from the menu-bar menu, a keyboard shortcut, or from Quick Access, then jump between categories and arrow-key around.
+- **Quick Access** — type `:?` to pull up your favorites and most-used emoji. Pin the ones you want under Settings → Quick Access.
+
+**Fixed & improved**
+
+- **Symbols** (#88) — `::` search now reaches every symbol macOS can draw: the £ sign and other currencies, Greek letters (`::lambda`, `::Delta`, `::omega`), fractions (`::half`), Braille, and more.
+- The picker now opens on the screen with your cursor on multi-monitor setups (#82).
+- GIFs paste as a file, so they animate in Slack, Discord, and other apps (#85).
+- Easter-egg fixes.
+
 ## v1.1.1
 
 - Fixed an issue where Mojito could accidentally trigger in an excluded app.
