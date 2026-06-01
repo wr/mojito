@@ -111,6 +111,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.engine.showBrowser() }
             .store(in: &observers)
+
+        // Discovery banner click: open Settings, then ask the navigator to
+        // reveal the egg. Order matters — open first so a fresh window's
+        // views mount and pick up the (already-set) reveal request on appear.
+        NotificationCenter.default.publisher(for: .mojitoRevealEasterEgg)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] note in
+                self?.openSettings()
+                if let id = note.object as? String {
+                    SettingsNavigator.shared.revealEgg(id)
+                }
+            }
+            .store(in: &observers)
     }
 
     func applicationWillTerminate(_ notification: Notification) {

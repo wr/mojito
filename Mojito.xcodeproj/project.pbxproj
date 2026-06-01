@@ -123,6 +123,7 @@
 		C892E976ED36AA1810770521 /* CeleryMan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947CA35F448BC012E3F73860 /* CeleryMan.swift */; };
 		C8F9762D99C984ABBB63A2BE /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 1BA5A32889912268FF08AB30 /* AppIcon.icon */; };
 		CA1857DDE9F106C6CCB3FD2F /* v09.bin in Resources */ = {isa = PBXBuildFile; fileRef = 4F4CFB098FFC29AB8C8B9855 /* v09.bin */; };
+		CA31BF29EEEA9CC0D89637E4 /* SettingsNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9407B4350C7E77A3EABDEA /* SettingsNavigator.swift */; };
 		CA9FE651B042EFCC920407D5 /* ImageBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74DB9192DF20F83CAD8A820C /* ImageBlob.swift */; };
 		CEAF9DB89294B0652A8A16F7 /* PrivacyPermissionsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */; };
 		D4E80136FD448E4ACC27EC58 /* QuickAccessSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F51678D17218A59CCE7DF9 /* QuickAccessSettings.swift */; };
@@ -323,6 +324,7 @@
 		FACE9E8BAF08240551D5237A /* v06.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v06.bin; sourceTree = "<group>"; };
 		FDE7F8DEA98F385943A30B78 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FzyScorer.swift; sourceTree = "<group>"; };
+		FF9407B4350C7E77A3EABDEA /* SettingsNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsNavigator.swift; sourceTree = "<group>"; };
 		FFC142D2205F1C089F7524D2 /* SettingsRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRoot.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -368,6 +370,7 @@
 				B3154DBEA72DA316E341C440 /* GeneralSettings.swift */,
 				C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */,
 				A5F51678D17218A59CCE7DF9 /* QuickAccessSettings.swift */,
+				FF9407B4350C7E77A3EABDEA /* SettingsNavigator.swift */,
 				FFC142D2205F1C089F7524D2 /* SettingsRoot.swift */,
 				ABF01308E9212227B8106776 /* SettingsWindowController.swift */,
 			);
@@ -920,6 +923,7 @@
 				1A80F47103BB59733D6292B7 /* QuickAccessStore.swift in Sources */,
 				FD15928FE17F78588821135E /* Rickroll.swift in Sources */,
 				41765C78ED90EB005C04E63B /* SeasonalGates.swift in Sources */,
+				CA31BF29EEEA9CC0D89637E4 /* SettingsNavigator.swift in Sources */,
 				DCE52DEE8C9CEC354443E7DB /* SettingsRoot.swift in Sources */,
 				155360187C1F8C68452934E7 /* SettingsWindowController.swift in Sources */,
 				6607717F2E4D11B5563F8184 /* Shortcuts.swift in Sources */,
