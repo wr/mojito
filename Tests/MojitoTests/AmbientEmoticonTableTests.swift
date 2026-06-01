@@ -20,8 +20,52 @@ struct AmbientEmoticonTableTests {
         #expect(AmbientEmoticonTable.emoji(for: "->") == "→")
         #expect(AmbientEmoticonTable.emoji(for: "<-") == "←")
         #expect(AmbientEmoticonTable.emoji(for: "<->") == "↔")
-        #expect(AmbientEmoticonTable.emoji(for: "=>") == "⇒")
-        #expect(AmbientEmoticonTable.emoji(for: "<=>") == "⇔")
+        // `=`-based arrows are intentionally NOT mapped — they collide with
+        // code operators and comparisons (`<=`, `=>`, spaceship `<=>`).
+        #expect(AmbientEmoticonTable.emoji(for: "=>") == nil)
+        #expect(AmbientEmoticonTable.emoji(for: "<=") == nil)
+        #expect(AmbientEmoticonTable.emoji(for: "<=>") == nil)
+    }
+
+    @Test func arrowKeysAreJustTheHyphenArrows() {
+        // Derived from the map — only keys built solely from `- < >`.
+        #expect(AmbientEmoticonTable.arrowKeys == ["->", "<-", "<->"])
+        // Hearts / smileys are NOT arrows even though they're punctuation-led.
+        #expect(!AmbientEmoticonTable.arrowKeys.contains("<3"))
+        #expect(!AmbientEmoticonTable.arrowKeys.contains("</3"))
+        #expect(!AmbientEmoticonTable.arrowKeys.contains(">:)"))
+        #expect(AmbientEmoticonTable.isArrow("->"))
+        #expect(!AmbientEmoticonTable.isArrow("<3"))
+    }
+
+    @Test func arrowSuffixPullsTrailingArrowOutOfABuffer() {
+        // The whole point of the fix: find the arrow at the end of `Foo->`.
+        #expect(AmbientEmoticonTable.arrowSuffix(of: "Foo->") == "->")
+        #expect(AmbientEmoticonTable.arrowSuffix(of: "Foo<->") == "<->")  // longest wins
+        // No trailing arrow → nil (incomplete `<`, dropped `=`-arrow, prose).
+        #expect(AmbientEmoticonTable.arrowSuffix(of: "Foo<") == nil)
+        #expect(AmbientEmoticonTable.arrowSuffix(of: "Foo<=") == nil)
+        #expect(AmbientEmoticonTable.arrowSuffix(of: "hello") == nil)
+        // A non-arrow punctuation emoticon is not pulled as a suffix.
+        #expect(AmbientEmoticonTable.arrowSuffix(of: "Hi<3") == nil)
+    }
+
+    @Test func hasLongerArrowDefersOnlyTheExtendableArrows() {
+        #expect(AmbientEmoticonTable.hasLongerArrow(extending: "<-"))   // → <->
+        #expect(!AmbientEmoticonTable.hasLongerArrow(extending: "->"))
+        #expect(!AmbientEmoticonTable.hasLongerArrow(extending: "<->"))
+    }
+
+    @Test func revocableByTrailingDigitCoversOnlyHearts() {
+        // Drives the `<30` rescue: a digit right after these reverts the
+        // conversion. Only the digit-ending hearts qualify.
+        #expect(AmbientEmoticonTable.revocableByTrailingDigit("<3"))
+        #expect(AmbientEmoticonTable.revocableByTrailingDigit("</3"))
+        #expect(!AmbientEmoticonTable.revocableByTrailingDigit("->"))
+        #expect(!AmbientEmoticonTable.revocableByTrailingDigit(">:)"))
+        #expect(!AmbientEmoticonTable.revocableByTrailingDigit("XD"))
+        // Not a known emoticon, even though it ends in a digit.
+        #expect(!AmbientEmoticonTable.revocableByTrailingDigit("<30"))
     }
 
     @Test func caseVariantsAreSeparateKeys() {
@@ -42,8 +86,6 @@ struct AmbientEmoticonTableTests {
         #expect(AmbientEmoticonTable.shouldFireImmediately("->"))
         #expect(AmbientEmoticonTable.shouldFireImmediately("<-"))
         #expect(AmbientEmoticonTable.shouldFireImmediately("<->"))
-        #expect(AmbientEmoticonTable.shouldFireImmediately("=>"))
-        #expect(AmbientEmoticonTable.shouldFireImmediately("<=>"))
     }
 
     @Test func hasLongerMatchFindsTableExtensions() {
@@ -52,16 +94,12 @@ struct AmbientEmoticonTableTests {
         #expect(AmbientEmoticonTable.hasLongerMatch(for: "<-"))
         // `>` has both `>:)` and `>:(` as longer entries.
         #expect(AmbientEmoticonTable.hasLongerMatch(for: ">"))
-        // `<=` isn't itself in the table but extends to `<=>`.
-        #expect(AmbientEmoticonTable.hasLongerMatch(for: "<="))
     }
 
     @Test func hasLongerMatchReturnsFalseForTerminalEntries() {
         // No table key strictly extends these.
         #expect(!AmbientEmoticonTable.hasLongerMatch(for: "<->"))
-        #expect(!AmbientEmoticonTable.hasLongerMatch(for: "<=>"))
         #expect(!AmbientEmoticonTable.hasLongerMatch(for: "->"))
-        #expect(!AmbientEmoticonTable.hasLongerMatch(for: "=>"))
         #expect(!AmbientEmoticonTable.hasLongerMatch(for: ""))
     }
 

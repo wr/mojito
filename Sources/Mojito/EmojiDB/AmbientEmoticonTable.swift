@@ -19,12 +19,52 @@ enum AmbientEmoticonTable {
         "->":   "→",
         "<-":   "←",
         "<->":  "↔",
-        "=>":   "⇒",
-        "<=>":  "⇔",
     ]
 
     static func emoji(for word: String) -> String? {
         map[word]
+    }
+
+    /// The arrow family — the only ambient emoticons allowed to fire when
+    /// typed flush against text (`Foo->Bar`), matched as a trailing suffix of
+    /// the buffer. Everything else stays boundary-gated so it can't eat into
+    /// prose. `=`-based forms (`=>`, `<=`) are deliberately excluded: they
+    /// collide with code operators and comparisons. Derived as the keys built
+    /// solely from arrow punctuation, so it tracks the map automatically.
+    private static let arrowChars: Set<Character> = ["-", "<", ">"]
+    static let arrowKeys: Set<String> = Set(map.keys.filter { $0.allSatisfy(arrowChars.contains) })
+
+    /// Whether `word` is an arrow-family key — used to gate the whole arrow
+    /// feature behind the "Convert text arrows" setting without touching the
+    /// other ambient emoticons.
+    static func isArrow(_ word: String) -> Bool { arrowKeys.contains(word) }
+
+    /// Emoticons that end in a digit (`<3` → ❤️, `</3` → 💔). These fire
+    /// eagerly so they land at the end of a message, but a digit typed right
+    /// after means the user meant a number (`<30`), so the Engine reverts the
+    /// conversion when that happens.
+    static func revocableByTrailingDigit(_ word: String) -> Bool {
+        (word.last?.isNumber ?? false) && map[word] != nil
+    }
+
+    /// The longest arrow key that is a suffix of `buffer`, if any. Lets the
+    /// state machine pull `->` out of `Foo->` without a leading boundary.
+    static func arrowSuffix(of buffer: String) -> String? {
+        var best: String?
+        for key in arrowKeys where buffer.hasSuffix(key) {
+            if best == nil || key.count > best!.count { best = key }
+        }
+        return best
+    }
+
+    /// True if appending more chars to `arrow` could still reach a longer
+    /// arrow key (`<-` → `<->`, `<=` → `<=>`) — used to defer firing the
+    /// shorter match until the next keystroke decides.
+    static func hasLongerArrow(extending arrow: String) -> Bool {
+        for key in arrowKeys where key.count > arrow.count && key.hasPrefix(arrow) {
+            return true
+        }
+        return false
     }
 
     /// Fire the moment a non-alphanumeric-led entry completes (`<3`,

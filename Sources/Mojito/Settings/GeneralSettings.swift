@@ -7,6 +7,7 @@ struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.useFrequencyBoost) private var useFrequencyBoost: Bool = true
     @AppStorage(PrefsKey.skinTone) private var skinToneRaw: String = SkinTone.default.rawValue
     @AppStorage(PrefsKey.emoticonsEnabled) private var emoticonsEnabled: Bool = true
+    @AppStorage(PrefsKey.arrowConversionEnabled) private var arrowConversionEnabled: Bool = true
     @AppStorage(PrefsKey.symbolsEnabled) private var symbolsEnabled: Bool = false
     @AppStorage(PrefsKey.symbolsRequireDoubleColon) private var symbolsRequireDoubleColon: Bool = false
     @AppStorage(PrefsKey.gifSearchEnabled) private var gifSearchEnabled: Bool = true
@@ -62,6 +63,11 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
                 Toggle("Convert emoticons (`:D` → 😃)", isOn: $emoticonsEnabled)
                     .toggleStyle(.switch)
+                if emoticonsEnabled {
+                    Toggle("Convert text arrows (`->` → →)", isOn: $arrowConversionEnabled)
+                        .toggleStyle(.switch)
+                        .padding(.leading, 20)
+                }
             }
 
             QuickAccessSection()

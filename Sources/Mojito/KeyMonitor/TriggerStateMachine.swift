@@ -131,6 +131,13 @@ struct TriggerStateMachine {
     /// When true, `::` upgrades the capture to symbols-only instead of cancelling.
     var symbolsDoubleColonEnabled: Bool = false
 
+    /// Gates the arrow family (`->`, `<-`, `<->`). When false, arrows are
+    /// inert — never matched as a suffix, never deferred, never consume a
+    /// following char — so they read as plain text. The Engine sets it from
+    /// `PrefsKey.arrowConversionEnabled`. Other ambient emoticons (`<3`, …)
+    /// are unaffected.
+    var arrowConversionEnabled: Bool = true
+
     /// The character that, typed right after a bare `:`, opens the Quick Access
     /// pill (e.g. `?` → `:?`). `nil` disables it. The Engine sets it from
     /// `PrefsKey.quickAccessTriggerChar`. Must be a `.cancelChar`-class glyph
@@ -389,6 +396,13 @@ struct TriggerStateMachine {
             return .passthrough
 
         case (.idle, .cancelChar(let c)):
+            // A pending arrow (`<-`/`<=`) resolves against whatever comes next.
+            // A terminator can't extend it to `<->`/`<=>`, so it fires here and
+            // carries the terminator through as `trailing` — this is what makes
+            // `Foo<- ` convert (the whole-word lookup below would miss `Foo<-`).
+            if let fire = resolvePendingFire(with: c) {
+                return fire
+            }
             if Self.ambientTerminators.contains(c) {
                 // Terminator — look up the buffered word, then reset.
                 let word = idleWord
@@ -405,9 +419,6 @@ struct TriggerStateMachine {
             }
             // Non-terminator punctuation (`<`, `>`, `)`, `(`, `_`, …) is
             // part of an emoticon body. Append and keep accumulating.
-            if let fire = resolvePendingFire(with: c) {
-                return fire
-            }
             idleWord += String(c)
             lastIdleKeystrokeAt = Date()
             if let fire = checkImmediateAmbientFire() {
@@ -764,12 +775,31 @@ struct TriggerStateMachine {
     /// in `pendingImmediateFire` so the next keystroke gets the chance to
     /// reach the longer match.
     private mutating func checkImmediateAmbientFire() -> TriggerOutput? {
-        guard AmbientEmoticonTable.shouldFireImmediately(idleWord),
-              let emoji = AmbientEmoticonTable.emoji(for: idleWord) else {
-            return nil
+        // Arrows match as a trailing suffix of the buffer, so they fire flush
+        // against text (`Foo->Bar`) — the matched key is what gets deleted, so
+        // the preceding `Foo` survives. Deferral (`<-` → `<->`) carries over.
+        if arrowConversionEnabled,
+           let arrow = AmbientEmoticonTable.arrowSuffix(of: idleWord),
+           let emoji = AmbientEmoticonTable.emoji(for: arrow) {
+            if AmbientEmoticonTable.hasLongerArrow(extending: arrow) {
+                pendingImmediateFire = (word: arrow, emoji: emoji)
+                return nil
+            }
+            idleWord = ""
+            lastIdleKeystrokeAt = nil
+            pendingImmediateFire = nil
+            return TriggerOutput(
+                action: .insertAmbientEmoticon(word: arrow, trailing: ""),
+                consumesKey: false
+            )
         }
-        if AmbientEmoticonTable.hasLongerMatch(for: idleWord) {
-            pendingImmediateFire = (word: idleWord, emoji: emoji)
+        // Every other punctuation-led emoticon (`<3`, `</3`, `>:)`, …) still
+        // requires the whole buffer to *be* the emoticon — i.e. a leading word
+        // boundary — so it can't eat into prose (`Hi<3` stays literal). Arrows
+        // are excluded here: when the toggle is on they're handled above; when
+        // off they must stay literal even though they're punctuation-led.
+        guard AmbientEmoticonTable.shouldFireImmediately(idleWord),
+              !AmbientEmoticonTable.isArrow(idleWord) else {
             return nil
         }
         let word = idleWord
@@ -790,8 +820,10 @@ struct TriggerStateMachine {
     private mutating func resolvePendingFire(with c: Character) -> TriggerOutput? {
         guard let pending = pendingImmediateFire else { return nil }
         let combined = pending.word + String(c)
-        let extendsToward = AmbientEmoticonTable.shouldFireImmediately(combined)
-            || AmbientEmoticonTable.hasLongerMatch(for: combined)
+        // Deferred matches are always arrows; keep accumulating only if this
+        // char completes a longer arrow or still leads toward one.
+        let extendsToward = AmbientEmoticonTable.arrowKeys.contains(combined)
+            || AmbientEmoticonTable.hasLongerArrow(extending: combined)
         if extendsToward { return nil }
         let word = pending.word
         pendingImmediateFire = nil
