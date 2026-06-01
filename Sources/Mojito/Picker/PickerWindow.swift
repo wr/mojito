@@ -287,7 +287,7 @@ final class PickerWindow {
     }
 
     private func positionedFrame(anchor: CGRect, size: CGSize) -> CGRect {
-        let screen = NSScreen.screens.first { $0.frame.contains(anchor.origin) } ?? NSScreen.main ?? NSScreen.screens.first!
+        let screen = screenForAnchor(anchor)
         let visible = screen.visibleFrame
 
         let gap: CGFloat = 6
@@ -320,6 +320,21 @@ final class PickerWindow {
     private func mouseAnchor() -> CGRect {
         let mouse = NSEvent.mouseLocation
         return CGRect(x: mouse.x, y: mouse.y, width: 1, height: 16)
+    }
+
+    // Probe the anchor's center first, then any intersecting screen, before
+    // falling back to NSScreen.main. The corner-point probe used previously
+    // missed the right screen when the caret rect sat on a screen edge or
+    // when the panel had briefly become key on the primary display.
+    private func screenForAnchor(_ anchor: CGRect) -> NSScreen {
+        let center = CGPoint(x: anchor.midX, y: anchor.midY)
+        if let hit = NSScreen.screens.first(where: { $0.frame.contains(center) }) {
+            return hit
+        }
+        if let hit = NSScreen.screens.first(where: { $0.frame.intersects(anchor) }) {
+            return hit
+        }
+        return NSScreen.main ?? NSScreen.screens.first!
     }
 }
 
