@@ -41,6 +41,15 @@ enum SymbolsDatabase {
         for range in symbolRanges {
             for codepoint in range {
                 guard let scalar = Unicode.Scalar(codepoint) else { continue }
+                // Skip non-graphic scalars (soft hyphen, format/control marks,
+                // unassigned slots in the swept ranges) — they'd otherwise pass
+                // the font-render gate as invisible blank rows.
+                switch scalar.properties.generalCategory {
+                case .control, .format, .surrogate, .privateUse, .unassigned:
+                    continue
+                default:
+                    break
+                }
                 let char = textPresentation(String(scalar))
                 if seenCharacters.contains(char) { continue }
                 guard let name = scalar.properties.name, !name.isEmpty else { continue }
@@ -124,7 +133,13 @@ enum SymbolsDatabase {
     }
 
     /// Covers the macOS emoji picker's "Symbols" category and adjacent blocks.
+    /// Letter blocks (Latin accents, Cyrillic, CJK ideographs) are deliberately
+    /// excluded — the per-keystroke fuzzy scan walks this whole corpus, so the
+    /// ~90k ideographs alone would push search from µs into ms. Greek stays:
+    /// its letters double as math/science symbols.
     private static let symbolRanges: [ClosedRange<Int>] = [
+        0x00A1...0x00BF,    // Latin-1 symbols (£ ¥ § ± ² ³ µ ¶ ¼ ½ ¾ ¿ « » ¬ …)
+        0x0370...0x03FF,    // Greek & Coptic (α β γ … Ω)
         0x2000...0x206F,    // General punctuation
         0x2070...0x209F,    // Super/subscripts
         0x20A0...0x20CF,    // Currency
@@ -143,10 +158,12 @@ enum SymbolsDatabase {
         0x2700...0x27BF,    // Dingbats (✓ ✗ ❤ ✉ ✏)
         0x27C0...0x27EF,    // Misc math A
         0x27F0...0x27FF,    // Supp arrows A
+        0x2800...0x28FF,    // Braille patterns
         0x2900...0x297F,    // Supp arrows B
         0x2980...0x29FF,    // Misc math B
         0x2A00...0x2AFF,    // Supp math
         0x2B00...0x2BFF,    // Misc symbols and arrows
+        0x3000...0x303F,    // CJK symbols & punctuation (、。「」《》)
         0x1F000...0x1F02F,  // Mahjong tiles
         0x1F030...0x1F09F,  // Domino tiles
         0x1F0A0...0x1F0FF,  // Playing cards
@@ -191,6 +208,71 @@ enum SymbolsDatabase {
         .init(character: "∑",  shortcodes: ["sum"]),
         .init(character: "π",  shortcodes: ["pi"]),
         .init(character: "°",  shortcodes: ["degree"]),
+
+        // Currency. The Latin-1 currency signs (£ ¢ ¥, U+00A2–A5) fall
+        // outside every block in `symbolRanges`, so without an explicit
+        // entry they never reach the picker at all. The synonyms are terms
+        // the Unicode name alone ("POUND SIGN") wouldn't fuzzy-match.
+        .init(character: "£",  shortcodes: ["pound", "sterling", "gbp"]),
+        .init(character: "¢",  shortcodes: ["cent", "cents"]),
+        .init(character: "¥",  shortcodes: ["yen", "yuan", "rmb"]),
+
+        // Fractions & superscripts. Swept too (Latin-1), but the Unicode names
+        // ("VULGAR FRACTION ONE HALF", "SUPERSCRIPT TWO") read terribly in the
+        // picker — give them the labels people search for.
+        .init(character: "½",  shortcodes: ["half", "one_half"]),
+        .init(character: "¼",  shortcodes: ["quarter", "one_quarter"]),
+        .init(character: "¾",  shortcodes: ["three_quarters"]),
+        .init(character: "²",  shortcodes: ["squared", "sup2"]),
+        .init(character: "³",  shortcodes: ["cubed", "sup3"]),
+        .init(character: "¹",  shortcodes: ["sup1"]),
+
+        // Greek. Cleaner than the swept names, and the sweep can't be searched
+        // by "lambda" at all — Unicode spells U+03BB "GREEK SMALL LETTER LAMDA".
+        // Capitalized aliases (Δ → "Delta") read distinct from lowercase in the
+        // picker. ⌥-typeable letters that look like Latin (Α Β Ε…) are left to
+        // the sweep.
+        .init(character: "α",  shortcodes: ["alpha"]),
+        .init(character: "β",  shortcodes: ["beta"]),
+        .init(character: "γ",  shortcodes: ["gamma"]),
+        .init(character: "δ",  shortcodes: ["delta"]),
+        .init(character: "ε",  shortcodes: ["epsilon"]),
+        .init(character: "ζ",  shortcodes: ["zeta"]),
+        .init(character: "η",  shortcodes: ["eta"]),
+        .init(character: "θ",  shortcodes: ["theta"]),
+        .init(character: "ι",  shortcodes: ["iota"]),
+        .init(character: "κ",  shortcodes: ["kappa"]),
+        .init(character: "λ",  shortcodes: ["lambda"]),
+        .init(character: "μ",  shortcodes: ["mu"]),
+        .init(character: "ν",  shortcodes: ["nu"]),
+        .init(character: "ξ",  shortcodes: ["xi"]),
+        .init(character: "ο",  shortcodes: ["omicron"]),
+        .init(character: "ρ",  shortcodes: ["rho"]),
+        .init(character: "σ",  shortcodes: ["sigma"]),
+        .init(character: "ς",  shortcodes: ["final_sigma"]),
+        .init(character: "τ",  shortcodes: ["tau"]),
+        .init(character: "υ",  shortcodes: ["upsilon"]),
+        .init(character: "φ",  shortcodes: ["phi"]),
+        .init(character: "χ",  shortcodes: ["chi"]),
+        .init(character: "ψ",  shortcodes: ["psi"]),
+        .init(character: "ω",  shortcodes: ["omega"]),
+        .init(character: "Γ",  shortcodes: ["Gamma"]),
+        .init(character: "Δ",  shortcodes: ["Delta"]),
+        .init(character: "Θ",  shortcodes: ["Theta"]),
+        .init(character: "Λ",  shortcodes: ["Lambda"]),
+        .init(character: "Ξ",  shortcodes: ["Xi"]),
+        .init(character: "Π",  shortcodes: ["Pi"]),
+        .init(character: "Σ",  shortcodes: ["Sigma"]),
+        .init(character: "Φ",  shortcodes: ["Phi"]),
+        .init(character: "Ψ",  shortcodes: ["Psi"]),
+        .init(character: "Ω",  shortcodes: ["Omega", "ohm"]),
+
+        // Latin-1 punctuation people can't easily type
+        .init(character: "¡",  shortcodes: ["inverted_exclamation", "spanish_exclamation"]),
+        .init(character: "¿",  shortcodes: ["inverted_question", "spanish_question"]),
+        .init(character: "µ",  shortcodes: ["micro"]),
+        .init(character: "«",  shortcodes: ["lguillemet", "guillemet_left"]),
+        .init(character: "»",  shortcodes: ["rguillemet", "guillemet_right"]),
 
         // Marks & misc
         .init(character: "✓",  shortcodes: ["check_mark", "tick"]),
