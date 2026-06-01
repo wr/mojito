@@ -6,16 +6,44 @@ struct PickerView: View {
     var body: some View {
         // Chrome lives on the panel (NSGlassEffectView / NSVisualEffectView)
         // so we match NSMenu pixel-faithfully.
-        VStack(spacing: 0) {
-            if viewModel.results.isEmpty {
-                emptyState
-            } else {
-                resultsList
-                Divider().opacity(0.3)
-                footer
+        if viewModel.expanded, let browser = viewModel.browser {
+            InlineBrowserView(
+                browser: browser,
+                onPick: { viewModel.onBrowserPick?($0) },
+                onCategory: { viewModel.onBrowserCategory?($0) }
+            )
+        } else if viewModel.compact {
+            compactBar
+        } else {
+            VStack(spacing: 0) {
+                if viewModel.results.isEmpty {
+                    emptyState
+                } else {
+                    resultsList
+                    Divider().opacity(0.3)
+                    footer
+                }
+            }
+            .frame(width: PickerLayout.width)
+        }
+    }
+
+    /// Bare-`:` favorites pill: a single horizontal row of emoji cells with
+    /// a trailing chevron (the Browse row) that expands to the full grid.
+    private var compactBar: some View {
+        HStack(spacing: PickerLayout.compactSpacing) {
+            ForEach(Array(viewModel.results.enumerated()), id: \.offset) { index, scored in
+                if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                    Divider()
+                        .frame(height: PickerLayout.compactCell * 0.55)
+                        .padding(.horizontal, 1)
+                }
+                CompactCell(scored: scored, index: index, viewModel: viewModel)
             }
         }
-        .frame(width: PickerLayout.width)
+        .padding(.horizontal, PickerLayout.compactPadding)
+        .frame(height: PickerLayout.compactHeight)
+        .fixedSize()
     }
 
     private var resultsList: some View {
@@ -122,7 +150,14 @@ private struct PickerRow: View {
     /// (dogcow) render an Image.
     @ViewBuilder
     private var leadingGlyph: some View {
-        if scored.emoji.hexcode == FuzzyMatcher.k03Hex,
+        if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+            return AnyView(
+                Image(systemName: "square.grid.2x2")
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 22, height: 22)
+            )
+        } else if scored.emoji.hexcode == FuzzyMatcher.k03Hex,
            let nsImage = Self.dogcowImage {
             // Template picks up the current foreground color.
             return AnyView(
@@ -147,7 +182,12 @@ private struct PickerRow: View {
 
     @ViewBuilder
     private var label: some View {
-        if FuzzyMatcher.rainbowHexcodes.contains(scored.emoji.hexcode) {
+        if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+            Text("Browse all emojis…")
+                .font(.system(size: 13))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+        } else if FuzzyMatcher.rainbowHexcodes.contains(scored.emoji.hexcode) {
             rainbowLabel(scored.matchedShortcode)
         } else if FuzzyMatcher.pinnedHexcodes.contains(scored.emoji.hexcode) {
             // Non-rainbow pinned eggs surface as `???` to stay a surprise.
@@ -201,6 +241,56 @@ private struct PickerRow: View {
             + Text(suffix).foregroundStyle(.secondary)
             + Text(verbatim: ":").foregroundStyle(.secondary)
         )
+    }
+}
+
+/// One cell in the compact favorites pill: an emoji (or the Browse chevron),
+/// selected one filled with the accent color like the macOS predictive strip.
+private struct CompactCell: View {
+    let scored: ScoredEmoji
+    let index: Int
+    @ObservedObject var viewModel: PickerViewModel
+
+    var body: some View {
+        let isSelected = index == viewModel.selectedIndex
+        let isBrowse = scored.emoji.hexcode == EmojiBrowser.sentinelHexcode
+        let isFirst = index == 0
+        let isLast = index == viewModel.results.count - 1
+        ZStack {
+            // Segmented-control style: the end cells' outer corners hug the
+            // pill's capsule end (semicircle), inner corners stay a normal
+            // rounded rect. Middle cells are an even rounded square.
+            UnevenRoundedRectangle(
+                topLeadingRadius: isFirst ? 20 : 10,
+                bottomLeadingRadius: isFirst ? 20 : 10,
+                bottomTrailingRadius: isLast ? 20 : 10,
+                topTrailingRadius: isLast ? 20 : 10,
+                style: .continuous
+            )
+            .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
+            if isBrowse {
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(isSelected ? Color.primary : Color.secondary)
+            } else {
+                Text(glyph)
+                    .font(.system(size: 25))
+            }
+        }
+        .frame(width: PickerLayout.compactCell, height: PickerLayout.compactCell)
+        .contentShape(Rectangle())
+        .onTapGesture { viewModel.onActivate?(index) }
+        .onHover { hovering in
+            if hovering { viewModel.selectedIndex = index }
+            // Drives the number-hotkey tooltip panel (only for real emoji cells).
+            viewModel.onPillHover?(hovering && !isBrowse ? index : nil)
+        }
+    }
+
+    private var glyph: String {
+        scored.emoji.supportsSkinTone
+            ? SkinTone.current.apply(to: scored.emoji.character)
+            : scored.emoji.character
     }
 }
 

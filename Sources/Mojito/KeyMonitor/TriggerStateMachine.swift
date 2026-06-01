@@ -7,6 +7,10 @@ enum TriggerState: Equatable {
     /// them to the picker's view model via `.refreshGifPicker`, so typing
     /// after `:::` lands in the GIF search box (not the focused app).
     case gifSearching(query: String)
+    /// Active while the full-library browser grid is up (the picker panel,
+    /// grown). Consumes keystrokes and routes them to the browser — search,
+    /// grid navigation, pick — so nothing leaks into the focused app.
+    case browsing(query: String)
 }
 
 /// `:foo` = full corpus, `::foo` = experimental Symbols set
@@ -99,6 +103,20 @@ enum TriggerAction: Equatable {
     case pickGif(deleteCount: Int)
     /// Arrow-key navigation across the GIF grid.
     case moveGifSelection(direction: GifMoveDirection)
+    /// Browser search query changed — Engine writes it to the browser model.
+    case refreshBrowser(query: String)
+    /// Arrow-key navigation across the browser grid.
+    case moveBrowser(direction: GifMoveDirection)
+    /// Enter / click in the browser — insert the selected emoji.
+    case pickBrowser
+    /// Close the browser grid (esc, backspace past empty, click-away).
+    case closeBrowser
+    /// Grow the favorites pill into the full browser grid (↓/↑ on the pill).
+    case expandBrowser
+    /// Pill quick-pick: insert the row at this index (digit 1–8 → 0–7).
+    case pickIndex(Int)
+    /// Close the pill and restore the swallowed `?` so `:?`+Esc leaves `:?`.
+    case closePickerRestoringQuestion
 }
 
 enum GifMoveDirection: Equatable { case left, right, up, down }
@@ -108,6 +126,26 @@ struct TriggerStateMachine {
 
     /// When true, `::` upgrades the capture to symbols-only instead of cancelling.
     var symbolsDoubleColonEnabled: Bool = false
+
+    /// The character that, typed right after a bare `:`, opens the Quick Access
+    /// pill (e.g. `?` → `:?`). `nil` disables it. The Engine sets it from
+    /// `PrefsKey.quickAccessTriggerChar`. Must be a `.cancelChar`-class glyph
+    /// (punctuation/symbol) since it's matched in the cancelChar branch.
+    var quickAccessTrigger: Character?
+
+    /// True only once the empty-query favorites picker is actually on screen.
+    /// The Engine sets it after the (debounced) show and clears it on hide,
+    /// so navigation keys are claimed for the picker *only* while it's
+    /// visible — a bare `:` followed by a fast keystroke never hijacks the
+    /// arrow keys or Return. Cleared internally whenever capture leaves the
+    /// empty-query state.
+    var emptyPickerActive: Bool = false
+
+    /// Selectable emoji rows in the pill (excludes the trailing Browse row).
+    /// The Engine sets it alongside `emptyPickerActive`; it bounds the digit
+    /// quick-pick so an out-of-range digit falls through to a normal search
+    /// instead of being swallowed.
+    var pillEmojiCount: Int = 0
 
     private var currentScope: CaptureScope = .normal
 
@@ -198,6 +236,13 @@ struct TriggerStateMachine {
             return handleGifSearching(input)
         }
 
+        // While the browser grid is up, it owns the keyboard — everything is
+        // consumed and routed to the browser model so nothing leaks into the
+        // focused app underneath.
+        if case .browsing = state {
+            return handleBrowsing(input)
+        }
+
         // `:::` within `gifTripleColonWindow` opens the GIF picker no
         // matter what the capture state is. Runs before everything else
         // so it overrides the normal colon flow.
@@ -223,7 +268,10 @@ struct TriggerStateMachine {
         // Konami only runs in `.capturing(query: "")` (right after `:`).
         // Tracking it from idle would eat arrow keys globally and break
         // caret navigation. Fires on the final `A` — no closing `:`.
-        if case .capturing(let q) = state, q.isEmpty {
+        // Skipped while the empty-query favorites picker is visible, which
+        // owns the arrow keys; that picker only appears after a deliberate
+        // dwell, so fast arrow input still flows here.
+        if case .capturing(let q) = state, q.isEmpty, !emptyPickerActive {
             if konamiProgress < Self.konamiSequence.count,
                Self.konamiMatches(input, Self.konamiSequence[konamiProgress]) {
                 konamiProgress += 1
@@ -244,9 +292,13 @@ struct TriggerStateMachine {
 
         switch (state, input) {
 
-        // `.gifSearching` is handled by the early-return guard above; this
-        // branch is unreachable but required for exhaustiveness.
+        // `.gifSearching` / `.browsing` are handled by the early-return
+        // guards above; these branches are unreachable but required for
+        // exhaustiveness.
         case (.gifSearching, _):
+            return .passthrough
+
+        case (.browsing, _):
             return .passthrough
 
         // MARK: Cmd+Z — must come before the `(.idle, _)` catch-all below.
@@ -286,6 +338,13 @@ struct TriggerStateMachine {
             }
             currentScope = .normal
             state = .capturing(query: "")
+            // Not visible yet — the Engine flips this on after the debounced
+            // show. Clearing here keeps a prior capture's value from leaking
+            // into a fresh `:`.
+            emptyPickerActive = false
+            // A bare `:` just starts capturing; the Quick Access pill is
+            // summoned by the trigger char that follows (`:?`), handled in the
+            // cancelChar branch below.
             return TriggerOutput(action: .none, consumesKey: false)
 
         case (.idle, .backspace):
@@ -357,6 +416,17 @@ struct TriggerStateMachine {
         // MARK: capturing — name characters
 
         case (.capturing(let q), .nameChar(let c)):
+            // Pill quick-pick: while the pill is up, a digit 1–8 inserts that
+            // row directly (`:?3` → 3rd emoji). Swallowed so it doesn't start
+            // a search.
+            if emptyPickerActive, let digit = c.wholeNumberValue,
+               digit >= 1, digit <= min(8, pillEmojiCount) {
+                return TriggerOutput(action: .pickIndex(digit - 1), consumesKey: true)
+            }
+            // First typed char leaves the empty-query state — drop the
+            // favorites picker if it was up.
+            let wasEmptyPicker = emptyPickerActive
+            emptyPickerActive = false
             let next = q + String(c)
             state = .capturing(query: next)
             let threshold = pickerThreshold(for: currentScope, query: next)
@@ -364,7 +434,8 @@ struct TriggerStateMachine {
             if next.count < threshold {
                 // Keep capturing silently so a terminator can still fire
                 // `:D `, but don't surface the picker on a single char.
-                action = .none
+                // If favorites were showing, close them as typing begins.
+                action = wasEmptyPicker ? .closePicker : .none
             } else if q.count < threshold {
                 action = .openPicker(query: next, scope: currentScope)
             } else {
@@ -396,19 +467,42 @@ struct TriggerStateMachine {
         // MARK: capturing — picker navigation
 
         case (.capturing(let q), .arrowUp):
-            return q.isEmpty
-                ? .passthrough
-                : TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
+            if q.isEmpty {
+                // Pill: both ↑ and ↓ expand into the full grid. Without the
+                // pill, ↑ on a bare `:` passes through (caret motion).
+                return emptyPickerActive
+                    ? TriggerOutput(action: .expandBrowser, consumesKey: true)
+                    : .passthrough
+            }
+            return TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
 
         case (.capturing(let q), .arrowDown):
-            return q.isEmpty
-                ? .passthrough
-                : TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
+            if q.isEmpty {
+                // Pill: ↓ grows it into the full browser grid.
+                return emptyPickerActive
+                    ? TriggerOutput(action: .expandBrowser, consumesKey: true)
+                    : .passthrough
+            }
+            return TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
 
-        case (.capturing(let q), .arrowLeft), (.capturing(let q), .arrowRight):
-            // Eat ← / → so the caret can't drift out of `:query` while
-            // the picker is up. Empty-query state is just `:` alone — let
-            // the arrow through and end capture.
+        case (.capturing(let q), .arrowLeft):
+            // The compact favorites pill is horizontal — ←/→ drive its
+            // selection while it's visible.
+            if emptyPickerActive {
+                return TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
+            }
+            // Otherwise eat ← / → so the caret can't drift out of `:query`,
+            // or end capture if we're sitting on a bare `:`.
+            if q.isEmpty {
+                state = .idle
+                return TriggerOutput(action: .closePicker, consumesKey: false)
+            }
+            return .consume
+
+        case (.capturing(let q), .arrowRight):
+            if emptyPickerActive {
+                return TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
+            }
             if q.isEmpty {
                 state = .idle
                 return TriggerOutput(action: .closePicker, consumesKey: false)
@@ -417,6 +511,15 @@ struct TriggerStateMachine {
 
         case (.capturing(let q), .returnKey), (.capturing(let q), .tabKey):
             if q.isEmpty {
+                // Favorites picker visible: Return/Tab picks the highlighted
+                // favorite (or the Browse row). Otherwise `:`+Return is just
+                // a literal colon — pass it through untouched.
+                if emptyPickerActive {
+                    emptyPickerActive = false
+                    state = .idle
+                    currentScope = .normal
+                    return TriggerOutput(action: .insertEmoji(query: "", mode: .fromPicker, scope: .normal), consumesKey: true)
+                }
                 state = .idle
                 currentScope = .normal
                 return TriggerOutput(action: .closePicker, consumesKey: false)
@@ -429,9 +532,22 @@ struct TriggerStateMachine {
         // MARK: capturing — exits
 
         case (.capturing, .escape):
+            // `:?`+Esc should leave the literal `:?` — the `?` was swallowed
+            // when the pill opened, so ask the Engine to type it back.
+            let restoreQuestion = emptyPickerActive && quickAccessTrigger != nil
+            emptyPickerActive = false
             state = .idle
             currentScope = .normal
-            return TriggerOutput(action: .closePicker, consumesKey: true)
+            return TriggerOutput(
+                action: restoreQuestion ? .closePickerRestoringQuestion : .closePicker,
+                consumesKey: true
+            )
+
+        case (.capturing(let q), .cancelChar(let c)) where q.isEmpty && quickAccessTrigger == c:
+            // `:<trigger>` (e.g. `:?`) summons the Quick Access pill. Swallow
+            // the trigger char so the focused app only ever holds the `:` —
+            // deleted on pick, so the insert delete-count stays 1.
+            return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: true)
 
         case (.capturing(let q), .cancelChar(let c)):
             // Symbols-only skips emoticons entirely (it's an emoji feature).
@@ -464,9 +580,27 @@ struct TriggerStateMachine {
         state = .gifSearching(query: query)
     }
 
+    /// Engine calls this when the pill's Browse row (or the menu) opens the
+    /// full grid: hand the keyboard to the browser.
+    mutating func enterBrowsing(query: String) {
+        state = .browsing(query: query)
+        emptyPickerActive = false
+        konamiProgress = 0
+    }
+
+    /// Keep the state machine's browser query in sync when a mouse action
+    /// (category tab) resets the search.
+    mutating func setBrowsingQuery(_ query: String) {
+        if case .browsing = state {
+            state = .browsing(query: query)
+        }
+    }
+
     mutating func reset() {
         state = .idle
         currentScope = .normal
+        emptyPickerActive = false
+        pillEmojiCount = 0
         lastWasWordChar = false
         konamiProgress = 0
         idleWord = ""
@@ -539,6 +673,57 @@ struct TriggerStateMachine {
         case .cmdZ:
             state = .idle
             return TriggerOutput(action: .closeGifPicker, consumesKey: false)
+        }
+    }
+
+    /// Routes keystrokes to the full-library browser grid. Everything is
+    /// consumed — the browser owns the keyboard while it's up, so typing,
+    /// arrows, and Enter never reach the focused app (only the final pick is
+    /// synthesized there).
+    private mutating func handleBrowsing(_ input: TriggerInput) -> TriggerOutput {
+        guard case .browsing(let q) = state else { return .passthrough }
+        switch input {
+        case .nameChar(let c):
+            let next = q + String(c)
+            state = .browsing(query: next)
+            return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
+        case .cancelChar(let c):
+            // Spaces + punctuation are valid in emoji labels ("smiling face").
+            let next = q + String(c)
+            state = .browsing(query: next)
+            return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
+        case .colon:
+            let next = q + ":"
+            state = .browsing(query: next)
+            return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
+        case .backspace:
+            if q.isEmpty {
+                state = .idle
+                return TriggerOutput(action: .closeBrowser, consumesKey: true)
+            }
+            let next = String(q.dropLast())
+            state = .browsing(query: next)
+            return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
+        case .escape:
+            state = .idle
+            return TriggerOutput(action: .closeBrowser, consumesKey: true)
+        case .returnKey, .tabKey:
+            state = .idle
+            return TriggerOutput(action: .pickBrowser, consumesKey: true)
+        case .arrowUp:
+            return TriggerOutput(action: .moveBrowser(direction: .up), consumesKey: true)
+        case .arrowDown:
+            return TriggerOutput(action: .moveBrowser(direction: .down), consumesKey: true)
+        case .arrowLeft:
+            return TriggerOutput(action: .moveBrowser(direction: .left), consumesKey: true)
+        case .arrowRight:
+            return TriggerOutput(action: .moveBrowser(direction: .right), consumesKey: true)
+        case .focusChange:
+            state = .idle
+            return TriggerOutput(action: .closeBrowser, consumesKey: false)
+        case .cmdZ:
+            state = .idle
+            return TriggerOutput(action: .closeBrowser, consumesKey: false)
         }
     }
 

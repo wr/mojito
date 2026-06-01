@@ -6,6 +6,14 @@ import Foundation
 /// programmatic sweep that derives shortcodes from Unicode names
 /// (`PLACE OF INTEREST SIGN` → `place_of_interest_sign`). Opt-in.
 enum SymbolsDatabase {
+    /// `SYM_…` hexcode → symbol, for resolving a pinned Quick Access slot.
+    /// Built once on first access (the sweep is the slow part); only touched
+    /// when a symbol is actually pinned.
+    static let byHexcode: [String: Emoji] = Dictionary(
+        indexed().map { ($0.emoji.hexcode, $0.emoji) },
+        uniquingKeysWith: { first, _ in first }
+    )
+
     static func indexed() -> [IndexedEmoji] {
         var seenCharacters = Set<String>()
         var result: [IndexedEmoji] = []
@@ -99,6 +107,13 @@ enum SymbolsDatabase {
             guard let runFont = attrs[kCTFontAttributeName as NSString] else { return false }
             let name = CTFontCopyPostScriptName(runFont as! CTFont) as String
             if name == "LastResort" { return false }
+            // Even with VS15 appended (see `textPresentation`), color-only
+            // scalars (✅ ✨ ✊ ✏ …) have no monochrome glyph, so Core Text
+            // resolves them to Apple Color Emoji — they'd render as color
+            // emoji among the text-style symbols. Drop them; they're already
+            // reachable in the emoji categories. Scalars with a real text glyph
+            // (♈︎, ✂︎, …) resolve to a text font and stay.
+            if name.contains("Emoji") { return false }
         }
         return true
     }

@@ -73,6 +73,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         KeyboardShortcuts.onKeyDown(for: .pauseUntilTomorrow) { [weak self] in
             self?.toggleOrPause(until: Self.tomorrowMorning())
         }
+        KeyboardShortcuts.onKeyDown(for: .showEmojiBrowser) { [weak self] in
+            self?.engine.showBrowser()
+        }
 
         // Force onboarding any time permissions aren't granted — revoked
         // perms / fresh accounts get the guided fix, not a silent break.
@@ -102,6 +105,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         NotificationCenter.default.publisher(for: .mojitoShouldOpenSettings)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.openSettings() }
+            .store(in: &observers)
+
+        NotificationCenter.default.publisher(for: .mojitoShouldOpenBrowser)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.engine.showBrowser() }
             .store(in: &observers)
     }
 

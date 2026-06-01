@@ -64,6 +64,8 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
             }
 
+            QuickAccessSection()
+
             Section("GIFs and Symbols") {
                 Toggle(isOn: $gifSearchEnabled) {
                     TitleAndCaption(
@@ -90,7 +92,7 @@ struct GeneralSettingsView: View {
                 KeyboardShortcuts.Recorder("Pause for 1 hour", name: .pauseHour)
                 KeyboardShortcuts.Recorder("Pause until tomorrow", name: .pauseUntilTomorrow)
             } header: {
-                Text("Keyboard shortcuts")
+                Text("Pausing")
             } footer: {
                 Text("Press the same shortcut again while paused to resume.")
                     .font(.callout)

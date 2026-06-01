@@ -16,11 +16,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .idle:          return "idle"
         case .capturing:     return "capturing"
         case .gifSearching:  return "gifSearching"
+        case .browsing:      return "browsing"
         }
     }
 
     private let database: EmojiDatabase
     private let exclusions: ExclusionStore
+    private let quickAccess = QuickAccessStore.shared
     private let viewModel = PickerViewModel()
     private let pickerWindow: PickerWindow
     private let gifPickerWindow = GifPickerWindow()
@@ -42,6 +44,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var captureIsExcluded: Bool = false
     private var usage: [String: Int]
     private var workspaceObserver: NSObjectProtocol?
+    private var spaceObserver: NSObjectProtocol?
     private var prefsObserver: NSObjectProtocol?
     /// Cached because `FuzzyMatcher.search` reads them on every keystroke and
     /// direct UserDefaults reads are a measurable per-keystroke cost.
@@ -60,6 +63,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// undo entry.
     private var inputSeq: Int = 0
     private static let emoticonUndoWindow: TimeInterval = 3.0
+    /// Chars of typed `:` to erase before a browser pick is synthesized
+    /// (1 when opened from the pill's chevron, 0 from the menu).
+    private var browserDeleteCount: Int = 0
 
     init(database: EmojiDatabase, exclusions: ExclusionStore) {
         self.database = database
@@ -72,10 +78,41 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
         self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
+        // The pill is summoned by `:?` when Quick Access is enabled.
+        let qaEnabled = (UserDefaults.standard.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
+        self.stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
 
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
             self?.cancelCapture()
+        }
+
+        // Mouse-pick on a compact favorites-pill cell — same resolution path
+        // as Return on the bar (insert the cell, or open Browse for the
+        // chevron). Only fires while the empty-query pill is up.
+        viewModel.onActivate = { [weak self] index in
+            guard let self, self.viewModel.compact else { return }
+            guard index < self.viewModel.results.count else { return }
+            self.viewModel.selectedIndex = index
+            if self.viewModel.results[index].emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                self.expandToBrowser(deleteCount: 1)  // the typed `:`
+            } else {
+                self.insert(query: "", mode: .fromPicker, scope: .normal)
+            }
+        }
+
+        // Mouse pick / category tab inside the expanded grid.
+        viewModel.onBrowserPick = { [weak self] emoji in
+            guard let self else { return }
+            self.viewModel.browser?.select(emoji)
+            self.pickFromBrowser()
+        }
+        viewModel.onBrowserCategory = { [weak self] category in
+            guard let self else { return }
+            // Switching category clears any in-progress search, so keep the
+            // state machine's browser query in sync.
+            self.stateMachine.setBrowsingQuery("")
+            self.viewModel.browser?.selectCategory(category)
         }
 
         gifPickerWindow.onClickAway = { [weak self] in
@@ -104,6 +141,20 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
         }
 
+        // Switching Spaces (incl. into a fullscreen app) should dismiss any
+        // open surface — the panel joins all Spaces, so without this the
+        // browser/pill would linger on the new desktop.
+        spaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.viewModel.isVisible || self.gifPickerWindow.isVisible else { return }
+                self.cancelCapture()  // also hides the GIF picker
+            }
+        }
+
         // Spotlight, system panels, and in-app field jumps don't fire
         // didActivateApplicationNotification reliably — AX does, synchronously.
         FocusedElementCache.shared.onFocusChange = { [weak self] in
@@ -125,12 +176,17 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
                 self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
+                let qaEnabled = (UserDefaults.standard.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
+                self.stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
             }
         }
     }
 
     deinit {
         if let obs = workspaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(obs)
+        }
+        if let obs = spaceObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(obs)
         }
         if let obs = prefsObserver {
@@ -144,14 +200,36 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // Our own panel briefly looking frontmost is not a real app switch.
         if bundleID == Bundle.main.bundleIdentifier { return }
         pendingEmoticonUndo = nil
-        guard case .capturing = stateMachine.state else { return }
-        guard bundleID != captureContext?.bundleID else { return }
-        cancelCapture()
+        switch stateMachine.state {
+        case .capturing:
+            guard bundleID != captureContext?.bundleID else { return }
+            cancelCapture()
+        case .browsing:
+            // Close the browser when another app (incl. a fullscreen app)
+            // takes over.
+            cancelCapture()
+        default:
+            break
+        }
     }
 
     private func handleFocusChanged() {
         pendingEmoticonUndo = nil
-        guard case .capturing = stateMachine.state else { return }
+        // The browser owns the keyboard while open and a pick is synthesized
+        // into whatever field is focused, so an AX focus change (in-app field
+        // jump, Spotlight) means our target moved — dismiss it, exactly as a
+        // capture does. Cross-app switches are handled by handleAppActivated.
+        switch stateMachine.state {
+        case .capturing:
+            break
+        case .browsing:
+            // The browser can be opened over a no-focus context (e.g. the
+            // Finder, to copy a glyph) — there's no captured field to drift
+            // away from, so a stray focus change must not self-dismiss it.
+            if captureFocusSnapshot == nil { return }
+        default:
+            return
+        }
         guard let snapshot = captureFocusSnapshot else {
             cancelCapture()
             return
@@ -174,10 +252,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         stateMachine.reset()
         viewModel.reset()
         pickerWindow.hide()
+        gifPickerWindow.hide()
         captureContext = nil
         captureFocusSnapshot = nil
         captureFocusPID = nil
         captureIsExcluded = false
+        browserDeleteCount = 0
         DebugRecorder.record(.picker, "cancel")
     }
 
@@ -371,6 +451,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .closePicker:
             viewModel.reset()
             pickerWindow.hide()
+            stateMachine.emptyPickerActive = false
             // Backspacing below the picker threshold (or demoting `::` symbols
             // scope) emits .closePicker while the SM stays in .capturing. The
             // capture metadata — exclusion flag, focus snapshot — must survive
@@ -385,10 +466,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .openPicker(let q, let scope):
             if captureExcluded { break }
             updateResults(query: q, scope: scope)
-            // Defer one tick: the keystroke moves the caret in the focused
-            // app after the tap callback returns. AX returns stale coords if
-            // we ask before then.
-            scheduleRepositionAndShow()
+            if q.isEmpty {
+                // Bare `:` → favorites + most-used. Debounced so a follow-up
+                // keystroke (`:)`, `:smile`) cancels it before it flashes.
+                scheduleEmptyPickerShow()
+            } else {
+                // Defer one tick: the keystroke moves the caret in the focused
+                // app after the tap callback returns. AX returns stale coords if
+                // we ask before then.
+                scheduleRepositionAndShow()
+            }
 
         case .refreshPicker(let q, let scope):
             if captureExcluded { break }
@@ -409,7 +496,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                     self?.insert(query: q, mode: .exactMatch, scope: scope)
                 }
             case .fromPicker:
-                insert(query: q, mode: .fromPicker, scope: scope)
+                if viewModel.topResult?.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                    // Browse row: grow the panel into the grid instead of
+                    // inserting. Delete count covers the typed `:` (+ `::`).
+                    let leading = (scope == .symbolsOnly) ? 2 : 1
+                    expandToBrowser(deleteCount: q.count + leading)
+                } else {
+                    insert(query: q, mode: .fromPicker, scope: scope)
+                }
             }
 
         case .checkEmoticon(let q, let term):
@@ -561,6 +655,43 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         case .moveGifSelection(let direction):
             gifPickerWindow.move(direction)
+
+        case .refreshBrowser(let q):
+            viewModel.browser?.setQuery(q)
+
+        case .moveBrowser(let direction):
+            viewModel.browser?.move(direction)
+
+        case .pickBrowser:
+            pickFromBrowser()
+
+        case .closeBrowser:
+            collapseBrowser()
+
+        case .expandBrowser:
+            // ↓/↑ on the pill — the typed `:` (1 char) is erased on pick.
+            expandToBrowser(deleteCount: 1)
+
+        case .pickIndex(let index):
+            if captureExcluded { break }
+            guard index >= 0, index < viewModel.results.count else { break }
+            let scored = viewModel.results[index]
+            // Never quick-pick the trailing Browse chevron.
+            if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode { break }
+            viewModel.selectedIndex = index
+            insert(query: "", mode: .fromPicker, scope: .normal)
+
+        case .closePickerRestoringQuestion:
+            viewModel.reset()
+            pickerWindow.hide()
+            stateMachine.emptyPickerActive = false
+            captureContext = nil
+            captureFocusSnapshot = nil
+            captureFocusPID = nil
+            captureIsExcluded = false
+            // The `?` from `:?` was swallowed; type it back so the focused app
+            // shows the literal `:?` after Esc.
+            TextInserter.replace(charactersToDelete: 0, with: "?")
         }
     }
 
@@ -605,9 +736,134 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         return false
     }
 
+    /// Show for the Quick Access pill, deferred one tick so the swallowed
+    /// trigger char is processed and the caret has settled first. A newer
+    /// keystroke advances `inputSeq`, cancelling this before it fires. Only
+    /// once it actually shows do we tell the state machine to claim the arrows.
+    private func scheduleEmptyPickerShow() {
+        let seq = inputSeq
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            guard self.inputSeq == seq else { return }
+            guard case .capturing(let q) = self.stateMachine.state, q.isEmpty else { return }
+            if self.focusHasChangedSinceCapture() {
+                self.cancelCapture()
+                return
+            }
+            guard !self.viewModel.results.isEmpty else { return }
+            let anchor = CaretLocator.caretRect()
+            PickerContextStore.capture(caretOutcome: CaretLocator.lastOutcome, resolvedCaret: anchor)
+            DebugRecorder.record(.picker, "openEmpty", ["results": "\(self.viewModel.results.count)"])
+            self.pickerWindow.show(near: anchor)
+            // Now the picker owns ↑↓ / Return for favorites selection. The
+            // emoji-row count (excludes the trailing Browse row) bounds the
+            // digit quick-pick so an out-of-range digit starts a search.
+            self.stateMachine.pillEmojiCount = max(0, self.viewModel.results.count - 1)
+            self.stateMachine.emptyPickerActive = true
+        }
+    }
+
+    /// Bare-`:` corpus: the 8 Quick Access slots (pinned glyphs + most-used
+    /// auto-fill), then a trailing "Browse all emojis…" row.
+    private func emptyQueryResults() -> [ScoredEmoji] {
+        var rows = QuickAccess
+            .resolved(store: quickAccess, database: database, usage: usage)
+            .map { ScoredEmoji(emoji: $0, matchedShortcode: $0.primaryShortcode) }
+        rows.append(EmojiBrowser.browseRow)
+        return rows
+    }
+
+    // MARK: - Full-library browser (the picker panel, grown)
+
+    /// Menu-bar / global-hotkey entry. These fire independently of the event
+    /// tap, so — unlike the `:` paths — they must explicitly honor pause +
+    /// permissions (`isActive` is false then), refuse to act in a secure field,
+    /// and clear any GIF picker that's up. If a `:query` capture is in flight,
+    /// that text is already in the field and must be erased on pick.
+    func showBrowser() {
+        guard isActive else { return }
+        let context = AppContextDetector.current()
+        if context.focusedFieldIsSecure {
+            DebugRecorder.record(.engine, "secureFieldBlocked")
+            return
+        }
+        gifPickerWindow.hide()
+        let deleteCount: Int
+        if case .capturing(let q) = stateMachine.state {
+            deleteCount = q.count + 1  // the typed `:query`
+        } else {
+            deleteCount = 0
+        }
+        captureContext = context
+        captureFocusSnapshot = FocusedElementCache.shared.element
+        captureFocusPID = FocusedElementCache.shared.focusedPID
+        expandToBrowser(deleteCount: deleteCount)
+    }
+
+    /// Grow the picker panel into the full grid and hand the keyboard to the
+    /// browser. `deleteCount` is the typed `:` erased when the user picks.
+    private func expandToBrowser(deleteCount: Int) {
+        browserDeleteCount = deleteCount
+        captureIsExcluded = false
+        stateMachine.enterBrowsing(query: "")
+        viewModel.browser = EmojiBrowserViewModel(database: database, quickAccess: quickAccess)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.viewModel.compact = false
+            self.viewModel.expanded = true
+            let anchor = CaretLocator.caretRect()
+            PickerContextStore.capture(caretOutcome: CaretLocator.lastOutcome, resolvedCaret: anchor)
+            DebugRecorder.record(.picker, "browserOpen")
+            self.pickerWindow.showExpanded(near: anchor)
+        }
+    }
+
+    private func pickFromBrowser() {
+        let emoji = viewModel.browser?.selectedEmoji
+        let delete = browserDeleteCount
+        // Copy instead of typing only when there's nowhere to type (e.g. the
+        // browser was opened over the Finder). The exclusion list doesn't apply
+        // here — the global hotkey is an explicit action, so a pick types into
+        // the focused field even in excluded apps.
+        let copy = !(captureContext?.focusedFieldIsEditable ?? true)
+        collapseBrowser()
+        guard let emoji else { return }
+        let glyph = characterWithSkinTone(emoji)
+        if copy {
+            copyToClipboard(glyph)
+        } else {
+            TextInserter.replace(charactersToDelete: delete, with: glyph)
+        }
+        recordUsage(emoji: emoji)
+        SeasonalGates.fire(for: emoji)
+        DebugRecorder.record(.insert, "browserPick", ["del": "\(delete)", "copied": "\(copy)"])
+    }
+
+    private func copyToClipboard(_ string: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(string, forType: .string)
+        CopyToast.show(string)
+        DebugRecorder.record(.insert, "clipboardCopy")
+    }
+
+    private func collapseBrowser() {
+        stateMachine.reset()
+        viewModel.reset()
+        pickerWindow.hide()
+        captureContext = nil
+        captureFocusSnapshot = nil
+        captureFocusPID = nil
+        captureIsExcluded = false
+        browserDeleteCount = 0
+    }
+
     private func updateResults(query: String, scope: CaptureScope) {
+        // Empty query → the compact favorites pill; anything typed → the
+        // vertical shortcode list.
+        viewModel.compact = query.isEmpty
         guard !query.isEmpty else {
-            viewModel.update(query: "", results: [])
+            viewModel.update(query: "", results: emptyQueryResults())
             return
         }
         let results = FuzzyMatcher.search(
@@ -661,6 +917,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             guard let scored = viewModel.topResult else { return }
             DebugRecorder.record(.insert, "fromPicker", ["scope": "\(scope)"])
             let charsToDelete = query.count + leadingColons
+            // The Browse sentinel is intercepted in `apply` before `insert`.
             if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
                 return
             }

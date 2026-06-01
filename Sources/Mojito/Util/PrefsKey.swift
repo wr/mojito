@@ -22,6 +22,12 @@ enum PrefsKey {
     static let allowedBundleIDs      = "mojito.allowBundleIDs"       // [String]
     static let allowedURLPatterns    = "mojito.allowURLPatterns"     // [String]
     static let usageCounts           = "mojito.usageCounts"          // [String: Int]  (hexcode → count)
+    /// The 8 Quick Access slots surfaced on `:<trigger>` and managed in
+    /// Settings ▸ General. An 8-element `[String]` where `""` is an auto
+    /// (most-used) slot and any other value is a pinned emoji hexcode.
+    static let quickAccessSlots      = "mojito.quickAccess"          // [String]  (8 slots; "" = auto)
+    /// Whether the `:?` Quick Access pill is enabled (default true).
+    static let quickAccessEnabled    = "mojito.quickAccessEnabled"
     /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
     /// Self-attested; no payment integration.
