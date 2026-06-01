@@ -88,7 +88,7 @@ struct QuickAccessSection: View {
                 .fill(Color(nsColor: .unemphasizedSelectedContentBackgroundColor))
             }
             if let emoji = slot.emoji {
-                Text(displayGlyph(emoji)).font(.system(size: 25))
+                Text(displayGlyph(emoji)).font(.system(size: 20))
             } else {
                 Image(systemName: "plus")
                     .font(.system(size: 14, weight: .semibold))
