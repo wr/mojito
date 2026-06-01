@@ -57,6 +57,7 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate {
 
     func checkForUpdates() {
         hasUpdateError = false
+        EasterEggTracker.record(.k52)
         updater.checkForUpdates()
     }
 
