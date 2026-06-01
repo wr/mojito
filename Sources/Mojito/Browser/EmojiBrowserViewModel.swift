@@ -48,6 +48,7 @@ final class EmojiBrowserViewModel: ObservableObject {
 
     private let database: EmojiDatabase
     private let usage: [String: Int]
+    private let symbolsEnabled: Bool
 
     /// Sections in display order (only those with content).
     let sections: [Section]
@@ -59,6 +60,7 @@ final class EmojiBrowserViewModel: ObservableObject {
     init(database: EmojiDatabase, quickAccess: QuickAccessStore) {
         self.database = database
         self.usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
+        self.symbolsEnabled = UserDefaults.standard.bool(forKey: PrefsKey.symbolsEnabled)
         let built = Self.build(database: database, quickAccess: quickAccess, usage: self.usage)
         self.sections = built
         self.flat = built.flatMap { $0.cells.map(\.emoji) }
@@ -72,10 +74,12 @@ final class EmojiBrowserViewModel: ObservableObject {
         guard !trimmed.isEmpty else { return flat }
         return FuzzyMatcher.search(
             query: trimmed, in: database, usage: usage,
-            corpus: .emojiOnly, useFrequencyBoost: true, limit: 240
+            corpus: symbolsEnabled ? .emojiAndSymbols : .emojiOnly,
+            useFrequencyBoost: true, limit: 240
         )
         .map(\.emoji)
-        .filter { database.byHexcode[$0.hexcode] != nil }  // drop egg/sentinel rows
+        // Keep real emoji + symbols; drop egg/sentinel rows.
+        .filter { database.byHexcode[$0.hexcode] != nil || $0.hexcode.hasPrefix("SYM_") }
     }
 
     var isSearching: Bool { !query.trimmingCharacters(in: .whitespaces).isEmpty }

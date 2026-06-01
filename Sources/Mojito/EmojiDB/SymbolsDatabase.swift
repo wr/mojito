@@ -6,6 +6,14 @@ import Foundation
 /// programmatic sweep that derives shortcodes from Unicode names
 /// (`PLACE OF INTEREST SIGN` → `place_of_interest_sign`). Opt-in.
 enum SymbolsDatabase {
+    /// `SYM_…` hexcode → symbol, for resolving a pinned Quick Access slot.
+    /// Built once on first access (the sweep is the slow part); only touched
+    /// when a symbol is actually pinned.
+    static let byHexcode: [String: Emoji] = Dictionary(
+        indexed().map { ($0.emoji.hexcode, $0.emoji) },
+        uniquingKeysWith: { first, _ in first }
+    )
+
     static func indexed() -> [IndexedEmoji] {
         var seenCharacters = Set<String>()
         var result: [IndexedEmoji] = []

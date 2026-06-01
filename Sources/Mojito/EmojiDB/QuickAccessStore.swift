@@ -80,7 +80,11 @@ enum QuickAccess {
         var out: [ResolvedSlot] = []
         for slot in store.slots {
             if let hex = slot {
-                out.append(ResolvedSlot(emoji: database.byHexcode[hex], pinned: true))
+                // A pinned symbol stores a `SYM_…` hexcode, which lives in
+                // SymbolsDatabase, not the emoji DB.
+                let emoji = database.byHexcode[hex]
+                    ?? (hex.hasPrefix("SYM_") ? SymbolsDatabase.byHexcode[hex] : nil)
+                out.append(ResolvedSlot(emoji: emoji, pinned: true))
             } else {
                 var fill: Emoji?
                 while let hex = pool.next() {
