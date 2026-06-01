@@ -14,6 +14,11 @@ enum PrefsKey {
     static let useFrequencyBoost     = "mojito.search.frequencyBoost"
     static let excludedBundleIDs     = "mojito.excludeBundleIDs"     // [String]
     static let excludedURLPatterns   = "mojito.excludeURLPatterns"   // [String]
+    /// One-time flag: developer-tool bundle IDs have been folded into the
+    /// excluded list. Lets existing installs pick up the editor/terminal
+    /// defaults once (arrow conversion collides with code operators) without
+    /// re-adding any the user later removes.
+    static let devToolExclusionsSeeded = "mojito.exclusions.devToolsSeeded"
     /// `denylist` (default) = block apps/sites in the excluded lists.
     /// `allowlist` = block everything except apps/sites in the allowed lists.
     /// In allowlist mode a URL-pattern match implicitly allows the browser
@@ -38,6 +43,9 @@ enum PrefsKey {
     static let skinTone              = "mojito.skinTone"
     /// `:D` → 😃 conversion.
     static let emoticonsEnabled      = "mojito.emoticonsEnabled"
+    /// Sub-toggle of `emoticonsEnabled`: text-arrow conversion (`->` → →,
+    /// `<-` → ←, `<->` → ↔). Default on; off leaves arrows as literal text.
+    static let arrowConversionEnabled = "mojito.arrowConversionEnabled"
     /// Experimental Symbols (★ ⌘ ⌥ …) included in fuzzy search.
     static let symbolsEnabled        = "mojito.symbolsEnabled"
     /// `:foo` = emoji only; `::foo` = symbols. Keeps the noisy symbols

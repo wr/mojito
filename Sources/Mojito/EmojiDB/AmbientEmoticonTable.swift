@@ -19,9 +19,6 @@ enum AmbientEmoticonTable {
         "->":   "→",
         "<-":   "←",
         "<->":  "↔",
-        "=>":   "⇒",
-        "<=":   "⇐",
-        "<=>":  "⇔",
     ]
 
     static func emoji(for word: String) -> String? {
@@ -31,10 +28,16 @@ enum AmbientEmoticonTable {
     /// The arrow family — the only ambient emoticons allowed to fire when
     /// typed flush against text (`Foo->Bar`), matched as a trailing suffix of
     /// the buffer. Everything else stays boundary-gated so it can't eat into
-    /// prose. Derived as the keys built solely from arrow punctuation, so it
-    /// tracks the map automatically.
-    private static let arrowChars: Set<Character> = ["-", "<", ">", "="]
+    /// prose. `=`-based forms (`=>`, `<=`) are deliberately excluded: they
+    /// collide with code operators and comparisons. Derived as the keys built
+    /// solely from arrow punctuation, so it tracks the map automatically.
+    private static let arrowChars: Set<Character> = ["-", "<", ">"]
     static let arrowKeys: Set<String> = Set(map.keys.filter { $0.allSatisfy(arrowChars.contains) })
+
+    /// Whether `word` is an arrow-family key — used to gate the whole arrow
+    /// feature behind the "Convert text arrows" setting without touching the
+    /// other ambient emoticons.
+    static func isArrow(_ word: String) -> Bool { arrowKeys.contains(word) }
 
     /// The longest arrow key that is a suffix of `buffer`, if any. Lets the
     /// state machine pull `->` out of `Foo->` without a leading boundary.

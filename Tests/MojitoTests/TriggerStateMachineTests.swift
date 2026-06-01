@@ -464,35 +464,16 @@ struct TriggerStateMachineTests {
         #expect(out.consumesKey == true)
     }
 
-    @Test func ambientDoubleArrowFiresOnEqualsGreaterThan() {
+    @Test func ambientEqualsArrowsAreInert() {
+        // `=`-based arrows are deliberately unmapped (code-operator collisions),
+        // so `=>` / `<=` / `<=>` accumulate and never convert.
         var sm = TriggerStateMachine()
         _ = sm.handle(.cancelChar("="))
-        let out = sm.handle(.cancelChar(">"))
-        #expect(out.action == .insertAmbientEmoticon(word: "=>", trailing: ""))
-        #expect(out.consumesKey == false)
-    }
-
-    @Test func ambientLeftRightDoubleArrowAccumulatesFreely() {
-        // `<=` is itself an arrow (`⇐`) but defers because `<=>` (`⇔`) extends
-        // it — so the `=` holds the fire pending, and the trailing `>` resolves
-        // to the longer `<=>`.
-        var sm = TriggerStateMachine()
-        _ = sm.handle(.cancelChar("<"))
-        let mid = sm.handle(.cancelChar("="))
-        #expect(mid.action == .none)
-        let out = sm.handle(.cancelChar(">"))
-        #expect(out.action == .insertAmbientEmoticon(word: "<=>", trailing: ""))
-    }
-
-    @Test func ambientLeftDoubleArrowFiresWithTrailingOnNonExtendingChar() {
-        // `<=` deferred for `<=>`; a non-extending char collapses it to `⇐`
-        // and carries the char as trailing (parallels `<-` → `←x`).
-        var sm = TriggerStateMachine()
+        #expect(sm.handle(.cancelChar(">")).action == .none)        // =>
+        sm = TriggerStateMachine()
         _ = sm.handle(.cancelChar("<"))
         _ = sm.handle(.cancelChar("="))
-        let out = sm.handle(.nameChar("x"))
-        #expect(out.action == .insertAmbientEmoticon(word: "<=", trailing: "x"))
-        #expect(out.consumesKey == true)
+        #expect(sm.handle(.cancelChar(">")).action == .none)        // <=>
     }
 
     // MARK: ambient arrows flush against text (no surrounding spaces)
@@ -518,10 +499,6 @@ struct TriggerStateMachineTests {
         #expect(lastAmbientAction(typing: "Foo->") == .insertAmbientEmoticon(word: "->", trailing: ""))
     }
 
-    @Test func ambientDoubleArrowFiresFlushAfterWord() {
-        #expect(lastAmbientAction(typing: "Foo=>") == .insertAmbientEmoticon(word: "=>", trailing: ""))
-    }
-
     @Test func ambientLeftRightArrowFiresFlushAfterWord() {
         // `Foo<->` → the deferred `<-` extends to `<->` and fires `↔`.
         #expect(lastAmbientAction(typing: "Foo<->") == .insertAmbientEmoticon(word: "<->", trailing: ""))
@@ -533,14 +510,33 @@ struct TriggerStateMachineTests {
         #expect(lastAmbientAction(typing: "Foo<-B") == .insertAmbientEmoticon(word: "<-", trailing: "B"))
     }
 
-    @Test func ambientLeftDoubleArrowFiresFlushBetweenWords() {
-        #expect(lastAmbientAction(typing: "Foo<=B") == .insertAmbientEmoticon(word: "<=", trailing: "B"))
-    }
-
     @Test func nonArrowEmoticonStaysBoundaryGatedFlushAfterWord() {
         // Per the chosen scope (arrows only), `<3` flush against a word does
         // NOT fire — `Hi<3` stays literal.
         #expect(lastAmbientAction(typing: "Hi<3") == .none)
+    }
+
+    @Test func arrowConversionToggleMakesArrowsInert() {
+        // With the sub-toggle off, arrows neither fire nor defer/consume — but
+        // other ambient emoticons keep working.
+        var sm = TriggerStateMachine()
+        sm.arrowConversionEnabled = false
+        _ = sm.handle(.nameChar("-"))
+        #expect(sm.handle(.cancelChar(">")).action == .none)        // -> inert
+        sm = TriggerStateMachine()
+        sm.arrowConversionEnabled = false
+        _ = sm.handle(.cancelChar("<"))
+        let dash = sm.handle(.nameChar("-"))
+        #expect(dash.action == .none)                                // no defer
+        #expect(dash.consumesKey == false)                           // no consume
+        let x = sm.handle(.nameChar("x"))
+        #expect(x.action == .none)                                   // <-x stays literal
+        #expect(x.consumesKey == false)
+        // Heart still fires regardless of the arrow toggle.
+        sm = TriggerStateMachine()
+        sm.arrowConversionEnabled = false
+        _ = sm.handle(.cancelChar("<"))
+        #expect(sm.handle(.nameChar("3")).action == .insertAmbientEmoticon(word: "<3", trailing: ""))
     }
 
     @Test func ambientTerminatorChecksWordThenResetsBuffer() {

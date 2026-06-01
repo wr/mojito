@@ -131,6 +131,13 @@ struct TriggerStateMachine {
     /// When true, `::` upgrades the capture to symbols-only instead of cancelling.
     var symbolsDoubleColonEnabled: Bool = false
 
+    /// Gates the arrow family (`->`, `<-`, `<->`). When false, arrows are
+    /// inert — never matched as a suffix, never deferred, never consume a
+    /// following char — so they read as plain text. The Engine sets it from
+    /// `PrefsKey.arrowConversionEnabled`. Other ambient emoticons (`<3`, …)
+    /// are unaffected.
+    var arrowConversionEnabled: Bool = true
+
     /// The character that, typed right after a bare `:`, opens the Quick Access
     /// pill (e.g. `?` → `:?`). `nil` disables it. The Engine sets it from
     /// `PrefsKey.quickAccessTriggerChar`. Must be a `.cancelChar`-class glyph
@@ -771,7 +778,8 @@ struct TriggerStateMachine {
         // Arrows match as a trailing suffix of the buffer, so they fire flush
         // against text (`Foo->Bar`) — the matched key is what gets deleted, so
         // the preceding `Foo` survives. Deferral (`<-` → `<->`) carries over.
-        if let arrow = AmbientEmoticonTable.arrowSuffix(of: idleWord),
+        if arrowConversionEnabled,
+           let arrow = AmbientEmoticonTable.arrowSuffix(of: idleWord),
            let emoji = AmbientEmoticonTable.emoji(for: arrow) {
             if AmbientEmoticonTable.hasLongerArrow(extending: arrow) {
                 pendingImmediateFire = (word: arrow, emoji: emoji)
@@ -787,8 +795,11 @@ struct TriggerStateMachine {
         }
         // Every other punctuation-led emoticon (`<3`, `</3`, `>:)`, …) still
         // requires the whole buffer to *be* the emoticon — i.e. a leading word
-        // boundary — so it can't eat into prose (`Hi<3` stays literal).
-        guard AmbientEmoticonTable.shouldFireImmediately(idleWord) else {
+        // boundary — so it can't eat into prose (`Hi<3` stays literal). Arrows
+        // are excluded here: when the toggle is on they're handled above; when
+        // off they must stay literal even though they're punctuation-led.
+        guard AmbientEmoticonTable.shouldFireImmediately(idleWord),
+              !AmbientEmoticonTable.isArrow(idleWord) else {
             return nil
         }
         let word = idleWord

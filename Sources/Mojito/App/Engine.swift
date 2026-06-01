@@ -81,6 +81,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // The pill is summoned by `:?` when Quick Access is enabled.
         let qaEnabled = (UserDefaults.standard.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
         self.stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
+        // Arrows are inert unless both emoticons and the arrow sub-toggle are on
+        // — gating in the SM means a disabled arrow never defers or consumes a
+        // following char (which would otherwise be dropped when the insert is
+        // suppressed downstream).
+        self.stateMachine.arrowConversionEnabled = Engine.arrowConversionActive()
 
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
@@ -178,8 +183,17 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
                 let qaEnabled = (UserDefaults.standard.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
                 self.stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
+                self.stateMachine.arrowConversionEnabled = Engine.arrowConversionActive()
             }
         }
+    }
+
+    /// Arrow conversion runs only when emoticons *and* the arrow sub-toggle are
+    /// both on. Read fresh (cheap, off the keystroke path).
+    private static func arrowConversionActive() -> Bool {
+        let emoticonsOn = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
+        let arrowsOn = (UserDefaults.standard.object(forKey: PrefsKey.arrowConversionEnabled) as? Bool) ?? true
+        return emoticonsOn && arrowsOn
     }
 
     deinit {
@@ -1249,7 +1263,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// final field reads `←x` instead of `<←`.
     private func handleAmbientEmoticonImmediate(word: String, trailing: String) {
         let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        guard enabled, let emoji = AmbientEmoticonTable.emoji(for: word) else {
+        guard enabled,
+              Engine.arrowConversionActive() || !AmbientEmoticonTable.isArrow(word),
+              let emoji = AmbientEmoticonTable.emoji(for: word) else {
             pendingEmoticonUndo = nil
             return
         }
@@ -1270,7 +1286,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// followed by a terminator, looked up in `AmbientEmoticonTable`.
     private func handleAmbientEmoticon(word: String, terminator: Character) {
         let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        guard enabled, let emoji = AmbientEmoticonTable.emoji(for: word) else {
+        guard enabled,
+              Engine.arrowConversionActive() || !AmbientEmoticonTable.isArrow(word),
+              let emoji = AmbientEmoticonTable.emoji(for: word) else {
             pendingEmoticonUndo = nil
             return
         }

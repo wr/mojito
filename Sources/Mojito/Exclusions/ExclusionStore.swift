@@ -32,12 +32,24 @@ final class ExclusionStore: ObservableObject {
             mode = .denylist
         }
 
-        let initialBundles: Set<String>
+        var initialBundles: Set<String>
         if let raw = defaults.array(forKey: PrefsKey.excludedBundleIDs) as? [String] {
             initialBundles = Set(raw)
         } else {
             initialBundles = Set(DefaultExclusions.bundleIDs)
             defaults.set(Array(initialBundles), forKey: PrefsKey.excludedBundleIDs)
+        }
+        // One-time, additive: fold the developer-tool defaults into existing
+        // installs (new installs already got them via the seed above). Guarded
+        // so any of these a user later removes won't reappear. No-op for
+        // allowlist-mode users until they switch back to a denylist.
+        if !defaults.bool(forKey: PrefsKey.devToolExclusionsSeeded) {
+            let merged = initialBundles.union(DefaultExclusions.developerTools)
+            if merged != initialBundles {
+                initialBundles = merged
+                defaults.set(Array(initialBundles), forKey: PrefsKey.excludedBundleIDs)
+            }
+            defaults.set(true, forKey: PrefsKey.devToolExclusionsSeeded)
         }
         bundleIDs = initialBundles
 
