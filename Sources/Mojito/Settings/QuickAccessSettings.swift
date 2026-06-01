@@ -149,7 +149,7 @@ struct QuickAccessSection: View {
     }
 
     private func displayGlyph(_ emoji: Emoji) -> String {
-        emoji.supportsSkinTone ? SkinTone.current.apply(to: emoji.character) : emoji.character
+        emoji.tonedGlyph
     }
 }
 

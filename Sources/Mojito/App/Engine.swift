@@ -253,12 +253,19 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         viewModel.reset()
         pickerWindow.hide()
         gifPickerWindow.hide()
+        clearCaptureState()
+        DebugRecorder.record(.picker, "cancel")
+    }
+
+    /// Reset the per-capture bookkeeping (context, focused-field snapshot,
+    /// excluded flag, browser delete count). Window + state-machine teardown is
+    /// left to the caller — those differ per entry point.
+    private func clearCaptureState() {
         captureContext = nil
         captureFocusSnapshot = nil
         captureFocusPID = nil
         captureIsExcluded = false
         browserDeleteCount = 0
-        DebugRecorder.record(.picker, "cancel")
     }
 
     func attach(permissions: PermissionsCoordinator) {
@@ -685,10 +692,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             viewModel.reset()
             pickerWindow.hide()
             stateMachine.emptyPickerActive = false
-            captureContext = nil
-            captureFocusSnapshot = nil
-            captureFocusPID = nil
-            captureIsExcluded = false
+            clearCaptureState()
             // The `?` from `:?` was swallowed; type it back so the focused app
             // shows the literal `:?` after Esc.
             TextInserter.replace(charactersToDelete: 0, with: "?")
@@ -790,7 +794,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         gifPickerWindow.hide()
         let deleteCount: Int
         if case .capturing(let q) = stateMachine.state {
-            deleteCount = q.count + 1  // the typed `:query`
+            // Erase the typed `:query` — or `::query` in symbols scope. Mirrors
+            // the keyboard Browse-row path in apply(.insertEmoji).
+            let leading = stateMachine.captureScope == .symbolsOnly ? 2 : 1
+            deleteCount = q.count + leading
         } else {
             deleteCount = 0
         }
@@ -828,7 +835,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         let copy = !(captureContext?.focusedFieldIsEditable ?? true)
         collapseBrowser()
         guard let emoji else { return }
-        let glyph = characterWithSkinTone(emoji)
+        let glyph = emoji.tonedGlyph
         if copy {
             copyToClipboard(glyph)
         } else {
@@ -851,11 +858,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         stateMachine.reset()
         viewModel.reset()
         pickerWindow.hide()
-        captureContext = nil
-        captureFocusSnapshot = nil
-        captureFocusPID = nil
-        captureIsExcluded = false
-        browserDeleteCount = 0
+        clearCaptureState()
     }
 
     private func updateResults(query: String, scope: CaptureScope) {
@@ -923,11 +926,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
             if scored.emoji.hexcode == FuzzyMatcher.k02Hex {
                 guard let pick = database.all.randomElement() else { return }
-                TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(pick))
+                TextInserter.replace(charactersToDelete: charsToDelete, with: pick.tonedGlyph)
                 EasterEggTracker.record(.k02)
                 return  // random rolls shouldn't bias future search
             }
-            TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(scored.emoji))
+            TextInserter.replace(charactersToDelete: charsToDelete, with: scored.emoji.tonedGlyph)
             recordUsage(emoji: scored.emoji)
             SeasonalGates.fire(for: scored.emoji)
 
@@ -968,7 +971,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 }
             }
             if let exact = database.exact(key) {
-                TextInserter.replace(charactersToDelete: charsToDelete, with: characterWithSkinTone(exact))
+                TextInserter.replace(charactersToDelete: charsToDelete, with: exact.tonedGlyph)
                 recordUsage(emoji: exact)
                 SeasonalGates.fire(for: exact)
                 return
@@ -1304,11 +1307,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         return true
     }
 
-    private func characterWithSkinTone(_ emoji: Emoji) -> String {
-        let tone = SkinTone.current
-        guard emoji.supportsSkinTone else { return emoji.character }
-        return tone.apply(to: emoji.character)
-    }
 }
 
 /// Cmd+Z or Backspace within `Engine.emoticonUndoWindow` reverses this.

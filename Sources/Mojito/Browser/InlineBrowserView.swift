@@ -206,9 +206,7 @@ struct InlineBrowserView: View {
 
     private func cell(_ emoji: Emoji, index: Int) -> some View {
         let isSelected = index == browser.selectedIndex
-        let glyph = emoji.supportsSkinTone
-            ? SkinTone.current.apply(to: emoji.character)
-            : emoji.character
+        let glyph = emoji.tonedGlyph
         return Text(glyph)
             .font(.system(size: 25))  // match the pill's glyph size
             .frame(maxWidth: .infinity)

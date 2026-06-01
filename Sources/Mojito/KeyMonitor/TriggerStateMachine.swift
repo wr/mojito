@@ -148,6 +148,10 @@ struct TriggerStateMachine {
     var pillEmojiCount: Int = 0
 
     private var currentScope: CaptureScope = .normal
+    /// The active capture's scope. Read by the Engine's global-hotkey browser
+    /// entry, which synthesizes a pick outside the normal action flow and needs
+    /// to know whether the field holds `:query` or `::query`.
+    var captureScope: CaptureScope { currentScope }
 
     private var konamiProgress: Int = 0
     private enum KonamiStep { case up, down, left, right, b, a }
