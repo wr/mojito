@@ -112,7 +112,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k49: return "Wordle"
         case .k50: return "Disk Optimizer"
         case .k51: return "Last Call"
-        case .k52: return "Alcoholic"
+        case .k52: return "One more round..."
         }
     }
 
@@ -228,7 +228,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k49: return "Green, yellow, gray — six tries."
         case .k50: return "Those little colored blocks, all out of order."
         case .k51: return "Solve it to see what comes next."
-        case .k52: return "Just one more check. Then maybe one more."
+        case .k52: return "Ask for a fresh mojito?"
         }
     }
 
@@ -284,7 +284,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k49: return "🟩"
         case .k50: return "💽"
         case .k51: return "🍹"
-        case .k52: return "🍺"
+        case .k52: return "🍸"
         }
     }
 
