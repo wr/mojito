@@ -215,9 +215,11 @@ echo "→ Extracting release notes for v$VERSION from CHANGELOG.md"
 # This fragment is the single source of truth for both the GitHub Release body
 # and the Sparkle HTML notes, so the two can never drift apart.
 CHANGELOG_FRAGMENT=$(mktemp)
+# Stop at the next *version* heading, not any `## ` — the per-release body
+# now uses `## New` / `## Fixed` section headings that must be captured.
 awk -v header="## v$VERSION" '
     $0 == header { capture = 1; next }
-    capture && /^## / { exit }
+    capture && /^## v[0-9]/ { exit }
     capture { print }
 ' "$REPO_ROOT/CHANGELOG.md" > "$CHANGELOG_FRAGMENT"
 if [[ ! -s "$CHANGELOG_FRAGMENT" ]]; then
@@ -248,11 +250,20 @@ git clone --depth 1 --branch gh-pages "https://github.com/$GITHUB_REPO.git" "$GH
 
 echo "→ Rendering release-notes HTML"
 RELEASE_NOTES_URL="https://mojito.wells.ee/release-notes/$VERSION.html"
+FULL_NOTES_URL="https://mojito.wells.ee/release-notes/history.html"
 mkdir -p "$GH_PAGES_DIR/release-notes"
 python3 "$REPO_ROOT/scripts/md_to_release_notes.py" \
     --title "$APP_NAME $VERSION" \
     < "$CHANGELOG_FRAGMENT" \
     > "$GH_PAGES_DIR/release-notes/$VERSION.html"
+
+# Full version history → Sparkle's "Version history" link. Render every
+# `## vX.Y.Z` section (skip the `# Changelog` intro, which is repo-internal).
+echo "→ Rendering full version-history HTML"
+awk '/^## v[0-9]/ { p = 1 } p' "$REPO_ROOT/CHANGELOG.md" \
+    | python3 "$REPO_ROOT/scripts/md_to_release_notes.py" \
+        --title "$APP_NAME — Version History" \
+    > "$GH_PAGES_DIR/release-notes/history.html"
 
 APPCAST="$GH_PAGES_DIR/appcast.xml"
 python3 "$REPO_ROOT/scripts/update_appcast.py" \
@@ -262,7 +273,8 @@ python3 "$REPO_ROOT/scripts/update_appcast.py" \
     --url "$DOWNLOAD_URL" \
     --length "$LENGTH" \
     --signature "$EDDSA_SIGNATURE" \
-    --release-notes-url "$RELEASE_NOTES_URL"
+    --release-notes-url "$RELEASE_NOTES_URL" \
+    --full-release-notes-url "$FULL_NOTES_URL"
 
 cd "$GH_PAGES_DIR"
 git add appcast.xml release-notes

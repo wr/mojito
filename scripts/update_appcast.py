@@ -34,7 +34,8 @@ def main() -> int:
     p.add_argument("--url", required=True)
     p.add_argument("--length", required=True)
     p.add_argument("--signature", required=True)
-    p.add_argument("--release-notes-url", default="", help="URL to hosted HTML release notes")
+    p.add_argument("--release-notes-url", default="", help="URL to hosted HTML release notes for this version")
+    p.add_argument("--full-release-notes-url", default="", help="URL to the full version-history page (Sparkle's 'Version history' link)")
     args = p.parse_args()
 
     if os.path.exists(args.appcast):
@@ -70,6 +71,9 @@ def main() -> int:
         # silently ignores the unknown element, so the wrong name leaves the
         # update dialog with a blank release-notes pane.
         ET.SubElement(item, "{%s}releaseNotesLink" % NS["sparkle"]).text = args.release_notes_url
+    if args.full_release_notes_url:
+        # Drives the update dialog's "Version history" link → full changelog.
+        ET.SubElement(item, "{%s}fullReleaseNotesLink" % NS["sparkle"]).text = args.full_release_notes_url
     ET.SubElement(
         item,
         "enclosure",

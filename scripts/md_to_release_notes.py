@@ -47,6 +47,9 @@ a { color: #0a7aff; }
 
 def render_inline(text: str) -> str:
     text = html.escape(text, quote=False)
+    # Links first, before the emphasis passes — a URL's `_`/`*` shouldn't be
+    # mangled into <em>. `&` in hrefs stays escaped (valid in HTML attrs).
+    text = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", r'<a href="\2">\1</a>', text)
     text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
     text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
     text = re.sub(r"(?<!\*)\*(?!\*)([^*]+?)\*(?!\*)", r"<em>\1</em>", text)
