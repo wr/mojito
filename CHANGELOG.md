@@ -8,10 +8,10 @@ updater.
 ## v1.2.1
 
 ## New
-- **Text arrows:** type `->`, `<-`, or `<->` and they turn into → ← ↔ — now even flush against a word like `Foo->Bar`. Don't want them? Turn off "Convert text arrows" in Settings → General. Mojito also stays out of code editors and terminals by default. ([#93](https://github.com/wr/mojito/pull/93))
+- **Text arrows:** type `->`, `<-`, or `<->` and they turn into → ← ↔. ([#93](https://github.com/wr/mojito/pull/93))
 
 ## Fixed
-- **Update window:** the "What's New" window now shows the release notes, and "Version history" opens the full changelog. ([#95](https://github.com/wr/mojito/pull/95), [#97](https://github.com/wr/mojito/pull/97))
+- **Update window:** now shows release notes, and "Version history" opens the full changelog. ([#95](https://github.com/wr/mojito/pull/95), [#97](https://github.com/wr/mojito/pull/97))
 - Easter-egg polish.
 
 ## v1.2.0
