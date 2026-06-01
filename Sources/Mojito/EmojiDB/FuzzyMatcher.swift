@@ -55,7 +55,7 @@ struct FuzzyMatcher {
     static let k99Hex       = "k99"
     /// Below this we skip the hash lookup, so short prefixes don't surface
     /// a discovery hint.
-    private static let specialMinPrefix = 4
+    private static let specialMinPrefix = 2
 
     private struct PinnedRow {
         let hexcode: String
