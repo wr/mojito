@@ -39,6 +39,21 @@ struct SymbolsDatabaseTests {
         #expect(!SymbolsDatabaseTests.indexed.contains(where: { $0.emoji.hexcode == hex }))
     }
 
+    @Test func latin1CurrencySignsAreReachable() {
+        // £ ¢ ¥ live at U+00A2–A5, outside every range in `symbolRanges`, so
+        // they only reach the picker through a curated alias. Each must be
+        // findable by the terms people actually type, not just its Unicode name.
+        let expected: [(term: String, character: String)] = [
+            ("pound", "£"), ("sterling", "£"), ("gbp", "£"),
+            ("cent", "¢"),
+            ("yen", "¥"), ("yuan", "¥"),
+        ]
+        for (term, character) in expected {
+            let hit = SymbolsDatabaseTests.indexed.first(where: { $0.emoji.shortcodes.contains(term) })
+            #expect(hit?.emoji.character == character, "expected \(character) for \"\(term)\"")
+        }
+    }
+
     @Test func curatedShortcodeStillResolves() {
         // The character mutation must not break the existing shortcode-
         // based lookup the curated aliases rely on.

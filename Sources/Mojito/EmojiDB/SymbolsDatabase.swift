@@ -192,6 +192,14 @@ enum SymbolsDatabase {
         .init(character: "π",  shortcodes: ["pi"]),
         .init(character: "°",  shortcodes: ["degree"]),
 
+        // Currency. The Latin-1 currency signs (£ ¢ ¥, U+00A2–A5) fall
+        // outside every block in `symbolRanges`, so without an explicit
+        // entry they never reach the picker at all. The synonyms are terms
+        // the Unicode name alone ("POUND SIGN") wouldn't fuzzy-match.
+        .init(character: "£",  shortcodes: ["pound", "sterling", "gbp"]),
+        .init(character: "¢",  shortcodes: ["cent", "cents"]),
+        .init(character: "¥",  shortcodes: ["yen", "yuan", "rmb"]),
+
         // Marks & misc
         .init(character: "✓",  shortcodes: ["check_mark", "tick"]),
         .init(character: "✗",  shortcodes: ["x_mark", "cross"]),
