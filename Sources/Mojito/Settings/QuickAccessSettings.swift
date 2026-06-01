@@ -79,10 +79,10 @@ struct QuickAccessSection: View {
             if isHovered {
                 // End cells round their outer edge to nest in the capsule ends.
                 UnevenRoundedRectangle(
-                    topLeadingRadius: isFirst ? 20 : 9,
-                    bottomLeadingRadius: isFirst ? 20 : 9,
-                    bottomTrailingRadius: isLast ? 20 : 9,
-                    topTrailingRadius: isLast ? 20 : 9,
+                    topLeadingRadius: isFirst ? 15 : 7,
+                    bottomLeadingRadius: isFirst ? 15 : 7,
+                    bottomTrailingRadius: isLast ? 15 : 7,
+                    topTrailingRadius: isLast ? 15 : 7,
                     style: .continuous
                 )
                 .fill(Color(nsColor: .unemphasizedSelectedContentBackgroundColor))
@@ -91,13 +91,13 @@ struct QuickAccessSection: View {
                 Text(displayGlyph(emoji)).font(.system(size: 20))
             } else {
                 Image(systemName: "plus")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
         }
-        .frame(width: 40, height: 40)
-        .overlay(alignment: .topTrailing) { cornerControl(index: index, slot: slot).padding(2) }
-        .contentShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+        .frame(width: 30, height: 30)
+        .overlay(alignment: .topTrailing) { cornerControl(index: index, slot: slot).padding(1) }
+        .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
         .onTapGesture { editing = EditingSlot(id: index) }
         .onHover { inside in hovered = inside ? index : (hovered == index ? nil : hovered) }
         .help(slotHelp(slot))
@@ -111,9 +111,9 @@ struct QuickAccessSection: View {
             if hovered == index {
                 Button { store.reset(at: index) } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 7, weight: .bold))
+                        .font(.system(size: 6, weight: .bold))
                         .foregroundStyle(.white)
-                        .padding(4)
+                        .padding(3)
                         .background(Circle().fill(Color.black.opacity(resetHovered ? 0.7 : 0.45)))
                 }
                 .buttonStyle(.plain)
@@ -121,9 +121,9 @@ struct QuickAccessSection: View {
                 .help("Reset to most-used")
             } else {
                 Image(systemName: "pin.fill")
-                    .font(.system(size: 8, weight: .bold))
+                    .font(.system(size: 7, weight: .bold))
                     .foregroundStyle(.orange)
-                    .padding(3)
+                    .padding(2)
                     .background(Circle().fill(Color.orange.opacity(0.18)))
             }
         }
