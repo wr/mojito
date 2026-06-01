@@ -62,6 +62,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// advanced when the handler fires, the user typed past us and we skip the
     /// undo entry.
     private var inputSeq: Int = 0
+    /// `inputSeq` of the most recent digit keystroke. Lets the deferred heart
+    /// insert skip itself when a digit lands immediately after (`<30`) before
+    /// the conversion (and its undo entry) has even been created.
+    private var lastDigitSeq: Int = -1
     private static let emoticonUndoWindow: TimeInterval = 3.0
     /// Chars of typed `:` to erase before a browser pick is synthesized
     /// (1 when opened from the pill's chevron, 0 from the menu).
@@ -369,6 +373,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
     private func process(input: TriggerInput) -> Bool {
         inputSeq &+= 1
+        if case .nameChar(let c) = input, c.isNumber { lastDigitSeq = inputSeq }
         // BSOD-style "press any key" effects pre-empt everything; the key is
         // consumed so it doesn't leak into the focused app underneath.
         if case .idle = stateMachine.state, EffectDismisser.topWantsAnyKey() {
@@ -397,6 +402,19 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 return true
             }
             return false
+        }
+
+        // `<3`→❤️ fires eagerly so a heart at the end of a message lands. If a
+        // digit follows once the heart has rendered, the user meant a number
+        // (`<30`): rebuild `<3` + the digit in one replacement and consume the
+        // key, so the restore and the digit can't interleave (the race that
+        // produced `❤️<3`). Faster follow-ups are caught by the skip in the
+        // deferred insert, before the heart renders.
+        if case .idle = stateMachine.state, case .nameChar(let c) = input, c.isNumber,
+           let undo = pendingEmoticonUndo,
+           AmbientEmoticonTable.revocableByTrailingDigit(undo.originalText),
+           performEmoticonUndoIfFresh(appending: String(c)) {
+            return true
         }
 
         // Any other keystroke closes the undo window. Otherwise the entry
@@ -569,6 +587,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             let seqAtDispatch = inputSeq
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
                 guard let self else { return }
+                // `<3` typed flush before a digit (`<30`) means a number — if
+                // that digit was the very next keystroke, skip the conversion
+                // entirely so it stays literal. (A digit typed after a longer
+                // pause, once ❤️ has rendered, just yields `❤️0` — reverting it
+                // in-flight tangles with the async insert, so we don't.)
+                if AmbientEmoticonTable.revocableByTrailingDigit(word),
+                   self.lastDigitSeq == seqAtDispatch &+ 1 {
+                    return
+                }
                 self.handleAmbientEmoticonImmediate(word: word, trailing: trailing)
                 if self.inputSeq != seqAtDispatch { self.pendingEmoticonUndo = nil }
             }
@@ -1310,7 +1337,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     /// Returns true if an undo fired (caller should consume the key).
-    private func performEmoticonUndoIfFresh() -> Bool {
+    /// `appending` is tacked onto the restored original in the *same*
+    /// replacement — used by the `<30` rescue to fold the triggering digit in
+    /// atomically, so the restore can't interleave with a real keystroke.
+    @discardableResult
+    private func performEmoticonUndoIfFresh(appending suffix: String = "") -> Bool {
         guard let entry = pendingEmoticonUndo else { return false }
         if Date().timeIntervalSince(entry.insertedAt) > Self.emoticonUndoWindow {
             pendingEmoticonUndo = nil
@@ -1325,7 +1356,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // Grapheme-count, not UTF-16: macOS deletes a ZWJ sequence as one
         // backspace and TextInserter sends one per grapheme.
         let emojiLen = entry.emojiInserted.count
-        TextInserter.replace(charactersToDelete: emojiLen, with: entry.originalText)
+        TextInserter.replace(charactersToDelete: emojiLen, with: entry.originalText + suffix)
         pendingEmoticonUndo = nil
         DebugRecorder.record(.emoticon, "undo")
         return true

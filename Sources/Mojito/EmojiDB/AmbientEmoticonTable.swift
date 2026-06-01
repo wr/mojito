@@ -39,6 +39,14 @@ enum AmbientEmoticonTable {
     /// other ambient emoticons.
     static func isArrow(_ word: String) -> Bool { arrowKeys.contains(word) }
 
+    /// Emoticons that end in a digit (`<3` → ❤️, `</3` → 💔). These fire
+    /// eagerly so they land at the end of a message, but a digit typed right
+    /// after means the user meant a number (`<30`), so the Engine reverts the
+    /// conversion when that happens.
+    static func revocableByTrailingDigit(_ word: String) -> Bool {
+        (word.last?.isNumber ?? false) && map[word] != nil
+    }
+
     /// The longest arrow key that is a suffix of `buffer`, if any. Lets the
     /// state machine pull `->` out of `Foo->` without a leading boundary.
     static func arrowSuffix(of buffer: String) -> String? {

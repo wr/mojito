@@ -56,6 +56,18 @@ struct AmbientEmoticonTableTests {
         #expect(!AmbientEmoticonTable.hasLongerArrow(extending: "<->"))
     }
 
+    @Test func revocableByTrailingDigitCoversOnlyHearts() {
+        // Drives the `<30` rescue: a digit right after these reverts the
+        // conversion. Only the digit-ending hearts qualify.
+        #expect(AmbientEmoticonTable.revocableByTrailingDigit("<3"))
+        #expect(AmbientEmoticonTable.revocableByTrailingDigit("</3"))
+        #expect(!AmbientEmoticonTable.revocableByTrailingDigit("->"))
+        #expect(!AmbientEmoticonTable.revocableByTrailingDigit(">:)"))
+        #expect(!AmbientEmoticonTable.revocableByTrailingDigit("XD"))
+        // Not a known emoticon, even though it ends in a digit.
+        #expect(!AmbientEmoticonTable.revocableByTrailingDigit("<30"))
+    }
+
     @Test func caseVariantsAreSeparateKeys() {
         // "XD"/"xD" are registered; "Xd"/"xd" are not.
         #expect(AmbientEmoticonTable.emoji(for: "Xd") == nil)
