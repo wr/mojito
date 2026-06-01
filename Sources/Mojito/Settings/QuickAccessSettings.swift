@@ -79,25 +79,25 @@ struct QuickAccessSection: View {
             if isHovered {
                 // End cells round their outer edge to nest in the capsule ends.
                 UnevenRoundedRectangle(
-                    topLeadingRadius: isFirst ? 15 : 7,
-                    bottomLeadingRadius: isFirst ? 15 : 7,
-                    bottomTrailingRadius: isLast ? 15 : 7,
-                    topTrailingRadius: isLast ? 15 : 7,
+                    topLeadingRadius: isFirst ? 17 : 8,
+                    bottomLeadingRadius: isFirst ? 17 : 8,
+                    bottomTrailingRadius: isLast ? 17 : 8,
+                    topTrailingRadius: isLast ? 17 : 8,
                     style: .continuous
                 )
                 .fill(Color(nsColor: .unemphasizedSelectedContentBackgroundColor))
             }
             if let emoji = slot.emoji {
-                Text(displayGlyph(emoji)).font(.system(size: 20))
+                Text(displayGlyph(emoji)).font(.system(size: 22))
             } else {
                 Image(systemName: "plus")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
         }
-        .frame(width: 30, height: 30)
-        .overlay(alignment: .topTrailing) { cornerControl(index: index, slot: slot).padding(1) }
-        .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .frame(width: 34, height: 34)
+        .overlay(alignment: .topTrailing) { cornerControl(index: index, slot: slot).padding(2) }
+        .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .onTapGesture { editing = EditingSlot(id: index) }
         .onHover { inside in hovered = inside ? index : (hovered == index ? nil : hovered) }
         .help(slotHelp(slot))
