@@ -65,7 +65,11 @@ def main() -> int:
     ET.SubElement(item, "{%s}version" % NS["sparkle"]).text = args.build
     ET.SubElement(item, "{%s}minimumSystemVersion" % NS["sparkle"]).text = "14.0"
     if args.release_notes_url:
-        ET.SubElement(item, "{%s}releaseNotesURL" % NS["sparkle"]).text = args.release_notes_url
+        # The appcast element is `sparkle:releaseNotesLink` — NOT
+        # `releaseNotesURL` (that's the SUAppcastItem *property* name). Sparkle
+        # silently ignores the unknown element, so the wrong name leaves the
+        # update dialog with a blank release-notes pane.
+        ET.SubElement(item, "{%s}releaseNotesLink" % NS["sparkle"]).text = args.release_notes_url
     ET.SubElement(
         item,
         "enclosure",
