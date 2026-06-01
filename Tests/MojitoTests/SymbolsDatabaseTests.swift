@@ -54,6 +54,44 @@ struct SymbolsDatabaseTests {
         }
     }
 
+    @Test func curatedSymbolsAreFindableBySearchTerm() {
+        // Curated aliases give clean, searchable labels for glyphs whose Unicode
+        // names are awkward or wrong. Notably "lambda": U+03BB's Unicode name is
+        // "GREEK SMALL LETTER LAMDA", so the sweep alone can't match "lambda".
+        let expected: [(term: String, character: String)] = [
+            ("lambda", "λ"), ("delta", "δ"), ("Delta", "Δ"), ("omega", "ω"),
+            ("half", "½"), ("squared", "²"), ("cubed", "³"),
+            ("spanish_question", "¿"), ("micro", "µ"),
+        ]
+        for (term, character) in expected {
+            let hit = SymbolsDatabaseTests.indexed.first(where: { $0.emoji.shortcodes.contains(term) })
+            #expect(hit?.emoji.character == character, "expected \(character) for \"\(term)\"")
+        }
+    }
+
+    @Test func newlySweptBlocksAreReachable() {
+        // Blocks below U+2000 (and Braille / CJK punctuation) used to fall
+        // outside symbolRanges entirely. Spot-check one scalar from each.
+        func present(_ cp: UInt32) -> Bool {
+            SymbolsDatabaseTests.indexed.contains(where: {
+                $0.emoji.character.unicodeScalars.first?.value == cp
+            })
+        }
+        #expect(present(0x2801), "Braille ⠁")
+        #expect(present(0x300C), "CJK bracket 「")
+        #expect(present(0x00BD), "fraction ½")
+        #expect(present(0x03C9), "greek ω")
+    }
+
+    @Test func nonGraphicScalarsAreExcluded() {
+        // The general-category guard must drop soft hyphen (U+00AD, format) so
+        // it doesn't surface as an invisible blank row.
+        let softHyphen = SymbolsDatabaseTests.indexed.contains(where: {
+            $0.emoji.character.unicodeScalars.first?.value == 0x00AD
+        })
+        #expect(!softHyphen)
+    }
+
     @Test func curatedShortcodeStillResolves() {
         // The character mutation must not break the existing shortcode-
         // based lookup the curated aliases rely on.
