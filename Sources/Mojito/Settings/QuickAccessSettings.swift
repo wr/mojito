@@ -9,6 +9,7 @@ struct QuickAccessSection: View {
     @State private var editing: EditingSlot?
     @State private var hovered: Int?
     @State private var resetHovered = false
+    @State private var confirmReset = false
     private let database = EmojiDatabase.shared
 
     private var usage: [String: Int] {
@@ -60,13 +61,24 @@ struct QuickAccessSection: View {
                 Spacer(minLength: 0)
 
                 if store.hasPins {
-                    Button("Reset") { store.resetAll() }
+                    Button("Reset") { confirmReset = true }
+                        .confirmationDialog(
+                            "Reset all pinned slots to most-used?",
+                            isPresented: $confirmReset,
+                            titleVisibility: .visible
+                        ) {
+                            Button("Reset", role: .destructive) { store.resetAll() }
+                            Button("Cancel", role: .cancel) {}
+                        }
                 }
             }
-            Text("Click a slot to pin a specific emoji or symbol. Quick Access defaults to your most-used emoji.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Click a slot to pin a specific emoji or symbol.")
+                Text("Quick Access defaults to your most-used emoji.")
+            }
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.vertical, 4)
     }

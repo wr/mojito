@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import KeyboardShortcuts
 
 @MainActor
 final class MenuBarController {
@@ -146,6 +147,8 @@ final class MenuBarController {
 
         menu.addItem(.separator())
         let browse = NSMenuItem(title: String(localized: "Browse Emoji…"), action: #selector(MenuActions.openBrowser), keyEquivalent: "").configured(target: MenuActions.shared)
+        // Displays (and keeps in sync) the user's assigned browser hotkey.
+        browse.setShortcut(for: .showEmojiBrowser)
         menu.addItem(browse)
         browseItem = browse
         menu.addItem(.separator())

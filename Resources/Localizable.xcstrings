@@ -3501,7 +3501,7 @@
         }
       }
     },
-    "Click a slot to pin a specific emoji or symbol. Quick Access defaults to your most-used emoji." : {
+    "Click a slot to pin a specific emoji or symbol." : {
 
     },
     "Close" : {
@@ -8708,6 +8708,9 @@
     "Quick Access" : {
 
     },
+    "Quick Access defaults to your most-used emoji." : {
+
+    },
     "Quit %@" : {
       "localizations" : {
         "ar" : {
@@ -9382,6 +9385,9 @@
           }
         }
       }
+    },
+    "Reset all pinned slots to most-used?" : {
+
     },
     "Reset eggs" : {
       "localizations" : {
