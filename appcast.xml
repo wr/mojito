@@ -11,7 +11,7 @@
       <sparkle:shortVersionString>1.2.0</sparkle:shortVersionString>
       <sparkle:version>16</sparkle:version>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <sparkle:releaseNotesURL>https://mojito.wells.ee/release-notes/1.2.0.html</sparkle:releaseNotesURL>
+      <sparkle:releaseNotesLink>https://mojito.wells.ee/release-notes/1.2.0.html</sparkle:releaseNotesLink>
       <enclosure url="https://github.com/wr/mojito/releases/download/v1.2.0/Mojito.dmg" type="application/octet-stream" length="9409797" sparkle:edSignature="3FM35WgJRC5uwOYm6M4sdO6UWaSbOMT63s1l2h/WwTF9qkTrtCvDjLAis5t/MYrIeOdJRmAS/9DL90PLk1lSAQ==" />
     </item>
     <item>
@@ -20,7 +20,7 @@
       <sparkle:shortVersionString>1.1.1</sparkle:shortVersionString>
       <sparkle:version>15</sparkle:version>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <sparkle:releaseNotesURL>https://mojito.wells.ee/release-notes/1.1.1.html</sparkle:releaseNotesURL>
+      <sparkle:releaseNotesLink>https://mojito.wells.ee/release-notes/1.1.1.html</sparkle:releaseNotesLink>
       <enclosure url="https://github.com/wr/mojito/releases/download/v1.1.1/Mojito.dmg" type="application/octet-stream" length="9072651" sparkle:edSignature="7YMBNpr1ZNRHPmEvt4kNd0e921GfGiqJME/oo6aeR6H2rJCYkKVfeg1YCDY46F3cH9wJ7uIAoUcKK50uof+vCw==" />
     </item>
     <item>
