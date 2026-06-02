@@ -90,34 +90,60 @@ struct PrivacyPermissionsSettingsView: View {
 
 /// Shared between Settings → Privacy and the onboarding "Privacy details…" sheet.
 struct PrivacyDetailsRows: View {
+    @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled = true
+
     var body: some View {
-        privacyRow(
-            icon: "keyboard",
-            title: "Keystrokes aren't logged",
-            detail: "Used to detect `:` triggers. Nothing else."
-        )
-        privacyRow(
-            icon: "internaldrive",
-            title: "Your data stays on this Mac",
-            detail: "Usage counts, settings, and your exclusion list are stored locally. \(AppInfo.displayName) doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to Giphy."
-        )
-        privacyRow(
-            icon: "dollarsign.circle",
-            title: "Funded by donations",
-            detail: "No ads, tracking, or subscriptions."
-        ) {
-            Button("Donate") {
-                NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsriley")!)
+        Group {
+            privacyRow(
+                icon: "keyboard",
+                title: "Keystrokes aren't logged",
+                detail: "Used to detect `:` triggers. Nothing else."
+            )
+            privacyRow(
+                icon: "internaldrive",
+                title: "Your data stays on this Mac",
+                detail: "Usage counts, settings, and your exclusion list live only on this Mac.\n\nException: GIF search sends your query to Giphy when you use it."
+            )
+            privacyRow(
+                icon: "chart.bar.xaxis",
+                title: "Share anonymous usage stats",
+                detail: "Once a day: which emoji are popular, which features you use, and your macOS version. No identifiers, no IP address, and nothing you type."
+            ) {
+                Toggle("", isOn: $telemetryEnabled).labelsHidden()
+            }
+            privacyRow(
+                icon: "checklist",
+                title: "Everything we collect is public",
+                detail: "The full dataset is published, live — the page is the documentation."
+            ) {
+                Button("View stats") {
+                    NSWorkspace.shared.open(URL(string: "https://mojito.wells.ee/stats")!)
+                }
+            }
+            privacyRow(
+                icon: "dollarsign.circle",
+                title: "Funded by donations",
+                detail: "No ads, tracking, or subscriptions."
+            ) {
+                Button("Donate") {
+                    NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsriley")!)
+                }
+            }
+            privacyRow(
+                icon: "chevron.left.forwardslash.chevron.right",
+                title: "Open source and auditable",
+                detail: "All the code is on GitHub. Read it, build it, fork it."
+            ) {
+                Button("View source") {
+                    NSWorkspace.shared.open(URL(string: "https://github.com/wr/mojito")!)
+                }
             }
         }
-        privacyRow(
-            icon: "chevron.left.forwardslash.chevron.right",
-            title: "Open source and auditable",
-            detail: "All the code is on GitHub. Read it, build it, fork it."
-        ) {
-            Button("View source") {
-                NSWorkspace.shared.open(URL(string: "https://github.com/wr/mojito")!)
-            }
+        .onAppear {
+            // Seeing this disclosure (Settings ▸ Privacy or the onboarding
+            // sheet) satisfies the consent gate, so the one-time launch notice
+            // won't double up for users who poke around Settings first.
+            UserDefaults.standard.set(true, forKey: PrefsKey.telemetryConsentSeen)
         }
     }
 

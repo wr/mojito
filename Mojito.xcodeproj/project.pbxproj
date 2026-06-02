@@ -63,6 +63,7 @@
 		68D7BD3B3AB6699B56D7D578 /* s04.bin in Resources */ = {isa = PBXBuildFile; fileRef = 54037341F6A92839A94F3408 /* s04.bin */; };
 		6A8EC5B13FA4A0AC0F338875 /* ConfettiSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EB589505841013FF5EF5500 /* ConfettiSound.swift */; };
 		6B48E883C3B324C8ABB16C93 /* AmbientEmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */; };
+		6CFD48A60F308CA1FCBF059A /* TelemetryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC88D13B457E17EBC5B68C5 /* TelemetryStore.swift */; };
 		6F9314FB48040BE582D87716 /* BlueScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD72EE1D10D399387F1DD1C8 /* BlueScreen.swift */; };
 		74CED6225633C087A96D7E9C /* DebugRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2928BC07BE26CF9B15F23D70 /* DebugRecorder.swift */; };
 		75008F5E9E8750E55512283C /* FzyScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */; };
@@ -94,6 +95,7 @@
 		9CCEA0B70EEB77F988521DDB /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DA7C9FD3286A7839BA642D /* AppInfo.swift */; };
 		9E9309E8AF1F9D8B44213729 /* EmoticonTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */; };
 		9F45015A816323AF275F23ED /* DebugReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9E01A82260E8A38DF8D7EA /* DebugReport.swift */; };
+		9F550EAD8B9A90F2874E8F22 /* TelemetryUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA05D792327D50DA2FCF35B /* TelemetryUploader.swift */; };
 		A1C87132DCD9B263CA32BAAE /* WordleSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F82574CC8A6D051CF87D9B /* WordleSounds.swift */; };
 		A637DCA2905238217427E806 /* EmojiBrowserCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C001583E27CC71D9959055 /* EmojiBrowserCatalog.swift */; };
 		A9A15B339C05195BB45CC09F /* MyLegSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C4C16E01184684E33C3437 /* MyLegSound.swift */; };
@@ -144,6 +146,7 @@
 		E9340C650BD416393A44ACC3 /* DockIconManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02F1996A3DED7A0A133E24C /* DockIconManager.swift */; };
 		EAF2B984187615EBAF67954E /* DiskOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDDFF6254C8A58E63AC223D5 /* DiskOptimizer.swift */; };
 		ECC3936D06DC519BCE249F8D /* PermissionsCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2027256AFD59D65C41FAA2AD /* PermissionsCoordinator.swift */; };
+		EE298513CD9C097AD2AEA237 /* TelemetryConsent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAD51C35233BDBC98AE0418B /* TelemetryConsent.swift */; };
 		EF12FA0699114C96BC4FEFC2 /* s09.bin in Resources */ = {isa = PBXBuildFile; fileRef = 4678DF22D8E1B41FC8359CF1 /* s09.bin */; };
 		EF68C901592CF3ACF08A344B /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 8B43031B38814AF859998A56 /* KeyboardShortcuts */; };
 		EFCA5419E2CE5D16F2DE7DB3 /* AmbientEmoticonTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F36FC6BE9A109EAEE6A18CE1 /* AmbientEmoticonTableTests.swift */; };
@@ -237,6 +240,7 @@
 		73FCCFD6A9499FB84B690194 /* s10.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s10.bin; sourceTree = "<group>"; };
 		74DB9192DF20F83CAD8A820C /* ImageBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageBlob.swift; sourceTree = "<group>"; };
 		786373C2E5DE4642148857B1 /* CaretLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaretLocator.swift; sourceTree = "<group>"; };
+		7CC88D13B457E17EBC5B68C5 /* TelemetryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryStore.swift; sourceTree = "<group>"; };
 		7CCBA41F4C17CC47E155A9BE /* v07.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v07.bin; sourceTree = "<group>"; };
 		7E63ABA27E65953D84162097 /* SolitaireWin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolitaireWin.swift; sourceTree = "<group>"; };
 		7EB589505841013FF5EF5500 /* ConfettiSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiSound.swift; sourceTree = "<group>"; };
@@ -271,6 +275,7 @@
 		AB126DDBD153A051CDEF105B /* EggIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggIndex.swift; sourceTree = "<group>"; };
 		ABF01308E9212227B8106776 /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
 		AD72EE1D10D399387F1DD1C8 /* BlueScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueScreen.swift; sourceTree = "<group>"; };
+		AEA05D792327D50DA2FCF35B /* TelemetryUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryUploader.swift; sourceTree = "<group>"; };
 		B000574456AD1D158ED5C88B /* v08.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v08.bin; sourceTree = "<group>"; };
 		B05F08FB28C8998B7F7075BB /* TicTacToeGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicTacToeGame.swift; sourceTree = "<group>"; };
 		B0953EA30C5D11ACF280D7A2 /* Trogdor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trogdor.swift; sourceTree = "<group>"; };
@@ -290,6 +295,7 @@
 		C410F8B7AF8493C098EA2AF1 /* ConfettiRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiRain.swift; sourceTree = "<group>"; };
 		C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPermissionsSettings.swift; sourceTree = "<group>"; };
 		C876AD00FBA92A6CA56ABD95 /* s07.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s07.bin; sourceTree = "<group>"; };
+		CAD51C35233BDBC98AE0418B /* TelemetryConsent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryConsent.swift; sourceTree = "<group>"; };
 		CB7ACE7E64FDA50492BD8570 /* WordleGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordleGame.swift; sourceTree = "<group>"; };
 		CDB886D82441D68D2F815AD3 /* AppIconDev.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIconDev.icon; sourceTree = "<group>"; };
 		CDDFF6254C8A58E63AC223D5 /* DiskOptimizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskOptimizer.swift; sourceTree = "<group>"; };
@@ -441,6 +447,7 @@
 				A7F583433DA02A2A38792FC6 /* Permissions */,
 				D2D14DAEC5971CA040B0A435 /* Picker */,
 				080DE9B8A7167B77D26EC5FB /* Settings */,
+				99F596222650D0CE2403371E /* Telemetry */,
 				F61D3C78A8AF186D20FBC515 /* Util */,
 			);
 			path = Mojito;
@@ -508,6 +515,16 @@
 				A9B4D494883A28523B1C6081 /* ExclusionStore.swift */,
 			);
 			path = Exclusions;
+			sourceTree = "<group>";
+		};
+		99F596222650D0CE2403371E /* Telemetry */ = {
+			isa = PBXGroup;
+			children = (
+				CAD51C35233BDBC98AE0418B /* TelemetryConsent.swift */,
+				7CC88D13B457E17EBC5B68C5 /* TelemetryStore.swift */,
+				AEA05D792327D50DA2FCF35B /* TelemetryUploader.swift */,
+			);
+			path = Telemetry;
 			sourceTree = "<group>";
 		};
 		A7F583433DA02A2A38792FC6 /* Permissions */ = {
@@ -935,6 +952,9 @@
 				368FCAE7AAA6BB9F89291A1D /* SosumiSound.swift in Sources */,
 				2B3FD6118D1C2D7AB0D24588 /* SymbolsDatabase.swift in Sources */,
 				5EBE8D89D81DB7FF6AF09968 /* TadaSound.swift in Sources */,
+				EE298513CD9C097AD2AEA237 /* TelemetryConsent.swift in Sources */,
+				6CFD48A60F308CA1FCBF059A /* TelemetryStore.swift in Sources */,
+				9F550EAD8B9A90F2874E8F22 /* TelemetryUploader.swift in Sources */,
 				340DAC1A3E1A94B6CB4C21D1 /* TextInserter.swift in Sources */,
 				8766D3C09A87866098D979B0 /* TicTacToeGame.swift in Sources */,
 				58DE4798B57C01E76DDF8F91 /* TrainGame.swift in Sources */,

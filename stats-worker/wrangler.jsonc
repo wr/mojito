@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mojito-stats",
+  "main": "src/index.js",
+  "compatibility_date": "2025-01-01",
+  "observability": { "enabled": true },
+
+  // Created via: wrangler d1 create mojito_stats
+  // Paste the printed database_id below, then run the schema (see README).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mojito_stats",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+    }
+  ]
+
+  // After first deploy, front it with the custom domain the app posts to and
+  // the stats page fetches from (must match TelemetryUploader.endpoint):
+  //
+  //   "routes": [
+  //     { "pattern": "stats.mojito.wells.ee", "custom_domain": true }
+  //   ]
+}

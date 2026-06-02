@@ -53,6 +53,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: PrefsKey.firstLaunchDate)
         }
 
+        // Anonymous, consent-gated daily stats. Self-gates — a no-op until the
+        // user has seen the notice and left it enabled. See W-342.
+        TelemetryUploader.shared.uploadIfDue()
+
         menuBar.install(
             engine: engine,
             permissions: permissions,
@@ -85,6 +89,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             openOnboarding()
         } else {
             engine.start()
+            TelemetryConsent.presentIfNeeded()
         }
 
         NotificationCenter.default.publisher(for: .mojitoShouldShowOnboarding)
@@ -99,6 +104,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
                 self?.engine.start()
                 // Drop the onboarding fast-poll back to the baseline cadence.
                 self?.permissions.startMonitoring()
+                // First run reaches "running" here — surface the stats consent.
+                TelemetryConsent.presentIfNeeded()
             }
             .store(in: &observers)
 

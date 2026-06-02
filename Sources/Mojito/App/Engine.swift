@@ -1190,8 +1190,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // Branch on the synthetic hexcode prefix so symbols don't pad the
         // emoji milestone count.
         if emoji.hexcode.hasPrefix("SYM_") {
+            TelemetryStore.recordSymbol()
             bumpSymbolCounter()
         } else {
+            TelemetryStore.recordEmoji(hexcode: emoji.hexcode)
             bumpEmojiCounter()
         }
     }
@@ -1217,6 +1219,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// Pure diagnostic tally — no milestone eggs ride on it, so no seeding.
     /// Lets the debug report show whether emoticon conversions are landing.
     private func bumpEmoticonCounter() {
+        TelemetryStore.recordEmoticon()
         let defaults = UserDefaults.standard
         defaults.set(defaults.integer(forKey: PrefsKey.totalEmoticonInserted) + 1,
                      forKey: PrefsKey.totalEmoticonInserted)
@@ -1243,6 +1246,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     private func recordGifInserted() {
+        TelemetryStore.recordGif()
         let defaults = UserDefaults.standard
         let current = (defaults.object(forKey: PrefsKey.totalGifInserted) as? Int) ?? 0
         let next = current + 1

@@ -1,0 +1,17 @@
+{
+  "name": "mojito-stats-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker + D1 backend for Mojito's anonymous usage stats (W-342).",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "db:create": "wrangler d1 create mojito_stats",
+    "db:init:local": "wrangler d1 execute mojito_stats --local --file=./schema.sql",
+    "db:init:remote": "wrangler d1 execute mojito_stats --remote --file=./schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
