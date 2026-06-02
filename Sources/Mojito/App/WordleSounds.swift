@@ -31,13 +31,19 @@ enum WordleSounds {
         play([Tone(freq: 1_100, duration: 0.022, amplitude: 0.045)])
     }
 
-    static func reveal(_ tone: RevealTone) {
-        let freq: Double
+    // `step` is the 0-based ordinal of this tile among correct tiles in the row;
+    // near/miss tiles ignore it (semitone offset 0).
+    static func reveal(_ tone: RevealTone, step: Int = 0) {
+        let base: Double
         switch tone {
-        case .hit:  freq = 880      // A5
-        case .near: freq = 622.25   // D#5
-        case .miss: freq = 415.30   // G#4
+        case .hit:  base = 880      // A5
+        case .near: base = 622.25   // D#5
+        case .miss: base = 415.30   // G#4
         }
+        // Major-triad semitone offsets (A C# E A C# …). Clamped past the top.
+        let degrees = [0, 4, 7, 12, 16, 19, 24]
+        let semis = tone == .hit ? degrees[min(max(step, 0), degrees.count - 1)] : 0
+        let freq = base * pow(2.0, Double(semis) / 12.0)
         play([Tone(freq: freq, duration: 0.10, amplitude: 0.06)])
     }
 
