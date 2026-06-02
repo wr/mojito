@@ -11,14 +11,13 @@
     {
       "binding": "DB",
       "database_name": "mojito_stats",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "d5afce2d-4163-476e-bd21-95dd41a0e1e8"
     }
-  ]
+  ],
 
-  // After first deploy, front it with the custom domain the app posts to and
-  // the stats page fetches from (must match TelemetryUploader.endpoint):
-  //
-  //   "routes": [
-  //     { "pattern": "stats.mojito.wells.ee", "custom_domain": true }
-  //   ]
+  // App posts here and the stats page fetches here. Requires wells.ee to be a
+  // Cloudflare zone; provisions the DNS record + cert on deploy.
+  "routes": [
+    { "pattern": "stats.mojito.wells.ee", "custom_domain": true }
+  ]
 }
