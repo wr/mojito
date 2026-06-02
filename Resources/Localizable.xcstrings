@@ -1467,6 +1467,9 @@
         }
       }
     },
+    "A new version of %@ is ready to install." : {
+
+    },
     "About" : {
       "localizations" : {
         "ar" : {
@@ -4602,6 +4605,9 @@
           }
         }
       }
+    },
+    "Convert text arrows (`->` → →)" : {
+
     },
     "Copied to clipboard" : {
       "localizations" : {
@@ -15811,6 +15817,12 @@
           }
         }
       }
+    },
+    "Update available" : {
+
+    },
+    "Update available…" : {
+
     },
     "Update check failed" : {
       "localizations" : {

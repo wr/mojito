@@ -12,6 +12,12 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate {
     /// quiet warning triangle instead of failing invisibly.
     @Published private(set) var hasUpdateError = false
 
+    /// True from when Sparkle finds a valid update until it installs (the app
+    /// relaunches) or a later check finds nothing. Drives a gentle menu-bar
+    /// "update available" badge + row *alongside* Sparkle's own popup, so a
+    /// deferred update still lingers as a reminder instead of vanishing.
+    @Published private(set) var hasUpdateAvailable = false
+
     private let log = OSLog(subsystem: "ee.wells.Mojito", category: "Updater")
     private let driver = SPUStandardUserDriver(hostBundle: .main, delegate: nil)
     private lazy var updater: SPUUpdater = SPUUpdater(
@@ -104,12 +110,14 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate {
     nonisolated func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
         Task { @MainActor in
             self.hasUpdateError = false
+            self.hasUpdateAvailable = true
         }
     }
 
     nonisolated func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
         Task { @MainActor in
             self.hasUpdateError = false
+            self.hasUpdateAvailable = false
         }
     }
 }
