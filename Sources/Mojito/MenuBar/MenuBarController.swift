@@ -15,6 +15,7 @@ final class MenuBarController {
     private weak var pauseHourItem: NSMenuItem?
     private weak var pauseTomorrowItem: NSMenuItem?
     private weak var browseItem: NSMenuItem?
+    private var updateBadge: NSView?
 
     func install(
         engine: Engine,
@@ -35,20 +36,18 @@ final class MenuBarController {
         engine.$isActive
             .combineLatest(permissions.$accessibility, permissions.$inputMonitoring)
             .receive(on: RunLoop.main)
-            .sink { [weak self] isActive, ax, im in
-                // Only warn post-onboarding. During onboarding the missing
-                // permissions are expected and the flow already shows them.
-                let onboardingComplete = UserDefaults.standard.bool(forKey: PrefsKey.onboardingComplete)
-                let hasIssue = onboardingComplete && !(ax && im)
-                self?.refreshIcon(active: isActive && ax && im, hasIssue: hasIssue)
+            .sink { [weak self] _, _, _ in
+                self?.applyStatusIcon()
                 self?.refreshMenu()
             }
             .store(in: &observers)
 
         UpdaterCoordinator.shared.$hasUpdateError
+            .combineLatest(UpdaterCoordinator.shared.$hasUpdateAvailable)
             .receive(on: RunLoop.main)
-            .sink { [weak self] hasError in
-                self?.refreshUpdatesItem(hasError: hasError)
+            .sink { [weak self] _, _ in
+                self?.applyStatusIcon()
+                self?.refreshUpdatesItem()
             }
             .store(in: &observers)
 
@@ -82,45 +81,87 @@ final class MenuBarController {
     private func createStatusItemIfNeeded() {
         guard statusItem == nil else { return }
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        if let button = item.button {
-            applyIcon(to: button, active: engine?.isActive ?? true, hasIssue: false)
-        }
         item.menu = buildMenu()
         statusItem = item
+        applyStatusIcon()
         refreshMenu()
-        refreshUpdatesItem(hasError: UpdaterCoordinator.shared.hasUpdateError)
+        refreshUpdatesItem()
     }
 
     // MARK: - Icon
 
-    private func refreshIcon(active: Bool, hasIssue: Bool) {
+    /// Reads the live engine/permission/updater state and repaints the icon.
+    /// Called from both Combine sinks so any of the three inputs refreshes it.
+    private func applyStatusIcon() {
         guard let button = statusItem?.button else { return }
-        applyIcon(to: button, active: active, hasIssue: hasIssue)
+        let ax = permissions?.accessibility ?? false
+        let im = permissions?.inputMonitoring ?? false
+        // Only warn post-onboarding. During onboarding the missing permissions
+        // are expected and the flow already shows them.
+        let onboardingComplete = UserDefaults.standard.bool(forKey: PrefsKey.onboardingComplete)
+        let hasIssue = onboardingComplete && !(ax && im)
+        let active = (engine?.isActive ?? true) && ax && im
+        applyIcon(to: button,
+                  active: active,
+                  hasIssue: hasIssue,
+                  updateAvailable: UpdaterCoordinator.shared.hasUpdateAvailable)
     }
 
     /// Text fallback because a `variableLength` status item with no image
     /// renders at 0pt — completely invisible.
-    private func applyIcon(to button: NSStatusBarButton, active: Bool, hasIssue: Bool) {
+    private func applyIcon(to button: NSStatusBarButton, active: Bool, hasIssue: Bool, updateAvailable: Bool) {
         if hasIssue, let image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: String(localized: "\(AppInfo.displayName) needs permission")) {
             image.isTemplate = false  // keep yellow tint
             button.image = image
             button.title = ""
+            setUpdateBadge(false, on: button)
             return
         }
 
         if let image = NSImage(named: "MenuBarIcon") {
             // ~15–16pt matches Apple's menu-bar icons. SVG is 128×119.
             image.size = NSSize(width: 16, height: 15)
-            image.isTemplate = true
+            image.isTemplate = true  // system tints it correctly for the menu bar
             // Softens template tint when paused.
             button.appearsDisabled = !active
             button.image = image
             button.title = ""
+            setUpdateBadge(updateAvailable, on: button)
             return
         }
 
         button.image = nil
         button.title = hasIssue ? "⚠️" : "🍹"
+        setUpdateBadge(false, on: button)
+    }
+
+    /// A small yellow "update available" dot pinned to the top-right of the
+    /// status button. A subview rather than a composited image, so the glyph
+    /// stays a template the system tints correctly for the menu bar's light/
+    /// dark state (compositing forces a non-template image that mis-tints).
+    private func setUpdateBadge(_ visible: Bool, on button: NSStatusBarButton) {
+        guard visible else { updateBadge?.isHidden = true; return }
+        let d: CGFloat = 6
+        // Distance from the top / right edges — nudged in so the dot sits on
+        // the glyph's upper-right rather than floating in the corner.
+        let rightInset: CGFloat = 7
+        let topInset: CGFloat = 3
+        // Status buttons draw flipped (top-left origin), so "top" is y≈0.
+        // Branch on isFlipped so the dot lands consistently either way.
+        let x = button.bounds.maxX - d - rightInset
+        let y = button.isFlipped ? topInset : (button.bounds.maxY - d - topInset)
+        let frame = NSRect(x: x, y: y, width: d, height: d)
+        if let badge = updateBadge {
+            badge.frame = frame
+            badge.isHidden = false
+        } else {
+            let badge = NSView(frame: frame)
+            badge.wantsLayer = true
+            badge.layer?.backgroundColor = NSColor.systemYellow.cgColor
+            badge.layer?.cornerRadius = d / 2
+            button.addSubview(badge)
+            updateBadge = badge
+        }
     }
 
     // MARK: - Menu
@@ -162,7 +203,7 @@ final class MenuBarController {
         let updatesItem = NSMenuItem(title: String(localized: "Check for Updates…"), action: #selector(MenuActions.checkForUpdates), keyEquivalent: "").configured(target: MenuActions.shared)
         menu.addItem(updatesItem)
         checkForUpdatesItem = updatesItem
-        refreshUpdatesItem(hasError: UpdaterCoordinator.shared.hasUpdateError)
+        refreshUpdatesItem()
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: String(localized: "Quit \(AppInfo.displayName)"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
@@ -183,15 +224,25 @@ final class MenuBarController {
         browseItem?.isEnabled = engine?.isActive ?? false
     }
 
-    private func refreshUpdatesItem(hasError: Bool) {
+    private func refreshUpdatesItem() {
         guard let item = checkForUpdatesItem else { return }
-        item.title = String(localized: "Check for Updates…")
-        if hasError {
+        if UpdaterCoordinator.shared.hasUpdateAvailable {
+            // Available beats the error state: clicking re-shows Sparkle's
+            // dialog so the user can install (or defer again).
+            item.title = String(localized: "Update available…")
+            let config = NSImage.SymbolConfiguration(paletteColors: [.systemYellow])
+            item.image = NSImage(systemSymbolName: "arrow.down.circle.fill", accessibilityDescription: String(localized: "Update available"))?
+                .withSymbolConfiguration(config)
+            item.image?.isTemplate = false
+            item.toolTip = String(localized: "A new version of \(AppInfo.displayName) is ready to install.")
+        } else if UpdaterCoordinator.shared.hasUpdateError {
             // Quieter than a modal but still discoverable.
+            item.title = String(localized: "Check for Updates…")
             item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: String(localized: "Update check failed"))
             item.image?.isTemplate = false
             item.toolTip = String(localized: "\(AppInfo.displayName) couldn't reach the update server.")
         } else {
+            item.title = String(localized: "Check for Updates…")
             item.image = nil
             item.toolTip = nil
         }
