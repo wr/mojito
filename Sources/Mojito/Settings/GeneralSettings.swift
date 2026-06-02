@@ -64,7 +64,7 @@ struct GeneralSettingsView: View {
                 Toggle("Convert emoticons (`:D` → 😃)", isOn: $emoticonsEnabled)
                     .toggleStyle(.switch)
                 if emoticonsEnabled {
-                    Toggle("Convert text arrows (`->` → →)", isOn: $arrowConversionEnabled)
+                    Toggle("Convert text arrows (`->` to →)", isOn: $arrowConversionEnabled)
                         .toggleStyle(.switch)
                         .padding(.leading, 20)
                 }

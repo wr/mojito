@@ -1467,16 +1467,22 @@
     },
     "A new version of %@ is ready to install.": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "A new version of %@ is ready to install."
+            "value": "إصدار جديد من %@ جاهز للتثبيت."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Eine neue Version von %@ kann installiert werden."
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new version of %@ is ready to install."
           }
         },
         "es": {
@@ -1491,10 +1497,28 @@
             "value": "Hay una nueva versión de %@ lista para instalar."
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسخهٔ جدید %@ آمادهٔ نصب است."
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Une nouvelle version de %@ est prête à être installée."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "גרסה חדשה של %@ מוכנה להתקנה."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ का नया वर्शन इंस्टॉल करने के लिए तैयार है।"
           }
         },
         "it": {
@@ -1503,16 +1527,40 @@
             "value": "Una nuova versione di %@ è pronta per l'installazione."
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ の新しいバージョンをインストールできます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@의 새 버전을 설치할 수 있습니다."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er is een nieuwe versie van %@ klaar om te installeren."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nowa wersja %@ jest gotowa do zainstalowania."
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Uma nova versão do %@ está pronta para instalar."
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ の新しいバージョンをインストールできます。"
+            "value": "Новая версия %@ готова к установке."
           }
         },
         "zh-Hans": {
@@ -1525,54 +1573,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 的新版本已可安裝。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@의 새 버전을 설치할 수 있습니다."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ का नया वर्शन इंस्टॉल करने के लिए तैयार है।"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Новая версия %@ готова к установке."
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nowa wersja %@ jest gotowa do zainstalowania."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Er is een nieuwe versie van %@ klaar om te installeren."
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "إصدار جديد من %@ جاهز للتثبيت."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "نسخهٔ جدید %@ آمادهٔ نصب است."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גרסה חדשה של %@ מוכנה להתקנה."
           }
         }
       }
@@ -4713,18 +4713,137 @@
         }
       }
     },
-    "Convert text arrows (`->` → →)": {
+    "Convert text arrows (`->` to →)": {
       "localizations": {
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Convert text arrows (`->` → →)"
+            "value": "Convert text arrows (`->` to →)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Textpfeile umwandeln (`->` zu →)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convertir flechas de texto (`->` a →)"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convertir flechas de texto (`->` a →)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convertir les flèches textuelles (`->` en →)"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converti le frecce testuali (`->` in →)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converter setas de texto (`->` em →)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "テキスト矢印を変換 (`->` を → に)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转换文本箭头 (`->` 变成 →)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "轉換文字箭頭 (`->` 變成 →)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "텍스트 화살표 변환 (`->`를 → 로)"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "टेक्स्ट तीर बदलें (`->` को →)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Преобразовывать текстовые стрелки (`->` в →)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamieniaj strzałki tekstowe (`->` na →)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekstpijlen omzetten (`->` naar →)"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحويل أسهم النص (`->` إلى →)"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تبدیل پیکان‌های متنی (`->` به →)"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המרת חצים טקסטואליים (`->` ל־ →)"
+          }
+        }
+      }
+    },
+    "Convert text arrows (`->` → →)": {
+      "extractionState": "stale",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحويل أسهم النص (`->` → →)"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Textpfeile umwandeln (`->` → →)"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert text arrows (`->` → →)"
           }
         },
         "es": {
@@ -4739,10 +4858,28 @@
             "value": "Convertir flechas de texto (`->` → →)"
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تبدیل پیکان‌های متنی (`->` → →)"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Convertir les flèches textuelles (`->` → →)"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המרת חצים טקסטואליים (`->` → →)"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "टेक्स्ट तीर बदलें (`->` → →)"
           }
         },
         "it": {
@@ -4751,16 +4888,40 @@
             "value": "Converti le frecce testuali (`->` → →)"
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "テキスト矢印を変換 (`->` → →)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "텍스트 화살표 변환 (`->` → →)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekstpijlen omzetten (`->` → →)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamieniaj strzałki tekstowe (`->` → →)"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Converter setas de texto (`->` → →)"
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "テキスト矢印を変換 (`->` → →)"
+            "value": "Преобразовывать текстовые стрелки (`->` → →)"
           }
         },
         "zh-Hans": {
@@ -4773,54 +4934,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "轉換文字箭頭 (`->` → →)"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "텍스트 화살표 변환 (`->` → →)"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "टेक्स्ट तीर बदलें (`->` → →)"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Преобразовывать текстовые стрелки (`->` → →)"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zamieniaj strzałki tekstowe (`->` → →)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tekstpijlen omzetten (`->` → →)"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تحويل أسهم النص (`->` → →)"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تبدیل پیکان‌های متنی (`->` → →)"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "המרת חצים טקסטואליים (`->` → →)"
           }
         }
       }
@@ -16036,10 +16149,10 @@
     },
     "Update available": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Update available"
+            "value": "يتوفر تحديث"
           }
         },
         "de": {
@@ -16048,6 +16161,12 @@
             "value": "Update verfügbar"
           }
         },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update available"
+          }
+        },
         "es": {
           "stringUnit": {
             "state": "translated",
@@ -16058,78 +16177,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Actualización disponible"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mise à jour disponible"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aggiornamento disponibile"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Atualização disponível"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アップデートあり"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "有可用更新"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "有可用更新"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "업데이트 사용 가능"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "अपडेट उपलब्ध"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Доступно обновление"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dostępna aktualizacja"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Update beschikbaar"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يتوفر تحديث"
           }
         },
         "fa": {
@@ -16138,26 +16185,98 @@
             "value": "به‌روزرسانی در دسترس است"
           }
         },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mise à jour disponible"
+          }
+        },
         "he": {
           "stringUnit": {
             "state": "translated",
             "value": "עדכון זמין"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अपडेट उपलब्ध"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiornamento disponibile"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップデートあり"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트 사용 가능"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update beschikbaar"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostępna aktualizacja"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualização disponível"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступно обновление"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有可用更新"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有可用更新"
           }
         }
       }
     },
     "Update available…": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Update available…"
+            "value": "يتوفر تحديث…"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Update verfügbar…"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update available…"
           }
         },
         "es": {
@@ -16172,10 +16291,28 @@
             "value": "Actualización disponible…"
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "به‌روزرسانی در دسترس است…"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Mise à jour disponible…"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עדכון זמין…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अपडेट उपलब्ध…"
           }
         },
         "it": {
@@ -16184,16 +16321,40 @@
             "value": "Aggiornamento disponibile…"
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップデートあり…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "업데이트 사용 가능…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update beschikbaar…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostępna aktualizacja…"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Atualização disponível…"
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "アップデートあり…"
+            "value": "Доступно обновление…"
           }
         },
         "zh-Hans": {
@@ -16206,54 +16367,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "有可用更新…"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "업데이트 사용 가능…"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "अपडेट उपलब्ध…"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Доступно обновление…"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dostępna aktualizacja…"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Update beschikbaar…"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يتوفر تحديث…"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "به‌روزرسانی در دسترس است…"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "עדכון זמין…"
           }
         }
       }
