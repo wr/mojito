@@ -31,13 +31,23 @@ enum WordleSounds {
         play([Tone(freq: 1_100, duration: 0.022, amplitude: 0.045)])
     }
 
-    static func reveal(_ tone: RevealTone) {
-        let freq: Double
+    // Only the green (correct) tiles climb: each successive hit in a row steps
+    // up the scale, so the greens build a little ascending melody that rewards
+    // getting letters right. `step` is the green's index within the row (0 for
+    // the first hit, 1 for the second …); near/miss tiles keep a fixed blip.
+    static func reveal(_ tone: RevealTone, step: Int = 0) {
+        let base: Double
         switch tone {
-        case .hit:  freq = 880      // A5
-        case .near: freq = 622.25   // D#5
-        case .miss: freq = 415.30   // G#4
+        case .hit:  base = 880      // A5
+        case .near: base = 622.25   // D#5
+        case .miss: base = 415.30   // G#4
         }
+        // Major-triad arpeggio in semitones (A C# E A C# …) — climbs faster and
+        // higher than a scale for a triumphant, fanfare-like reward. Clamps past
+        // the top.
+        let degrees = [0, 4, 7, 12, 16, 19, 24]
+        let semis = tone == .hit ? degrees[min(max(step, 0), degrees.count - 1)] : 0
+        let freq = base * pow(2.0, Double(semis) / 12.0)
         play([Tone(freq: freq, duration: 0.10, amplitude: 0.06)])
     }
 

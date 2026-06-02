@@ -447,6 +447,14 @@ private struct WordleView: View {
         // superseded round don't write into the fresh board.
         let round = model.roundTick
         let states = model.evaluation(for: model.guesses[row])
+        // Per-column scale step for the reveal SFX: only greens climb, indexed
+        // by how many greens precede them so scattered hits still ascend cleanly.
+        var greenStep = [Int](repeating: 0, count: states.count)
+        var greens = 0
+        for c in 0..<states.count where states[c].revealTone == .hit {
+            greenStep[c] = greens
+            greens += 1
+        }
         for col in 0..<WordleModel.wordLength {
             let idx = row * WordleModel.wordLength + col
             let delay = Double(col) * colRevealStep
@@ -459,7 +467,7 @@ private struct WordleView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + delay + 0.12) {
                 guard model.roundTick == round else { return }
                 revealedFront.insert(idx)
-                if col < states.count { WordleSounds.reveal(states[col].revealTone) }
+                if col < states.count { WordleSounds.reveal(states[col].revealTone, step: greenStep[col]) }
                 withAnimation(.easeOut(duration: 0.12)) { flipY[idx] = 1 }
             }
         }
