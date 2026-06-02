@@ -447,8 +447,8 @@ private struct WordleView: View {
         // superseded round don't write into the fresh board.
         let round = model.roundTick
         let states = model.evaluation(for: model.guesses[row])
-        // Per-column scale step for the reveal SFX: only greens climb, indexed
-        // by how many greens precede them so scattered hits still ascend cleanly.
+        // Per-column scale step for the reveal SFX: 0-based ordinal among
+        // correct tiles, used as the `step` argument to WordleSounds.reveal.
         var greenStep = [Int](repeating: 0, count: states.count)
         var greens = 0
         for c in 0..<states.count where states[c].revealTone == .hit {

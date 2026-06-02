@@ -31,10 +31,8 @@ enum WordleSounds {
         play([Tone(freq: 1_100, duration: 0.022, amplitude: 0.045)])
     }
 
-    // Only the green (correct) tiles climb: each successive hit in a row steps
-    // up the scale, so the greens build a little ascending melody that rewards
-    // getting letters right. `step` is the green's index within the row (0 for
-    // the first hit, 1 for the second …); near/miss tiles keep a fixed blip.
+    // `step` is the 0-based ordinal of this tile among correct tiles in the row;
+    // near/miss tiles ignore it (semitone offset 0).
     static func reveal(_ tone: RevealTone, step: Int = 0) {
         let base: Double
         switch tone {
@@ -42,9 +40,7 @@ enum WordleSounds {
         case .near: base = 622.25   // D#5
         case .miss: base = 415.30   // G#4
         }
-        // Major-triad arpeggio in semitones (A C# E A C# …) — climbs faster and
-        // higher than a scale for a triumphant, fanfare-like reward. Clamps past
-        // the top.
+        // Major-triad semitone offsets (A C# E A C# …). Clamped past the top.
         let degrees = [0, 4, 7, 12, 16, 19, 24]
         let semis = tone == .hit ? degrees[min(max(step, 0), degrees.count - 1)] : 0
         let freq = base * pow(2.0, Double(semis) / 12.0)
