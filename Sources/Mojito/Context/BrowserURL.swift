@@ -24,20 +24,56 @@ enum BrowserURL {
         knownBrowserBundleIDs.contains(bundleID)
     }
 
+    // Bundle IDs are opaque, so the obscure ones are named. detect() tries the
+    // Safari web-area path then an address-bar fallback, so WebKit/Gecko entries
+    // are best-effort; the Chromium path is the proven one.
     private static let knownBrowserBundleIDs: Set<String> = [
+        // WebKit
         "com.apple.Safari",
         "com.apple.SafariTechnologyPreview",
+        "com.kagi.kagimacOS",                       // Orion
+        "com.kagi.kagimacOS.RC",                    // Orion RC
+        "com.duckduckgo.macos.browser",             // DuckDuckGo
+        "com.sigmaos.sigmaos.macos",                // SigmaOS
+
+        // Chromium
         "com.google.Chrome",
-        "com.google.Chrome.canary",
         "com.google.Chrome.beta",
+        "com.google.Chrome.dev",
+        "com.google.Chrome.canary",
+        "org.chromium.Chromium",
         "com.brave.Browser",
+        "com.brave.Browser.beta",
+        "com.brave.Browser.nightly",
         "com.microsoft.edgemac",
-        "company.thebrowser.Browser",   // Arc
-        "company.thebrowser.dia",       // Dia
+        "com.microsoft.edgemac.Beta",
+        "com.microsoft.edgemac.Dev",
+        "com.microsoft.edgemac.Canary",
+        "com.vivaldi.Vivaldi",
+        "com.vivaldi.Vivaldi.snapshot",
+        "com.operasoftware.Opera",
+        "com.operasoftware.OperaGX",
+        "com.operasoftware.OperaAir",
+        "com.operasoftware.OperaNext",              // Opera beta
+        "com.operasoftware.OperaDeveloper",
+        "company.thebrowser.Browser",               // Arc
+        "company.thebrowser.dia",                   // Dia
+        "net.imput.helium",                         // Helium
+        "com.pushplaylabs.sidekick",                // Sidekick
+        "ru.yandex.desktop.yandex-browser",         // Yandex
+        "com.naver.Whale",                          // Naver Whale
+        "io.wavebox.wavebox",                       // Wavebox
+
+        // Gecko
         "org.mozilla.firefox",
         "org.mozilla.firefoxdeveloperedition",
-        "com.vivaldi.Vivaldi",
-        "com.operasoftware.Opera",
+        "org.mozilla.nightly",                      // Firefox Nightly
+        "app.zen-browser.zen",                      // Zen
+        "one.ablaze.floorp",                        // Floorp
+        "io.gitlab.librewolf-community.librewolf",  // LibreWolf
+        "org.waterfoxproject.waterfox",             // Waterfox
+        "net.mullvad.mullvadbrowser",               // Mullvad Browser
+        "org.torproject.torbrowser",                // Tor Browser
     ]
 
     private static func focusedWebAreaURL(in app: AXUIElement) -> URL? {
