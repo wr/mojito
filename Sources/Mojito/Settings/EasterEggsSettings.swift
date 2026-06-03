@@ -223,8 +223,9 @@ private struct EggHintButton: View {
         .popover(isPresented: $shown, arrowEdge: .bottom) {
             Text(hint)
                 .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(12)
-                .frame(maxWidth: 240)
+                .frame(width: 240)
         }
     }
 }
