@@ -39,6 +39,7 @@ struct EasterEggsSettingsView: View {
                          destination: URL(string: "https://mojito.wells.ee/stats")!)
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                        .underline()
                         .padding(.vertical, rowPadding)
                 }
 

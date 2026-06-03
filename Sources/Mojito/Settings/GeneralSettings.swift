@@ -54,10 +54,10 @@ struct GeneralSettingsView: View {
                 }
 
                 Toggle(isOn: $telemetryEnabled) {
-                    TitleAndCaption(
-                        title: "Share anonymous usage stats",
-                        caption: "Aggregate counts only — no identifiers."
-                    )
+                    HStack(spacing: 4) {
+                        Text("Share anonymous usage stats")
+                        StatsHelpButton()
+                    }
                 }
                 .toggleStyle(.switch)
                 .onChange(of: telemetryEnabled) { _, _ in
@@ -133,6 +133,25 @@ private struct TitleAndCaption: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+private struct StatsHelpButton: View {
+    @State private var isShown = false
+
+    var body: some View {
+        Button {
+            isShown.toggle()
+        } label: {
+            Image(systemName: "questionmark.circle")
+                .foregroundStyle(.secondary)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $isShown, arrowEdge: .top) {
+            Text("Anonymous, aggregate counts only — no identifiers. The full dataset is public at [mojito.wells.ee/stats](https://mojito.wells.ee/stats).")
+                .padding(12)
+                .frame(width: 260)
         }
     }
 }

@@ -93,8 +93,8 @@ struct PrivacyDetailsRows: View {
         )
         privacyRow(
             icon: "internaldrive",
-            title: "What you type stays on this Mac",
-            detail: "Your exclusion list and anything you type never leave this Mac. GIF search sends just your query to Giphy when you use it."
+            title: "Your blocklist stays on this Mac",
+            detail: "The apps and sites you exclude never leave it. GIF search sends just your query to Giphy when you use it."
         )
         privacyRow(
             icon: "dollarsign.circle",
