@@ -35,9 +35,10 @@ struct EasterEggsSettingsView: View {
                         .padding(.vertical, rowPadding)
                     LabeledContent("Emoji autocompleted", value: "\(totalAutocompleted)")
                         .padding(.vertical, rowPadding)
-                    Link("See how that stacks up at mojito.wells.ee/stats",
+                    Link("See how you compare at mojito.wells.ee/stats",
                          destination: URL(string: "https://mojito.wells.ee/stats")!)
                         .font(.callout)
+                        .foregroundStyle(.secondary)
                         .padding(.vertical, rowPadding)
                 }
 
@@ -208,8 +209,9 @@ struct ResetEasterEggsButton: View {
 
     var body: some View {
         Button("Reset eggs") { confirm = true }
-            .buttonStyle(.link)
+            .buttonStyle(.plain)
             .font(.callout)
+            .foregroundStyle(.secondary)
             .disabled(isDisabled)
             .confirmationDialog(
                 "Reset all easter egg progress?",

@@ -56,7 +56,7 @@ struct GeneralSettingsView: View {
                 Toggle(isOn: $telemetryEnabled) {
                     TitleAndCaption(
                         title: "Share anonymous usage stats",
-                        caption: "Aggregate counts only — no identifiers. See them at mojito.wells.ee/stats."
+                        caption: "Aggregate counts only — no identifiers."
                     )
                 }
                 .toggleStyle(.switch)
