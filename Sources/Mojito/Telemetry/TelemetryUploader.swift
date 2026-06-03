@@ -23,9 +23,19 @@ final class TelemetryUploader {
 
     static func utcDay(_ now: Date = Date()) -> Int { Int(now.timeIntervalSince1970 / 86_400) }
 
+    // Debug builds never upload — keeps dev pings out of production stats.
+    private static let uploadsEnabled: Bool = {
+        #if DEBUG
+        return false
+        #else
+        return true
+        #endif
+    }()
+
     func uploadIfDue() {
         let defaults = UserDefaults.standard
-        guard TelemetryStore.isEnabled,
+        guard Self.uploadsEnabled,
+              TelemetryStore.isEnabled,
               defaults.bool(forKey: PrefsKey.telemetryConsentSeen),
               defaults.integer(forKey: PrefsKey.telemetryLastUploadDay) != Self.utcDay()
         else { return }
