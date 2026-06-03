@@ -127,7 +127,9 @@
     if (!el) return;
     if (!features.length) { el.innerHTML = note("No data yet."); return; }
     el.innerHTML = features.map(function (f) {
-      return barRow(FEATURE[f.feature] || f.feature, f.pct, f.pct + "%");
+      return '<div class="feat-tile"><span class="feat-pct">' + f.pct +
+        '%</span><span class="feat-name">' + (FEATURE[f.feature] || f.feature) +
+        "</span></div>";
     }).join("");
   }
 

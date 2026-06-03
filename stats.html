@@ -14,7 +14,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="stylesheet" href="style.css?v=66">
-<link rel="stylesheet" href="stats.css?v=5">
+<link rel="stylesheet" href="stats.css?v=6">
 </head>
 <body>
 
@@ -164,13 +164,13 @@
       <h2 class="card-title">Feature adoption</h2>
       <span class="card-note">share of installs</span>
     </div>
-    <div class="bars" id="bars-features">
-      <div class="bar"><span class="bar-label">Frequency boost</span><span class="bar-track"><span class="bar-fill" data-w="91%"></span></span><span class="bar-val">91%</span></div>
-      <div class="bar"><span class="bar-label">Launch at login</span><span class="bar-track"><span class="bar-fill" data-w="79%"></span></span><span class="bar-val">79%</span></div>
-      <div class="bar"><span class="bar-label">GIF search</span><span class="bar-track"><span class="bar-fill" data-w="73%"></span></span><span class="bar-val">73%</span></div>
-      <div class="bar"><span class="bar-label">Emoticons</span><span class="bar-track"><span class="bar-fill" data-w="64%"></span></span><span class="bar-val">64%</span></div>
-      <div class="bar"><span class="bar-label">Arrow conversion</span><span class="bar-track"><span class="bar-fill" data-w="52%"></span></span><span class="bar-val">52%</span></div>
-      <div class="bar"><span class="bar-label">Symbols</span><span class="bar-track"><span class="bar-fill" data-w="38%"></span></span><span class="bar-val">38%</span></div>
+    <div class="feat-grid" id="bars-features">
+      <div class="feat-tile"><span class="feat-pct">91%</span><span class="feat-name">Frequency boost</span></div>
+      <div class="feat-tile"><span class="feat-pct">79%</span><span class="feat-name">Launch at login</span></div>
+      <div class="feat-tile"><span class="feat-pct">73%</span><span class="feat-name">GIF search</span></div>
+      <div class="feat-tile"><span class="feat-pct">64%</span><span class="feat-name">Emoticons</span></div>
+      <div class="feat-tile"><span class="feat-pct">52%</span><span class="feat-name">Arrow conversion</span></div>
+      <div class="feat-tile"><span class="feat-pct">38%</span><span class="feat-name">Symbols</span></div>
     </div>
   </section>
 
@@ -289,6 +289,6 @@
   document.querySelectorAll('.reveal').forEach(function (s) { io.observe(s); });
 })();
 </script>
-<script src="stats-live.js?v=3"></script>
+<script src="stats-live.js?v=4"></script>
 </body>
 </html>

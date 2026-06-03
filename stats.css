@@ -245,6 +245,40 @@
   transition: width 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
+/* ---- feature tiles (compact + de-emphasized; least-important stats) ----- */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.feat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  aspect-ratio: 1 / 1;
+  padding: 8px 6px;
+  background: var(--track);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.feat-pct {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.feat-name {
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--text-soft);
+}
+
 .bar-val {
   font-size: 13.5px;
   font-weight: 600;
