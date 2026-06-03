@@ -136,7 +136,13 @@ struct EasterEggsSettingsView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 if discovered {
-                    Text(egg.title)
+                    HStack(spacing: 4) {
+                        Text(egg.title)
+                        Image(systemName: "questionmark.circle")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.tertiary)
+                            .help(egg.hint)
+                    }
                     Text(.init(detailText(for: egg)))
                         .font(.callout)
                         .foregroundStyle(.secondary)
@@ -157,9 +163,6 @@ struct EasterEggsSettingsView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(.green)
-                Image(systemName: "info.circle")
-                    .foregroundStyle(.tertiary)
-                    .help(egg.hint)
             }
         }
     }
