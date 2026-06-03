@@ -259,7 +259,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 5px;
   aspect-ratio: 1 / 1;
   padding: 10px 6px;
   background: var(--track);
@@ -267,30 +267,45 @@
   text-align: center;
 }
 
-/* tiny radial gauge — green arc = the percentage, hole matches the tile */
+/* half-circle speedometer — green arc sweeps left→right with the percentage */
 .feat-gauge {
   position: relative;
   flex-shrink: 0;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: conic-gradient(var(--accent) calc(var(--p, 0) * 1%), var(--gauge-rest) 0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 52px;
+  height: 26px;
+  overflow: hidden;
 }
 
+/* the dial: a full circle whose visible top half is the arc */
 .feat-gauge::before {
   content: "";
   position: absolute;
-  inset: 5px;
+  top: 0;
+  left: 0;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
+  background: conic-gradient(from 270deg,
+    var(--accent) 0 calc(var(--p, 0) * 1.8deg),
+    var(--gauge-rest) calc(var(--p, 0) * 1.8deg) 180deg,
+    transparent 180deg);
+}
+
+/* punch out the inner half-circle so the dial reads as a thin arc */
+.feat-gauge::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 18px;
+  border-radius: 18px 18px 0 0;
   background: var(--track);
 }
 
 .feat-pct {
-  position: relative;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }

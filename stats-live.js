@@ -130,7 +130,7 @@
     if (!features.length) { el.innerHTML = note("No data yet."); return; }
     el.innerHTML = features.map(function (f) {
       return '<div class="feat-tile"><div class="feat-gauge" style="--p:' + f.pct +
-        '"><span class="feat-pct">' + f.pct + '%</span></div><span class="feat-name">' +
+        '"></div><span class="feat-pct">' + f.pct + '%</span><span class="feat-name">' +
         (FEATURE[f.feature] || f.feature) + "</span></div>";
     }).join("");
   }
