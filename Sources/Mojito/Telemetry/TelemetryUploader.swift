@@ -8,7 +8,7 @@ import os.log
 /// today (UTC). The payload carries no identifier and no timestamp; the
 /// server discards the IP. On a 2xx the pending deltas are cleared so the
 /// next day starts fresh. Failures are silent — the deltas survive and
-/// retry next launch. See W-342 / mojito.wells.ee/stats.
+/// retry next launch. See mojito.wells.ee/stats.
 @MainActor
 final class TelemetryUploader {
     static let shared = TelemetryUploader()

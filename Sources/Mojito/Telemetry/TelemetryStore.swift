@@ -8,7 +8,7 @@ import Foundation
 /// safe to call straight from the keystroke/insert path. Nothing recorded here
 /// is an identifier, a timestamp, or free text — just counts. The recording
 /// calls short-circuit when telemetry is disabled, so a user who opted out
-/// never even builds a local pending set. See W-342.
+/// never even builds a local pending set.
 enum TelemetryStore {
     private static var defaults: UserDefaults { .standard }
 

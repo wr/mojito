@@ -54,7 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         }
 
         // Anonymous, consent-gated daily stats. Self-gates — a no-op until the
-        // user has seen the notice and left it enabled. See W-342.
+        // user has seen the notice and left it enabled.
         TelemetryUploader.shared.uploadIfDue()
 
         menuBar.install(

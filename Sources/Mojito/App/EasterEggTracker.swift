@@ -358,9 +358,8 @@ enum EasterEggTracker {
     static func record(_ egg: EasterEgg) {
         guard cache.insert(egg.rawValue).inserted else { return }
         UserDefaults.standard.set(Array(cache), forKey: PrefsKey.easterEggsDiscovered)
-        // Feed the public community counter, but only for genuine hidden eggs —
-        // usage milestones (k36+, k42, k52) are auto-unlocked, not "found". Just
-        // a bare tally; never the id.
+        // Feed the public community counter for genuine discoveries only;
+        // auto-unlocked achievements are excluded.
         if !achievementSet.contains(egg) { TelemetryStore.recordEggDiscovery() }
         NotificationCenter.default.post(name: .easterEggDiscovered, object: nil)
         // In-app banner is the only discovery signal for now. The system

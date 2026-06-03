@@ -75,7 +75,7 @@ enum PrefsKey {
     /// debug report can show whether conversions are landing at all.
     static let totalEmoticonInserted = "mojito.totals.emoticonInserted"
 
-    // MARK: Anonymous usage statistics (W-342)
+    // MARK: Anonymous usage statistics
     /// Opt-out master switch. Default true, but nothing is sent until
     /// `telemetryConsentSeen` is also true (Homebrew-style consent gate).
     static let telemetryEnabled        = "mojito.telemetry.enabled"
