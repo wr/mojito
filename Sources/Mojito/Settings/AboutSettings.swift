@@ -193,32 +193,6 @@ private final class ThankYouSpeaker {
     }
 }
 
-// MARK: - Clear stats button
-
-/// Shared between Easter Eggs and Privacy panes; owns its own confirmation state.
-struct ClearStatsButton: View {
-    @EnvironmentObject private var engine: Engine
-    @State private var confirm = false
-    var isDisabled: Bool = false
-
-    var body: some View {
-        Button("Clear stats...") { confirm = true }
-            .disabled(isDisabled)
-            .confirmationDialog(
-                "Clear all emoji usage stats?",
-                isPresented: $confirm,
-                titleVisibility: .visible
-            ) {
-                Button("Clear stats", role: .destructive) {
-                    engine.clearUsageStats()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This will erase your autocomplete stats and Top 8. Settings and exclusions won't be changed.")
-            }
-    }
-}
-
 // MARK: - Heart confetti
 
 private struct HeartConfetti: View {

@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mojito-stats",
+  "main": "src/index.js",
+  "compatibility_date": "2025-01-01",
+  "observability": { "enabled": true },
+  // Keep the *.workers.dev URL alive alongside the custom domain.
+  "workers_dev": true,
+
+  // Created via: wrangler d1 create mojito_stats
+  // Paste the printed database_id below, then run the schema (see README).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mojito_stats",
+      "database_id": "d5afce2d-4163-476e-bd21-95dd41a0e1e8"
+    }
+  ],
+
+  // App posts here and the stats page fetches here. Requires wells.ee to be a
+  // Cloudflare zone; provisions the DNS record + cert on deploy.
+  "routes": [
+    { "pattern": "stats.mojito.wells.ee", "custom_domain": true }
+  ]
+}

@@ -74,4 +74,24 @@ enum PrefsKey {
     /// diagnostic tally — no milestone achievements ride on it — so the
     /// debug report can show whether conversions are landing at all.
     static let totalEmoticonInserted = "mojito.totals.emoticonInserted"
+
+    // MARK: Anonymous usage statistics
+    /// Opt-out master switch. Default true, but nothing is sent until
+    /// `telemetryConsentSeen` is also true (Homebrew-style consent gate).
+    static let telemetryEnabled        = "mojito.telemetry.enabled"
+    /// Flipped once the user has seen the one-time consent notice (or the
+    /// Privacy settings tab). Gates all uploads so nothing leaves the Mac
+    /// before disclosure.
+    static let telemetryConsentSeen    = "mojito.telemetry.consentSeen"
+    /// UTC day number of the last successful upload — throttles to ≤1/day.
+    static let telemetryLastUploadDay  = "mojito.telemetry.lastUploadDay"
+    /// Daily-aggregate deltas, cleared on a successful upload. Per-emoji map
+    /// is capped per-emoji on write (anti-skew, not identification). No
+    /// identifiers, timestamps, or free text are ever accumulated here.
+    static let telemetryPendingEmoji        = "mojito.telemetry.pending.emoji"        // [String: Int]
+    static let telemetryPendingEmojiTotal   = "mojito.telemetry.pending.emojiTotal"   // Int
+    static let telemetryPendingSymbol       = "mojito.telemetry.pending.symbol"       // Int
+    static let telemetryPendingGif          = "mojito.telemetry.pending.gif"          // Int
+    static let telemetryPendingEmoticon     = "mojito.telemetry.pending.emoticon"     // Int
+    static let telemetryPendingEggs         = "mojito.telemetry.pending.eggs"         // Int
 }

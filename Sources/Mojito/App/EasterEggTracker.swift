@@ -358,6 +358,9 @@ enum EasterEggTracker {
     static func record(_ egg: EasterEgg) {
         guard cache.insert(egg.rawValue).inserted else { return }
         UserDefaults.standard.set(Array(cache), forKey: PrefsKey.easterEggsDiscovered)
+        // Feed the public community counter for genuine discoveries only;
+        // auto-unlocked achievements are excluded.
+        if !achievementSet.contains(egg) { TelemetryStore.recordEggDiscovery() }
         NotificationCenter.default.post(name: .easterEggDiscovered, object: nil)
         // In-app banner is the only discovery signal for now. The system
         // UNUserNotification path (DiscoveryNotifier) is suppressed — it

@@ -35,11 +35,15 @@ struct EasterEggsSettingsView: View {
                         .padding(.vertical, rowPadding)
                     LabeledContent("Emoji autocompleted", value: "\(totalAutocompleted)")
                         .padding(.vertical, rowPadding)
-                    HStack {
-                        Text("Danger zone")
-                        Spacer()
-                        ClearStatsButton(isDisabled: totalAutocompleted == 0)
+                    HStack(spacing: 4) {
+                        Text("See how you compare at")
+                        Link("mojito.wells.ee/stats",
+                             destination: URL(string: "https://mojito.wells.ee/stats")!)
+                            .tint(.secondary)
+                            .underline()
                     }
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
                     .padding(.vertical, rowPadding)
                 }
 
@@ -97,18 +101,17 @@ struct EasterEggsSettingsView: View {
                     .background(flashBackground(for: egg))
                     .id(egg.id)
             }
-            HStack {
-                Text("Danger zone")
-                Spacer()
-                ResetEasterEggsButton(isDisabled: EasterEggTracker.discoveredCount == 0)
-            }
-            .padding(.vertical, rowPadding)
         } header: {
             HStack {
                 Text("Easter eggs")
                 Spacer()
                 Text("\(EasterEggTracker.discoveredCount) of \(EasterEggTracker.totalCount)")
                     .foregroundStyle(.secondary)
+            }
+        } footer: {
+            HStack {
+                Spacer()
+                ResetEasterEggsButton(isDisabled: EasterEggTracker.discoveredCount == 0)
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .easterEggDiscovered)) { _ in
@@ -133,7 +136,10 @@ struct EasterEggsSettingsView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 if discovered {
-                    Text(egg.title)
+                    HStack(spacing: 4) {
+                        Text(egg.title)
+                        EggHintButton(hint: egg.hint)
+                    }
                     Text(.init(detailText(for: egg)))
                         .font(.callout)
                         .foregroundStyle(.secondary)
@@ -154,9 +160,6 @@ struct EasterEggsSettingsView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(.green)
-                Image(systemName: "info.circle")
-                    .foregroundStyle(.tertiary)
-                    .help(egg.hint)
             }
         }
     }
@@ -202,15 +205,43 @@ struct EasterEggsSettingsView: View {
 
 }
 
+// MARK: - Egg hint button
+
+/// Click-to-reveal hint shown next to a discovered egg's name. A popover
+/// (not `.help`, which is hover-only and reads as disabled).
+private struct EggHintButton: View {
+    let hint: String
+    @State private var shown = false
+
+    var body: some View {
+        Button { shown.toggle() } label: {
+            Image(systemName: "questionmark.circle")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $shown, arrowEdge: .bottom) {
+            Text(hint)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(12)
+                .frame(width: 240)
+        }
+    }
+}
+
 // MARK: - Reset eggs button
 
-/// Parallels `ClearStatsButton`.
+/// Small text link under the eggs table.
 struct ResetEasterEggsButton: View {
     @State private var confirm = false
     var isDisabled: Bool = false
 
     var body: some View {
-        Button("Reset eggs...") { confirm = true }
+        Button("Reset eggs") { confirm = true }
+            .buttonStyle(.plain)
+            .font(.callout)
+            .foregroundStyle(.secondary)
             .disabled(isDisabled)
             .confirmationDialog(
                 "Reset all easter egg progress?",

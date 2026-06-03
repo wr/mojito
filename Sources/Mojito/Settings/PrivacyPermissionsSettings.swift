@@ -27,11 +27,6 @@ struct PrivacyPermissionsSettingsView: View {
 
             Section("Privacy") {
                 PrivacyDetailsRows()
-                HStack {
-                    Text("Danger zone")
-                    Spacer()
-                    ClearStatsButton()
-                }
             }
         }
         .formStyle(.grouped)
@@ -97,9 +92,9 @@ struct PrivacyDetailsRows: View {
             detail: "Used to detect `:` triggers. Nothing else."
         )
         privacyRow(
-            icon: "internaldrive",
-            title: "Your data stays on this Mac",
-            detail: "Usage counts, settings, and your exclusion list are stored locally. \(AppInfo.displayName) doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to Giphy."
+            icon: "eye.slash",
+            title: "You are anonymous",
+            detail: "Statistics and GIF searches sent to Giphy are never linked to you, and no personally-identifiable data is stored or sent anywhere."
         )
         privacyRow(
             icon: "dollarsign.circle",

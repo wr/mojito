@@ -2,6 +2,118 @@
   "sourceLanguage": "en",
   "strings": {
     "": {},
+    "%@ can share anonymous usage stats — popular emoji, which features get used, and your macOS version. Nothing you type is ever included.\n\nIt's all public at mojito.wells.ee/stats, and you can turn it off in Settings.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ can share anonymous usage stats — popular emoji, which features get used, and your macOS version. Nothing you type is ever included.\n\nIt's all public at mojito.wells.ee/stats, and you can turn it off in Settings."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kann anonyme Nutzungsstatistiken teilen — beliebte Emoji, welche Funktionen genutzt werden und deine macOS-Version. Nichts, was du tippst, wird je übermittelt.\n\nAlles ist öffentlich auf mojito.wells.ee/stats einsehbar, und du kannst es in den Einstellungen ausschalten."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ puede compartir estadísticas de uso anónimas — emojis populares, qué funciones se usan y tu versión de macOS. Nada de lo que escribes se incluye nunca.\n\nTodo es público en mojito.wells.ee/stats, y puedes desactivarlo en Ajustes."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ puede compartir estadísticas de uso anónimas — emojis populares, qué funciones se usan y tu versión de macOS. Nada de lo que escribes se incluye nunca.\n\nTodo es público en mojito.wells.ee/stats, y puedes desactivarlo en Ajustes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ peut partager des statistiques d'utilisation anonymes — emojis populaires, fonctionnalités utilisées et ta version de macOS. Rien de ce que tu tapes n'est jamais inclus.\n\nTout est public sur mojito.wells.ee/stats, et tu peux le désactiver dans les Réglages."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ può condividere statistiche d'uso anonime — emoji popolari, quali funzioni vengono usate e la tua versione di macOS. Nulla di ciò che digiti viene mai incluso.\n\nÈ tutto pubblico su mojito.wells.ee/stats, e puoi disattivarlo nelle Impostazioni."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ pode compartilhar estatísticas de uso anônimas — emojis populares, quais recursos são usados e sua versão do macOS. Nada do que você digita é incluído.\n\nTudo é público em mojito.wells.ee/stats, e você pode desativar nos Ajustes."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ は匿名の使用統計を共有できます — 人気の絵文字、どの機能が使われているか、お使いの macOS のバージョンです。あなたが入力した内容は一切含まれません。\n\nすべて mojito.wells.ee/stats で公開されており、設定でオフにできます。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 可以分享匿名的使用统计——热门表情、哪些功能被使用，以及你的 macOS 版本。你输入的任何内容都绝不会包含在内。\n\n所有数据都公开在 mojito.wells.ee/stats，你也可以在设置中关闭它。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 可以分享匿名的使用統計——熱門表情、哪些功能被使用，以及你的 macOS 版本。你輸入的任何內容都絕不會包含在內。\n\n所有資料都公開在 mojito.wells.ee/stats，你也可以在設定中關閉它。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@은(는) 익명 사용 통계를 공유할 수 있습니다 — 인기 이모지, 어떤 기능이 사용되는지, 그리고 macOS 버전입니다. 당신이 입력한 내용은 절대 포함되지 않습니다.\n\n모든 정보는 mojito.wells.ee/stats에서 공개되며, 설정에서 끌 수 있습니다."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ गुमनाम उपयोग आँकड़े साझा कर सकता है — लोकप्रिय इमोजी, कौन-से फ़ीचर इस्तेमाल होते हैं, और आपका macOS वर्शन। आप जो टाइप करते हैं वह कभी शामिल नहीं किया जाता।\n\nयह सब mojito.wells.ee/stats पर सार्वजनिक है, और आप इसे सेटिंग्स में बंद कर सकते हैं।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ может делиться анонимной статистикой использования — популярные эмодзи, какие функции используются и ваша версия macOS. Ничего из того, что вы печатаете, никогда не включается.\n\nВсё это открыто на mojito.wells.ee/stats, и вы можете отключить это в Настройках."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ może udostępniać anonimowe statystyki użycia — popularne emoji, z których funkcji się korzysta i twoją wersję macOS. Nic z tego, co wpisujesz, nigdy nie jest dołączane.\n\nWszystko jest publiczne na mojito.wells.ee/stats i możesz to wyłączyć w Ustawieniach."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kan anonieme gebruiksstatistieken delen — populaire emoji, welke functies worden gebruikt en je macOS-versie. Niets van wat je typt wordt ooit meegestuurd.\n\nAlles is openbaar op mojito.wells.ee/stats, en je kunt het uitschakelen in Instellingen."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يمكن لـ %@ مشاركة إحصائيات استخدام مجهولة — الإيموجي الشائعة، والميزات التي تُستخدم، وإصدار macOS لديك. لا يُدرَج أبدًا أي شيء تكتبه.\n\nكل ذلك علني على mojito.wells.ee/stats، ويمكنك إيقافه من الإعدادات."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ می‌تواند آمار استفادهٔ ناشناس را به اشتراک بگذارد — ایموجی‌های محبوب، اینکه چه قابلیت‌هایی استفاده می‌شوند و نسخهٔ macOS شما. هیچ‌چیز از آنچه تایپ می‌کنید هرگز گنجانده نمی‌شود.\n\nهمه‌چیز در mojito.wells.ee/stats عمومی است و می‌توانید آن را در تنظیمات خاموش کنید."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏%@ יכול לשתף סטטיסטיקת שימוש אנונימית — אימוג'י פופולריים, אילו תכונות בשימוש וגרסת macOS שלך. שום דבר ממה שאתה מקליד לא נכלל לעולם.\n\nהכול פומבי בכתובת mojito.wells.ee/stats, ואפשר לכבות את זה בהגדרות."
+          }
+        }
+      }
+    },
     "%@ couldn't reach the update server.": {
       "localizations": {
         "ar": {
@@ -3033,6 +3145,118 @@
         }
       }
     },
+    "Anonymous, aggregate counts only — no identifiers. The full dataset is public at [mojito.wells.ee/stats](https://mojito.wells.ee/stats).": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonymous, aggregate counts only — no identifiers. The full dataset is public at [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur anonyme, aggregierte Zahlen — keine Identifikatoren. Der vollständige Datensatz ist öffentlich unter [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo recuentos anónimos y agregados — sin identificadores. El conjunto de datos completo es público en [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo conteos anónimos y agregados — sin identificadores. El conjunto de datos completo es público en [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uniquement des compteurs anonymes et agrégés — aucun identifiant. L'ensemble complet des données est public sur [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo conteggi anonimi e aggregati — nessun identificatore. L'intero set di dati è pubblico su [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apenas contagens anônimas e agregadas — sem identificadores. O conjunto de dados completo é público em [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匿名の集計値のみで、識別子はありません。データセット全体は [mojito.wells.ee/stats](https://mojito.wells.ee/stats) で公開されています。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅匿名的汇总计数——没有任何标识符。完整数据集公开在 [mojito.wells.ee/stats](https://mojito.wells.ee/stats)。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅匿名的彙總計數——沒有任何識別碼。完整資料集公開在 [mojito.wells.ee/stats](https://mojito.wells.ee/stats)。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "익명 집계 수치만 있고 식별자는 없습니다. 전체 데이터셋은 [mojito.wells.ee/stats](https://mojito.wells.ee/stats)에서 공개됩니다."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "केवल गुमनाम, समग्र गणनाएँ — कोई पहचानकर्ता नहीं। पूरा डेटासेट [mojito.wells.ee/stats](https://mojito.wells.ee/stats) पर सार्वजनिक है।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Только анонимные сводные подсчёты — никаких идентификаторов. Полный набор данных открыт на [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tylko anonimowe, zbiorcze liczniki — żadnych identyfikatorów. Pełny zbiór danych jest publiczny na [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen anonieme, geaggregeerde aantallen — geen identificatiegegevens. De volledige dataset is openbaar op [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أعداد مجهولة ومجمّعة فقط — بلا أي مُعرِّفات. مجموعة البيانات الكاملة علنية على [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فقط شمارش‌های ناشناس و تجمیعی — بدون هیچ شناسه‌ای. مجموعهٔ کامل داده‌ها در [mojito.wells.ee/stats](https://mojito.wells.ee/stats) عمومی است."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "רק ספירות אנונימיות ומצרפיות — בלי מזהים. מערך הנתונים המלא פומבי בכתובת [mojito.wells.ee/stats](https://mojito.wells.ee/stats)."
+          }
+        }
+      }
+    },
     "Autocomplete `:emoji:` everywhere.": {
       "localizations": {
         "ar": {
@@ -3930,6 +4154,7 @@
       }
     },
     "Clear all emoji usage stats?": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4042,6 +4267,7 @@
       }
     },
     "Clear stats": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4154,6 +4380,7 @@
       }
     },
     "Clear stats...": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -4715,16 +4942,22 @@
     },
     "Convert text arrows (`->` to →)": {
       "localizations": {
-        "en-GB": {
+        "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Convert text arrows (`->` to →)"
+            "value": "تحويل أسهم النص (`->` إلى →)"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Textpfeile umwandeln (`->` zu →)"
+          }
+        },
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert text arrows (`->` to →)"
           }
         },
         "es": {
@@ -4739,10 +4972,28 @@
             "value": "Convertir flechas de texto (`->` a →)"
           }
         },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تبدیل پیکان‌های متنی (`->` به →)"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Convertir les flèches textuelles (`->` en →)"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המרת חצים טקסטואליים (`->` ל־ →)"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "टेक्स्ट तीर बदलें (`->` को →)"
           }
         },
         "it": {
@@ -4751,16 +5002,40 @@
             "value": "Converti le frecce testuali (`->` in →)"
           }
         },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "テキスト矢印を変換 (`->` を → に)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "텍스트 화살표 변환 (`->`를 → 로)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekstpijlen omzetten (`->` naar →)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamieniaj strzałki tekstowe (`->` na →)"
+          }
+        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Converter setas de texto (`->` em →)"
           }
         },
-        "ja": {
+        "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "テキスト矢印を変換 (`->` を → に)"
+            "value": "Преобразовывать текстовые стрелки (`->` в →)"
           }
         },
         "zh-Hans": {
@@ -4773,54 +5048,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "轉換文字箭頭 (`->` 變成 →)"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "텍스트 화살표 변환 (`->`를 → 로)"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "टेक्स्ट तीर बदलें (`->` को →)"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Преобразовывать текстовые стрелки (`->` в →)"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zamieniaj strzałki tekstowe (`->` na →)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tekstpijlen omzetten (`->` naar →)"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تحويل أسهم النص (`->` إلى →)"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تبدیل پیکان‌های متنی (`->` به →)"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "המרת חצים טקסטואליים (`->` ל־ →)"
           }
         }
       }
@@ -5500,6 +5727,7 @@
       }
     },
     "Danger zone": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -7852,6 +8080,118 @@
         }
       }
     },
+    "Help improve %@?": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help improve %@?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ verbessern helfen?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Ayudar a mejorar %@?"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Ayudar a mejorar %@?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aider à améliorer %@ ?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aiutare a migliorare %@?"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajudar a melhorar o %@?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ の改善に協力しますか？"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "帮助改进 %@？"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "幫助改進 %@？"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 개선에 도움을 주시겠어요?"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ को बेहतर बनाने में मदद करें?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Помочь улучшить %@?"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pomóc ulepszyć %@?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ helpen verbeteren?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل تساعد في تحسين %@؟"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "به بهبود %@ کمک می‌کنید؟"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לעזור לשפר את %@?"
+          }
+        }
+      }
+    },
     "Hide Details": {
       "localizations": {
         "ar": {
@@ -9755,6 +10095,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "沒有與「%@」相符的表情符號"
+          }
+        }
+      }
+    },
+    "Not now": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not now"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht jetzt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahora no"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ahora no"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas maintenant"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non ora"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agora não"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今はしない"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂不"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暫不"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나중에"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अभी नहीं"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не сейчас"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie teraz"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet nu"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس الآن"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الان نه"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לא עכשיו"
           }
         }
       }
@@ -12562,6 +13014,7 @@
       }
     },
     "Reset eggs...": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -13234,6 +13687,118 @@
         }
       }
     },
+    "See how you compare at": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See how you compare at"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vergleiche dich auf"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mira cómo te comparas en"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mira cómo te comparas en"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compare-toi sur"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scopri come ti confronti su"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veja como você se compara em"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたの傾向を比べてみよう"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "看看你的对比情况"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "看看你的對比情況"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "당신의 순위를 확인해 보세요"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "देखें आप कैसे तुलना करते हैं"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сравни себя с другими на"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zobacz, jak wypadasz na tle innych"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zie hoe je je verhoudt op"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اطّلع على مقارنتك على"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ببینید در مقایسه کجا قرار دارید"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ראה איך אתה משתווה ב-"
+          }
+        }
+      }
+    },
     "Settings…": {
       "localizations": {
         "ar": {
@@ -13342,6 +13907,230 @@
           "stringUnit": {
             "state": "translated",
             "value": "設定…"
+          }
+        }
+      }
+    },
+    "Share anonymous stats": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share anonymous stats"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonyme Statistiken teilen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir estadísticas anónimas"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir estadísticas anónimas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partager des statistiques anonymes"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condividi statistiche anonime"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhar estatísticas anônimas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匿名の統計を共有"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享匿名统计"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享匿名統計"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "익명 통계 공유"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गुमनाम आँकड़े साझा करें"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Делиться анонимной статистикой"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udostępniaj anonimowe statystyki"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonieme statistieken delen"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مشاركة إحصائيات مجهولة"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اشتراک‌گذاری آمار ناشناس"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "שיתוף סטטיסטיקה אנונימית"
+          }
+        }
+      }
+    },
+    "Share anonymous usage stats": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share anonymous usage stats"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonyme Nutzungsstatistiken teilen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir estadísticas de uso anónimas"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartir estadísticas de uso anónimas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partager des statistiques d'utilisation anonymes"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Condividi statistiche d'uso anonime"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhar estatísticas de uso anônimas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匿名の使用統計を共有"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享匿名使用统计"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享匿名使用統計"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "익명 사용 통계 공유"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गुमनाम उपयोग आँकड़े साझा करें"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Делиться анонимной статистикой использования"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udostępniaj anonimowe statystyki użycia"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anonieme gebruiksstatistieken delen"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مشاركة إحصائيات استخدام مجهولة"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اشتراک‌گذاری آمار استفادهٔ ناشناس"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "שיתוף סטטיסטיקת שימוש אנונימית"
           }
         }
       }
@@ -14126,6 +14915,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "登入時啟動"
+          }
+        }
+      }
+    },
+    "Statistics and GIF searches sent to Giphy are never linked to you, and no personally-identifiable data is stored or sent anywhere.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistics and GIF searches sent to Giphy are never linked to you, and no personally-identifiable data is stored or sent anywhere."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistiken und an Giphy gesendete GIF-Suchen werden nie mit dir verknüpft, und es werden keine personenbezogenen Daten gespeichert oder irgendwohin gesendet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las estadísticas y las búsquedas de GIF enviadas a Giphy nunca se vinculan contigo, y no se almacena ni se envía a ningún sitio ningún dato que te identifique."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las estadísticas y las búsquedas de GIF enviadas a Giphy nunca se vinculan contigo, y no se almacena ni se envía a ningún lado ningún dato que te identifique."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les statistiques et les recherches de GIF envoyées à Giphy ne sont jamais associées à toi, et aucune donnée permettant de t'identifier n'est stockée ni envoyée où que ce soit."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le statistiche e le ricerche di GIF inviate a Giphy non vengono mai collegate a te, e nessun dato che possa identificarti viene salvato o inviato da nessuna parte."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As estatísticas e as buscas de GIF enviadas ao Giphy nunca são vinculadas a você, e nenhum dado que possa identificá-lo é armazenado ou enviado a lugar nenhum."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "統計や Giphy に送信される GIF 検索があなたと結び付けられることはなく、個人を特定できるデータがどこかに保存・送信されることもありません。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "统计数据和发送给 Giphy 的 GIF 搜索绝不会与你关联，也不会存储或向任何地方发送任何可识别个人身份的数据。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "統計資料和傳送給 Giphy 的 GIF 搜尋絕不會與你關聯，也不會儲存或向任何地方傳送任何可識別個人身分的資料。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "통계와 Giphy로 전송되는 GIF 검색은 절대 당신과 연결되지 않으며, 개인을 식별할 수 있는 데이터는 어디에도 저장되거나 전송되지 않습니다."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आँकड़े और Giphy को भेजी गई GIF खोजें कभी आपसे नहीं जोड़ी जातीं, और कोई व्यक्तिगत पहचान वाला डेटा कहीं संग्रहीत या भेजा नहीं जाता।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Статистика и поисковые запросы GIF, отправляемые в Giphy, никогда не связываются с вами, и никакие персональные данные нигде не хранятся и не отправляются."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statystyki i wyszukiwania GIF-ów wysyłane do Giphy nigdy nie są powiązane z tobą, a żadne dane umożliwiające identyfikację nie są nigdzie przechowywane ani wysyłane."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistieken en GIF-zoekopdrachten die naar Giphy worden gestuurd, worden nooit aan jou gekoppeld, en er worden nergens persoonlijk identificeerbare gegevens opgeslagen of verzonden."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا تُربَط الإحصائيات وعمليات البحث عن GIF المُرسَلة إلى Giphy بك أبدًا، ولا تُخزَّن أو تُرسَل أي بيانات تُعرّف عنك إلى أي مكان."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آمار و جست‌وجوهای GIF که به Giphy ارسال می‌شوند هرگز به شما مرتبط نمی‌شوند و هیچ داده‌ای که هویت شما را آشکار کند در جایی ذخیره یا ارسال نمی‌شود."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "סטטיסטיקה וחיפושי GIF שנשלחים ל-Giphy לעולם אינם מקושרים אליך, ושום מידע שמזהה אותך אישית אינו נשמר או נשלח לשום מקום."
           }
         }
       }
@@ -15139,6 +16040,7 @@
       }
     },
     "This will erase your autocomplete stats and Top 8. Settings and exclusions won't be changed.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -16597,6 +17499,7 @@
       }
     },
     "Usage counts, settings, and your exclusion list are stored locally. %@ doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to Giphy.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -17386,6 +18289,118 @@
         }
       }
     },
+    "You are anonymous": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are anonymous"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du bleibst anonym"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eres anónimo"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eres anónimo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu restes anonyme"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sei anonimo"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você é anônimo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなたは匿名のままです"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你是匿名的"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你是匿名的"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "당신은 익명입니다"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आप गुमनाम हैं"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вы анонимны"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jesteś anonimowy"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent anoniem"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أنت مجهول الهوية"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شما ناشناس هستید"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אתה אנונימי"
+          }
+        }
+      }
+    },
     "You're all set": {
       "localizations": {
         "ar": {
@@ -17499,6 +18514,7 @@
       }
     },
     "Your data stays on this Mac": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -18508,6 +19524,9 @@
           }
         }
       }
+    },
+    "mojito.wells.ee/stats": {
+      "shouldTranslate": false
     },
     "navigate": {
       "extractionState": "stale",

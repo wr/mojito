@@ -470,6 +470,7 @@ struct PermissionsStep: View {
 struct DoneStep: View {
     @AppStorage(PrefsKey.launchAtLogin) private var launchAtLogin: Bool = false
     @AppStorage(PrefsKey.skinTone) private var skinToneRaw: String = SkinTone.default.rawValue
+    @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled: Bool = true
     @State private var autoUpdates: Bool = UpdaterCoordinator.shared.automaticUpdates
 
     var body: some View {
@@ -534,11 +535,25 @@ struct DoneStep: View {
                     .onChange(of: launchAtLogin) { _, newValue in
                         LaunchAtLogin.apply(newValue)
                     }
+
+                Toggle(isOn: $telemetryEnabled) {
+                    HStack(spacing: 4) {
+                        Text("Share anonymous usage stats")
+                        StatsHelpButton()
+                    }
+                }
+                .toggleStyle(.switch)
             }
             .formStyle(.grouped)
             .scrollContentBackground(.hidden)
             .scrollDisabled(true)
             .frame(maxWidth: 460)
+            .onAppear {
+                // Reaching the final step discloses stats sharing, so it
+                // satisfies the consent gate — no separate launch alert needed
+                // for users who just finished onboarding.
+                UserDefaults.standard.set(true, forKey: PrefsKey.telemetryConsentSeen)
+            }
         }
     }
 }
