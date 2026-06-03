@@ -4,7 +4,7 @@
  *   POST /ingest          one daily aggregate per install (no ID, IP discarded)
  *   GET  /api/stats.json  public marginal aggregates (the dataset *is* the page)
  *
- * Privacy posture (see W-342):
+ * Privacy posture:
  *  - We never read cf-connecting-ip / any client identifier. Nothing links one
  *    ping to another, across days or dimensions.
  *  - Stored data is per-UTC-day counters only. No raw events, no free text

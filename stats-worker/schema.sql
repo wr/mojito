@@ -4,7 +4,7 @@
 -- (floor(unix_seconds / 86400)). The ingest endpoint UPSERTs counters; it
 -- never stores a row per request, an identifier, or an IP. Published views
 -- are pure marginals (each dimension its own table) — we never cross-tabulate,
--- so a single small count can't single anyone out. See W-342.
+-- so a single small count can't single anyone out.
 
 CREATE TABLE IF NOT EXISTS emoji_daily (
   day     INTEGER NOT NULL,
