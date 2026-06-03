@@ -92,9 +92,9 @@ struct PrivacyDetailsRows: View {
             detail: "Used to detect `:` triggers. Nothing else."
         )
         privacyRow(
-            icon: "photo",
-            title: "GIF search uses Giphy",
-            detail: "Type `:::` to search GIFs, and your search goes to Giphy. Nothing else you type ever leaves your Mac."
+            icon: "eye.slash",
+            title: "You are anonymous",
+            detail: "The aggregate stats Mojito shares and the GIF searches sent to Giphy are never linked to you."
         )
         privacyRow(
             icon: "dollarsign.circle",
