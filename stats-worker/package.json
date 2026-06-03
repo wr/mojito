@@ -2,7 +2,7 @@
   "name": "mojito-stats-worker",
   "version": "1.0.0",
   "private": true,
-  "description": "Cloudflare Worker + D1 backend for Mojito's anonymous usage stats (W-342).",
+  "description": "Cloudflare Worker + D1 backend for Mojito's anonymous usage stats.",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",

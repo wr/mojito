@@ -1,8 +1,8 @@
 # mojito-stats
 
-Cloudflare Worker + D1 backend for Mojito's anonymous usage statistics. Tracked
-in **W-342**. Lives in this repo but is deployed independently of the macOS app
-and is **not** part of the Xcode build.
+Cloudflare Worker + D1 backend for Mojito's anonymous usage statistics. Lives
+in this repo but is deployed independently of the macOS app and is **not** part
+of the Xcode build.
 
 ## What it does
 
@@ -14,7 +14,7 @@ and is **not** part of the Xcode build.
 Storage is per-UTC-day counters only (see `schema.sql`) — no per-request rows,
 no identifiers, no free text. Published output is pure marginals (each dimension
 its own table; never cross-tabulated) with a light long-tail trim. The privacy
-guarantees are structural, not statistical — see the W-342 description.
+guarantees are structural, not statistical.
 
 ## First-time setup
 
