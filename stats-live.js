@@ -1,10 +1,10 @@
 /*
- * Progressive enhancement: replace the baked-in sample data with the live
- * public dataset when it's available and non-empty. If the fetch fails or the
- * dataset is still empty (pre-launch), the page keeps its sample data and the
- * "Sample data · preview" pill. The endpoints are tried in order so the page
- * works both in production (custom domain) and from a local preview (the
- * workers.dev fallback resolves when the custom domain hasn't propagated).
+ * Renders the live public dataset onto the page. The page ships with sample
+ * markup so it looks right before any JS runs and as a fallback if the API is
+ * unreachable; on a successful fetch the live data always wins — even when
+ * it's all zeros (pre-launch), in which case empty sections show a tidy
+ * placeholder rather than leftover sample. Endpoints are tried in order so it
+ * works in production (custom domain) and from a local preview (workers.dev).
  */
 (function () {
   var ENDPOINTS = [
@@ -29,7 +29,7 @@
   fetchFirst(0);
 
   function fetchFirst(i) {
-    if (i >= ENDPOINTS.length) return;
+    if (i >= ENDPOINTS.length) return; // all endpoints failed: keep the sample
     var ctrl = new AbortController();
     var timer = setTimeout(function () { ctrl.abort(); }, 4000);
     fetch(ENDPOINTS[i], { signal: ctrl.signal })
@@ -39,22 +39,15 @@
   }
 
   function handle(d) {
-    if (!d || !isPopulated(d)) return; // pre-launch: keep the sample
-    window.__statsLiveTookOver = true;  // stop the sample count-up animations
-    applyLive(d);
-  }
-
-  function isPopulated(d) {
-    return (d.macsSharingStats > 0) ||
-      (d.topEmoji && d.topEmoji.length > 0) ||
-      (d.totals && d.totals.emoji > 0);
+    if (!d) return;
+    window.__statsLiveTookOver = true; // stop the sample count-up animations
+    applyLive(d);                      // live data wins, even when it's all zeros
   }
 
   // ---- render ----
 
   function applyLive(d) {
-    hide("pill-preview"); hide("pill-preview-sep");
-    setText("updated", "Updated " + fmtDate(d.generatedAt));
+    setText("updated", "last update " + fmtDate(d.generatedAt));
 
     num("bn-macs", d.macsSharingStats);
     num("bn-emoji", d.totals.emoji);
@@ -76,7 +69,8 @@
 
   function renderEmoji(top) {
     var el = byId("emoji-rows");
-    if (!el || !top.length) return;
+    if (!el) return;
+    if (!top.length) { el.innerHTML = note("No emoji inserted yet."); return; }
     var max = top[0].count || 1;
     el.innerHTML = top.map(function (e, i) {
       var pct = Math.round((e.count / max) * 100);
@@ -90,16 +84,21 @@
   }
 
   function renderMix(t) {
-    var sum = (t.emoji + t.symbol + t.gif + t.emoticon) || 1;
-    var seg = { emoji: t.emoji, emoticon: t.emoticon, symbol: t.symbol, gif: t.gif };
+    var sum = t.emoji + t.symbol + t.gif + t.emoticon;
     var bar = byId("mix-bar");
+    var legend = byId("mix-legend");
+    if (!sum) {
+      if (bar) bar.querySelectorAll(".mixseg").forEach(function (s) { s.style.width = "0%"; });
+      if (legend) legend.innerHTML = note("No insertions yet.");
+      return;
+    }
+    var seg = { emoji: t.emoji, emoticon: t.emoticon, symbol: t.symbol, gif: t.gif };
     if (bar) {
       ["emoji", "emoticon", "symbol", "gif"].forEach(function (k) {
         var s = bar.querySelector(".mixseg." + k);
         if (s) s.style.width = (seg[k] / sum) * 100 + "%";
       });
     }
-    var legend = byId("mix-legend");
     if (legend) {
       var rows = [["emoji", "Emoji"], ["emoticon", "Emoticons"],
         ["symbol", "Symbols"], ["gif", "GIFs"]];
@@ -115,6 +114,7 @@
   function renderDist(id, arr, labelFn) {
     var el = byId(id);
     if (!el || !arr) return;
+    if (!arr.length) { el.innerHTML = note("No data yet."); return; }
     var sum = arr.reduce(function (a, b) { return a + b.count; }, 0) || 1;
     el.innerHTML = arr.map(function (r) {
       var pct = Math.round((r.count / sum) * 100);
@@ -125,6 +125,7 @@
   function renderFeatures(id, features) {
     var el = byId(id);
     if (!el) return;
+    if (!features.length) { el.innerHTML = note("No data yet."); return; }
     el.innerHTML = features.map(function (f) {
       return barRow(FEATURE[f.feature] || f.feature, f.pct, f.pct + "%");
     }).join("");
@@ -132,7 +133,8 @@
 
   function renderTones(id, arr) {
     var el = byId(id);
-    if (!el || !arr.length) return;
+    if (!el) return;
+    if (!arr.length) { el.innerHTML = note("No data yet."); return; }
     var sum = arr.reduce(function (a, b) { return a + b.count; }, 0) || 1;
     var by = {};
     arr.forEach(function (r) { by[r.value] = r.count; });
@@ -145,6 +147,10 @@
   }
 
   // ---- helpers ----
+
+  function note(t) {
+    return '<p style="color:var(--text-soft);font-size:14px;margin:16px 0 0;">' + t + "</p>";
+  }
 
   function barRow(label, pct, val) {
     return '<div class="bar"><span class="bar-label">' + label +
@@ -168,7 +174,6 @@
 
   function num(id, n) { var el = byId(id); if (el) el.textContent = compact(n); }
   function setText(id, t) { var el = byId(id); if (el) el.textContent = t; }
-  function hide(id) { var el = byId(id); if (el) el.style.display = "none"; }
   function byId(id) { return document.getElementById(id); }
   function fmtDate(iso) {
     try {
