@@ -23,9 +23,22 @@ final class TelemetryUploader {
 
     static func utcDay(_ now: Date = Date()) -> Int { Int(now.timeIntervalSince1970 / 86_400) }
 
+    /// Debug/dev builds never upload — this keeps dev pings out of the public
+    /// production stats (Sparkle is disabled in Debug for the same reason). The
+    /// consent alert and Settings toggle stay visible in dev so the UX is
+    /// testable; only the network send is suppressed.
+    private static let uploadsEnabled: Bool = {
+        #if DEBUG
+        return false
+        #else
+        return true
+        #endif
+    }()
+
     func uploadIfDue() {
         let defaults = UserDefaults.standard
-        guard TelemetryStore.isEnabled,
+        guard Self.uploadsEnabled,
+              TelemetryStore.isEnabled,
               defaults.bool(forKey: PrefsKey.telemetryConsentSeen),
               defaults.integer(forKey: PrefsKey.telemetryLastUploadDay) != Self.utcDay()
         else { return }
