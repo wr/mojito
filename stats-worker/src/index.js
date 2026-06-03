@@ -214,8 +214,9 @@ async function dim(env, name, win) {
 // ---- helpers -------------------------------------------------------------
 
 function cors() {
+  // The stats payload is fully public data, so it's readable from anywhere.
   return {
-    "Access-Control-Allow-Origin": SITE_ORIGIN,
+    "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Max-Age": "86400",
   };

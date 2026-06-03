@@ -35,12 +35,10 @@ struct EasterEggsSettingsView: View {
                         .padding(.vertical, rowPadding)
                     LabeledContent("Emoji autocompleted", value: "\(totalAutocompleted)")
                         .padding(.vertical, rowPadding)
-                    HStack {
-                        Text("Danger zone")
-                        Spacer()
-                        ClearStatsButton(isDisabled: totalAutocompleted == 0)
-                    }
-                    .padding(.vertical, rowPadding)
+                    Link("See how that stacks up at mojito.wells.ee/stats",
+                         destination: URL(string: "https://mojito.wells.ee/stats")!)
+                        .font(.callout)
+                        .padding(.vertical, rowPadding)
                 }
 
                 easterEggsSection
@@ -97,18 +95,17 @@ struct EasterEggsSettingsView: View {
                     .background(flashBackground(for: egg))
                     .id(egg.id)
             }
-            HStack {
-                Text("Danger zone")
-                Spacer()
-                ResetEasterEggsButton(isDisabled: EasterEggTracker.discoveredCount == 0)
-            }
-            .padding(.vertical, rowPadding)
         } header: {
             HStack {
                 Text("Easter eggs")
                 Spacer()
                 Text("\(EasterEggTracker.discoveredCount) of \(EasterEggTracker.totalCount)")
                     .foregroundStyle(.secondary)
+            }
+        } footer: {
+            HStack {
+                Spacer()
+                ResetEasterEggsButton(isDisabled: EasterEggTracker.discoveredCount == 0)
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .easterEggDiscovered)) { _ in
@@ -204,13 +201,15 @@ struct EasterEggsSettingsView: View {
 
 // MARK: - Reset eggs button
 
-/// Parallels `ClearStatsButton`.
+/// Small text link under the eggs table.
 struct ResetEasterEggsButton: View {
     @State private var confirm = false
     var isDisabled: Bool = false
 
     var body: some View {
-        Button("Reset eggs...") { confirm = true }
+        Button("Reset eggs") { confirm = true }
+            .buttonStyle(.link)
+            .font(.callout)
             .disabled(isDisabled)
             .confirmationDialog(
                 "Reset all easter egg progress?",

@@ -4,6 +4,8 @@
   "main": "src/index.js",
   "compatibility_date": "2025-01-01",
   "observability": { "enabled": true },
+  // Keep the *.workers.dev URL alive alongside the custom domain.
+  "workers_dev": true,
 
   // Created via: wrangler d1 create mojito_stats
   // Paste the printed database_id below, then run the schema (see README).

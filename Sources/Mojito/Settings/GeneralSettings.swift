@@ -11,6 +11,7 @@ struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.symbolsEnabled) private var symbolsEnabled: Bool = false
     @AppStorage(PrefsKey.symbolsRequireDoubleColon) private var symbolsRequireDoubleColon: Bool = false
     @AppStorage(PrefsKey.gifSearchEnabled) private var gifSearchEnabled: Bool = true
+    @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled: Bool = true
     @State private var autoUpdates: Bool = UpdaterCoordinator.shared.automaticUpdates
 
     var body: some View {
@@ -50,6 +51,18 @@ struct GeneralSettingsView: View {
                     }
                 } label: {
                     Text("Automatic updates")
+                }
+
+                Toggle(isOn: $telemetryEnabled) {
+                    TitleAndCaption(
+                        title: "Share anonymous usage stats",
+                        caption: "Aggregate counts only — no identifiers. See them at mojito.wells.ee/stats."
+                    )
+                }
+                .toggleStyle(.switch)
+                .onChange(of: telemetryEnabled) { _, _ in
+                    // Interacting with the toggle is itself the consent decision.
+                    UserDefaults.standard.set(true, forKey: PrefsKey.telemetryConsentSeen)
                 }
             }
 
