@@ -92,9 +92,9 @@ struct PrivacyDetailsRows: View {
             detail: "Used to detect `:` triggers. Nothing else."
         )
         privacyRow(
-            icon: "internaldrive",
-            title: "Your blocklist stays on this Mac",
-            detail: "The apps and sites you exclude never leave it. GIF search sends just your query to Giphy when you use it."
+            icon: "photo",
+            title: "GIF search uses Giphy",
+            detail: "Type `:::` to search GIFs, and your search goes to Giphy. Nothing else you type ever leaves your Mac."
         )
         privacyRow(
             icon: "dollarsign.circle",

@@ -28,7 +28,7 @@ enum TelemetryConsent {
         alert.informativeText = String(localized: """
             \(name) can share anonymous usage stats — popular emoji, which features get used, and your macOS version. Nothing you type is ever included.
 
-            It's all public at mojito.wells.ee/stats, and you can turn it off anytime in Settings ▸ Privacy.
+            It's all public at mojito.wells.ee/stats, and you can turn it off in Settings.
             """)
         alert.addButton(withTitle: String(localized: "Share anonymous stats"))
         alert.addButton(withTitle: String(localized: "Not now"))

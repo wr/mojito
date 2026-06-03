@@ -35,12 +35,16 @@ struct EasterEggsSettingsView: View {
                         .padding(.vertical, rowPadding)
                     LabeledContent("Emoji autocompleted", value: "\(totalAutocompleted)")
                         .padding(.vertical, rowPadding)
-                    Link("See how you compare at mojito.wells.ee/stats",
-                         destination: URL(string: "https://mojito.wells.ee/stats")!)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .underline()
-                        .padding(.vertical, rowPadding)
+                    HStack(spacing: 4) {
+                        Text("See how you compare at")
+                        Link("mojito.wells.ee/stats",
+                             destination: URL(string: "https://mojito.wells.ee/stats")!)
+                            .tint(.secondary)
+                            .underline()
+                    }
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, rowPadding)
                 }
 
                 easterEggsSection
