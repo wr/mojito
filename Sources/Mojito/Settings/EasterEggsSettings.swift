@@ -138,10 +138,7 @@ struct EasterEggsSettingsView: View {
                 if discovered {
                     HStack(spacing: 4) {
                         Text(egg.title)
-                        Image(systemName: "questionmark.circle")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.tertiary)
-                            .help(egg.hint)
+                        EggHintButton(hint: egg.hint)
                     }
                     Text(.init(detailText(for: egg)))
                         .font(.callout)
@@ -206,6 +203,30 @@ struct EasterEggsSettingsView: View {
         .frame(width: tileSize, height: tileSize)
     }
 
+}
+
+// MARK: - Egg hint button
+
+/// Click-to-reveal hint shown next to a discovered egg's name. A popover
+/// (not `.help`, which is hover-only and reads as disabled).
+private struct EggHintButton: View {
+    let hint: String
+    @State private var shown = false
+
+    var body: some View {
+        Button { shown.toggle() } label: {
+            Image(systemName: "questionmark.circle")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $shown, arrowEdge: .bottom) {
+            Text(hint)
+                .font(.callout)
+                .padding(12)
+                .frame(maxWidth: 240)
+        }
+    }
 }
 
 // MARK: - Reset eggs button
