@@ -237,6 +237,7 @@
 }
 
 .bar-fill {
+  display: block; /* a <span> is inline by default — width/height are ignored without this */
   height: 100%;
   width: 0;
   border-radius: 999px;
