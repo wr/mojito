@@ -10,7 +10,9 @@
   --card-border: rgba(0, 0, 0, 0.07);
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 30px rgba(0, 0, 0, 0.06);
   --track: rgba(0, 0, 0, 0.06);
-  --fill: linear-gradient(90deg, #2db867, #1e8c54);
+  --fill-start: #2db867;
+  --fill-end: #1e8c54;
+  --fill: linear-gradient(90deg, var(--fill-start), var(--fill-end));
   --gauge-rest: rgba(0, 0, 0, 0.10);
   --hairline: rgba(0, 0, 0, 0.08);
 
@@ -286,7 +288,8 @@
   height: 52px;
   border-radius: 50%;
   background: conic-gradient(from 270deg,
-    var(--accent) 0 calc(var(--p, 0) * 1.8deg),
+    var(--fill-start) 0deg,
+    var(--fill-end) calc(var(--p, 0) * 1.8deg),
     var(--gauge-rest) calc(var(--p, 0) * 1.8deg) 180deg,
     transparent 180deg);
   -webkit-mask: radial-gradient(circle at 50% 50%, transparent 16px, #000 17px);
@@ -610,7 +613,9 @@
     --card-border: rgba(255, 255, 255, 0.08);
     --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.28);
     --track: rgba(255, 255, 255, 0.09);
-    --fill: linear-gradient(90deg, #2db867, #46cd7d);
+    --fill-start: #2db867;
+    --fill-end: #46cd7d;
+    --fill: linear-gradient(90deg, var(--fill-start), var(--fill-end));
     --gauge-rest: rgba(255, 255, 255, 0.14);
     --hairline: rgba(255, 255, 255, 0.1);
 
