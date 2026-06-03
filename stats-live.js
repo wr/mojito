@@ -25,6 +25,8 @@
     medium: "#c68a52", mediumDark: "#9c6438", dark: "#5e4129" };
   var TONE_NAME = { default: "Default", light: "Light", mediumLight: "Med-light",
     medium: "Medium", mediumDark: "Med-dark", dark: "Dark" };
+  var TONE_HAND = { default: "🖖", light: "🖖🏻", mediumLight: "🖖🏼",
+    medium: "🖖🏽", mediumDark: "🖖🏾", dark: "🖖🏿" };
 
   fetchFirst(0);
 
@@ -127,9 +129,9 @@
     if (!el) return;
     if (!features.length) { el.innerHTML = note("No data yet."); return; }
     el.innerHTML = features.map(function (f) {
-      return '<div class="feat-tile"><span class="feat-pct">' + f.pct +
-        '%</span><span class="feat-name">' + (FEATURE[f.feature] || f.feature) +
-        "</span></div>";
+      return '<div class="feat-tile"><div class="feat-gauge" style="--p:' + f.pct +
+        '"><span class="feat-pct">' + f.pct + '%</span></div><span class="feat-name">' +
+        (FEATURE[f.feature] || f.feature) + "</span></div>";
     }).join("");
   }
 
@@ -142,8 +144,8 @@
     arr.forEach(function (r) { by[r.value] = r.count; });
     el.innerHTML = TONE_ORDER.filter(function (v) { return by[v]; }).map(function (v) {
       var pct = Math.round((by[v] / sum) * 100);
-      return '<div class="tone"><span class="tone-dot" style="background:' + TONE_COLOR[v] +
-        '" aria-hidden="true"></span><span class="tone-pct">' + pct +
+      return '<div class="tone"><span class="tone-hand" aria-hidden="true">' + TONE_HAND[v] +
+        '</span><span class="tone-pct">' + pct +
         '%</span><span class="tone-name">' + TONE_NAME[v] + "</span></div>";
     }).join("");
   }

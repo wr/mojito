@@ -14,7 +14,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="stylesheet" href="style.css?v=66">
-<link rel="stylesheet" href="stats.css?v=6">
+<link rel="stylesheet" href="stats.css?v=7">
 </head>
 <body>
 
@@ -49,31 +49,26 @@
   <section class="bignums reveal" aria-label="Headline totals">
     <div class="bignum">
       <div class="bignum-value" id="bn-macs" data-count="9184" data-format="int">9,184</div>
-      <div class="bignum-label">Macs sharing stats</div>
-      <div class="bignum-sub">past 30 days</div>
+      <div class="bignum-label">Active users</div>
     </div>
     <div class="bignum">
       <div class="bignum-value" id="bn-emoji" data-count="12600000" data-format="m1">12.6M</div>
-      <div class="bignum-label">Emoji inserted</div>
-      <div class="bignum-sub">all time</div>
+      <div class="bignum-label">Emoji</div>
     </div>
     <div class="bignum">
       <div class="bignum-value" id="bn-gif" data-count="410000" data-format="k">410K</div>
-      <div class="bignum-label">GIFs inserted</div>
-      <div class="bignum-sub">all time</div>
+      <div class="bignum-label">GIFs</div>
     </div>
     <div class="bignum">
       <div class="bignum-value" id="bn-emoticon" data-count="2400000" data-format="m1">2.4M</div>
-      <div class="bignum-label">Emoticons converted</div>
-      <div class="bignum-sub">all time</div>
+      <div class="bignum-label">Emoticons</div>
     </div>
   </section>
 
   <!-- top emoji -->
   <section class="card reveal" aria-label="Most inserted emoji">
     <div class="card-head">
-      <h2 class="card-title">Most-inserted emoji</h2>
-      <span class="card-note">past 30 days · bar = share of #1</span>
+      <h2 class="card-title">Top emoji</h2>
     </div>
     <div class="erows" id="emoji-rows">
       <div class="erow"><span class="erank">1</span><span class="eglyph" aria-hidden="true">😂</span><span class="ecode">:joy:</span><span class="bar-track"><span class="bar-fill" data-w="100%"></span></span><span class="ecount">1,284,930</span></div>
@@ -99,7 +94,6 @@
   <section class="card reveal" aria-label="What gets inserted">
     <div class="card-head">
       <h2 class="card-title">What gets inserted</h2>
-      <span class="card-note">all time</span>
     </div>
     <div class="mixbar" id="mix-bar" role="img" aria-label="Emoji 76%, emoticons 14%, symbols 7%, GIFs 3%">
       <span class="mixseg emoji" style="width:76%"></span>
@@ -126,7 +120,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-head"><h2 class="card-title">Mac chip</h2></div>
+      <div class="card-head"><h2 class="card-title">Architecture</h2></div>
       <div class="bars" id="bars-arch">
         <div class="bar"><span class="bar-label">Apple Silicon</span><span class="bar-track"><span class="bar-fill" data-w="86%"></span></span><span class="bar-val">86%</span></div>
         <div class="bar"><span class="bar-label">Intel</span><span class="bar-track"><span class="bar-fill" data-w="14%"></span></span><span class="bar-val">14%</span></div>
@@ -137,7 +131,7 @@
   <!-- app version + features -->
   <section class="grid-2 reveal" aria-label="App">
     <div class="card">
-      <div class="card-head"><h2 class="card-title">App version</h2><span class="card-note">update reach</span></div>
+      <div class="card-head"><h2 class="card-title">App version</h2></div>
       <div class="bars" id="bars-app">
         <div class="bar"><span class="bar-label">1.2.1 <small>latest</small></span><span class="bar-track"><span class="bar-fill" data-w="71%"></span></span><span class="bar-val">71%</span></div>
         <div class="bar"><span class="bar-label">1.2.0</span><span class="bar-track"><span class="bar-fill" data-w="14%"></span></span><span class="bar-val">14%</span></div>
@@ -146,7 +140,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-head"><h2 class="card-title">Languages</h2><span class="card-note">interface</span></div>
+      <div class="card-head"><h2 class="card-title">Languages</h2></div>
       <div class="bars" id="bars-lang">
         <div class="bar"><span class="bar-label">English</span><span class="bar-track"><span class="bar-fill" data-w="71%"></span></span><span class="bar-val">71%</span></div>
         <div class="bar"><span class="bar-label">German</span><span class="bar-track"><span class="bar-fill" data-w="6%"></span></span><span class="bar-val">6%</span></div>
@@ -159,18 +153,17 @@
   </section>
 
   <!-- feature adoption -->
-  <section class="card reveal" aria-label="Feature adoption">
+  <section class="card reveal" aria-label="Feature usage">
     <div class="card-head">
-      <h2 class="card-title">Feature adoption</h2>
-      <span class="card-note">share of installs</span>
+      <h2 class="card-title">Feature usage</h2>
     </div>
     <div class="feat-grid" id="bars-features">
-      <div class="feat-tile"><span class="feat-pct">91%</span><span class="feat-name">Frequency boost</span></div>
-      <div class="feat-tile"><span class="feat-pct">79%</span><span class="feat-name">Launch at login</span></div>
-      <div class="feat-tile"><span class="feat-pct">73%</span><span class="feat-name">GIF search</span></div>
-      <div class="feat-tile"><span class="feat-pct">64%</span><span class="feat-name">Emoticons</span></div>
-      <div class="feat-tile"><span class="feat-pct">52%</span><span class="feat-name">Arrow conversion</span></div>
-      <div class="feat-tile"><span class="feat-pct">38%</span><span class="feat-name">Symbols</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:91"><span class="feat-pct">91%</span></div><span class="feat-name">Frequency boost</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:79"><span class="feat-pct">79%</span></div><span class="feat-name">Launch at login</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:73"><span class="feat-pct">73%</span></div><span class="feat-name">GIF search</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:64"><span class="feat-pct">64%</span></div><span class="feat-name">Emoticons</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:52"><span class="feat-pct">52%</span></div><span class="feat-name">Arrow conversion</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:38"><span class="feat-pct">38%</span></div><span class="feat-name">Symbols</span></div>
     </div>
   </section>
 
@@ -178,28 +171,21 @@
   <section class="card reveal" aria-label="Skin tone preference">
     <div class="card-head">
       <h2 class="card-title">Skin tone</h2>
-      <span class="card-note">default modifier</span>
     </div>
     <div class="tones" id="tones">
-      <div class="tone"><span class="tone-dot" style="background:#ffce4a" aria-hidden="true"></span><span class="tone-pct">68%</span><span class="tone-name">Default</span></div>
-      <div class="tone"><span class="tone-dot" style="background:#f3d3b0" aria-hidden="true"></span><span class="tone-pct">7%</span><span class="tone-name">Light</span></div>
-      <div class="tone"><span class="tone-dot" style="background:#e7b78c" aria-hidden="true"></span><span class="tone-pct">9%</span><span class="tone-name">Med-light</span></div>
-      <div class="tone"><span class="tone-dot" style="background:#c68a52" aria-hidden="true"></span><span class="tone-pct">8%</span><span class="tone-name">Medium</span></div>
-      <div class="tone"><span class="tone-dot" style="background:#9c6438" aria-hidden="true"></span><span class="tone-pct">4%</span><span class="tone-name">Med-dark</span></div>
-      <div class="tone"><span class="tone-dot" style="background:#5e4129" aria-hidden="true"></span><span class="tone-pct">4%</span><span class="tone-name">Dark</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖</span><span class="tone-pct">68%</span><span class="tone-name">Default</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏻</span><span class="tone-pct">7%</span><span class="tone-name">Light</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏼</span><span class="tone-pct">9%</span><span class="tone-name">Med-light</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏽</span><span class="tone-pct">8%</span><span class="tone-name">Medium</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏾</span><span class="tone-pct">4%</span><span class="tone-name">Med-dark</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏿</span><span class="tone-pct">4%</span><span class="tone-name">Dark</span></div>
     </div>
   </section>
 
   <!-- community discoveries (single vague counter, no breakdown) -->
-  <section class="card eggs-card reveal" aria-label="Community discoveries">
+  <section class="card eggs-card reveal" aria-label="Easter eggs discovered">
     <div class="egg-num" id="egg-num" data-count="47902" data-format="int">47,902</div>
-    <p class="egg-cap">little surprises the community has stumbled onto. Mojito hides a few — <span style="white-space:nowrap">go find one.</span></p>
-  </section>
-
-  <!-- what's collected (the single plain disclosure) -->
-  <section class="card reveal" aria-label="What's collected">
-    <div class="card-head"><h2 class="card-title">What's collected</h2></div>
-    <p class="card-lead" style="margin:0;">Aggregate counts, once a day — emoji and feature usage, plus app and macOS version. No names, no IP address, and nothing you type. It's anonymous and on by default; turn it off anytime in Settings &rarr; Privacy.</p>
+    <p class="egg-cap">Easter eggs discovered</p>
   </section>
 
   <!-- data + source -->
@@ -208,7 +194,6 @@
       <a class="data-btn" href="/api/stats.json"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M4.5 2.5A2 2 0 0 0 2.5 4.5v2A1.5 1.5 0 0 1 1 8a1.5 1.5 0 0 1 1.5 1.5v2a2 2 0 0 0 2 2H6V12H4.5a.5.5 0 0 1-.5-.5V9.5A2 2 0 0 0 2.9 8 2 2 0 0 0 4 6.5V4.5a.5.5 0 0 1 .5-.5H6V2.5ZM11.5 2.5H10V4h1.5a.5.5 0 0 1 .5.5v2A2 2 0 0 0 13.1 8 2 2 0 0 0 12 9.5v2a.5.5 0 0 1-.5.5H10v1.5h1.5a2 2 0 0 0 2-2v-2A1.5 1.5 0 0 1 15 8a1.5 1.5 0 0 1-1.5-1.5v-2a2 2 0 0 0-2-2Z"/></svg>Get the raw JSON&nbsp;<code>/api/stats.json</code></a>
       <a class="data-btn" href="https://github.com/wr/mojito"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>Read the source</a>
     </div>
-    <p class="card-lead" style="margin-top:14px;">Same numbers, as raw JSON.</p>
   </section>
 
 </main>
@@ -228,6 +213,7 @@
     </ul>
     <span class="footer-pill-divider" aria-hidden="true"></span>
     <div class="footer-text-links">
+      <a href="/stats">Stats</a>
       <a href="https://buymeacoffee.com/wellsriley">Donate</a>
       <a href="mailto:mojito@wells.ee">Contact</a>
     </div>
@@ -289,6 +275,6 @@
   document.querySelectorAll('.reveal').forEach(function (s) { io.observe(s); });
 })();
 </script>
-<script src="stats-live.js?v=4"></script>
+<script src="stats-live.js?v=5"></script>
 </body>
 </html>

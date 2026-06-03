@@ -11,6 +11,7 @@
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 30px rgba(0, 0, 0, 0.06);
   --track: rgba(0, 0, 0, 0.06);
   --fill: linear-gradient(90deg, #2db867, #1e8c54);
+  --gauge-rest: rgba(0, 0, 0, 0.10);
   --hairline: rgba(0, 0, 0, 0.08);
 
   /* usage-mix segment colors */
@@ -258,18 +259,39 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 8px;
   aspect-ratio: 1 / 1;
-  padding: 8px 6px;
+  padding: 10px 6px;
   background: var(--track);
   border-radius: 12px;
   text-align: center;
 }
 
+/* tiny radial gauge — green arc = the percentage, hole matches the tile */
+.feat-gauge {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) calc(var(--p, 0) * 1%), var(--gauge-rest) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feat-gauge::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: var(--track);
+}
+
 .feat-pct {
-  font-size: 20px;
+  position: relative;
+  font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -400,6 +422,11 @@
   height: 30px;
   border-radius: 50%;
   box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.tone-hand {
+  font-size: 30px;
+  line-height: 1;
 }
 
 .tone-pct {
@@ -580,6 +607,7 @@
     --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.28);
     --track: rgba(255, 255, 255, 0.09);
     --fill: linear-gradient(90deg, #2db867, #46cd7d);
+    --gauge-rest: rgba(255, 255, 255, 0.14);
     --hairline: rgba(255, 255, 255, 0.1);
 
     --mix-emoji: #2db867;
