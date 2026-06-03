@@ -137,7 +137,7 @@ private struct TitleAndCaption: View {
     }
 }
 
-private struct StatsHelpButton: View {
+struct StatsHelpButton: View {
     @State private var isShown = false
 
     var body: some View {

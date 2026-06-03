@@ -537,11 +537,9 @@ struct DoneStep: View {
                     }
 
                 Toggle(isOn: $telemetryEnabled) {
-                    VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
                         Text("Share anonymous usage stats")
-                        Text("Aggregate counts only — no identifiers.")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
+                        StatsHelpButton()
                     }
                 }
                 .toggleStyle(.switch)
