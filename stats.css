@@ -276,7 +276,7 @@
   overflow: hidden;
 }
 
-/* the dial: a full circle whose visible top half is the arc */
+/* the dial: a full circle clipped to its top half, masked into a thin arc */
 .feat-gauge::before {
   content: "";
   position: absolute;
@@ -289,19 +289,8 @@
     var(--accent) 0 calc(var(--p, 0) * 1.8deg),
     var(--gauge-rest) calc(var(--p, 0) * 1.8deg) 180deg,
     transparent 180deg);
-}
-
-/* punch out the inner half-circle so the dial reads as a thin arc */
-.feat-gauge::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 18px;
-  border-radius: 18px 18px 0 0;
-  background: var(--track);
+  -webkit-mask: radial-gradient(circle at 50% 50%, transparent 16px, #000 17px);
+  mask: radial-gradient(circle at 50% 50%, transparent 16px, #000 17px);
 }
 
 .feat-pct {
