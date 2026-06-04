@@ -116,9 +116,8 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Picker label once the egg is discovered. Matches the bare-keyword
-    /// form already used by `EggStrings.k04Label` / `k05Label`. Decoded at
-    /// runtime only on demand. Non-picker eggs return `"???"` so callers
+    /// Picker label to show once the egg is discovered.
+    /// Decoded at runtime only on demand; non-picker eggs return `"???"` so callers
     /// have a safe fallback even if they look one up.
     var pickerLabel: String {
         switch self {

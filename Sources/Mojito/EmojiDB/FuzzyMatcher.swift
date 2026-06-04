@@ -208,8 +208,7 @@ struct FuzzyMatcher {
            let row = pinnedRows[hexcode] {
             // Reveal the trigger keyword once the user has discovered the egg —
             // a row stuck on "???" after discovery is just dead weight in the
-            // picker. k04/k05 already ship their label, so the swap is a no-op
-            // for them.
+            // picker.
             var label = row.label
             if label == "???",
                let egg = EasterEgg(rawValue: hexcode),
