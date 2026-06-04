@@ -11,6 +11,18 @@ NS = {
 }
 ET.register_namespace("sparkle", NS["sparkle"])
 
+# Predefined XML namespace — ElementTree serializes this as `xml:lang` without
+# an explicit xmlns declaration. Sparkle resolves the per-language node via
+# +[NSBundle preferredLocalizationsFromArray:], so an untagged node counts as
+# "en" and the first node in document order is the ultimate no-match fallback.
+XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
+
+
+def localized_url(en_url: str, locale: str) -> str:
+    """`…/release-notes/1.2.2.html` → `…/release-notes/<locale>/1.2.2.html`."""
+    base, _, fname = en_url.rpartition("/")
+    return f"{base}/{locale}/{fname}"
+
 
 def empty_appcast() -> ET.ElementTree:
     # ET.register_namespace above emits xmlns:sparkle automatically when any
@@ -34,9 +46,11 @@ def main() -> int:
     p.add_argument("--url", required=True)
     p.add_argument("--length", required=True)
     p.add_argument("--signature", required=True)
-    p.add_argument("--release-notes-url", default="", help="URL to hosted HTML release notes for this version")
-    p.add_argument("--full-release-notes-url", default="", help="URL to the full version-history page (Sparkle's 'Version history' link)")
+    p.add_argument("--release-notes-url", default="", help="URL to the English HTML release notes for this version")
+    p.add_argument("--full-release-notes-url", default="", help="URL to the English full version-history page (Sparkle's 'Version history' link)")
+    p.add_argument("--locales", default="", help="Space-separated locales with rendered localized notes; emits xml:lang variants alongside English")
     args = p.parse_args()
+    locales = [loc for loc in args.locales.split() if loc]
 
     if os.path.exists(args.appcast):
         tree = ET.parse(args.appcast)
@@ -65,15 +79,30 @@ def main() -> int:
     # update comparison against this field, NOT shortVersionString.
     ET.SubElement(item, "{%s}version" % NS["sparkle"]).text = args.build
     ET.SubElement(item, "{%s}minimumSystemVersion" % NS["sparkle"]).text = "14.0"
-    if args.release_notes_url:
+    def add_notes_link(tag: str, en_url: str) -> None:
         # The appcast element is `sparkle:releaseNotesLink` — NOT
         # `releaseNotesURL` (that's the SUAppcastItem *property* name). Sparkle
         # silently ignores the unknown element, so the wrong name leaves the
         # update dialog with a blank release-notes pane.
-        ET.SubElement(item, "{%s}releaseNotesLink" % NS["sparkle"]).text = args.release_notes_url
-    if args.full_release_notes_url:
-        # Drives the update dialog's "Version history" link → full changelog.
-        ET.SubElement(item, "{%s}fullReleaseNotesLink" % NS["sparkle"]).text = args.full_release_notes_url
+        if not en_url:
+            return
+        if not locales:
+            ET.SubElement(item, "{%s}%s" % (NS["sparkle"], tag)).text = en_url
+            return
+        # Localized: tag English explicitly and keep it first (it's the no-match
+        # fallback), then one node per locale with its `/<locale>/` URL.
+        en = ET.SubElement(item, "{%s}%s" % (NS["sparkle"], tag))
+        en.set(XML_LANG, "en")
+        en.text = en_url
+        for loc in locales:
+            node = ET.SubElement(item, "{%s}%s" % (NS["sparkle"], tag))
+            node.set(XML_LANG, loc)
+            node.text = localized_url(en_url, loc)
+
+    # releaseNotesLink → per-version notes; fullReleaseNotesLink → "Version
+    # history" link in the update dialog.
+    add_notes_link("releaseNotesLink", args.release_notes_url)
+    add_notes_link("fullReleaseNotesLink", args.full_release_notes_url)
     ET.SubElement(
         item,
         "enclosure",
