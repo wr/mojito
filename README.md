@@ -6,24 +6,31 @@ Requires macOS 14 or later.
 
 ## Install
 
-Download the latest DMG from the Releases page and move Mojito to Applications. The app walks through granting Accessibility and Input Monitoring access on first launch. Updates arrive automatically.
+Download the latest DMG from the Releases page and move Mojito to Applications. The app walks through granting Accessibility and Input Monitoring access on first launch. Updates arrive automatically — when one is ready, the menu-bar icon shows a badge.
 
 ## How it works
 
 After you type a colon and a character or two, a picker shows up next to your cursor with fuzzy matches. Arrow keys move the selection; Return or Tab inserts. To skip the picker, type the closing colon — `:heart:` — and the exact match goes in directly.
 
+Type a colon by itself to get your favorites, with a row to browse every emoji in a grid.
+
 Other things it does:
 
 - Ranks results by how often you use them
-- Recognizes emoticons like `:)` and `<3`
-- Optional symbol insertion: `:cmd:` for ⌘, `:star:` for ★
+- Recognizes emoticons like `:)` and `<3`, and converts text arrows (`->` → →, `<->` → ↔)
+- GIF search — type `:::` and a query to drop in a GIF, powered by GIPHY
+- Optional symbols and signs: hundreds of them, from `:cmd:` for ⌘ and `:star:` for ★ to currency, arrows, math, and Greek letters
 - Default skin tone
-- Stays out of apps and websites with native emoji input. Slack, Discord and friends are excluded out of the box.
-- Pause for an hour or until tomorrow from the menu bar
+- Stays out of apps and websites with native emoji input — Slack, Discord, and a long list of others are excluded out of the box. You can edit the list, or flip it into allowlist mode so Mojito runs only where you say.
+- Pause for an hour or until tomorrow, from the menu bar or a keyboard shortcut you set
 
 ## Privacy
 
-Mojito reads keystrokes to recognize shortcodes. Nothing is logged or sent anywhere. Password fields are skipped. The only outbound request is the update check.
+Mojito reads keystrokes to recognize shortcodes. That happens on your Mac — nothing you type is logged, stored, or sent anywhere, and password fields are skipped entirely.
+
+Mojito can share **anonymous usage stats** to help guide what gets built: counts of popular emoji, which features you have switched on, your macOS and app version, and your language and skin-tone preference. It never includes anything you actually type. You're asked once, you can turn it off anytime in Settings, and the whole dataset is public at [mojito.wells.ee/stats](https://mojito.wells.ee/stats). It's sent at most once a day, carries no identifier, and the server discards your IP. (Dev builds never send it.)
+
+So the only times Mojito reaches the network are the update check, a GIF search when you run one, and — if you leave stats on — that once-a-day anonymous ping.
 
 ## Translations
 
@@ -39,7 +46,7 @@ scripts/run-locale.sh fr   # or de, ja, ar, zh-Hans, etc.
 
 ## Credits
 
-emojibase, Sparkle, KeyboardShortcuts, and a Swift port of fzy.
+emojibase, Sparkle, KeyboardShortcuts, GIPHY, and a Swift port of fzy.
 
 ## License
 
