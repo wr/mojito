@@ -28,7 +28,7 @@ struct PickerView: View {
         }
     }
 
-    /// Bare-`:` favorites pill: a single horizontal row of emoji cells with
+    /// `:?` favorites pill: a single horizontal row of emoji cells with
     /// a trailing chevron (the Browse row) that expands to the full grid.
     private var compactBar: some View {
         HStack(spacing: PickerLayout.compactSpacing) {

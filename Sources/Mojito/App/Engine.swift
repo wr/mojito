@@ -506,8 +506,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if captureExcluded { break }
             updateResults(query: q, scope: scope)
             if q.isEmpty {
-                // Bare `:` → favorites + most-used. Debounced so a follow-up
-                // keystroke (`:)`, `:smile`) cancels it before it flashes.
+                // `:?` (empty query) → favorites + most-used. Debounced so a
+                // follow-up keystroke (`:)`, `:smile`) cancels it before it flashes.
                 scheduleEmptyPickerShow()
             } else {
                 // Defer one tick: the keystroke moves the caret in the focused
@@ -922,7 +922,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             "results": "\(results.count)",
             "scope": "\(scope)",
         ])
-        // Trailing Browse row mirrors the bare-`:` pill — a no-match query
+        // Trailing Browse row mirrors the `:?` favorites pill — a no-match query
         // still hides the picker (results stay empty), but any hit list lets
         // the user fall through to the full grid.
         if !results.isEmpty {
