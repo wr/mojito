@@ -265,6 +265,37 @@ awk '/^## v[0-9]/ { p = 1 } p' "$REPO_ROOT/CHANGELOG.md" \
         --title "$APP_NAME — Version History" \
     > "$GH_PAGES_DIR/release-notes/history.html"
 
+# Localized release notes. Translations live in release-notes-i18n/<locale>.md
+# (same `## vX.Y.Z` structure as CHANGELOG.md). A locale is rendered only if it
+# has a section for THIS version — otherwise Sparkle falls back to English. The
+# rendered set is passed to update_appcast.py so the appcast gets xml:lang links.
+echo "→ Rendering localized release notes"
+I18N_DIR="$REPO_ROOT/release-notes-i18n"
+LOCALES="en-GB de es es-419 fr it pt-BR ja zh-Hans zh-Hant ko hi ru pl nl ar fa he"
+RENDERED_LOCALES=""
+for loc in $LOCALES; do
+    src="$I18N_DIR/$loc.md"
+    [[ -f "$src" ]] || continue
+    frag=$(awk -v header="## v$VERSION" '
+        $0 == header { capture = 1; next }
+        capture && /^## v[0-9]/ { exit }
+        capture { print }
+    ' "$src")
+    [[ -n "$frag" ]] || continue
+    mkdir -p "$GH_PAGES_DIR/release-notes/$loc"
+    printf '%s\n' "$frag" \
+        | python3 "$REPO_ROOT/scripts/md_to_release_notes.py" \
+            --title "$APP_NAME $VERSION" --lang "$loc" \
+        > "$GH_PAGES_DIR/release-notes/$loc/$VERSION.html"
+    awk '/^## v[0-9]/ { p = 1 } p' "$src" \
+        | python3 "$REPO_ROOT/scripts/md_to_release_notes.py" \
+            --title "$APP_NAME — Version History" --lang "$loc" \
+        > "$GH_PAGES_DIR/release-notes/$loc/history.html"
+    RENDERED_LOCALES="$RENDERED_LOCALES $loc"
+done
+RENDERED_LOCALES=$(echo "$RENDERED_LOCALES" | xargs)
+[[ -n "$RENDERED_LOCALES" ]] && echo "   localized: $RENDERED_LOCALES"
+
 APPCAST="$GH_PAGES_DIR/appcast.xml"
 python3 "$REPO_ROOT/scripts/update_appcast.py" \
     --appcast "$APPCAST" \
@@ -274,7 +305,8 @@ python3 "$REPO_ROOT/scripts/update_appcast.py" \
     --length "$LENGTH" \
     --signature "$EDDSA_SIGNATURE" \
     --release-notes-url "$RELEASE_NOTES_URL" \
-    --full-release-notes-url "$FULL_NOTES_URL"
+    --full-release-notes-url "$FULL_NOTES_URL" \
+    --locales "$RENDERED_LOCALES"
 
 cd "$GH_PAGES_DIR"
 git add appcast.xml release-notes

@@ -13,6 +13,9 @@ import html
 import re
 import sys
 
+# Locales whose release notes render right-to-left. Drives the <html dir>.
+RTL_LANGS = {"ar", "fa", "he"}
+
 CSS = """
 :root { color-scheme: light dark; }
 body {
@@ -108,13 +111,16 @@ def render_body(md: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--title", default="Release Notes", help="HTML <title>")
+    parser.add_argument("--lang", default="en", help="BCP-47 code for <html lang>; ar/fa/he render RTL")
     args = parser.parse_args()
 
     body = render_body(sys.stdin.read())
     title = html.escape(args.title, quote=True)
+    lang = html.escape(args.lang, quote=True)
+    direction = "rtl" if args.lang in RTL_LANGS else "ltr"
     sys.stdout.write(
         "<!DOCTYPE html>\n"
-        '<html lang="en">\n'
+        f'<html lang="{lang}" dir="{direction}">\n'
         "<head>\n"
         '<meta charset="utf-8">\n'
         f"<title>{title}</title>\n"
