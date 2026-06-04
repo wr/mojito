@@ -1653,9 +1653,14 @@ footer {
   min-width: 210px;
   max-height: 340px;
   overflow-y: auto;
-  background: var(--menu-bg);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  /* Frosted glass: a low-opacity tint over a strong backdrop blur so the page
+     reads through. The menu lives under .topbar (which also has a
+     backdrop-filter) — `isolation: isolate` gives it its own stacking context
+     so its backdrop samples the page content behind it, not the topbar's. */
+  isolation: isolate;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
   border: 1px solid var(--menu-border);
   border-radius: 14px;
   box-shadow: var(--menu-shadow);
