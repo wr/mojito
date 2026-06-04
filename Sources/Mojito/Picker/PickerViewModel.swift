@@ -7,8 +7,8 @@ final class PickerViewModel: ObservableObject {
     @Published var results: [ScoredEmoji] = []
     @Published var selectedIndex: Int = 0
     @Published var isVisible: Bool = false
-    /// True for the bare-`:` favorites surface, which renders as a compact
-    /// horizontal pill instead of the vertical shortcode list.
+    /// True for the `:?` (empty-query) favorites surface, which renders as a
+    /// compact horizontal pill instead of the vertical shortcode list.
     @Published var compact: Bool = false
     /// True once the pill has grown into the full-library grid (same panel).
     @Published var expanded: Bool = false
