@@ -1,0 +1,95 @@
+{
+  "meta.title": "Mojito — Autocompleta :emoji: en cualquier parte de macOS",
+  "meta.description": "Autocompleta :emoji: en cualquier parte de macOS. Escribe dos puntos y busca cualquier emoji, símbolo o shortcode en segundos — en TextEdit, iMessage, Terminal, donde sea.",
+
+  "nav.github": "GitHub",
+  "nav.donate": "Donar",
+  "nav.download": "Descargar para macOS",
+
+  "hero.title": "Autocompleta <code>:emoji:</code> en todas partes.",
+  "hero.sub": "Escribe <code>:</code> para buscar cualquier emoji o símbolo en segundos.",
+
+  "demo.folderLabel": "Sitio web",
+  "demo.achievement.lead": "¡Tu primer easter egg!",
+  "demo.achievement.detail": "Uno menos, quedan 100",
+  "demo.sadmac.hint": "haz clic para reiniciar",
+
+  "demo.textedit.title": "Sin título.txt — Editado",
+
+  "demo.imessage.contact": "Sarah",
+  "demo.imessage.label": "iMessage",
+  "demo.imessage.bubble1": "voy con retraso, ¡perdona!",
+  "demo.imessage.bubble2": "llego en 10",
+  "demo.imessage.placeholder": "iMessage",
+  "demo.imessage.aria.compose": "Redactar en iMessage",
+  "demo.imessage.aria.attach": "Adjuntar",
+  "demo.imessage.aria.dictate": "Dictar",
+  "demo.imessage.aria.emoji": "Emoji",
+
+  "demo.mastodon.visibility": "Público, se permiten citas",
+  "demo.mastodon.compose.placeholder": "¿Qué estás pensando?",
+  "demo.mastodon.aria.compose": "Redactar en Mastodon",
+  "demo.mastodon.post": "Publicar",
+
+  "demo.reminders.title": "Recordatorios",
+  "demo.reminders.item1": "Responder a Sarah",
+  "demo.reminders.item2": "Enviar la hoja de horas",
+  "demo.reminders.item3": "Renovar el carné de la biblioteca",
+  "demo.reminders.placeholder": "Añadir un recordatorio…",
+  "demo.reminders.aria.add": "Añadir recordatorio",
+  "demo.reminders.new": "Nuevo recordatorio",
+  "demo.reminders.aria.new": "Nuevo recordatorio",
+
+  "demo.aria.liveDemo": "Demo en directo",
+
+  "demo.imessage.today": "Hoy",
+  "demo.mastodon.language": "Español",
+  "demo.scene.doc": "Revisión de diseño — {date}\n\nEl selector debería aparecer con un fundido la primera vez. El equipo está de acuerdo.\n\nPor hacer:\n- Añadir la opción de fundido",
+  "demo.scene.deadline": "\n- Cumplir el plazo ",
+  "demo.scene.soon": "hasta pronto ",
+  "demo.scene.shipped": "Acabo de lanzar una nueva app ",
+  "demo.scene.pickup": "Recoger ",
+  "demo.scene.formom": " para mamá",
+  "demo.fallback": "No olvides el :tada",
+
+  "picker.aria.suggestions": "Sugerencias de emoji",
+  "picker.select": "seleccionar",
+  "picker.insert": "insertar",
+  "picker.dismiss": "cerrar",
+
+  "about.h2": "Acerca de",
+  "about.body": "Creé Mojito porque el <code>:tada:</code> → 🎉 de Slack debería funcionar en cualquier parte de macOS, no solo en Slack. Es gratuito y de código abierto.",
+
+  "faq.h2": "Preguntas frecuentes",
+  "faq.q1.q": "¿En qué se diferencia del selector de emoji integrado en macOS?",
+  "faq.q1.a": "El selector de macOS (⌃⌘Espacio) es una ventana aparte — la abres, buscas, haces clic y vuelves. Mojito simplemente aparece junto al cursor mientras escribes. Pulsa los dos puntos, escribe un par de letras, flechas + Retorno para insertar. Sin ventana, sin ratón, sin cambiar de contexto.",
+  "faq.q2.q": "¿En qué apps funciona?",
+  "faq.q2.a": "En cualquier sitio donde puedas escribir — TextEdit, Terminal, Mail, Notas, navegadores, Notion. Se mantiene al margen de las apps y sitios que ya gestionan los emoji por shortcode de forma nativa (Slack, Discord, Messages, GitHub) para que no haya doble procesamiento.",
+  "faq.q3.q": "¿Puedo personalizarlo?",
+  "faq.q3.a": "Unos cuantos ajustes en la barra de menús: tono de piel por defecto, un modo de símbolos opcional (<code>:cmd:</code> → ⌘, <code>:star:</code> → ★) y la opción de pausarlo durante una hora o hasta mañana. Los resultados se reordenan según la frecuencia con la que los usas, y se reconocen emoticonos habituales como <code>:)</code> y <code>&lt;3</code>.",
+  "faq.q4.q": "¿También puedo insertar GIF?",
+  "faq.q4.a": "Sí — escribe <code>:::</code> (tres dos puntos) y luego un término de búsqueda para coger un GIF de <a href=\"https://giphy.com\">Giphy</a>. Está activado por defecto; desactívalo en Ajustes → General si prefieres mantenerlo todo en local.",
+  "faq.q5.q": "¿En qué idiomas está disponible?",
+  "faq.q5.a": "La interfaz está traducida a 19 idiomas — inglés (EE. UU. + Reino Unido), alemán, español (España + Latinoamérica), francés, italiano, portugués de Brasil, japonés, chino simplificado y tradicional, coreano, hindi, ruso, polaco, neerlandés, árabe, persa y hebreo. Los shortcodes de emoji están localizados en 14 de ellos, así que <code>:gato:</code> funciona en español, <code>:chien:</code> en francés, y así sucesivamente. Las traducciones empezaron como borradores generados por IA; las <a href=\"https://github.com/wr/mojito#translations\">correcciones de hablantes nativos</a> son muy bienvenidas.",
+  "faq.q6.q": "¿Cuáles son los requisitos del sistema?",
+  "faq.q6.a": "macOS 14 (Sonoma) o posterior. Nativo en Apple Silicon e Intel.",
+  "faq.q7.q": "¿Cómo funcionan las actualizaciones y la desinstalación?",
+  "faq.q7.a": "Las actualizaciones llegan automáticamente a través de Sparkle, el framework de actualización estándar de macOS. Para desinstalarlo, cierra Mojito desde la barra de menús y arrástralo desde Aplicaciones a la Papelera.",
+  "faq.q8.q": "¿Es de código abierto?",
+  "faq.q8.a": "Código fuente completo en <a href=\"https://github.com/wr/mojito\">GitHub</a>, AGPL-3.0.",
+  "faq.q9.q": "¿De verdad es gratis? ¿Cómo puedo apoyarlo?",
+  "faq.q9.a": "Sí — sin prueba, sin anuncios, sin ventas adicionales. Si quieres aportar tu granito de arena, un <a href=\"https://buymeacoffee.com/wellsriley\">Buy Me a Coffee</a> se agradece mucho.",
+  "faq.q10.q": "¿La app está llena de easter eggs por descubrir?",
+  "faq.q10.a": "Sí — a diferencia de la mayoría del software de hoy, Mojito es a la vez útil <em>y</em> tiene alma. Diviértete con ella.",
+
+  "privacy.h2": "Privacidad",
+  "privacy.p1": "Las pulsaciones se comparan con la lista de shortcodes de forma local — no se registra, transmite ni almacena nada en ningún servidor. Los campos de contraseña y otros campos de texto seguro se ignoran por completo. No hay telemetría, ni analíticas, ni cuenta.",
+  "privacy.p2": "Mojito hace dos tipos de solicitudes salientes. Primero, una comprobación anónima de actualizaciones de la app. Segundo, si la búsqueda de GIF está activada (lo está por defecto — actívala o desactívala en Ajustes → General), el texto que escribes tras <code>:::</code> se envía a <a href=\"https://giphy.com\">Giphy</a> para obtener los GIF coincidentes, y a esas solicitudes se les aplica la <a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">política de privacidad de Giphy</a>.",
+
+  "footer.aria.socials": "Enlaces sociales",
+  "footer.donate": "Donar",
+  "footer.contact": "Contacto",
+
+  "lang.aria.picker": "Idioma",
+  "lang.menu.title": "Elegir idioma"
+}

@@ -1,0 +1,95 @@
+{
+  "meta.title": "Mojito — macOSのどこでも :emoji: をオートコンプリート",
+  "meta.description": "macOSのどこでも :emoji: をオートコンプリート。コロンを入力すれば、どんな絵文字・記号・ショートコードも数秒で検索できます — TextEdit、iMessage、Terminal、どこでも。",
+
+  "nav.github": "GitHub",
+  "nav.donate": "寄付する",
+  "nav.download": "macOS版をダウンロード",
+
+  "hero.title": "どこでも <code>:emoji:</code> をオートコンプリート。",
+  "hero.sub": "<code>:</code> を入力すれば、どんな絵文字や記号も数秒で検索できます。",
+
+  "demo.folderLabel": "ウェブサイト",
+  "demo.achievement.lead": "最初のイースターエッグ発見！",
+  "demo.achievement.detail": "1個達成、あと100個",
+  "demo.sadmac.hint": "クリックして再起動",
+
+  "demo.textedit.title": "名称未設定.txt — 編集済み",
+
+  "demo.imessage.contact": "Sarah",
+  "demo.imessage.label": "iMessage",
+  "demo.imessage.bubble1": "遅れてる、ごめん！",
+  "demo.imessage.bubble2": "あと10分で着くよ",
+  "demo.imessage.placeholder": "iMessage",
+  "demo.imessage.aria.compose": "iMessage作成",
+  "demo.imessage.aria.attach": "添付",
+  "demo.imessage.aria.dictate": "音声入力",
+  "demo.imessage.aria.emoji": "絵文字",
+
+  "demo.mastodon.visibility": "公開、引用可",
+  "demo.mastodon.compose.placeholder": "今どうしてる？",
+  "demo.mastodon.aria.compose": "Mastodon作成",
+  "demo.mastodon.post": "投稿",
+
+  "demo.reminders.title": "リマインダー",
+  "demo.reminders.item1": "Sarahに返信する",
+  "demo.reminders.item2": "勤務表を提出する",
+  "demo.reminders.item3": "図書館カードを更新する",
+  "demo.reminders.placeholder": "リマインダーを追加…",
+  "demo.reminders.aria.add": "リマインダーを追加",
+  "demo.reminders.new": "新規リマインダー",
+  "demo.reminders.aria.new": "新規リマインダー",
+
+  "demo.aria.liveDemo": "ライブデモ",
+
+  "demo.imessage.today": "今日",
+  "demo.mastodon.language": "日本語",
+  "demo.scene.doc": "デザインレビュー — {date}\n\nピッカーは初回表示時にフェードインさせること。チーム合意済み。\n\nやること:\n- フェードインフラグを追加",
+  "demo.scene.deadline": "\n- 締め切りに間に合わせる ",
+  "demo.scene.soon": "またね ",
+  "demo.scene.shipped": "新しいアプリをリリースしたよ ",
+  "demo.scene.pickup": "買ってくる ",
+  "demo.scene.formom": " ママのために",
+  "demo.fallback": "忘れずに :tada",
+
+  "picker.aria.suggestions": "絵文字の候補",
+  "picker.select": "選択",
+  "picker.insert": "挿入",
+  "picker.dismiss": "閉じる",
+
+  "about.h2": "概要",
+  "about.body": "Slackの <code>:tada:</code> → 🎉 がSlackだけでなくmacOSのどこでも使えるべきだと思って、Mojitoを作りました。無料でオープンソースです。",
+
+  "faq.h2": "よくある質問",
+  "faq.q1.q": "macOS内蔵の絵文字ピッカーと何が違うの？",
+  "faq.q1.a": "macOSのピッカー（⌃⌘Space）は別ウィンドウです — 開いて、検索して、クリックして、また戻る。Mojitoは入力中にカーソルのすぐ横に現れるだけ。コロンを打って、数文字入力し、矢印キー＋Returnで挿入。ウィンドウもマウスもコンテキストの切り替えも不要です。",
+  "faq.q2.q": "どのアプリで使えるの？",
+  "faq.q2.a": "入力できる場所ならどこでも — TextEdit、Terminal、Mail、Notes、ブラウザ、Notion。ショートコードの絵文字をすでにネイティブで扱うアプリやサイト（Slack、Discord、Messages、GitHub）では動作しないので、二重処理になりません。",
+  "faq.q3.q": "カスタマイズできる？",
+  "faq.q3.a": "メニューバーにいくつかの設定があります：デフォルトの肌の色、オプションの記号モード（<code>:cmd:</code> → ⌘、<code>:star:</code> → ★）、1時間または明日まで一時停止。結果は使用頻度に応じて並び替えられ、<code>:)</code> や <code>&lt;3</code> のような一般的な顔文字も認識されます。",
+  "faq.q4.q": "GIFも挿入できる？",
+  "faq.q4.a": "はい — <code>:::</code>（コロン3つ）に続けて検索語を入力すると、<a href=\"https://giphy.com\">Giphy</a> からGIFを取得できます。デフォルトでオンになっています。すべてをローカルに留めたい場合は、設定 → 一般 でオフにできます。",
+  "faq.q5.q": "どの言語に対応してる？",
+  "faq.q5.a": "インターフェースは19のロケールに翻訳されています — 英語（米国＋英国）、ドイツ語、スペイン語（スペイン＋ラテンアメリカ）、フランス語、イタリア語、ブラジルポルトガル語、日本語、簡体字・繁体字中国語、韓国語、ヒンディー語、ロシア語、ポーランド語、オランダ語、アラビア語、ペルシア語、ヘブライ語。絵文字のショートコードはそのうち14言語でローカライズされており、<code>:gato:</code> はスペイン語で、<code>:chien:</code> はフランス語で動作する、といった具合です。翻訳はLLMの下書きから始まりました。<a href=\"https://github.com/wr/mojito#translations\">ネイティブスピーカーによる修正</a>を大歓迎しています。",
+  "faq.q6.q": "システム要件は？",
+  "faq.q6.a": "macOS 14（Sonoma）以降。Apple SiliconとIntelにネイティブ対応。",
+  "faq.q7.q": "アップデートとアンインストールはどうやるの？",
+  "faq.q7.a": "アップデートはmacOS標準のアップデートフレームワークであるSparkleを通じて自動的に届きます。アンインストールするには、メニューバーからMojitoを終了し、アプリケーションフォルダからゴミ箱にドラッグしてください。",
+  "faq.q8.q": "オープンソースなの？",
+  "faq.q8.a": "ソースコードはすべて <a href=\"https://github.com/wr/mojito\">GitHub</a> にあります、AGPL-3.0。",
+  "faq.q9.q": "本当に無料なの？どうやって応援できる？",
+  "faq.q9.a": "はい — 試用期間も広告もアップセルもありません。もしよければ、<a href=\"https://buymeacoffee.com/wellsriley\">Buy Me a Coffee</a> での応援をとてもうれしく思います。",
+  "faq.q10.q": "アプリには見つけられるイースターエッグがたくさんあるの？",
+  "faq.q10.a": "はい — 今どきの多くのソフトウェアと違って、Mojitoは便利さ<em>と</em>遊び心を兼ね備えています。楽しんでください。",
+
+  "privacy.h2": "プライバシー",
+  "privacy.p1": "キー入力はローカルでショートコードのリストと照合されます — どこかのサーバーに記録・送信・保存されることはありません。パスワードなどの保護されたテキストフィールドは完全に無視されます。テレメトリも分析もアカウントもありません。",
+  "privacy.p2": "Mojitoは2種類の外部リクエストを行います。1つ目は、アプリのアップデートの匿名チェック。2つ目は、GIF検索が有効な場合（デフォルトでオン — 設定 → 一般 で切り替え）、<code>:::</code> の後に入力したテキストが <a href=\"https://giphy.com\">Giphy</a> に送信され、一致するGIFを取得します。これらのリクエストには <a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">Giphyのプライバシーポリシー</a>が適用されます。",
+
+  "footer.aria.socials": "SNSリンク",
+  "footer.donate": "寄付する",
+  "footer.contact": "お問い合わせ",
+
+  "lang.aria.picker": "言語",
+  "lang.menu.title": "言語を選択"
+}

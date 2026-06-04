@@ -36,6 +36,12 @@ if ! node --check picker.js; then
   fail=1
 fi
 
+gray "  node --check i18n.js"
+if ! node --check i18n.js; then
+  red "  i18n.js has a syntax error"
+  fail=1
+fi
+
 if [[ $fail -eq 1 ]]; then
   red "lint failed"
   exit 1
