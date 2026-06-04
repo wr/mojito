@@ -16,7 +16,7 @@
 
   "demo.textedit.title": "제목 없음.txt — 편집됨",
 
-  "demo.imessage.contact": "Sarah",
+  "demo.imessage.contact": "지은",
   "demo.imessage.label": "iMessage",
   "demo.imessage.bubble1": "늦을 것 같아, 미안!",
   "demo.imessage.bubble2": "10분 안에 도착해",
@@ -32,7 +32,7 @@
   "demo.mastodon.post": "게시",
 
   "demo.reminders.title": "미리 알림",
-  "demo.reminders.item1": "Sarah에게 답장하기",
+  "demo.reminders.item1": "지은에게 답장하기",
   "demo.reminders.item2": "근무 기록표 제출하기",
   "demo.reminders.item3": "도서관 카드 갱신하기",
   "demo.reminders.placeholder": "미리 알림 추가…",

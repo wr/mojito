@@ -1705,7 +1705,11 @@ code { unicode-bidi: isolate; }
    the picker popup stay LTR — shells and :shortcodes read left-to-right — and
    the few physical-property spots that don't auto-mirror get an explicit flip.
    Flex alignment (bubble sides, toolbar order, stoplights) flips on its own. */
-[dir="rtl"] .app-terminal { direction: ltr; }
+/* Terminal: the window chrome mirrors (stoplights move top-right, like real
+   macOS in an RTL system locale), but the shell content stays LTR — commands,
+   paths and prompts are left-to-right even on an Arabic Mac. Scope the LTR pin
+   to the body, not the whole app, so the title bar still flips. */
+[dir="rtl"] .term-body { direction: ltr; }
 [dir="rtl"] .picker { direction: ltr; }
 
 /* iMessage: mirror the bubble tail corner + move the waveform button and its
