@@ -1,21 +1,16 @@
 {
   "meta.title": "Mojito — Completamento automatico delle :emoji: ovunque su macOS",
   "meta.description": "Completamento automatico delle :emoji: ovunque su macOS. Digita i due punti e cerca qualsiasi emoji, simbolo o shortcode in pochi secondi — in TextEdit, iMessage, Terminal, ovunque.",
-
   "nav.github": "GitHub",
   "nav.donate": "Dona",
   "nav.download": "Scarica per macOS",
-
   "hero.title": "Completa automaticamente le <code>:emoji:</code> ovunque.",
   "hero.sub": "Digita <code>:</code> per cercare qualsiasi emoji o simbolo in pochi secondi.",
-
   "demo.folderLabel": "Sito web",
   "demo.achievement.lead": "Il tuo primo easter egg!",
   "demo.achievement.detail": "Uno fatto, ne mancano 100",
   "demo.sadmac.hint": "clicca per riavviare",
-
   "demo.textedit.title": "Senza titolo.txt — Modificato",
-
   "demo.imessage.contact": "Giulia",
   "demo.imessage.label": "iMessage",
   "demo.imessage.bubble1": "sono in ritardo, scusa!",
@@ -25,12 +20,10 @@
   "demo.imessage.aria.attach": "Allega",
   "demo.imessage.aria.dictate": "Detta",
   "demo.imessage.aria.emoji": "Emoji",
-
   "demo.mastodon.visibility": "Pubblico, citazioni consentite",
   "demo.mastodon.compose.placeholder": "A cosa stai pensando?",
   "demo.mastodon.aria.compose": "Composizione Mastodon",
   "demo.mastodon.post": "Pubblica",
-
   "demo.reminders.title": "Promemoria",
   "demo.reminders.item1": "Rispondi a Giulia",
   "demo.reminders.item2": "Invia il foglio ore",
@@ -39,9 +32,7 @@
   "demo.reminders.aria.add": "Aggiungi promemoria",
   "demo.reminders.new": "Nuovo promemoria",
   "demo.reminders.aria.new": "Nuovo promemoria",
-
   "demo.aria.liveDemo": "Demo dal vivo",
-
   "demo.imessage.today": "Oggi",
   "demo.mastodon.language": "Italiano",
   "demo.scene.doc": "Revisione del design — {date}\n\nIl selettore dovrebbe comparire in dissolvenza alla prima apertura. Il team è d'accordo.\n\nDa fare:\n- Aggiungere l'opzione di dissolvenza",
@@ -51,15 +42,12 @@
   "demo.scene.pickup": "Vai a prendere ",
   "demo.scene.formom": " per la mamma",
   "demo.fallback": "Non dimenticare il :tada",
-
   "picker.aria.suggestions": "Suggerimenti emoji",
   "picker.select": "seleziona",
   "picker.insert": "inserisci",
   "picker.dismiss": "chiudi",
-
   "about.h2": "Informazioni",
   "about.body": "Ho creato Mojito perché il <code>:tada:</code> → 🎉 di Slack dovrebbe funzionare ovunque su macOS, non solo in Slack. È gratuito e open source.",
-
   "faq.h2": "FAQ",
   "faq.q1.q": "In cosa si differenzia dal selettore di emoji integrato in macOS?",
   "faq.q1.a": "Il selettore di macOS (⌃⌘Spazio) è una finestra separata — la apri, cerchi, clicchi, torni indietro. Mojito compare semplicemente accanto al cursore mentre digiti. Premi i due punti, digita un paio di lettere, frecce + Invio per inserire. Niente finestra, niente mouse, niente cambio di contesto.",
@@ -81,15 +69,14 @@
   "faq.q9.a": "Sì — niente prova, niente pubblicità, niente upgrade a pagamento. Se vuoi contribuire, un <a href=\"https://buymeacoffee.com/wellsriley\">Buy Me a Coffee</a> è molto apprezzato.",
   "faq.q10.q": "L'app è piena di easter egg da scoprire?",
   "faq.q10.a": "Sì — a differenza della maggior parte dei software di oggi, Mojito è sia utile <em>che</em> pieno di anima. Divertiti.",
-
   "privacy.h2": "Privacy",
-  "privacy.p1": "Le digitazioni vengono confrontate con l'elenco degli shortcode in locale — nulla viene registrato, trasmesso o archiviato su un server da qualche parte. I campi password e gli altri campi di testo protetti vengono ignorati del tutto. Nessuna telemetria, nessuna analisi e nessun account.",
-  "privacy.p2": "Mojito effettua due tipi di richieste in uscita. La prima, un controllo anonimo degli aggiornamenti dell'app. La seconda, se la ricerca di GIF è attiva (di default — si attiva e disattiva in Impostazioni → Generali), il testo che digiti dopo <code>:::</code> viene inviato a <a href=\"https://giphy.com\">Giphy</a> per recuperare le GIF corrispondenti, e a tali richieste si applica l'<a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">informativa sulla privacy di Giphy</a>.",
-
+  "privacy.p1": "Le digitazioni vengono confrontate con l'elenco degli shortcode in locale — <strong>nulla di ciò che digiti</strong> viene mai registrato, trasmesso o archiviato su un server. I campi password e gli altri campi di testo protetti vengono ignorati del tutto, e non c'è alcun account.",
+  "privacy.p2": "Mojito condivide anche statistiche d'uso anonime e aggregate — quali emoji e funzioni sono popolari e quali versioni di macOS usano le persone. Vengono inviate una volta al giorno senza identificatore e il tuo IP non viene conservato, e puoi disattivarle in Impostazioni → Privacy. L'intero set di dati è pubblico nella <a href=\"/stats\">pagina delle statistiche</a>.",
+  "privacy.p3": "Oltre a questo, Mojito effettua altri due tipi di richieste in uscita: un controllo anonimo degli aggiornamenti dell'app e — se la ricerca di GIF è attiva (di default — si attiva e disattiva in Impostazioni → Generali) — il testo che digiti dopo <code>:::</code> viene inviato a <a href=\"https://giphy.com\">Giphy</a> per recuperare le GIF corrispondenti, secondo l'<a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">informativa sulla privacy di Giphy</a>.",
   "footer.aria.socials": "Link social",
+  "footer.stats": "Statistiche",
   "footer.donate": "Dona",
   "footer.contact": "Contatti",
-
   "lang.aria.picker": "Lingua",
   "lang.menu.title": "Scegli la lingua"
 }

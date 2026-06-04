@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mojito — Version History</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+  font: -apple-system-body, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 16px 18px;
+  color: #1d1d1f;
+  background: transparent;
+}
+h1 { font-size: 17px; margin: 0 0 8px; }
+h2 { font-size: 15px; margin: 16px 0 6px; }
+h3 { font-size: 13px; margin: 12px 0 4px; }
+p { margin: 6px 0; }
+ul { margin: 6px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+a { color: #0a7aff; }
+@media (prefers-color-scheme: dark) {
+  body { color: #f5f5f7; }
+  code { background: rgba(255, 255, 255, 0.12); }
+  a { color: #4aa3ff; }
+}
+</style>
+</head>
+<body>
+<h2>v1.2.2</h2>
+<h2>New</h2>
+<ul>
+<li><strong>Anonymous usage stats:</strong> Mojito can now share opt-out, fully anonymous aggregate stats — popular emoji, feature usage, your macOS version — and the whole dataset is public at <a href="https://mojito.wells.ee/stats">mojito.wells.ee/stats</a>. Nothing you type is ever included; turn it off anytime in Settings. (<a href="https://github.com/wr/mojito/pull/103">#103</a>)</li>
+</ul>
+<h2>Fixed</h2>
+<ul>
+<li><strong>Easter-egg polish.</strong></li>
+</ul>
+<h2>v1.2.1</h2>
+<h2>New</h2>
+<ul>
+<li><strong>Text arrows:</strong> type <code>-&gt;</code>, <code>&lt;-</code>, or <code>&lt;-&gt;</code> and they turn into → ← ↔. (<a href="https://github.com/wr/mojito/pull/93">#93</a>)</li>
+</ul>
+<h2>Fixed</h2>
+<ul>
+<li><strong>Update window:</strong> now shows release notes, and "Version history" opens the full changelog. (<a href="https://github.com/wr/mojito/pull/95">#95</a>, <a href="https://github.com/wr/mojito/pull/97">#97</a>)</li>
+<li>Easter-egg polish.</li>
+</ul>
+<h2>v1.2.0</h2>
+<p><strong>New</strong></p>
+<ul>
+<li><strong>Browse all emojis</strong> (#68) — a full grid covering the whole library. Open it from the menu-bar menu, a keyboard shortcut, or from Quick Access, then jump between categories and arrow-key around.</li>
+<li><strong>Quick Access</strong> — type <code>:?</code> to pull up your favorites and most-used emoji. Pin the ones you want under Settings → Quick Access.</li>
+</ul>
+<p><strong>Fixed &amp; improved</strong></p>
+<ul>
+<li><strong>Symbols</strong> (#88) — <code>::</code> search now reaches every symbol macOS can draw: the £ sign and other currencies, Greek letters (<code>::lambda</code>, <code>::Delta</code>, <code>::omega</code>), fractions (<code>::half</code>), Braille, and more.</li>
+<li>The picker now opens on the screen with your cursor on multi-monitor setups (#82).</li>
+<li>GIFs paste as a file, so they animate in Slack, Discord, and other apps (#85).</li>
+<li>Easter-egg fixes.</li>
+</ul>
+<h2>v1.1.1</h2>
+<ul>
+<li>Fixed an issue where Mojito could accidentally trigger in an excluded app.</li>
+<li>Improved debug logs.</li>
+</ul>
+<h2>v1.1.0</h2>
+<p><strong>New</strong></p>
+<ul>
+<li><strong>Allowlist mode for exclusions</strong> — flip your exclusions into an allowlist so Mojito runs <em>only</em> in the apps and sites you pick, instead of everywhere except a blocklist.</li>
+</ul>
+<p>Plus various fixes and improvements.</p>
+<h2>v1.0.8</h2>
+<ul>
+<li>Fixed a full-screen effect that could appear oversized on large / 4K displays.</li>
+</ul>
+<h2>v1.0.7</h2>
+<ul>
+<li><strong>About → Copy Debug Info</strong> — an anonymized debug report to make support easier.</li>
+<li><strong>Symbols</strong> — picker entries force text presentation, and un-renderable glyphs are dropped from the corpus.</li>
+<li><strong>GIF picker</strong> — faster: search and thumbnail loads share one connection.</li>
+<li><strong>Fixes</strong></li>
+<li>Keystrokes pass through correctly during capture in excluded apps and when there's no picker result.</li>
+<li>Picker keeps its top padding when scrolled to the top.</li>
+<li>Easter-egg additions and polish.</li>
+</ul>
+<h2>v1.0.6</h2>
+<p>Added easter eggs. Find them.</p>
+<h2>v1.0.5</h2>
+<p><strong>Fix:</strong> GIF search (<code>:::</code>) now actually works in the released app. v1.0.4 shipped without the Giphy API key packaged, so the panel showed "API key required" on every search. The key is now baked into builds.</p>
+<h2>v1.0.4</h2>
+<p><strong>GIF search.</strong> Type <code>:::</code> in any text field to pop a Giphy-backed search panel. Arrow keys + Enter to insert inline. Translated into all 19 locales.</p>
+<p>Toggle off (or restrict to non-excluded apps) under <strong>Settings → General</strong> and <strong>Settings → Exclusions</strong>. Privacy detail: when on, your query goes to Giphy.</p>
+<h2>v1.0.3</h2>
+<p><strong>Now available in 18 more languages</strong> 🌍</p>
+<p>Mojito's interface is translated into 18 new locales (full list in the GitHub repo). Translations were LLM-drafted and will improve as native speakers review them — corrections welcome.</p>
+<p>Plus a help hint for the macOS 26 menu-bar visibility toggle, and small UI polish.</p>
+<h2>v1.0.2</h2>
+<ul>
+<li><strong>Smarter emoji search.</strong> Typing <code>:eye</code> now surfaces <code>:eyes:</code> and <code>:eye:</code> ahead of longer shortcodes containing <code>eye</code>. Prefix matches now always rank above mid-string matches, regardless of how often you've used the others.</li>
+<li><strong>Hide the menu bar icon.</strong> New "Show icon in menu bar" preference in Settings → General. When hidden, reopen Settings by launching Mojito from Finder or Spotlight.</li>
+<li><strong>Tidied Settings layout.</strong> "Rank frequently used emoji higher" moved into the Emoji section. The menu-bar hint now appears inline below the toggle that triggers it.</li>
+<li><strong>iMessage no longer excluded by default.</strong> Add it to your exclusions list if you prefer the old behavior.</li>
+</ul>
+<p>Plus a little easter-egg polish.</p>
+<h2>v1.0.1</h2>
+<p>Bug fixes and polish.</p>
+<h2>v1.0.0</h2>
+<p>Initial release.</p>
+</body>
+</html>

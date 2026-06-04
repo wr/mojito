@@ -418,8 +418,9 @@ Changes not staged for commit:
 
 <section id="privacy" class="prose">
   <h2 data-i18n="privacy.h2">Privacy</h2>
-  <p data-i18n-html="privacy.p1">Keystrokes are matched against the shortcode list locally — nothing is logged, transmitted, or stored on a server somewhere. Password and other secure-text fields are ignored entirely. There's no telemetry, no analytics, and no account.</p>
-  <p data-i18n-html="privacy.p2">Mojito makes two kinds of outbound request. First, an anonymous check for app updates. Second, if GIF search is enabled (on by default — toggle in Settings &rarr; General), the text you type after <code>:::</code> is sent to <a href="https://giphy.com">Giphy</a> to fetch matching GIFs, and <a href="https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy">Giphy's privacy policy</a> applies to those requests.</p>
+  <p data-i18n-html="privacy.p1">Keystrokes are matched against the shortcode list locally — <strong>nothing you type</strong> is ever logged, transmitted, or stored on a server. Password and other secure-text fields are ignored entirely, and there's no account.</p>
+  <p data-i18n-html="privacy.p2">Mojito also shares anonymous, aggregate usage statistics — which emoji and features are popular, and what macOS versions people run. It's sent once a day with no identifier and your IP isn't stored, and you can switch it off in Settings &rarr; Privacy. The whole dataset is public on the <a href="/stats">stats page</a>.</p>
+  <p data-i18n-html="privacy.p3">Beyond that, Mojito makes two other kinds of outbound request: an anonymous check for app updates, and — if GIF search is enabled (on by default — toggle in Settings &rarr; General) — the text you type after <code>:::</code> is sent to <a href="https://giphy.com">Giphy</a> to fetch matching GIFs, under <a href="https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy">Giphy's privacy policy</a>.</p>
 </section>
 
 </main>
@@ -439,6 +440,7 @@ Changes not staged for commit:
     </ul>
     <span class="footer-pill-divider" aria-hidden="true"></span>
     <div class="footer-text-links">
+      <a href="/stats" data-i18n="footer.stats">Stats</a>
       <a href="https://buymeacoffee.com/wellsriley" data-i18n="footer.donate">Donate</a>
       <a href="mailto:mojito@wells.ee" data-i18n="footer.contact">Contact</a>
     </div>

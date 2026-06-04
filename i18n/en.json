@@ -83,10 +83,12 @@
   "faq.q10.a": "Yes — unlike most software built today, Mojito is both useful <em>and</em> soulful. Have fun with it.",
 
   "privacy.h2": "Privacy",
-  "privacy.p1": "Keystrokes are matched against the shortcode list locally — nothing is logged, transmitted, or stored on a server somewhere. Password and other secure-text fields are ignored entirely. There's no telemetry, no analytics, and no account.",
-  "privacy.p2": "Mojito makes two kinds of outbound request. First, an anonymous check for app updates. Second, if GIF search is enabled (on by default — toggle in Settings → General), the text you type after <code>:::</code> is sent to <a href=\"https://giphy.com\">Giphy</a> to fetch matching GIFs, and <a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">Giphy's privacy policy</a> applies to those requests.",
+  "privacy.p1": "Keystrokes are matched against the shortcode list locally — <strong>nothing you type</strong> is ever logged, transmitted, or stored on a server. Password and other secure-text fields are ignored entirely, and there's no account.",
+  "privacy.p2": "Mojito also shares anonymous, aggregate usage statistics — which emoji and features are popular, and what macOS versions people run. It's sent once a day with no identifier and your IP isn't stored, and you can switch it off in Settings → Privacy. The whole dataset is public on the <a href=\"/stats\">stats page</a>.",
+  "privacy.p3": "Beyond that, Mojito makes two other kinds of outbound request: an anonymous check for app updates, and — if GIF search is enabled (on by default — toggle in Settings → General) — the text you type after <code>:::</code> is sent to <a href=\"https://giphy.com\">Giphy</a> to fetch matching GIFs, under <a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">Giphy's privacy policy</a>.",
 
   "footer.aria.socials": "Social links",
+  "footer.stats": "Stats",
   "footer.donate": "Donate",
   "footer.contact": "Contact",
 

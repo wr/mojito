@@ -1,0 +1,637 @@
+/*
+ * Stats / transparency page. Reuses the design tokens, .topbar and footer
+ * from style.css (loaded first) — this file only adds the stats-specific
+ * components (cards, bar charts, counters). Dark-mode overrides live LAST,
+ * same convention as style.css.
+ */
+
+:root {
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --card-border: rgba(0, 0, 0, 0.07);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 30px rgba(0, 0, 0, 0.06);
+  --track: rgba(0, 0, 0, 0.06);
+  --fill-start: #2db867;
+  --fill-end: #1e8c54;
+  --fill: linear-gradient(90deg, var(--fill-start), var(--fill-end));
+  --gauge-rest: rgba(0, 0, 0, 0.10);
+  --hairline: rgba(0, 0, 0, 0.08);
+
+  /* usage-mix segment colors */
+  --mix-emoji: #1e8c54;
+  --mix-emoticon: #2bb0a6;
+  --mix-symbol: #3b82f6;
+  --mix-gif: #8b5cf6;
+}
+
+/* ---- header ------------------------------------------------------------- */
+.stats-hero {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 64px 24px 30px;
+  text-align: center;
+}
+
+.stats-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.stats-hero h1 {
+  font-size: clamp(34px, 5vw, 46px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.07;
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+
+.stats-sub {
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--text-soft);
+  max-width: 540px;
+  margin: 0 auto 18px;
+  letter-spacing: -0.005em;
+}
+
+.stats-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.meta-pill.preview {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+.meta-pill.live {
+  background: rgba(30, 140, 84, 0.12);
+  color: var(--accent-hover);
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(46, 184, 103, 0.5);
+  animation: live-pulse 2.4s ease-out infinite;
+}
+
+@keyframes live-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46, 184, 103, 0.45); }
+  70%  { box-shadow: 0 0 0 7px rgba(46, 184, 103, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 184, 103, 0); }
+}
+
+.meta-sep { opacity: 0.5; }
+
+/* ---- layout ------------------------------------------------------------- */
+.stats-main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ---- big number tiles --------------------------------------------------- */
+.bignums {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.bignum {
+  background: var(--card-bg);
+  border: 0.5px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  padding: 20px 16px;
+  text-align: center;
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bignum-value {
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.bignum-label {
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-soft);
+  letter-spacing: -0.005em;
+}
+
+.bignum-sub {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-soft);
+  opacity: 0.8;
+}
+
+/* ---- card --------------------------------------------------------------- */
+.card {
+  background: var(--card-bg);
+  border: 0.5px solid var(--card-border);
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+  padding: 24px 26px;
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.card-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.card-note {
+  font-size: 12.5px;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+
+.card-lead {
+  font-size: 14px;
+  color: var(--text-soft);
+  margin: 0 0 4px;
+}
+
+/* ---- bar list ----------------------------------------------------------- */
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: minmax(96px, 150px) 1fr 52px;
+  align-items: center;
+  gap: 14px;
+}
+
+.bar-label {
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: -0.005em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-label small {
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.bar-track {
+  height: 10px;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block; /* a <span> is inline by default — width/height are ignored without this */
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--fill);
+  transition: width 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ---- feature tiles (compact + de-emphasized; least-important stats) ----- */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.feat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  aspect-ratio: 1 / 1;
+  padding: 10px 6px;
+  background: var(--track);
+  border-radius: 12px;
+  text-align: center;
+}
+
+/* half-circle speedometer — green arc sweeps left→right with the percentage */
+.feat-gauge {
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 26px;
+  overflow: hidden;
+}
+
+/* the dial: a full circle clipped to its top half, masked into a thin arc */
+.feat-gauge::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: conic-gradient(from 270deg,
+    var(--fill-start) 0deg,
+    var(--fill-end) calc(var(--p, 0) * 1.8deg),
+    var(--gauge-rest) calc(var(--p, 0) * 1.8deg) 180deg,
+    transparent 180deg);
+  -webkit-mask: radial-gradient(circle at 50% 50%, transparent 16px, #000 17px);
+  mask: radial-gradient(circle at 50% 50%, transparent 16px, #000 17px);
+}
+
+.feat-pct {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.feat-name {
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--text-soft);
+}
+
+.bar-val {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-soft);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- emoji ranking ------------------------------------------------------ */
+.erows {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 18px;
+}
+
+.erow {
+  display: grid;
+  grid-template-columns: 22px 26px 92px 1fr 78px;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -10px;
+  padding: 0 10px;
+  border-radius: 7px;
+  transition: background 0.15s ease;
+}
+
+.erank {
+  font-size: 12.5px;
+  color: var(--text-soft);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.eglyph {
+  font-size: 20px;
+  line-height: 1;
+  text-align: center;
+}
+
+.ecode {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  color: var(--text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ecount {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- usage mix (stacked bar) -------------------------------------------- */
+.mixbar {
+  display: flex;
+  height: 16px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 18px;
+  background: var(--track);
+}
+
+.mixseg { height: 100%; }
+.mixseg.emoji    { background: var(--mix-emoji); }
+.mixseg.emoticon { background: var(--mix-emoticon); }
+.mixseg.symbol   { background: var(--mix-symbol); }
+.mixseg.gif      { background: var(--mix-gif); }
+
+.mix-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.mix-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.mix-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.mix-item b { font-weight: 600; }
+.mix-item span { color: var(--text-soft); }
+
+/* ---- skin tone ---------------------------------------------------------- */
+.tones {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.tone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  flex: 1 1 0;
+  min-width: 56px;
+}
+
+.tone-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.tone-hand {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.tone-pct {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tone-name {
+  font-size: 11px;
+  color: var(--text-soft);
+  text-align: center;
+}
+
+/* ---- community discoveries --------------------------------------------- */
+.eggs-card {
+  text-align: center;
+  padding: 34px 26px;
+}
+
+.egg-num {
+  font-size: clamp(40px, 7vw, 60px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  background: var(--fill);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.egg-cap {
+  margin: 14px auto 0;
+  max-width: 440px;
+  font-size: 14px;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+/* ---- collect / never collect ------------------------------------------- */
+.collect-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px 30px;
+  margin-top: 18px;
+}
+
+.collect-col h4 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+.collect-col.yes h4 { color: var(--accent-hover); }
+.collect-col.no h4 { color: #c2410c; }
+
+.clist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.clist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.cmark {
+  flex-shrink: 0;
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+}
+
+.collect-col.yes .cmark { color: var(--accent-hover); }
+.collect-col.no .cmark { color: #c2410c; }
+
+.collect-foot {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 0.5px solid var(--hairline);
+  font-size: 13.5px;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+/* ---- data / source CTA -------------------------------------------------- */
+.data-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 4px 0 8px;
+}
+
+.data-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  border: 0.5px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text) !important;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.06s ease, filter 0.12s ease;
+}
+
+.data-btn:hover { filter: brightness(0.98); transform: translateY(-1px); }
+.data-btn svg { display: block; }
+.data-btn code { font-size: 12.5px; }
+
+/* ---- hover micro-interactions ------------------------------------------ */
+.card:hover,
+.bignum:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05), 0 16px 38px rgba(0, 0, 0, 0.09);
+}
+
+.card:hover { border-color: rgba(0, 0, 0, 0.1); }
+
+.erow:hover { background: var(--track); }
+
+.bar:hover .bar-fill,
+.erow:hover .bar-fill { filter: brightness(1.06); }
+
+/* ---- reveal on scroll --------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- responsive --------------------------------------------------------- */
+@media (max-width: 620px) {
+  .bignums { grid-template-columns: repeat(2, 1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .collect-grid { grid-template-columns: 1fr; }
+  .erow { grid-template-columns: 20px 24px 1fr 66px; }
+  .erow .ecode { display: none; }
+  .bar { grid-template-columns: minmax(84px, 120px) 1fr 46px; gap: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .bar-fill { transition: none; }
+  .live-dot { animation: none; }
+  .card, .bignum { transition: none; }
+  .card:hover, .bignum:hover { transform: none; }
+}
+
+/* ===========================================================================
+   Dark-mode overrides — LAST in the file (same convention as style.css).
+   =========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --card-bg: rgba(44, 44, 47, 0.5);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.28);
+    --track: rgba(255, 255, 255, 0.09);
+    --fill-start: #2db867;
+    --fill-end: #46cd7d;
+    --fill: linear-gradient(90deg, var(--fill-start), var(--fill-end));
+    --gauge-rest: rgba(255, 255, 255, 0.14);
+    --hairline: rgba(255, 255, 255, 0.1);
+
+    --mix-emoji: #2db867;
+    --mix-emoticon: #34d3c5;
+    --mix-symbol: #5b9bff;
+    --mix-gif: #a78bfa;
+  }
+
+  .meta-pill.preview { background: rgba(245, 158, 11, 0.16); color: #fbbf24; }
+  .collect-col.no h4 { color: #fb7185; }
+  .collect-col.no .cmark { color: #fb7185; }
+
+  .card:hover,
+  .bignum:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 16px 38px rgba(0, 0, 0, 0.42);
+  }
+  .card:hover { border-color: rgba(255, 255, 255, 0.12); }
+}

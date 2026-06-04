@@ -1,21 +1,16 @@
 {
   "meta.title": "Mojito — macOSのどこでも :emoji: をオートコンプリート",
   "meta.description": "macOSのどこでも :emoji: をオートコンプリート。コロンを入力すれば、どんな絵文字・記号・ショートコードも数秒で検索できます — TextEdit、iMessage、Terminal、どこでも。",
-
   "nav.github": "GitHub",
   "nav.donate": "寄付する",
   "nav.download": "macOS版をダウンロード",
-
   "hero.title": "どこでも <code>:emoji:</code> をオートコンプリート。",
   "hero.sub": "<code>:</code> を入力すれば、どんな絵文字や記号も数秒で検索できます。",
-
   "demo.folderLabel": "ウェブサイト",
   "demo.achievement.lead": "最初のイースターエッグ発見！",
   "demo.achievement.detail": "1個達成、あと100個",
   "demo.sadmac.hint": "クリックして再起動",
-
   "demo.textedit.title": "名称未設定.txt — 編集済み",
-
   "demo.imessage.contact": "さくら",
   "demo.imessage.label": "iMessage",
   "demo.imessage.bubble1": "遅れてる、ごめん！",
@@ -25,12 +20,10 @@
   "demo.imessage.aria.attach": "添付",
   "demo.imessage.aria.dictate": "音声入力",
   "demo.imessage.aria.emoji": "絵文字",
-
   "demo.mastodon.visibility": "公開、引用可",
   "demo.mastodon.compose.placeholder": "今どうしてる？",
   "demo.mastodon.aria.compose": "Mastodon作成",
   "demo.mastodon.post": "投稿",
-
   "demo.reminders.title": "リマインダー",
   "demo.reminders.item1": "さくらに返信する",
   "demo.reminders.item2": "勤務表を提出する",
@@ -39,9 +32,7 @@
   "demo.reminders.aria.add": "リマインダーを追加",
   "demo.reminders.new": "新規リマインダー",
   "demo.reminders.aria.new": "新規リマインダー",
-
   "demo.aria.liveDemo": "ライブデモ",
-
   "demo.imessage.today": "今日",
   "demo.mastodon.language": "日本語",
   "demo.scene.doc": "デザインレビュー — {date}\n\nピッカーは初回表示時にフェードインさせること。チーム合意済み。\n\nやること:\n- フェードインフラグを追加",
@@ -51,15 +42,12 @@
   "demo.scene.pickup": "買ってくる ",
   "demo.scene.formom": " ママのために",
   "demo.fallback": "忘れずに :tada",
-
   "picker.aria.suggestions": "絵文字の候補",
   "picker.select": "選択",
   "picker.insert": "挿入",
   "picker.dismiss": "閉じる",
-
   "about.h2": "概要",
   "about.body": "Slackの <code>:tada:</code> → 🎉 がSlackだけでなくmacOSのどこでも使えるべきだと思って、Mojitoを作りました。無料でオープンソースです。",
-
   "faq.h2": "よくある質問",
   "faq.q1.q": "macOS内蔵の絵文字ピッカーと何が違うの？",
   "faq.q1.a": "macOSのピッカー（⌃⌘Space）は別ウィンドウです — 開いて、検索して、クリックして、また戻る。Mojitoは入力中にカーソルのすぐ横に現れるだけ。コロンを打って、数文字入力し、矢印キー＋Returnで挿入。ウィンドウもマウスもコンテキストの切り替えも不要です。",
@@ -81,15 +69,14 @@
   "faq.q9.a": "はい — 試用期間も広告もアップセルもありません。もしよければ、<a href=\"https://buymeacoffee.com/wellsriley\">Buy Me a Coffee</a> での応援をとてもうれしく思います。",
   "faq.q10.q": "アプリには見つけられるイースターエッグがたくさんあるの？",
   "faq.q10.a": "はい — 今どきの多くのソフトウェアと違って、Mojitoは便利さ<em>と</em>遊び心を兼ね備えています。楽しんでください。",
-
   "privacy.h2": "プライバシー",
-  "privacy.p1": "キー入力はローカルでショートコードのリストと照合されます — どこかのサーバーに記録・送信・保存されることはありません。パスワードなどの保護されたテキストフィールドは完全に無視されます。テレメトリも分析もアカウントもありません。",
-  "privacy.p2": "Mojitoは2種類の外部リクエストを行います。1つ目は、アプリのアップデートの匿名チェック。2つ目は、GIF検索が有効な場合（デフォルトでオン — 設定 → 一般 で切り替え）、<code>:::</code> の後に入力したテキストが <a href=\"https://giphy.com\">Giphy</a> に送信され、一致するGIFを取得します。これらのリクエストには <a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">Giphyのプライバシーポリシー</a>が適用されます。",
-
+  "privacy.p1": "キー入力はローカルでショートコードのリストと照合されます — <strong>入力した内容</strong>がどこかのサーバーに記録・送信・保存されることは一切ありません。パスワードなどの保護されたテキストフィールドは完全に無視され、アカウントもありません。",
+  "privacy.p2": "Mojitoは匿名の集計利用統計も共有します — どの絵文字や機能が人気か、そしてどのmacOSバージョンが使われているかです。識別子なしで1日1回送信され、IPアドレスは保存されません。設定 → プライバシー でオフにできます。データセット全体は<a href=\"/stats\">統計ページ</a>で公開されています。",
+  "privacy.p3": "それ以外に、Mojitoは2種類の外部リクエストを行います。アプリのアップデートの匿名チェックと、GIF検索が有効な場合（デフォルトでオン — 設定 → 一般 で切り替え）、<code>:::</code> の後に入力したテキストが <a href=\"https://giphy.com\">Giphy</a> に送信され、一致するGIFを取得します。これは<a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">Giphyのプライバシーポリシー</a>に基づきます。",
   "footer.aria.socials": "SNSリンク",
+  "footer.stats": "統計",
   "footer.donate": "寄付する",
   "footer.contact": "お問い合わせ",
-
   "lang.aria.picker": "言語",
   "lang.menu.title": "言語を選択"
 }

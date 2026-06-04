@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mojito — Usage stats</title>
+<meta name="description" content="Mojito in numbers. Anonymous, aggregate usage statistics — fully public. What we collect, what we never collect, and what people are typing.">
+<link rel="canonical" href="https://mojito.wells.ee/stats">
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mojito.wells.ee/stats">
+<meta property="og:title" content="Mojito — Usage stats">
+<meta property="og:description" content="Mojito in numbers. Anonymous, aggregate, fully public.">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="style.css?v=66">
+<link rel="stylesheet" href="stats.css?v=10">
+</head>
+<body>
+
+<nav class="topbar">
+  <a class="brand" href="/" aria-label="Mojito">
+    <img src="app-icon.png" alt="" width="28" height="28">
+    <span>Mojito</span>
+  </a>
+  <div class="nav-links">
+    <a href="/#privacy">Privacy</a>
+    <a href="https://github.com/wr/mojito">GitHub</a>
+    <a class="nav-cta" href="https://github.com/wr/mojito/releases/latest/download/Mojito.dmg">
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v7.69l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 0 1 1.06-1.06l2.72 2.72V2.25A.75.75 0 0 1 8 1.5Zm-5.25 11a.75.75 0 0 1 .75.75v.25a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-.25a.75.75 0 0 1 1.5 0v.25A2 2 0 0 1 12 15.5H4a2 2 0 0 1-2-2v-.25a.75.75 0 0 1 .75-.75Z"/></svg>
+      <span>Download for macOS</span>
+    </a>
+  </div>
+</nav>
+
+<header class="stats-hero">
+  <h1>Mojito, by the numbers.</h1>
+  <p class="stats-sub">A live look at what people reach for — the most-loved emoji, the features that get used, and where Mojito runs.</p>
+  <div class="stats-meta">
+    <span class="meta-pill live"><span class="live-dot" aria-hidden="true"></span>Updates daily</span>
+    <span class="meta-sep" aria-hidden="true">·</span>
+    <span id="updated">last update June 2, 2026</span>
+  </div>
+</header>
+
+<main class="stats-main">
+
+  <!-- headline counters -->
+  <section class="bignums reveal" aria-label="Headline totals">
+    <div class="bignum">
+      <div class="bignum-value" id="bn-macs" data-count="9184" data-format="int">9,184</div>
+      <div class="bignum-label">Active users</div>
+    </div>
+    <div class="bignum">
+      <div class="bignum-value" id="bn-emoji" data-count="12600000" data-format="m1">12.6M</div>
+      <div class="bignum-label">Emoji</div>
+    </div>
+    <div class="bignum">
+      <div class="bignum-value" id="bn-gif" data-count="410000" data-format="k">410K</div>
+      <div class="bignum-label">GIFs</div>
+    </div>
+    <div class="bignum">
+      <div class="bignum-value" id="bn-emoticon" data-count="2400000" data-format="m1">2.4M</div>
+      <div class="bignum-label">Emoticons</div>
+    </div>
+  </section>
+
+  <!-- top emoji -->
+  <section class="card reveal" aria-label="Most inserted emoji">
+    <div class="card-head">
+      <h2 class="card-title">Top emoji</h2>
+    </div>
+    <div class="erows" id="emoji-rows">
+      <div class="erow"><span class="erank">1</span><span class="eglyph" aria-hidden="true">😂</span><span class="ecode">:joy:</span><span class="bar-track"><span class="bar-fill" data-w="100%"></span></span><span class="ecount">1,284,930</span></div>
+      <div class="erow"><span class="erank">2</span><span class="eglyph" aria-hidden="true">❤️</span><span class="ecode">:heart:</span><span class="bar-track"><span class="bar-fill" data-w="79%"></span></span><span class="ecount">1,012,448</span></div>
+      <div class="erow"><span class="erank">3</span><span class="eglyph" aria-hidden="true">👍</span><span class="ecode">:thumbsup:</span><span class="bar-track"><span class="bar-fill" data-w="69%"></span></span><span class="ecount">884,102</span></div>
+      <div class="erow"><span class="erank">4</span><span class="eglyph" aria-hidden="true">😭</span><span class="ecode">:sob:</span><span class="bar-track"><span class="bar-fill" data-w="57%"></span></span><span class="ecount">731,560</span></div>
+      <div class="erow"><span class="erank">5</span><span class="eglyph" aria-hidden="true">🔥</span><span class="ecode">:fire:</span><span class="bar-track"><span class="bar-fill" data-w="48%"></span></span><span class="ecount">612,889</span></div>
+      <div class="erow"><span class="erank">6</span><span class="eglyph" aria-hidden="true">✨</span><span class="ecode">:sparkles:</span><span class="bar-track"><span class="bar-fill" data-w="44%"></span></span><span class="ecount">564,201</span></div>
+      <div class="erow"><span class="erank">7</span><span class="eglyph" aria-hidden="true">🙏</span><span class="ecode">:pray:</span><span class="bar-track"><span class="bar-fill" data-w="39%"></span></span><span class="ecount">498,773</span></div>
+      <div class="erow"><span class="erank">8</span><span class="eglyph" aria-hidden="true">🎉</span><span class="ecode">:tada:</span><span class="bar-track"><span class="bar-fill" data-w="34%"></span></span><span class="ecount">442,300</span></div>
+      <div class="erow"><span class="erank">9</span><span class="eglyph" aria-hidden="true">😍</span><span class="ecode">:heart_eyes:</span><span class="bar-track"><span class="bar-fill" data-w="31%"></span></span><span class="ecount">401,996</span></div>
+      <div class="erow"><span class="erank">10</span><span class="eglyph" aria-hidden="true">💀</span><span class="ecode">:skull:</span><span class="bar-track"><span class="bar-fill" data-w="29%"></span></span><span class="ecount">377,540</span></div>
+      <div class="erow"><span class="erank">11</span><span class="eglyph" aria-hidden="true">👀</span><span class="ecode">:eyes:</span><span class="bar-track"><span class="bar-fill" data-w="26%"></span></span><span class="ecount">332,118</span></div>
+      <div class="erow"><span class="erank">12</span><span class="eglyph" aria-hidden="true">🫡</span><span class="ecode">:saluting_face:</span><span class="bar-track"><span class="bar-fill" data-w="22%"></span></span><span class="ecount">288,640</span></div>
+      <div class="erow"><span class="erank">13</span><span class="eglyph" aria-hidden="true">🥹</span><span class="ecode">:holding_back_tears:</span><span class="bar-track"><span class="bar-fill" data-w="21%"></span></span><span class="ecount">264,205</span></div>
+      <div class="erow"><span class="erank">14</span><span class="eglyph" aria-hidden="true">😊</span><span class="ecode">:blush:</span><span class="bar-track"><span class="bar-fill" data-w="20%"></span></span><span class="ecount">251,880</span></div>
+      <div class="erow"><span class="erank">15</span><span class="eglyph" aria-hidden="true">🤔</span><span class="ecode">:thinking:</span><span class="bar-track"><span class="bar-fill" data-w="17%"></span></span><span class="ecount">224,517</span></div>
+      <div class="erow"><span class="erank">16</span><span class="eglyph" aria-hidden="true">🙌</span><span class="ecode">:raised_hands:</span><span class="bar-track"><span class="bar-fill" data-w="16%"></span></span><span class="ecount">201,344</span></div>
+    </div>
+  </section>
+
+  <!-- usage mix -->
+  <section class="card reveal" aria-label="What gets inserted">
+    <div class="card-head">
+      <h2 class="card-title">What gets inserted</h2>
+    </div>
+    <div class="mixbar" id="mix-bar" role="img" aria-label="Emoji 76%, emoticons 14%, symbols 7%, GIFs 3%">
+      <span class="mixseg emoji" style="width:76%"></span>
+      <span class="mixseg emoticon" style="width:14%"></span>
+      <span class="mixseg symbol" style="width:7%"></span>
+      <span class="mixseg gif" style="width:3%"></span>
+    </div>
+    <div class="mix-legend" id="mix-legend">
+      <span class="mix-item"><span class="mix-swatch" style="background:var(--mix-emoji)"></span><b>Emoji</b>&nbsp;<span>76% · 12.6M</span></span>
+      <span class="mix-item"><span class="mix-swatch" style="background:var(--mix-emoticon)"></span><b>Emoticons</b>&nbsp;<span>14% · 2.4M</span></span>
+      <span class="mix-item"><span class="mix-swatch" style="background:var(--mix-symbol)"></span><b>Symbols</b>&nbsp;<span>7% · 1.1M</span></span>
+      <span class="mix-item"><span class="mix-swatch" style="background:var(--mix-gif)"></span><b>GIFs</b>&nbsp;<span>3% · 410K</span></span>
+    </div>
+  </section>
+
+  <!-- macOS + chip -->
+  <section class="grid-2 reveal" aria-label="Platform">
+    <div class="card">
+      <div class="card-head"><h2 class="card-title">macOS version</h2></div>
+      <div class="bars" id="bars-os">
+        <div class="bar"><span class="bar-label">macOS 26 <small>Tahoe</small></span><span class="bar-track"><span class="bar-fill" data-w="44%"></span></span><span class="bar-val">44%</span></div>
+        <div class="bar"><span class="bar-label">macOS 15 <small>Sequoia</small></span><span class="bar-track"><span class="bar-fill" data-w="39%"></span></span><span class="bar-val">39%</span></div>
+        <div class="bar"><span class="bar-label">macOS 14 <small>Sonoma</small></span><span class="bar-track"><span class="bar-fill" data-w="17%"></span></span><span class="bar-val">17%</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2 class="card-title">Architecture</h2></div>
+      <div class="bars" id="bars-arch">
+        <div class="bar"><span class="bar-label">Apple Silicon</span><span class="bar-track"><span class="bar-fill" data-w="86%"></span></span><span class="bar-val">86%</span></div>
+        <div class="bar"><span class="bar-label">Intel</span><span class="bar-track"><span class="bar-fill" data-w="14%"></span></span><span class="bar-val">14%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- app version + features -->
+  <section class="grid-2 reveal" aria-label="App">
+    <div class="card">
+      <div class="card-head"><h2 class="card-title">App version</h2></div>
+      <div class="bars" id="bars-app">
+        <div class="bar"><span class="bar-label">1.2.1 <small>latest</small></span><span class="bar-track"><span class="bar-fill" data-w="71%"></span></span><span class="bar-val">71%</span></div>
+        <div class="bar"><span class="bar-label">1.2.0</span><span class="bar-track"><span class="bar-fill" data-w="14%"></span></span><span class="bar-val">14%</span></div>
+        <div class="bar"><span class="bar-label">1.1.x</span><span class="bar-track"><span class="bar-fill" data-w="9%"></span></span><span class="bar-val">9%</span></div>
+        <div class="bar"><span class="bar-label">1.0.x</span><span class="bar-track"><span class="bar-fill" data-w="6%"></span></span><span class="bar-val">6%</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2 class="card-title">Languages</h2></div>
+      <div class="bars" id="bars-lang">
+        <div class="bar"><span class="bar-label">English</span><span class="bar-track"><span class="bar-fill" data-w="71%"></span></span><span class="bar-val">71%</span></div>
+        <div class="bar"><span class="bar-label">German</span><span class="bar-track"><span class="bar-fill" data-w="6%"></span></span><span class="bar-val">6%</span></div>
+        <div class="bar"><span class="bar-label">Japanese</span><span class="bar-track"><span class="bar-fill" data-w="5%"></span></span><span class="bar-val">5%</span></div>
+        <div class="bar"><span class="bar-label">French</span><span class="bar-track"><span class="bar-fill" data-w="4%"></span></span><span class="bar-val">4%</span></div>
+        <div class="bar"><span class="bar-label">Spanish</span><span class="bar-track"><span class="bar-fill" data-w="4%"></span></span><span class="bar-val">4%</span></div>
+        <div class="bar"><span class="bar-label">Other <small>+13</small></span><span class="bar-track"><span class="bar-fill" data-w="10%"></span></span><span class="bar-val">10%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- feature adoption -->
+  <section class="card reveal" aria-label="Feature usage">
+    <div class="card-head">
+      <h2 class="card-title">Feature usage</h2>
+    </div>
+    <div class="feat-grid" id="bars-features">
+      <div class="feat-tile"><div class="feat-gauge" style="--p:91"></div><span class="feat-pct">91%</span><span class="feat-name">Frequency boost</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:79"></div><span class="feat-pct">79%</span><span class="feat-name">Launch at login</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:73"></div><span class="feat-pct">73%</span><span class="feat-name">GIF search</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:64"></div><span class="feat-pct">64%</span><span class="feat-name">Emoticons</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:52"></div><span class="feat-pct">52%</span><span class="feat-name">Arrow conversion</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:38"></div><span class="feat-pct">38%</span><span class="feat-name">Symbols</span></div>
+    </div>
+  </section>
+
+  <!-- skin tone -->
+  <section class="card reveal" aria-label="Skin tone preference">
+    <div class="card-head">
+      <h2 class="card-title">Skin tone</h2>
+    </div>
+    <div class="tones" id="tones">
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖</span><span class="tone-pct">68%</span><span class="tone-name">Default</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏻</span><span class="tone-pct">7%</span><span class="tone-name">Light</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏼</span><span class="tone-pct">9%</span><span class="tone-name">Med-light</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏽</span><span class="tone-pct">8%</span><span class="tone-name">Medium</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏾</span><span class="tone-pct">4%</span><span class="tone-name">Med-dark</span></div>
+      <div class="tone"><span class="tone-hand" aria-hidden="true">🖖🏿</span><span class="tone-pct">4%</span><span class="tone-name">Dark</span></div>
+    </div>
+  </section>
+
+  <!-- community discoveries (single vague counter, no breakdown) -->
+  <section class="card eggs-card reveal" aria-label="Easter eggs discovered">
+    <div class="egg-num" id="egg-num" data-count="47902" data-format="int">47,902</div>
+    <p class="egg-cap">Easter eggs discovered</p>
+  </section>
+
+  <!-- data + source -->
+  <section class="reveal" aria-label="Get the data" style="text-align:center; padding:6px 0 4px;">
+    <div class="data-cta">
+      <a class="data-btn" href="https://github.com/wr/mojito"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>Read the source</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-pill">
+    <ul class="footer-socials" aria-label="Social links">
+      <li><a href="https://twitter.com/wr" aria-label="Twitter — @wr" rel="me">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M22 5.8c-.7.3-1.5.6-2.4.7.9-.5 1.5-1.3 1.9-2.2-.8.5-1.7.9-2.6 1.1-.8-.8-1.9-1.3-3.1-1.3-2.3 0-4.2 1.9-4.2 4.2 0 .3 0 .7.1 1C8.2 9 5 7.3 2.8 4.7c-.4.7-.6 1.4-.6 2.1 0 1.5.7 2.8 1.9 3.5-.7 0-1.3-.2-1.9-.5v.1c0 2 1.5 3.7 3.4 4.1-.4.1-.7.2-1.1.2-.3 0-.5 0-.8-.1.5 1.7 2.1 2.9 4 2.9C6.3 18.1 4.5 18.8 2.5 18.8H2c1.9 1.2 4.1 1.9 6.4 1.9 7.7 0 11.9-6.4 11.9-11.9v-.5c.8-.6 1.5-1.3 2.1-2.1z"/></svg>
+      </a></li>
+      <li><a href="https://mastodon.social/@wellsriley" aria-label="Mastodon — @wellsriley@mastodon.social" rel="me">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M21.58 8.27c0-4.83-3.16-6.24-3.16-6.24-1.6-.73-4.34-1.04-7.18-1.07h-.07c-2.84.02-5.58.33-7.18 1.07 0 0-3.16 1.41-3.16 6.24 0 1.11-.02 2.43.01 3.83.1 4.72.85 9.37 5.2 10.52 2.01.53 3.73.64 5.11.57 2.5-.14 3.91-.9 3.91-.9l-.08-1.81s-1.79.57-3.81.5c-2-.07-4.11-.21-4.43-2.67a4.91 4.91 0 0 1-.04-.68s1.96.48 4.45.6c1.52.07 2.94-.09 4.39-.26 2.78-.33 5.2-2.05 5.5-3.62.48-2.49.44-6.08.44-6.08zm-3.3 5.51h-2.06v-5.04c0-1.06-.45-1.6-1.34-1.6-.99 0-1.49.64-1.49 1.91v2.77h-2.04V9.05c0-1.27-.5-1.91-1.49-1.91-.89 0-1.34.54-1.34 1.6v5.04H6.46v-5.2c0-1.06.27-1.9.81-2.52.56-.62 1.29-.94 2.2-.94 1.05 0 1.85.4 2.38 1.21l.51.86.51-.86c.53-.81 1.33-1.21 2.38-1.21.91 0 1.64.32 2.2.94.54.62.81 1.46.81 2.52v5.2z"/></svg>
+      </a></li>
+      <li><a href="https://youtube.com/@wellsriley" aria-label="YouTube — @wellsriley" rel="me">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.6 3.5 12 3.5 12 3.5s-7.6 0-9.4.6A3 3 0 0 0 .5 6.2C0 8 0 12 0 12s0 4 .5 5.8a3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 16 24 12 24 12s0-4-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+      </a></li>
+    </ul>
+    <span class="footer-pill-divider" aria-hidden="true"></span>
+    <div class="footer-text-links">
+      <a href="/stats">Stats</a>
+      <a href="https://buymeacoffee.com/wellsriley">Donate</a>
+      <a href="mailto:mojito@wells.ee">Contact</a>
+    </div>
+  </div>
+  <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
+</footer>
+
+<script>
+/* Reveal sections on scroll: grow the bars and count the headline numbers up
+   when they enter the viewport. No dependencies; degrades to fully-shown +
+   final values under reduced-motion. */
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function fmt(type, v) {
+    if (type === 'm1') return (v / 1e6).toFixed(1) + 'M';
+    if (type === 'k') return Math.round(v / 1000).toLocaleString('en-US') + 'K';
+    return Math.round(v).toLocaleString('en-US');
+  }
+  function countUp(el) {
+    var to = parseFloat(el.getAttribute('data-count'));
+    var type = el.getAttribute('data-format') || 'int';
+    var dur = 1100, start = null;
+    function tick(ts) {
+      if (window.__statsLiveTookOver) return; // live data replaced the sample
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(type, to * eased);
+      if (p < 1) requestAnimationFrame(tick); else el.textContent = fmt(type, to);
+    }
+    requestAnimationFrame(tick);
+  }
+  function fillNodes(root) {
+    root.querySelectorAll('[data-w]').forEach(function (el, i) {
+      setTimeout(function () { el.style.width = el.getAttribute('data-w'); }, 55 * i);
+    });
+  }
+  function activate(root) {
+    root.classList.add('is-in');
+    fillNodes(root);
+    root.querySelectorAll('[data-count]').forEach(countUp);
+  }
+
+  if (reduce || !('IntersectionObserver' in window)) {
+    document.querySelectorAll('.reveal').forEach(function (s) { s.classList.add('is-in'); });
+    document.querySelectorAll('[data-w]').forEach(function (el) { el.style.width = el.getAttribute('data-w'); });
+    return;
+  }
+  /* zero the counters up front so there's no flash of the final value */
+  document.querySelectorAll('[data-count]').forEach(function (el) {
+    el.textContent = fmt(el.getAttribute('data-format') || 'int', 0);
+  });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { activate(e.target); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(function (s) { io.observe(s); });
+})();
+</script>
+<script src="stats-live.js?v=6"></script>
+</body>
+</html>
