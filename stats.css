@@ -166,6 +166,9 @@
 
 /* ---- card --------------------------------------------------------------- */
 .card {
+  /* Query container so .bar can adapt to the CARD's width, not the viewport —
+     in a 2-up .grid-2 the cards get narrow well before any viewport breakpoint. */
+  container-type: inline-size;
   background: var(--card-bg);
   border: 0.5px solid var(--card-border);
   border-radius: 18px;
@@ -216,6 +219,15 @@
   grid-template-columns: minmax(96px, 150px) 1fr 52px;
   align-items: center;
   gap: 14px;
+}
+
+/* Narrow card (the 2-up .grid-2 cards at most widths): shrink the label + value
+   columns so the track keeps real width instead of collapsing to a sliver. */
+@container (max-width: 400px) {
+  .bars .bar {
+    grid-template-columns: minmax(56px, 90px) 1fr 40px;
+    gap: 10px;
+  }
 }
 
 .bar-label {
