@@ -1644,27 +1644,25 @@ footer {
 .lang-btn-caret { opacity: 0.55; }
 
 .lang-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  inset-inline-end: 0;
+  /* position:fixed + portaled to <body> (see i18n.js) so the menu sits OUTSIDE
+     .topbar's backdrop-filter — otherwise the ancestor filter swallows this
+     one and the blur never samples the page. i18n.js sets top/right/left. */
+  position: fixed;
   margin: 0;
   padding: 6px;
   list-style: none;
   min-width: 210px;
   max-height: 340px;
   overflow-y: auto;
-  /* Frosted glass: a low-opacity tint over a strong backdrop blur so the page
-     reads through. The menu lives under .topbar (which also has a
-     backdrop-filter) — `isolation: isolate` gives it its own stacking context
-     so its backdrop samples the page content behind it, not the topbar's. */
-  isolation: isolate;
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  /* Frosted glass: a translucent grey menu material over a strong backdrop
+     blur, so the page reads through, frosted. */
+  background: color-mix(in srgb, var(--menu-bg) 72%, transparent);
   backdrop-filter: saturate(180%) blur(24px);
   -webkit-backdrop-filter: saturate(180%) blur(24px);
   border: 1px solid var(--menu-border);
   border-radius: 14px;
   box-shadow: var(--menu-shadow);
-  z-index: 60;
+  z-index: 70;
 }
 .lang-menu[hidden] { display: none; }
 .lang-menu:focus { outline: none; }
