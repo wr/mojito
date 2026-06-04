@@ -3595,6 +3595,8 @@
     if (!anchor) return;
     const cs = getComputedStyle(input);
     const padLeft = parseFloat(cs.paddingLeft);
+    const padRight = parseFloat(cs.paddingRight);
+    const rtl = cs.direction === 'rtl';
     const padTop = parseFloat(cs.paddingTop);
     const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.55;
     const inputRect = input.getBoundingClientRect();
@@ -3618,7 +3620,13 @@
     const inputOffsetX = (inputRect.left - anchorRect.left) / scaleX;
     const inputOffsetY = (inputRect.top - anchorRect.top) / scaleY;
 
-    const colonX = inputOffsetX + padLeft + measureTextWidth(currentLineText) - (input.scrollLeft || 0);
+    // In an RTL field the text is right-aligned, so the caret (and the trailing
+    // `:query`) sits at the left end of the run: measure from the right edge in.
+    // LTR keeps the original measure-from-the-left math.
+    const lineWidth = measureTextWidth(currentLineText);
+    const colonX = rtl
+      ? inputOffsetX + (inputRect.width / scaleX) - padRight - lineWidth
+      : inputOffsetX + padLeft + lineWidth - (input.scrollLeft || 0);
     const lineBaseY = inputOffsetY + padTop + lineIndex * lineHeight - (input.scrollTop || 0);
     const colonBottom = lineBaseY + lineHeight;
     const colonTop = lineBaseY;
