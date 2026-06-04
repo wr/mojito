@@ -116,6 +116,46 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Picker label once the egg is discovered. Matches the bare-keyword
+    /// form already used by `EggStrings.k04Label` / `k05Label`. Decoded at
+    /// runtime only on demand. Non-picker eggs return `"???"` so callers
+    /// have a safe fallback even if they look one up.
+    var pickerLabel: String {
+        switch self {
+        case .k01: return String(EggStrings.k01.dropFirst().dropLast())
+        case .k02: return String(EggStrings.k02.dropFirst().dropLast())
+        case .k03: return String(EggStrings.k03.dropFirst().dropLast())
+        case .k04: return EggStrings.k04Label
+        case .k05: return EggStrings.k05Label
+        case .k06: return String(EggStrings.k06.dropFirst().dropLast())
+        case .k07: return String(EggStrings.k07.dropFirst().dropLast())
+        case .k08: return String(EggStrings.k08.dropFirst().dropLast())
+        case .k09: return String(EggStrings.k09.dropFirst().dropLast())
+        case .k10: return String(EggStrings.k10.dropFirst().dropLast())
+        case .k11: return String(EggStrings.k11.dropFirst().dropLast())
+        case .k12: return String(EggStrings.k12.dropFirst().dropLast())
+        case .k13: return String(EggStrings.k13.dropFirst().dropLast())
+        case .k14: return String(EggStrings.k14.dropFirst().dropLast())
+        case .k15: return String(EggStrings.k15.dropFirst().dropLast())
+        case .k16: return String(EggStrings.k16.dropFirst().dropLast())
+        case .k17: return String(EggStrings.k17.dropFirst().dropLast())
+        case .k19: return String(EggStrings.k19.dropFirst().dropLast())
+        case .k20: return String(EggStrings.k20.dropFirst().dropLast())
+        case .k21: return String(EggStrings.k21.dropFirst().dropLast())
+        case .k22: return String(EggStrings.k22.dropFirst().dropLast())
+        case .k23: return String(EggStrings.k23.dropFirst().dropLast())
+        case .k24: return String(EggStrings.k24.dropFirst().dropLast())
+        case .k25: return String(EggStrings.k25.dropFirst().dropLast())
+        case .k27: return String(EggStrings.k27.dropFirst().dropLast())
+        case .k29: return String(EggStrings.k29.dropFirst().dropLast())
+        case .k30: return String(EggStrings.k30.dropFirst().dropLast())
+        case .k35: return String(EggStrings.k35.dropFirst().dropLast())
+        case .k49: return String(EggStrings.k49.dropFirst().dropLast())
+        case .k50: return String(EggStrings.k50.dropFirst().dropLast())
+        default:   return "???"
+        }
+    }
+
     /// Shown next to a discovered egg in About — spells out the trigger.
     /// Backticked keywords decode from `EggStrings` so they're not
     /// plaintext spoilers in the source.
