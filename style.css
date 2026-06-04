@@ -1656,7 +1656,7 @@ footer {
   overflow-y: auto;
   /* Frosted glass: a translucent grey menu material over a strong backdrop
      blur, so the page reads through, frosted. */
-  background: color-mix(in srgb, var(--menu-bg) 62%, transparent);
+  background: color-mix(in srgb, var(--menu-bg) 50%, transparent);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border: 1px solid var(--menu-border);
