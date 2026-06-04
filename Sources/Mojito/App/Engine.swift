@@ -910,7 +910,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             viewModel.update(query: "", results: emptyQueryResults())
             return
         }
-        let results = FuzzyMatcher.search(
+        var results = FuzzyMatcher.search(
             query: query,
             in: database,
             usage: usage,
@@ -922,6 +922,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             "results": "\(results.count)",
             "scope": "\(scope)",
         ])
+        // Trailing Browse row mirrors the bare-`:` pill — a no-match query
+        // still hides the picker (results stay empty), but any hit list lets
+        // the user fall through to the full grid.
+        if !results.isEmpty {
+            results.append(EmojiBrowser.browseRow)
+        }
         viewModel.update(query: query, results: results)
     }
 
