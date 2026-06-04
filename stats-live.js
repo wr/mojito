@@ -28,7 +28,17 @@
   var TONE_HAND = { default: "🖖", light: "🖖🏻", mediumLight: "🖖🏼",
     medium: "🖖🏽", mediumDark: "🖖🏾", dark: "🖖🏿" };
 
+  // i18n: labels are localized through window.MojitoI18n (i18n.js), with the
+  // English tables above as fallbacks. The worker returns only opaque codes.
+  var I18N = window.MojitoI18n;
+  function t(k, f) { return (I18N && I18N.t) ? I18N.t(k, f) : f; }
+  function loc() { return (I18N && I18N.locale) ? I18N.locale : "en"; }
+  var lastData = null;
+
   fetchFirst(0);
+  // Re-render with localized labels once i18n is ready and whenever the visitor
+  // switches languages (the fetched data is cached in lastData).
+  if (I18N && I18N.onChange) I18N.onChange(render);
 
   function fetchFirst(i) {
     if (i >= ENDPOINTS.length) return; // all endpoints failed: keep the sample
@@ -43,13 +53,18 @@
   function handle(d) {
     if (!d) return;
     window.__statsLiveTookOver = true; // stop the sample count-up animations
-    applyLive(d);                      // live data wins, even when it's all zeros
+    lastData = d;                      // live data wins, even when it's all zeros
+    whenReady(render);
+  }
+  function render() { if (lastData) applyLive(lastData); }
+  function whenReady(fn) {
+    if (I18N && I18N.ready && I18N.ready.then) I18N.ready.then(fn); else fn();
   }
 
   // ---- render ----
 
   function applyLive(d) {
-    setText("updated", "last update " + fmtDate(d.generatedAt));
+    setText("updated", t("stats.lastUpdate", "last update {date}").replace("{date}", fmtDate(d.generatedAt)));
 
     num("bn-macs", d.macsSharingStats);
     num("bn-emoji", d.totals.emoji);
@@ -64,7 +79,7 @@
       return v === "arm64" ? "Apple Silicon" : v === "x86_64" ? "Intel" : v;
     });
     renderDist("bars-app", d.appVersion, function (v) { return v; });
-    renderDist("bars-lang", d.lang, function (v) { return LANG[v] || v.toUpperCase(); });
+    renderDist("bars-lang", d.lang, function (v) { return t("stats.lang." + v, LANG[v] || v.toUpperCase()); });
     renderTones("tones", d.skinTone || []);
     renderFeatures("bars-features", d.features || []);
   }
@@ -72,7 +87,7 @@
   function renderEmoji(top) {
     var el = byId("emoji-rows");
     if (!el) return;
-    if (!top.length) { el.innerHTML = note("No emoji inserted yet."); return; }
+    if (!top.length) { el.innerHTML = note(t("stats.empty.emoji", "No emoji inserted yet.")); return; }
     var max = top[0].count || 1;
     el.innerHTML = top.map(function (e, i) {
       var pct = Math.round((e.count / max) * 100);
@@ -80,21 +95,21 @@
         '</span><span class="eglyph" aria-hidden="true">' + hexToEmoji(e.hexcode) +
         '</span><span class="ecode">' + e.hexcode.toLowerCase() +
         '</span><span class="bar-track"><span class="bar-fill" style="width:' + pct +
-        '%"></span></span><span class="ecount">' + e.count.toLocaleString("en-US") +
+        '%"></span></span><span class="ecount">' + e.count.toLocaleString(loc()) +
         "</span></div>";
     }).join("");
   }
 
-  function renderMix(t) {
-    var sum = t.emoji + t.symbol + t.gif + t.emoticon;
+  function renderMix(tot) {
+    var sum = tot.emoji + tot.symbol + tot.gif + tot.emoticon;
     var bar = byId("mix-bar");
     var legend = byId("mix-legend");
     if (!sum) {
       if (bar) bar.querySelectorAll(".mixseg").forEach(function (s) { s.style.width = "0%"; });
-      if (legend) legend.innerHTML = note("No insertions yet.");
+      if (legend) legend.innerHTML = note(t("stats.empty.mix", "No insertions yet."));
       return;
     }
-    var seg = { emoji: t.emoji, emoticon: t.emoticon, symbol: t.symbol, gif: t.gif };
+    var seg = { emoji: tot.emoji, emoticon: tot.emoticon, symbol: tot.symbol, gif: tot.gif };
     if (bar) {
       ["emoji", "emoticon", "symbol", "gif"].forEach(function (k) {
         var s = bar.querySelector(".mixseg." + k);
@@ -107,7 +122,7 @@
       legend.innerHTML = rows.map(function (r) {
         var pct = Math.round((seg[r[0]] / sum) * 100);
         return '<span class="mix-item"><span class="mix-swatch" style="background:var(--mix-' +
-          r[0] + ')"></span><b>' + r[1] + "</b>&nbsp;<span>" + pct + "% · " +
+          r[0] + ')"></span><b>' + t("stats.mix." + r[0], r[1]) + "</b>&nbsp;<span>" + pct + "% · " +
           compact(seg[r[0]]) + "</span></span>";
       }).join("");
     }
@@ -116,7 +131,7 @@
   function renderDist(id, arr, labelFn) {
     var el = byId(id);
     if (!el || !arr) return;
-    if (!arr.length) { el.innerHTML = note("No data yet."); return; }
+    if (!arr.length) { el.innerHTML = note(t("stats.empty.data", "No data yet.")); return; }
     var sum = arr.reduce(function (a, b) { return a + b.count; }, 0) || 1;
     el.innerHTML = arr.map(function (r) {
       var pct = Math.round((r.count / sum) * 100);
@@ -127,18 +142,18 @@
   function renderFeatures(id, features) {
     var el = byId(id);
     if (!el) return;
-    if (!features.length) { el.innerHTML = note("No data yet."); return; }
+    if (!features.length) { el.innerHTML = note(t("stats.empty.data", "No data yet.")); return; }
     el.innerHTML = features.map(function (f) {
       return '<div class="feat-tile"><div class="feat-gauge" style="--p:' + f.pct +
         '"></div><span class="feat-pct">' + f.pct + '%</span><span class="feat-name">' +
-        (FEATURE[f.feature] || f.feature) + "</span></div>";
+        t("stats.feature." + f.feature, FEATURE[f.feature] || f.feature) + "</span></div>";
     }).join("");
   }
 
   function renderTones(id, arr) {
     var el = byId(id);
     if (!el) return;
-    if (!arr.length) { el.innerHTML = note("No data yet."); return; }
+    if (!arr.length) { el.innerHTML = note(t("stats.empty.data", "No data yet.")); return; }
     var sum = arr.reduce(function (a, b) { return a + b.count; }, 0) || 1;
     var by = {};
     arr.forEach(function (r) { by[r.value] = r.count; });
@@ -146,7 +161,7 @@
       var pct = Math.round((by[v] / sum) * 100);
       return '<div class="tone"><span class="tone-hand" aria-hidden="true">' + TONE_HAND[v] +
         '</span><span class="tone-pct">' + pct +
-        '%</span><span class="tone-name">' + TONE_NAME[v] + "</span></div>";
+        '%</span><span class="tone-name">' + t("stats.tone." + v, TONE_NAME[v]) + "</span></div>";
     }).join("");
   }
 
@@ -173,7 +188,7 @@
   function compact(n) {
     if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
     if (n >= 1e4) return Math.round(n / 1000) + "K";
-    return n.toLocaleString("en-US");
+    return n.toLocaleString(loc());
   }
 
   function num(id, n) { var el = byId(id); if (el) el.textContent = compact(n); }
@@ -181,7 +196,7 @@
   function byId(id) { return document.getElementById(id); }
   function fmtDate(iso) {
     try {
-      return new Date(iso).toLocaleDateString("en-US",
+      return new Date(iso).toLocaleDateString(loc(),
         { year: "numeric", month: "long", day: "numeric" });
     } catch (e) { return ""; }
   }
