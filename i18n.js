@@ -245,9 +245,25 @@
     });
   }
 
+  // The menu is portaled to <body> (out of the backdrop-filtered .topbar so its
+  // own backdrop-filter can actually blur the page), so position it under the
+  // button by hand — aligning its inline-end edge to the button's.
+  function positionMenu() {
+    var r = btn.getBoundingClientRect();
+    menu.style.top = (r.bottom + 8) + "px";
+    if (document.documentElement.dir === "rtl") {
+      menu.style.left = r.left + "px";
+      menu.style.right = "auto";
+    } else {
+      menu.style.right = (window.innerWidth - r.right) + "px";
+      menu.style.left = "auto";
+    }
+  }
+
   function openMenu() {
     if (menuOpen) return;
     menuOpen = true;
+    positionMenu();
     menu.hidden = false;
     btn.setAttribute("aria-expanded", "true");
     var opts = menu.querySelectorAll('[role="option"]');
@@ -334,12 +350,13 @@
       else if (e.key === "Tab") { closeMenu(false); }
     });
     document.addEventListener("click", function (e) {
-      if (menuOpen && !wrap.contains(e.target)) closeMenu(false);
+      if (menuOpen && !wrap.contains(e.target) && !menu.contains(e.target)) closeMenu(false);
     });
+    window.addEventListener("resize", function () { if (menuOpen) positionMenu(); });
 
     wrap.appendChild(btn);
-    wrap.appendChild(menu);
     nav.insertBefore(wrap, nav.firstChild);
+    document.body.appendChild(menu); // portal out of .topbar's backdrop-filter
   }
 
   /* ----- boot --------------------------------------------------------- */
