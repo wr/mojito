@@ -12,7 +12,7 @@ Download the latest DMG from the Releases page and move Mojito to Applications. 
 
 After you type a colon and a character or two, a picker shows up next to your cursor with fuzzy matches. Arrow keys move the selection; Return or Tab inserts. To skip the picker, type the closing colon — `:heart:` — and the exact match goes in directly.
 
-Type a colon by itself to get your favorites, with a row to browse every emoji in a grid.
+Type `:?` to pull up your favorites, with a row to browse every emoji in a grid.
 
 Other things it does:
 
