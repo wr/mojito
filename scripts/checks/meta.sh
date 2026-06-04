@@ -27,7 +27,7 @@ attr_val() {
 }
 
 title_text() {
-  printf '%s' "$HTML" | tr '\n' ' ' | grep -oE '<title>[^<]*</title>' | head -1 | sed -E 's,</?title>,,g'
+  printf '%s' "$HTML" | tr '\n' ' ' | grep -oE '<title[^>]*>[^<]*</title>' | head -1 | sed -E 's,</?title[^>]*>,,g'
 }
 
 link_href() {

@@ -3595,6 +3595,8 @@
     if (!anchor) return;
     const cs = getComputedStyle(input);
     const padLeft = parseFloat(cs.paddingLeft);
+    const padRight = parseFloat(cs.paddingRight);
+    const rtl = cs.direction === 'rtl';
     const padTop = parseFloat(cs.paddingTop);
     const lineHeight = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.55;
     const inputRect = input.getBoundingClientRect();
@@ -3618,7 +3620,13 @@
     const inputOffsetX = (inputRect.left - anchorRect.left) / scaleX;
     const inputOffsetY = (inputRect.top - anchorRect.top) / scaleY;
 
-    const colonX = inputOffsetX + padLeft + measureTextWidth(currentLineText) - (input.scrollLeft || 0);
+    // In an RTL field the text is right-aligned, so the caret (and the trailing
+    // `:query`) sits at the left end of the run: measure from the right edge in.
+    // LTR keeps the original measure-from-the-left math.
+    const lineWidth = measureTextWidth(currentLineText);
+    const colonX = rtl
+      ? inputOffsetX + (inputRect.width / scaleX) - padRight - lineWidth
+      : inputOffsetX + padLeft + lineWidth - (input.scrollLeft || 0);
     const lineBaseY = inputOffsetY + padTop + lineIndex * lineHeight - (input.scrollTop || 0);
     const colonBottom = lineBaseY + lineHeight;
     const colonTop = lineBaseY;
@@ -3921,27 +3929,46 @@
   const termLoginEl = document.querySelector('.term-login');
   if (termLoginEl) termLoginEl.textContent = `Last login: ${formatTermLogin(_lastLogin)} on ttys001`;
   const imMetaTimeEl = document.querySelector('.im-meta-time');
-  if (imMetaTimeEl) imMetaTimeEl.textContent = `Today · ${formatTime12(_now)}`;
-  const _docDate = `${_months[_now.getMonth()]} ${_now.getDate()}`;
+
+  // i18n hooks: scene prose and the iMessage timestamp are localized through
+  // window.MojitoI18n (i18n.js). The Terminal scene stays English — it's a
+  // literal git command — and `:query` shortcodes always match the English
+  // demo DB, so only the surrounding before/after prose is translated.
+  const I18N = window.MojitoI18n;
+  const tr = (key, fallback) => (I18N && I18N.t) ? I18N.t(key, fallback) : fallback;
+  const curLocale = () => (I18N && I18N.locale) ? I18N.locale : 'en';
+
+  function localizedTime(d) {
+    try { return new Intl.DateTimeFormat(curLocale(), { hour: 'numeric', minute: '2-digit' }).format(d); }
+    catch (e) { return formatTime12(d); }
+  }
+  function localizedDocDate(d) {
+    try { return new Intl.DateTimeFormat(curLocale(), { month: 'short', day: 'numeric' }).format(d); }
+    catch (e) { return `${_months[d.getMonth()]} ${d.getDate()}`; }
+  }
+  function refreshIMessageTime() {
+    if (imMetaTimeEl) imMetaTimeEl.textContent = `${tr('demo.imessage.today', 'Today')} · ${localizedTime(_now)}`;
+  }
 
   // Each scene targets one app and uses a UNIQUE emoji (no repeats across the cycle).
   // App indices: 0=TextEdit, 1=iMessage, 2=Terminal, 3=Mastodon, 4=Reminders.
   // `prefilled`: text already in the textarea when the slide arrives (not typed).
-  const scenes = [
-    {
-      app: 0,
-      prefilled:
-        `Design Review — ${_docDate}\n\n` +
-        "Picker should fade in on first show. Team agreed.\n\n" +
-        "To-do:\n" +
-        "- Add fade-in flag",
-      before: '\n- Hit deadline ', query: 'fire', after: '',
-    },
-    { app: 1, before: 'see you soon ',                     query: 'wave',   after: '' },
-    { app: 2, before: 'git commit -m "fix the ',           query: 'bug',    after: '"' },
-    { app: 3, before: 'Just shipped a new app ',           query: 'rocket', after: '' },
-    { app: 4, before: 'Pick up ',                          query: 'gift',   after: ' for mom' },
-  ];
+  function buildScenes() {
+    const docTemplate = tr('demo.scene.doc',
+      'Design Review — {date}\n\nPicker should fade in on first show. Team agreed.\n\nTo-do:\n- Add fade-in flag');
+    return [
+      {
+        app: 0,
+        prefilled: docTemplate.replace('{date}', localizedDocDate(_now)),
+        before: tr('demo.scene.deadline', '\n- Hit deadline '), query: 'fire', after: '',
+      },
+      { app: 1, before: tr('demo.scene.soon', 'see you soon '),               query: 'wave',   after: '' },
+      { app: 2, before: 'git commit -m "fix the ',                            query: 'bug',    after: '"' },
+      { app: 3, before: tr('demo.scene.shipped', 'Just shipped a new app '),  query: 'rocket', after: '' },
+      { app: 4, before: tr('demo.scene.pickup', 'Pick up '),                  query: 'gift',   after: tr('demo.scene.formom', ' for mom') },
+    ];
+  }
+  let scenes = buildScenes();
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const wait = (ms) => sleep(reduceMotion ? 0 : ms);
@@ -4076,13 +4103,36 @@
     }
   });
 
-  if (reduceMotion) {
-    autoplay = false;
-    setActiveApp(0);
-    input.value = "Don't forget the :tada";
-    handleInput();
+  function startDemo() {
+    if (reduceMotion) {
+      autoplay = false;
+      setActiveApp(0);
+      input.value = tr('demo.fallback', "Don't forget the :tada");
+      handleInput();
+    } else {
+      autoplayLoop();
+    }
+  }
+
+  // Rebuild scenes + restart whenever the visitor switches languages.
+  function relocalizeDemo() {
+    scenes = buildScenes();
+    refreshIMessageTime();
+    if (reduceMotion) {
+      input.value = tr('demo.fallback', "Don't forget the :tada");
+      handleInput();
+    } else {
+      autoplayLoop(); // bumps autoplayToken → cleanly restarts with new scenes
+    }
+  }
+
+  // Wait for i18n to settle so the first scenes build in the active locale.
+  if (I18N && I18N.ready && typeof I18N.ready.then === 'function') {
+    I18N.ready.then(() => { scenes = buildScenes(); refreshIMessageTime(); startDemo(); });
+    if (I18N.onChange) I18N.onChange(relocalizeDemo);
   } else {
-    autoplayLoop();
+    refreshIMessageTime();
+    startDemo();
   }
 
   /* ---------- easter egg: drag "Website" folder to trash to crash the site.

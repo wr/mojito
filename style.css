@@ -1615,3 +1615,122 @@ footer {
 
   .demo-input::selection { background: rgba(46, 184, 103, 0.35); }
 }
+
+/* ============================================================
+   Language picker (nav) + RTL — appended last so the picker's
+   menu reuses the --menu-* vars (which the dark block above
+   already flips) and the RTL block overrides ship LTR defaults.
+   ============================================================ */
+
+.lang-picker { position: relative; display: inline-flex; }
+
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+.lang-btn:hover { color: var(--text); border-color: color-mix(in srgb, var(--text) 22%, transparent); }
+.lang-btn-flag { font-size: 16px; line-height: 1; }
+.lang-btn-caret { opacity: 0.55; }
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-end: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  min-width: 210px;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--menu-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid var(--menu-border);
+  border-radius: 14px;
+  box-shadow: var(--menu-shadow);
+  z-index: 60;
+}
+.lang-menu[hidden] { display: none; }
+.lang-menu:focus { outline: none; }
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.lang-option .lang-flag { font-size: 17px; line-height: 1; }
+.lang-option .lang-name { flex: 1; }
+.lang-option.is-active { background: color-mix(in srgb, var(--text) 9%, transparent); }
+.lang-option[aria-selected="true"] { font-weight: 600; }
+.lang-option[aria-selected="true"]::after {
+  content: "✓";
+  color: var(--accent);
+  font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .lang-btn { padding: 4px 7px; }
+  .lang-menu { min-width: 190px; }
+}
+
+/* Keep inline code/shortcodes (e.g. :emoji:, ->) visually intact when the
+   surrounding paragraph runs right-to-left. Harmless in LTR. */
+code { unicode-bidi: isolate; }
+
+/* RTL: the page chrome flips via dir="rtl" on <html>; the hero demo subtree
+   is pinned dir="ltr" in the HTML so the mock apps + caret math stay correct.
+   These are the few spots that need an explicit nudge. */
+[dir="rtl"] .nav-cta { padding: 7px 12px 7px 14px; }
+[dir="rtl"] kbd { direction: ltr; }
+
+/* RTL: the hero demo now inherits dir from <html> (the dir="ltr" pin was
+   removed), so the mock apps mirror like the rest of the page. Terminal and
+   the picker popup stay LTR — shells and :shortcodes read left-to-right — and
+   the few physical-property spots that don't auto-mirror get an explicit flip.
+   Flex alignment (bubble sides, toolbar order, stoplights) flips on its own. */
+/* Terminal: the window chrome mirrors (stoplights move top-right, like real
+   macOS in an RTL system locale), but the shell content stays LTR — commands,
+   paths and prompts are left-to-right even on an Arabic Mac. Scope the LTR pin
+   to the body, not the whole app, so the title bar still flips. */
+[dir="rtl"] .term-body { direction: ltr; }
+[dir="rtl"] .picker { direction: ltr; }
+
+/* iMessage: mirror the bubble tail corner + move the waveform button and its
+   input padding to the other side. */
+[dir="rtl"] .bubble.received { border-bottom-left-radius: 22px; border-bottom-right-radius: 7px; }
+[dir="rtl"] .bubble.sent     { border-bottom-right-radius: 22px; border-bottom-left-radius: 7px; }
+[dir="rtl"] .im-pill .demo-input { padding: 8px 14px 8px 36px; }
+[dir="rtl"] .im-pill-btn { right: auto; left: 8px; }
+[dir="rtl"] .im-contact-pill svg { transform: scaleX(-1); }
+
+/* Reminders unified-toolbar groups re-anchor to the mirrored side. */
+[dir="rtl"] .rm-tb-left  { margin-left: 0; margin-right: 8px; }
+[dir="rtl"] .rm-tb-right { margin-left: 0; margin-right: auto; }
+
+/* Directional chevrons (Safari back/forward) point the other way in RTL. */
+[dir="rtl"] .safari-nav-pill svg { transform: scaleX(-1); }
+
+/* Decorative desktop folder + trash move to the mirrored corner. */
+[dir="rtl"] .desktop-icons { right: auto; left: 32px; }
+[dir="rtl"] .desktop-trash { right: auto; left: 32px; }
+@media (max-width: 640px) {
+  [dir="rtl"] .desktop-icons { right: auto; left: 14px; }
+  [dir="rtl"] .desktop-trash { right: auto; left: 14px; }
+}

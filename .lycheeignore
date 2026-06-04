@@ -1,3 +1,9 @@
 # One regex per line. Lines starting with # are comments.
 # Example: ignore links that 403 from CI but resolve fine in a browser.
 # https://www\.example\.com/.*
+
+# /stats is a GitHub Pages "clean URL" (it serves stats.html). The local static
+# server used by this link check can't do clean URLs, so /stats 404s locally —
+# but it resolves on the deployed site (mojito.wells.ee/stats). Scope the ignore
+# to the local server so the real URL is still validated if referenced absolutely.
+localhost:[0-9]+/stats$

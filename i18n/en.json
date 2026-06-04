@@ -1,0 +1,97 @@
+{
+  "meta.title": "Mojito — Autocomplete :emoji: everywhere on macOS",
+  "meta.description": "Autocomplete :emoji: everywhere on macOS. Type a colon and search any emoji, symbol, or shortcode in seconds — in TextEdit, iMessage, Terminal, anywhere.",
+
+  "nav.github": "GitHub",
+  "nav.donate": "Donate",
+  "nav.download": "Download for macOS",
+
+  "hero.title": "Autocomplete <code>:emoji:</code> everywhere.",
+  "hero.sub": "Type <code>:</code> to search for any emoji or symbol in seconds.",
+
+  "demo.folderLabel": "Website",
+  "demo.achievement.lead": "Your first easter egg!",
+  "demo.achievement.detail": "One down, 100 to go",
+  "demo.sadmac.hint": "click to reboot",
+
+  "demo.textedit.title": "Untitled.txt — Edited",
+
+  "demo.imessage.contact": "Sarah",
+  "demo.imessage.label": "iMessage",
+  "demo.imessage.bubble1": "running late, sorry!",
+  "demo.imessage.bubble2": "be there in 10",
+  "demo.imessage.placeholder": "iMessage",
+  "demo.imessage.aria.compose": "iMessage compose",
+  "demo.imessage.aria.attach": "Attach",
+  "demo.imessage.aria.dictate": "Dictate",
+  "demo.imessage.aria.emoji": "Emoji",
+
+  "demo.mastodon.visibility": "Public, quotes allowed",
+  "demo.mastodon.compose.placeholder": "What's on your mind?",
+  "demo.mastodon.aria.compose": "Mastodon compose",
+  "demo.mastodon.post": "Post",
+
+  "demo.reminders.title": "Reminders",
+  "demo.reminders.item1": "Reply to Sarah",
+  "demo.reminders.item2": "Submit timesheet",
+  "demo.reminders.item3": "Renew library card",
+  "demo.reminders.placeholder": "Add a reminder…",
+  "demo.reminders.aria.add": "Add reminder",
+  "demo.reminders.new": "New Reminder",
+  "demo.reminders.aria.new": "New reminder",
+
+  "demo.aria.liveDemo": "Live demo",
+
+  "demo.imessage.today": "Today",
+  "demo.mastodon.language": "English",
+  "demo.scene.doc": "Design Review — {date}\n\nPicker should fade in on first show. Team agreed.\n\nTo-do:\n- Add fade-in flag",
+  "demo.scene.deadline": "\n- Hit deadline ",
+  "demo.scene.soon": "see you soon ",
+  "demo.scene.shipped": "Just shipped a new app ",
+  "demo.scene.pickup": "Pick up ",
+  "demo.scene.formom": " for mom",
+  "demo.fallback": "Don't forget the :tada",
+
+  "picker.aria.suggestions": "Emoji suggestions",
+  "picker.select": "select",
+  "picker.insert": "insert",
+  "picker.dismiss": "dismiss",
+
+  "about.h2": "About",
+  "about.body": "I built Mojito because Slack's <code>:tada:</code> → 🎉 should work everywhere on macOS, not just in Slack. It's free and open source.",
+
+  "faq.h2": "FAQ",
+  "faq.q1.q": "How is this different from macOS's built-in emoji picker?",
+  "faq.q1.a": "The macOS picker (⌃⌘Space) is a separate window — open it, search, click, switch back. Mojito just appears next to your cursor as you type. Hit a colon, type a couple letters, arrow keys + Return to insert. No window, no mouse, no context switch.",
+  "faq.q2.q": "Which apps does it work in?",
+  "faq.q2.a": "Anywhere you can type — TextEdit, Terminal, Mail, Notes, browsers, Notion. It stays out of apps and sites that already do shortcode emoji natively (Slack, Discord, Messages, GitHub) so you don't get double-handling.",
+  "faq.q3.q": "Can I customize it?",
+  "faq.q3.a": "A few knobs in the menu bar: default skin tone, an optional symbol mode (<code>:cmd:</code> → ⌘, <code>:star:</code> → ★), and pause for an hour or until tomorrow. Results re-rank by how often you use them, and common emoticons like <code>:)</code> and <code>&lt;3</code> are recognized.",
+  "faq.q4.q": "Can I insert GIFs too?",
+  "faq.q4.a": "Yes — type <code>:::</code> (three colons) then a search term to grab a GIF from <a href=\"https://giphy.com\">Giphy</a>. It's on by default; flip it off in Settings → General if you'd rather keep things local.",
+  "faq.q5.q": "What languages is it available in?",
+  "faq.q5.a": "The interface is translated into 19 locales — English (US + UK), German, Spanish (Spain + Latin America), French, Italian, Brazilian Portuguese, Japanese, Simplified and Traditional Chinese, Korean, Hindi, Russian, Polish, Dutch, Arabic, Farsi, and Hebrew. Emoji shortcodes are localized in 14 of those, so <code>:gato:</code> works in Spanish, <code>:chien:</code> in French, and so on. Translations started as LLM drafts; <a href=\"https://github.com/wr/mojito#translations\">native-speaker corrections</a> are very welcome.",
+  "faq.q6.q": "What are the system requirements?",
+  "faq.q6.a": "macOS 14 (Sonoma) or later. Native on Apple Silicon and Intel.",
+  "faq.q7.q": "How do updates and uninstall work?",
+  "faq.q7.a": "Updates arrive automatically through Sparkle, the standard macOS update framework. To uninstall, quit Mojito from the menu bar and drag it from Applications to the Trash.",
+  "faq.q8.q": "Is it open source?",
+  "faq.q8.a": "Full source on <a href=\"https://github.com/wr/mojito\">GitHub</a>, AGPL-3.0.",
+  "faq.q9.q": "Is it really free? How can I support it?",
+  "faq.q9.a": "Yes — no trial, no ads, no upsells. If you'd like to chip in, <a href=\"https://buymeacoffee.com/wellsriley\">Buy Me a Coffee</a> is much appreciated.",
+  "faq.q10.q": "Is the app full of easter eggs for me to find?",
+  "faq.q10.a": "Yes — unlike most software built today, Mojito is both useful <em>and</em> soulful. Have fun with it.",
+
+  "privacy.h2": "Privacy",
+  "privacy.p1": "Keystrokes are matched against the shortcode list locally — <strong>nothing you type</strong> is ever logged, transmitted, or stored on a server. Password and other secure-text fields are ignored entirely, and there's no account.",
+  "privacy.p2": "Mojito also shares anonymous, aggregate usage statistics — which emoji and features are popular, and what macOS versions people run. It's sent once a day with no identifier and your IP isn't stored, and you can switch it off in Settings → Privacy. The whole dataset is public on the <a href=\"/stats\">stats page</a>.",
+  "privacy.p3": "Beyond that, Mojito makes two other kinds of outbound request: an anonymous check for app updates, and — if GIF search is enabled (on by default — toggle in Settings → General) — the text you type after <code>:::</code> is sent to <a href=\"https://giphy.com\">Giphy</a> to fetch matching GIFs, under <a href=\"https://support.giphy.com/hc/en-us/articles/360032872931-GIPHY-Privacy-Policy\">Giphy's privacy policy</a>.",
+
+  "footer.aria.socials": "Social links",
+  "footer.stats": "Stats",
+  "footer.donate": "Donate",
+  "footer.contact": "Contact",
+
+  "lang.aria.picker": "Language",
+  "lang.menu.title": "Choose language"
+}
