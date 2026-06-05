@@ -181,10 +181,7 @@ async function stats(env) {
                    pct: r.t ? Math.round((r.e / r.t) * 100) : 0 }))
     .sort((a, b) => b.pct - a.pct);
 
-  // `macsSharingStats` is the sum of daily-active pings (person-days) — kept for
-  // compatibility but misleading as a headcount. `avgDailyActive` is the honest
-  // headline: mean distinct installs on a day we saw any activity, so one
-  // returning user isn't multiplied across the days they showed up.
+  // macsSharingStats is person-days (kept for compat); avgDailyActive is the per-day mean.
   const activeTotal = active30.results[0]?.c || 0;
   const activeDays = active30.results[0]?.d || 0;
   const avgDailyActive = activeDays ? Math.round(activeTotal / activeDays) : 0;
