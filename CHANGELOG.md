@@ -5,6 +5,12 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.2.3
+
+## Fixed
+- **Bug fixes and improvements.**
+- Easter-egg polish.
+
 ## v1.2.2
 
 ## New
