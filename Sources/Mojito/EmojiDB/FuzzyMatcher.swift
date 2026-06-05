@@ -206,10 +206,19 @@ struct FuzzyMatcher {
            lowercased.count >= specialMinPrefix,
            let hexcode = EggIndex.id(forPrefix: lowercased),
            let row = pinnedRows[hexcode] {
+            // Reveal the trigger keyword once the user has discovered the egg —
+            // a row stuck on "???" after discovery is just dead weight in the
+            // picker.
+            var label = row.label
+            if label == "???",
+               let egg = EasterEgg(rawValue: hexcode),
+               EasterEggTracker.isDiscovered(egg) {
+                label = egg.pickerLabel
+            }
             specialRow = makeSpecialRow(
                 hexcode: row.hexcode,
                 character: row.character,
-                label: row.label,
+                label: label,
                 order: row.order
             )
         }
