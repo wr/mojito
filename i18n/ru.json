@@ -85,7 +85,7 @@
   "stats.hero.sub": "Живой взгляд на то, чем пользуются люди: самые любимые эмодзи, востребованные функции и то, где работает Mojito.",
   "stats.hero.updatesDaily": "Обновляется ежедневно",
   "stats.lastUpdate": "последнее обновление {date}",
-  "stats.bignum.users": "Активные пользователи",
+  "stats.bignum.users": "Польз. в день (сред.)",
   "stats.bignum.emoji": "Эмодзи",
   "stats.bignum.gif": "GIF",
   "stats.bignum.emoticon": "Смайлики",

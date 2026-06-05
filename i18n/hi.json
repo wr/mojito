@@ -85,7 +85,7 @@
   "stats.hero.sub": "लोग किस ओर सबसे ज़्यादा जाते हैं—इसकी एक लाइव झलक: सबसे पसंदीदा इमोजी, सबसे ज़्यादा इस्तेमाल होने वाली सुविधाएँ, और Mojito कहाँ चलता है।",
   "stats.hero.updatesDaily": "रोज़ अपडेट होता है",
   "stats.lastUpdate": "अंतिम अपडेट {date}",
-  "stats.bignum.users": "सक्रिय उपयोगकर्ता",
+  "stats.bignum.users": "औसत दैनिक उपयोगकर्ता",
   "stats.bignum.emoji": "इमोजी",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "इमोटिकॉन",

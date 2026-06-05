@@ -85,7 +85,7 @@
   "stats.hero.sub": "نگاهی زنده به آنچه مردم بیشتر سراغش می‌روند — محبوب‌ترین ایموجی‌ها، پرکاربردترین قابلیت‌ها، و اینکه Mojito کجا اجرا می‌شود.",
   "stats.hero.updatesDaily": "هر روز به‌روزرسانی می‌شود",
   "stats.lastUpdate": "آخرین به‌روزرسانی {date}",
-  "stats.bignum.users": "کاربران فعال",
+  "stats.bignum.users": "میانگین کاربران روزانه",
   "stats.bignum.emoji": "ایموجی",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "شکلک",

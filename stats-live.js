@@ -66,7 +66,9 @@
   function applyLive(d) {
     setText("updated", t("stats.lastUpdate", "last update {date}").replace("{date}", fmtDate(d.generatedAt)));
 
-    num("bn-macs", d.macsSharingStats);
+    num("bn-macs", d.avgDailyActive != null
+      ? d.avgDailyActive
+      : Math.round((d.macsSharingStats || 0) / ((d.window && d.window.days) || 30)));
     num("bn-emoji", d.totals.emoji);
     num("bn-gif", d.totals.gif);
     num("bn-emoticon", d.totals.emoticon);

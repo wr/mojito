@@ -85,7 +85,7 @@
   "stats.hero.sub": "מבט חי על מה שאנשים בוחרים — האימוג'ים האהובים ביותר, הפיצ'רים שנמצאים בשימוש, והיכן Mojito פועל.",
   "stats.hero.updatesDaily": "מתעדכן מדי יום",
   "stats.lastUpdate": "עדכון אחרון {date}",
-  "stats.bignum.users": "משתמשים פעילים",
+  "stats.bignum.users": "ממוצע משתמשים יומי",
   "stats.bignum.emoji": "אימוג'ים",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "סמיילים",

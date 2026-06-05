@@ -85,7 +85,7 @@
   "stats.hero.sub": "即時了解大家都在用什麼——最受喜愛的表情符號、最常用的功能，以及 Mojito 的執行環境。",
   "stats.hero.updatesDaily": "每日更新",
   "stats.lastUpdate": "最後更新 {date}",
-  "stats.bignum.users": "活躍使用者",
+  "stats.bignum.users": "日均使用者",
   "stats.bignum.emoji": "表情符號",
   "stats.bignum.gif": "GIF",
   "stats.bignum.emoticon": "顏文字",
