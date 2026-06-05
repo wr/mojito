@@ -167,7 +167,8 @@ async function stats(env) {
       ).bind(win).all(),
       env.DB.prepare(`SELECT kind, SUM(count) c FROM totals_daily GROUP BY kind`).all(),
       env.DB.prepare(
-        `SELECT SUM(count) c FROM totals_daily WHERE kind = 'active' AND day >= ?`
+        `SELECT COALESCE(SUM(count), 0) c, COUNT(DISTINCT day) d
+         FROM totals_daily WHERE kind = 'active' AND day >= ?`
       ).bind(win).all(),
       env.DB.prepare(`SELECT value FROM meta WHERE key = 'community_eggs'`).all(),
     ]);
@@ -180,10 +181,16 @@ async function stats(env) {
                    pct: r.t ? Math.round((r.e / r.t) * 100) : 0 }))
     .sort((a, b) => b.pct - a.pct);
 
+  // macsSharingStats is person-days (kept for compat); avgDailyActive is the per-day mean.
+  const activeTotal = active30.results[0]?.c || 0;
+  const activeDays = active30.results[0]?.d || 0;
+  const avgDailyActive = activeDays ? Math.round(activeTotal / activeDays) : 0;
+
   const payload = {
     generatedAt: new Date().toISOString(),
     window: { days: 30 },
-    macsSharingStats: active30.results[0]?.c || 0,
+    macsSharingStats: activeTotal,
+    avgDailyActive,
     totals: {
       emoji: totalsMap.emoji || 0,
       symbol: totalsMap.symbol || 0,
