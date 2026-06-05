@@ -85,7 +85,7 @@
   "stats.hero.sub": "사람들이 즐겨 찾는 것을 실시간으로 살펴봐요. 가장 사랑받는 이모지, 많이 쓰는 기능, 그리고 Mojito가 실행되는 곳까지요.",
   "stats.hero.updatesDaily": "매일 업데이트",
   "stats.lastUpdate": "마지막 업데이트 {date}",
-  "stats.bignum.users": "활성 사용자",
+  "stats.bignum.users": "일일 평균 사용자",
   "stats.bignum.emoji": "이모지",
   "stats.bignum.gif": "GIF",
   "stats.bignum.emoticon": "이모티콘",

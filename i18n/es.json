@@ -85,7 +85,7 @@
   "stats.hero.sub": "Una mirada en vivo a lo que la gente usa — los emojis más queridos, las funciones que más se utilizan y dónde corre Mojito.",
   "stats.hero.updatesDaily": "Se actualiza a diario",
   "stats.lastUpdate": "última actualización {date}",
-  "stats.bignum.users": "Usuarios activos",
+  "stats.bignum.users": "Usuarios diarios (prom.)",
   "stats.bignum.emoji": "Emojis",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "Emoticonos",

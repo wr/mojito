@@ -85,7 +85,7 @@
   "stats.hero.sub": "نظرة حيّة على ما يلجأ إليه الناس — أكثر الرموز التعبيرية حبًّا، والميزات الأكثر استخدامًا، وأين يعمل Mojito.",
   "stats.hero.updatesDaily": "يُحدَّث يوميًا",
   "stats.lastUpdate": "آخر تحديث {date}",
-  "stats.bignum.users": "المستخدمون النشطون",
+  "stats.bignum.users": "متوسط المستخدمين يوميًا",
   "stats.bignum.emoji": "رموز تعبيرية",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "وجوه تعبيرية",

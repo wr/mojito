@@ -85,7 +85,7 @@
   "stats.hero.sub": "みんながよく使うものをライブでチェック。人気の絵文字、よく使われる機能、そして Mojito が動いている場所がわかります。",
   "stats.hero.updatesDaily": "毎日更新",
   "stats.lastUpdate": "最終更新 {date}",
-  "stats.bignum.users": "アクティブユーザー",
+  "stats.bignum.users": "1日の平均ユーザー数",
   "stats.bignum.emoji": "絵文字",
   "stats.bignum.gif": "GIF",
   "stats.bignum.emoticon": "顔文字",
