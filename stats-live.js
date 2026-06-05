@@ -95,7 +95,7 @@
       var pct = Math.round((e.count / max) * 100);
       return '<div class="erow"><span class="erank">' + (i + 1) +
         '</span><span class="eglyph" aria-hidden="true">' + hexToEmoji(e.hexcode) +
-        '</span><span class="ecode">' + e.hexcode.toLowerCase() +
+        '</span><span class="ecode">' + shortcode(e.hexcode) +
         '</span><span class="bar-track"><span class="bar-fill" style="width:' + pct +
         '%"></span></span><span class="ecount">' + e.count.toLocaleString(loc()) +
         "</span></div>";
@@ -185,6 +185,14 @@
         return parseInt(h, 16);
       }));
     } catch (e) { return "·"; }
+  }
+
+  // The worker returns only hexcodes; map to the canonical :shortcode: from the
+  // baked-in table (emoji-codes.js). Fall back to the bare hexcode if absent.
+  function shortcode(hex) {
+    var h = hex.toLowerCase();
+    var codes = window.MojitoEmojiCodes;
+    return (codes && codes[h]) ? ":" + codes[h] + ":" : h;
   }
 
   function compact(n) {

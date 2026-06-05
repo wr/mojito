@@ -49,15 +49,6 @@
   text-wrap: balance;
 }
 
-.stats-sub {
-  font-size: 18px;
-  line-height: 1.5;
-  color: var(--text-soft);
-  max-width: 540px;
-  margin: 0 auto 18px;
-  letter-spacing: -0.005em;
-}
-
 .stats-meta {
   display: inline-flex;
   align-items: center;
