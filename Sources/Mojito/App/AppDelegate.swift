@@ -56,6 +56,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         // Anonymous, consent-gated daily stats. Self-gates — a no-op until the
         // user has seen the notice and left it enabled.
         TelemetryUploader.shared.uploadIfDue()
+        scheduleTelemetryFlush()
 
         menuBar.install(
             engine: engine,
@@ -135,6 +136,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
     func applicationWillTerminate(_ notification: Notification) {
         os_log("applicationWillTerminate", log: log, type: .info)
+        // Best-effort send of this session's tail. The async POST may not
+        // finish before the process exits, but the timer/day-change/wake
+        // paths below are what actually keeps long-lived installs current.
+        TelemetryUploader.shared.uploadIfDue()
+    }
+
+    /// `uploadIfDue()` used to fire only at launch, so a menu-bar app the user
+    /// never quits would sit on a full day of pending deltas until its next
+    /// relaunch — starving the public stats. Re-attempt on an hourly timer, at
+    /// day rollover, and on wake. The uploader's once-per-UTC-day gate makes
+    /// every extra call a cheap no-op, so this only ever sends real work once.
+    private func scheduleTelemetryFlush() {
+        Timer.publish(every: 3600, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in TelemetryUploader.shared.uploadIfDue() }
+            .store(in: &observers)
+
+        NotificationCenter.default.publisher(for: .NSCalendarDayChanged)
+            .receive(on: RunLoop.main)
+            .sink { _ in TelemetryUploader.shared.uploadIfDue() }
+            .store(in: &observers)
+
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didWakeNotification)
+            .receive(on: RunLoop.main)
+            .sink { _ in TelemetryUploader.shared.uploadIfDue() }
+            .store(in: &observers)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
