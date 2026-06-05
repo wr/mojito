@@ -159,7 +159,16 @@ Wiring lives in `project.yml`: `options.preGenCommand` runs the script before xc
 
 ### What's persisted
 
-UserDefaults only. Keys live in `PrefsKey`. Notably: `usageCounts` (hexcode → int) drives the fuzzy match's frequency boost; `pausedUntil` (timeIntervalSince1970) is read at launch by `AppDelegate` to restore pause state; `firstLaunchDate` is stamped once on the very first launch and shown as "User since" in About. Nothing else is written or transmitted (no telemetry, no analytics).
+UserDefaults only. Keys live in `PrefsKey`. Notably: `usageCounts` (hexcode → int) drives the fuzzy match's frequency boost; `pausedUntil` (timeIntervalSince1970) is read at launch by `AppDelegate` to restore pause state; `firstLaunchDate` is stamped once on the very first launch and shown as "User since" in About. The only thing transmitted off-device is the anonymous daily stats aggregate (see Telemetry below) — opt-out, consent-gated, counts only, no identifiers.
+
+### Telemetry / public stats
+
+Mojito sends one anonymous usage aggregate per install per UTC day — opt-out (default on), gated behind a one-time consent notice (`TelemetryConsent`, Homebrew-style). The payload is counts only: no identifier, no timestamp, no free text (GIF search terms are dropped on-device); the server discards the IP. It's all public at mojito.wells.ee/stats.
+
+- `Sources/Mojito/Telemetry/` — `TelemetryStore` accumulates the daily deltas in UserDefaults (the `mojito.telemetry.pending.*` keys); `TelemetryUploader` batches them once a day at launch (`AppDelegate.uploadIfDue()`), POSTs to the Worker, and clears the deltas on a 2xx. Recording calls sit on the insert path (`Engine.recordUsage` → emoji/symbol, plus gif/emoticon/egg hooks) and short-circuit when telemetry is off.
+- **Debug builds never upload** (`#if DEBUG` → `uploadsEnabled = false`). Recording still happens locally, but the send is suppressed — so your own dev-build usage never appears in the public stats. Don't chase a "my inserts aren't counted" ghost: it's by design.
+- `stats-worker/` — the Cloudflare Worker (`POST /ingest`, `GET /api/stats.json`) backed by a D1 database of per-UTC-day rollups (`stats-worker/schema.sql`). Published output is pure marginals. The stats *page* (`stats.html` + `stats-live.js`) lives in the **`mojito-site`** repo, not here.
+- Metric caveat: the schema stores **no identifiers**, so the page's "Active users" is really active *person-days* summed over the 30-day window (one ping per install per day) — for launch-at-login users that overcounts the real headcount by up to ~30×; it is not a unique-user count. The community discovery counter only moves on genuine (non-achievement) discoveries.
 
 ### Onboarding / Settings windows
 
@@ -179,7 +188,9 @@ Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose(
 - `Sources/Mojito/Exclusions/` — apps / URL patterns Mojito stays out of
 - `Sources/Mojito/MenuBar/` — `NSStatusItem` controller
 - `Sources/Mojito/Onboarding/`, `Sources/Mojito/Settings/` — SwiftUI window content
+- `Sources/Mojito/Telemetry/` — anonymous daily-aggregate store, uploader, consent gate (see Telemetry above)
 - `Sources/Mojito/Util/PrefsKey.swift` — every UserDefaults key in one place
+- `stats-worker/` — Cloudflare Worker + D1 schema for the public usage stats (ingest + `/api/stats.json`); the front-end page lives in the `mojito-site` repo
 - `scripts/` — `release.sh`, `setup-dev-signing.sh`, `run-tests.sh`, `build_emoji_db.py`, `build_egg_strings.py`, `build_giphy_key.py`, `update_appcast.py`, `sync-localizable.sh`, `translate-localizable.py`, `run-locale.sh`
 - `bin/` — vendored `generate_keys` and `sign_update` from Sparkle (committed so release doesn't depend on DerivedData being intact)
 - `Resources/` — Info.plist, entitlements, emoji.json, AppIcon.icns, easter-egg assets
