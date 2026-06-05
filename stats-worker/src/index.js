@@ -198,8 +198,8 @@ async function stats(env) {
       emoticon: totalsMap.emoticon || 0,
     },
     communityDiscoveries: eggs.results[0]?.value || 0,
-    topEmoji: emoji.results.map((r) => ({ hexcode: r.hexcode, count: r.c }))
-      .filter((r) => r.count >= 5), // light long-tail trim (cosmetic, not privacy)
+    // Top inserted emoji, capped — no count floor, so it never blanks at low volume.
+    topEmoji: emoji.results.map((r) => ({ hexcode: r.hexcode, count: r.c })).slice(0, 12),
     os: os, arch: arch, lang: lang, appVersion: app, skinTone: skin,
     features: featureList,
   };
