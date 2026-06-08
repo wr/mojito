@@ -11,8 +11,12 @@ enum BrowserURL {
 
         let app = AXUIElementCreateApplication(pid)
 
-        // Safari exposes AXURL on the web area.
-        if let url = focusedWebAreaURL(in: app) { return url }
+        // Most browsers expose the page URL as an `AXURL` attribute somewhere
+        // under the focused window — Safari/WebKit on the `AXWebArea`, Chrome
+        // and other Chromium browsers on a top-level `AXGroup`. Walking the
+        // tree DFS for the first element that carries `AXURL` finds the
+        // outermost page URL before any nested iframe.
+        if let url = focusedURL(in: app) { return url }
 
         if let raw = focusedAddressBarValue(in: app), let url = normalizedURL(from: raw) {
             return url
@@ -76,10 +80,12 @@ enum BrowserURL {
         "org.torproject.torbrowser",                // Tor Browser
     ]
 
-    private static func focusedWebAreaURL(in app: AXUIElement) -> URL? {
+    private static func focusedURL(in app: AXUIElement) -> URL? {
         guard let window = focusedWindow(in: app) else { return nil }
-        guard let webArea = findElement(role: "AXWebArea", under: window, depth: 6) else { return nil }
-        guard let value = copyAttribute(webArea, attribute: "AXURL") else { return nil }
+        guard let element = findElement(under: window, depth: 10, match: { el in
+            copyAttribute(el, attribute: "AXURL") != nil
+        }) else { return nil }
+        guard let value = copyAttribute(element, attribute: "AXURL") else { return nil }
         if let url = value as? URL { return url }
         if let str = value as? String { return URL(string: str) }
         return nil
@@ -87,7 +93,7 @@ enum BrowserURL {
 
     private static func focusedAddressBarValue(in app: AXUIElement) -> String? {
         guard let window = focusedWindow(in: app) else { return nil }
-        guard let toolbar = findElement(role: "AXToolbar", under: window, depth: 4) else { return nil }
+        guard let toolbar = findElement(role: "AXToolbar", under: window, depth: 10) else { return nil }
         guard let field = findAddressField(under: toolbar) else { return nil }
         return copyAttribute(field, attribute: kAXValueAttribute as String) as? String
     }
