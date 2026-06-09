@@ -66,7 +66,11 @@ final class FocusedElementCache {
             kAXFocusedUIElementAttribute as CFString,
             &ref
         )
-        element = status == .success ? (ref as! AXUIElement) : nil
+        if status == .success, let ref, CFGetTypeID(ref) == AXUIElementGetTypeID() {
+            element = (ref as! AXUIElement)
+        } else {
+            element = nil
+        }
         focusedPID = pid
         DebugRecorder.record(.focus, "app", ["bundleID": app.bundleIdentifier ?? "—"])
         onFocusChange?()

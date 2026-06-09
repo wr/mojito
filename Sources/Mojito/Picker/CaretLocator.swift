@@ -23,7 +23,8 @@ enum CaretLocator {
             focused = cached
         } else {
             let system = AXUIElementCreateSystemWide()
-            guard let focusedRef = copyAttribute(system, key: kAXFocusedUIElementAttribute) else { return nil }
+            guard let focusedRef = copyAttribute(system, key: kAXFocusedUIElementAttribute),
+                  CFGetTypeID(focusedRef) == AXUIElementGetTypeID() else { return nil }
             focused = focusedRef as! AXUIElement
         }
         let elementFrame = elementFrame(of: focused)

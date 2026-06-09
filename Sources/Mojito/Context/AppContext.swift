@@ -93,7 +93,8 @@ enum AppContextDetector {
         let system = AXUIElementCreateSystemWide()
         var ref: AnyObject?
         guard AXUIElementCopyAttributeValue(system, kAXFocusedUIElementAttribute as CFString, &ref) == .success,
-              let element = ref else { return nil }
+              let element = ref,
+              CFGetTypeID(element) == AXUIElementGetTypeID() else { return nil }
         return (element as! AXUIElement)
     }
 

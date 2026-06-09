@@ -222,19 +222,23 @@ struct TriggerStateMachine {
     ]
 
     mutating func handle(_ input: TriggerInput) -> TriggerOutput {
+        // One timestamp per keystroke — every window check and stamp in
+        // this pass measures against the same instant.
+        let now = Date()
+
         // Drop a stale ambient word after too long a pause (covers
         // click-to-move-caret followed by delayed typing). A deferred
         // fire is dropped without firing — the user moved on, and we'd
         // have no way to emit the held action without also dropping
         // whatever input arrived next.
         if let last = lastIdleKeystrokeAt,
-           Date().timeIntervalSince(last) > Self.emoticonMaxIdle {
+           now.timeIntervalSince(last) > Self.emoticonMaxIdle {
             idleWord = ""
             lastIdleKeystrokeAt = nil
             pendingImmediateFire = nil
         }
 
-        let output = process(input)
+        let output = process(input, now: now)
         if case .idle = state {
             switch input {
             case .nameChar: lastWasWordChar = true
@@ -246,7 +250,7 @@ struct TriggerStateMachine {
             // measured against the most recent one, not the opening colon.
             switch input {
             case .colon, .nameChar, .backspace:
-                lastCaptureKeystrokeAt = Date()
+                lastCaptureKeystrokeAt = now
             default:
                 break
             }
@@ -254,7 +258,7 @@ struct TriggerStateMachine {
         return output
     }
 
-    private mutating func process(_ input: TriggerInput) -> TriggerOutput {
+    private mutating func process(_ input: TriggerInput, now: Date) -> TriggerOutput {
         // While the GIF picker is showing, the state machine owns the
         // keyboard — namechars + arrows + enter + esc + backspace are
         // forwarded to the picker view model and consumed so they don't
@@ -274,7 +278,6 @@ struct TriggerStateMachine {
         // matter what the capture state is. Runs before everything else
         // so it overrides the normal colon flow.
         if case .colon = input {
-            let now = Date()
             recentColonTimes.append(now)
             recentColonTimes = recentColonTimes.filter {
                 now.timeIntervalSince($0) <= Self.gifTripleColonWindow
@@ -320,13 +323,8 @@ struct TriggerStateMachine {
 
         switch (state, input) {
 
-        // `.gifSearching` / `.browsing` are handled by the early-return
-        // guards above; these branches are unreachable but required for
-        // exhaustiveness.
-        case (.gifSearching, _):
-            return .passthrough
-
-        case (.browsing, _):
+        // Unreachable — handled by the early returns above; kept for exhaustiveness.
+        case (.gifSearching, _), (.browsing, _):
             return .passthrough
 
         // MARK: Cmd+Z — must come before the `(.idle, _)` catch-all below.
@@ -352,7 +350,7 @@ struct TriggerStateMachine {
             // behind.
             if AmbientEmoticonTable.colonContinuationPrefixes.contains(idleWord) {
                 idleWord += ":"
-                lastIdleKeystrokeAt = Date()
+                lastIdleKeystrokeAt = now
                 if let fire = checkImmediateAmbientFire() {
                     return fire
                 }
@@ -379,7 +377,7 @@ struct TriggerStateMachine {
         case (.idle, .backspace):
             if !idleWord.isEmpty {
                 idleWord = String(idleWord.dropLast())
-                lastIdleKeystrokeAt = idleWord.isEmpty ? nil : Date()
+                lastIdleKeystrokeAt = idleWord.isEmpty ? nil : now
             }
             pendingImmediateFire = nil
             return .passthrough
@@ -389,7 +387,7 @@ struct TriggerStateMachine {
                 return fire
             }
             idleWord += String(c)
-            lastIdleKeystrokeAt = Date()
+            lastIdleKeystrokeAt = now
             if let fire = checkImmediateAmbientFire() {
                 return fire
             }
@@ -420,7 +418,7 @@ struct TriggerStateMachine {
             // Non-terminator punctuation (`<`, `>`, `)`, `(`, `_`, …) is
             // part of an emoticon body. Append and keep accumulating.
             idleWord += String(c)
-            lastIdleKeystrokeAt = Date()
+            lastIdleKeystrokeAt = now
             if let fire = checkImmediateAmbientFire() {
                 return fire
             }
@@ -602,7 +600,7 @@ struct TriggerStateMachine {
             }
             // Long pause before terminator → user was mid-sentence; this
             // isn't an emoticon attempt.
-            if let lastAt, Date().timeIntervalSince(lastAt) > Self.emoticonMaxIdle {
+            if let lastAt, now.timeIntervalSince(lastAt) > Self.emoticonMaxIdle {
                 return TriggerOutput(action: .abortEmoticon, consumesKey: false)
             }
             return TriggerOutput(action: .checkEmoticon(query: q, terminator: c), consumesKey: false)
