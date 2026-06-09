@@ -3,17 +3,8 @@ import AVFoundation
 /// Two-blast train whistle — perfect-fifth (G4 + D5) triangle chord, no sample.
 @MainActor
 enum ChooChooSound {
-    private static let engine = AVAudioEngine()
-    private static let player = AVAudioPlayerNode()
-    private static var started = false
-
-    private static let sampleRate: Double = 44_100
-    private static let format = AVAudioFormat(
-        commonFormat: .pcmFormatFloat32,
-        sampleRate: sampleRate,
-        channels: 1,
-        interleaved: false
-    )!
+    private static let player = SynthPlayer()
+    private static let sampleRate = SynthRenderer.sampleRate
 
     /// Two short blasts. Second is held a touch longer so it lands.
     private static let blasts: [(duration: Double, gap: Double)] = [
@@ -26,27 +17,15 @@ enum ChooChooSound {
 
     static func play() {
         guard let buffer = renderBuffer() else { return }
-        ensureRunning()
-        player.scheduleBuffer(buffer, at: nil, options: [.interrupts], completionHandler: nil)
-        if !player.isPlaying { player.play() }
+        player.play(buffer)
     }
 
-    private static func ensureRunning() {
-        guard !started else { return }
-        engine.attach(player)
-        engine.connect(player, to: engine.mainMixerNode, format: format)
-        do {
-            try engine.start()
-            started = true
-        } catch {
-            // Silent fall-through; the visual still plays.
-        }
-    }
-
+    /// Multi-voice chord with a long per-blast release — bespoke enough to
+    /// stay out of the single-voice `SynthRenderer.buffer` path.
     private static func renderBuffer() -> AVAudioPCMBuffer? {
         let totalDuration = blasts.reduce(0) { $0 + $1.duration + $1.gap }
         let frameCount = AVAudioFrameCount(totalDuration * sampleRate)
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount),
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: SynthRenderer.monoFormat, frameCapacity: frameCount),
               let channel = buffer.floatChannelData?[0] else { return nil }
         buffer.frameLength = frameCount
         for i in 0..<Int(frameCount) { channel[i] = 0 }

@@ -11,29 +11,23 @@ enum BlueScreen {
     private static var startupSound: NSSound?
 
     static func start() {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
         startupSound?.stop()
         startupSound = nil
 
-        let panel = NSPanel(
-            contentRect: frame,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
+        let panel = ParticlePanel.makeFullScreen(
+            frame: frame,
+            interactive: true,
+            backgroundColor: NSColor(red: 0.0, green: 0.0, blue: 0.66, alpha: 1)
         )
-        panel.isOpaque = true
-        panel.backgroundColor = NSColor(red: 0.0, green: 0.0, blue: 0.66, alpha: 1)
-        panel.hasShadow = false
-        panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.statusWindow)))
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
 
         let dismiss = {
             MainActor.assumeIsolated {
                 panel.orderOut(nil)
+                panel.contentView = nil
                 startupSound?.stop()
                 startupSound = nil
                 unregister?()

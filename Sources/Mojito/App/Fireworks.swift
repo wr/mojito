@@ -11,8 +11,7 @@ enum Fireworks {
     private static var activeWindow: NSWindow?
 
     static func start(burstCount: Int = 14, duration: TimeInterval = 6.0) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -113,6 +112,7 @@ enum Fireworks {
         let dismiss = {
             MainActor.assumeIsolated {
                 panel.orderOut(nil)
+                panel.contentView = nil
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }
@@ -362,41 +362,26 @@ private struct FireworksView: View {
 }
 
 /// Synthesized "pew" pool. AVAudioPlayer only plays one sound at a time;
-/// a small ring buffer per frequency keeps overlapping bursts from
-/// cutting each other off and avoids per-pew construction cost.
+/// a small pool per frequency keeps overlapping bursts from cutting each
+/// other off and avoids per-pew construction cost.
 @MainActor
 private enum FireworksSounds {
-    private static var pool: [Double: [AVAudioPlayer]] = [:]
-    private static let poolSize = 3
+    private static var pools: [Double: AudioPlayerPool] = [:]
 
     static func pew(frequency: Double) {
-        guard let player = nextPlayer(for: frequency) else { return }
-        player.stop()
-        player.currentTime = 0
-        player.play()
-    }
-
-    private static func nextPlayer(for frequency: Double) -> AVAudioPlayer? {
-        if let players = pool[frequency] {
-            // Round-robin: pick the most-likely-idle player.
-            return players.min(by: { ($0.isPlaying ? 1 : 0, $0.currentTime) < ($1.isPlaying ? 1 : 0, $1.currentTime) })
+        let pool: AudioPlayerPool
+        if let existing = pools[frequency] {
+            pool = existing
+        } else {
+            pool = AudioPlayerPool(data: makePewWave(frequency: frequency), size: 3, volume: 0.25)
+            pools[frequency] = pool
         }
-        let data = makePewWave(frequency: frequency)
-        var players: [AVAudioPlayer] = []
-        for _ in 0..<poolSize {
-            if let p = try? AVAudioPlayer(data: data) {
-                p.volume = 0.25
-                p.prepareToPlay()
-                players.append(p)
-            }
-        }
-        pool[frequency] = players
-        return players.first
+        pool.play()
     }
 
     /// ~0.22s: fast downward freq sweep, sharp attack, exponential decay.
     private static func makePewWave(frequency: Double) -> Data {
-        let sampleRate: Double = 44100
+        let sampleRate = SynthRenderer.sampleRate
         let duration: Double = 0.22
         let numSamples = Int(duration * sampleRate)
         let amplitude = Double(Int16.max) * 0.55
@@ -418,36 +403,6 @@ private enum FireworksSounds {
             let decay = exp(-t * 14)
             samples.append(Int16(amplitude * mixed * attack * decay))
         }
-
-        let dataSize = samples.count * MemoryLayout<Int16>.size
-        var data = Data()
-        func writeUInt32LE(_ value: UInt32) {
-            var v = value.littleEndian
-            withUnsafeBytes(of: &v) { data.append(contentsOf: $0) }
-        }
-        func writeUInt16LE(_ value: UInt16) {
-            var v = value.littleEndian
-            withUnsafeBytes(of: &v) { data.append(contentsOf: $0) }
-        }
-        data.append(contentsOf: "RIFF".utf8)
-        writeUInt32LE(UInt32(36 + dataSize))
-        data.append(contentsOf: "WAVE".utf8)
-        data.append(contentsOf: "fmt ".utf8)
-        writeUInt32LE(16)
-        writeUInt16LE(1)
-        writeUInt16LE(1)
-        writeUInt32LE(UInt32(sampleRate))
-        writeUInt32LE(UInt32(sampleRate) * 2)
-        writeUInt16LE(2)
-        writeUInt16LE(16)
-        data.append(contentsOf: "data".utf8)
-        writeUInt32LE(UInt32(dataSize))
-        samples.withUnsafeBufferPointer { ptr in
-            data.append(UnsafeBufferPointer(
-                start: UnsafeRawPointer(ptr.baseAddress!).assumingMemoryBound(to: UInt8.self),
-                count: dataSize
-            ))
-        }
-        return data
+        return SynthRenderer.monoWaveData(samples: samples)
     }
 }

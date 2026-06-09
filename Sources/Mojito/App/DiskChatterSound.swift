@@ -7,20 +7,12 @@ import AVFoundation
 /// free-running loop.
 @MainActor
 enum DiskChatterSound {
-    private static let engine = AVAudioEngine()
-    private static let player = AVAudioPlayerNode()
-    private static var started = false
+    private static let player = SynthPlayer()
     /// Gates playback so ticks queued by a still-running view stop the instant
     /// the effect is dismissed.
     private static var enabled = false
 
-    private static let sampleRate: Double = 44_100
-    private static let format = AVAudioFormat(
-        commonFormat: .pcmFormatFloat32,
-        sampleRate: sampleRate,
-        channels: 1,
-        interleaved: false
-    )!
+    private static let sampleRate = SynthRenderer.sampleRate
 
     private static var ticks: [AVAudioPCMBuffer] = []
     private static var chatter: AVAudioPCMBuffer?
@@ -29,46 +21,25 @@ enum DiskChatterSound {
     /// Stand up the engine so subsequent `playTick`/`playRun` are instant.
     static func start() {
         ensureBuffers()
-        ensureRunning()
+        player.warmUp()
         enabled = true
-        guard started, !player.isPlaying else { return }
-        player.play()
     }
 
     static func stop() {
         enabled = false
-        guard started else { return }
         player.stop()
     }
 
     /// One head tick — call once per small consolidated chunk.
     static func playTick() {
-        guard enabled else { return }
-        ensureRunning()
-        guard started, let buffer = ticks.randomElement() else { return }
-        player.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)
-        if !player.isPlaying { player.play() }
+        guard enabled, let buffer = ticks.randomElement() else { return }
+        player.enqueue(buffer)
     }
 
     /// A rapid run — call for a big relocation band.
     static func playRun() {
-        guard enabled else { return }
-        ensureRunning()
-        guard started, let buffer = (Bool.random() ? chirp : chatter) else { return }
-        player.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)
-        if !player.isPlaying { player.play() }
-    }
-
-    private static func ensureRunning() {
-        guard !started else { return }
-        engine.attach(player)
-        engine.connect(player, to: engine.mainMixerNode, format: format)
-        do {
-            try engine.start()
-            started = true
-        } catch {
-            // Silent fall-through; the visual still plays.
-        }
+        guard enabled, let buffer = (Bool.random() ? chirp : chatter) else { return }
+        player.enqueue(buffer)
     }
 
     // MARK: - Synthesis
@@ -99,7 +70,7 @@ enum DiskChatterSound {
     private static func makeClick(duration: Double, lpCutoff: Double, noiseDecay: Double, bodyFreq: Double, bodyDecay: Double, amp: Float) -> AVAudioPCMBuffer? {
         let frames = Int(duration * sampleRate)
         guard frames > 0,
-              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frames)),
+              let buffer = AVAudioPCMBuffer(pcmFormat: SynthRenderer.monoFormat, frameCapacity: AVAudioFrameCount(frames)),
               let channel = buffer.floatChannelData?[0] else { return nil }
         buffer.frameLength = AVAudioFrameCount(frames)
 
@@ -130,7 +101,7 @@ enum DiskChatterSound {
         let total = stride * Double(clicks)
         let frames = Int(total * sampleRate)
         guard frames > 0,
-              let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frames)),
+              let buffer = AVAudioPCMBuffer(pcmFormat: SynthRenderer.monoFormat, frameCapacity: AVAudioFrameCount(frames)),
               let channel = buffer.floatChannelData?[0] else { return nil }
         buffer.frameLength = AVAudioFrameCount(frames)
         for i in 0..<frames { channel[i] = 0 }

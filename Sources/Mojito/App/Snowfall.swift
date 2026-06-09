@@ -9,8 +9,7 @@ enum Snowfall {
     private static var activeWindow: NSWindow?
 
     static func start(emitFor emit: TimeInterval = 8.0, particleLifetime: TimeInterval = 11.0) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil

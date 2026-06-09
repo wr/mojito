@@ -8,8 +8,7 @@ enum SolitaireWin {
     private static var activeWindow: NSWindow?
 
     static func start(duration: TimeInterval = 9.0) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -49,6 +48,7 @@ enum SolitaireWin {
         let dismiss = {
             MainActor.assumeIsolated {
                 panel.orderOut(nil)
+                panel.contentView = nil
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

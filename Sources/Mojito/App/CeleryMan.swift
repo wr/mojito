@@ -27,7 +27,7 @@ enum CeleryMan {
         }
         didSwap = false
 
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
+        guard let screen = ParticlePanel.primaryScreen() else { return }
         let visible = screen.visibleFrame
 
         // 320pt baseline; landscape × 0.91, portrait × 1.56, Paul under both.
@@ -149,6 +149,9 @@ enum CeleryMan {
                 if let obs = observers.removeValue(forKey: cid) {
                     NotificationCenter.default.removeObserver(obs)
                 }
+                // Drop the content view so video playback / typewriter
+                // teardown happens now, not at some later dealloc.
+                closed.contentView = nil
                 if windows.remove(closed) != nil {
                     DockIconManager.windowDidClose()
                 }
@@ -298,7 +301,7 @@ private final class PaulsClickedModel: ObservableObject {
 private struct PaulsComputerContents: View {
     @ObservedObject var model: PaulsClickedModel
     @State private var typedCount: Int = 0
-    @State private var typeTimer: Timer?
+    @State private var typeTicker = AnimationTicker()
 
     private let engagedText = "4d3d3d3 Engaged"
 
@@ -343,8 +346,7 @@ private struct PaulsComputerContents: View {
             if isClicked { startTyping() }
         }
         .onDisappear {
-            typeTimer?.invalidate()
-            typeTimer = nil
+            typeTicker.stop()
         }
     }
 
@@ -358,16 +360,13 @@ private struct PaulsComputerContents: View {
 
     private func startTyping() {
         typedCount = 0
-        typeTimer?.invalidate()
         let total = engagedText.count
-        typeTimer = Timer.scheduledTimer(withTimeInterval: 0.08, repeats: true) { t in
-            DispatchQueue.main.async {
-                if typedCount >= total {
-                    t.invalidate()
-                    return
-                }
-                typedCount += 1
+        typeTicker.start(interval: 0.08) { _ in
+            if typedCount >= total {
+                typeTicker.stop()
+                return
             }
+            typedCount += 1
         }
     }
 }

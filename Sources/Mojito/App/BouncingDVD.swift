@@ -10,26 +10,14 @@ enum BouncingDVD {
     private static var activeWindow: NSWindow?
 
     static func start() {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
 
-        // No auto-dismiss timer — runs until the user bails.
-        let panel = NSPanel(
-            contentRect: frame,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
-        )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false
-        // Accept clicks so the SwiftUI tap handler fires.
-        panel.ignoresMouseEvents = false
-        panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.statusWindow)))
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
+        // No auto-dismiss timer — runs until the user bails. Interactive
+        // so the SwiftUI tap handler fires.
+        let panel = ParticlePanel.makeFullScreen(frame: frame, interactive: true)
 
         var cancelToken: (() -> Void)?
         let dismiss = {

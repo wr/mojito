@@ -60,13 +60,15 @@ enum Trogdor {
             forName: NSWindow.willCloseNotification,
             object: w,
             queue: .main
-        ) { _ in
+        ) { note in
             MainActor.assumeIsolated {
                 if let obs = closeObserver {
                     NotificationCenter.default.removeObserver(obs)
                     closeObserver = nil
                 }
                 cancelToken?(); cancelToken = nil
+                // Drop the web view so page media stops now.
+                (note.object as? NSWindow)?.contentView = nil
                 window = nil
                 DockIconManager.windowDidClose()
             }

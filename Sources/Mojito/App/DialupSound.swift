@@ -80,7 +80,7 @@ enum DialupSound {
             forName: NSWindow.willCloseNotification,
             object: w,
             queue: .main
-        ) { _ in
+        ) { note in
             MainActor.assumeIsolated {
                 if let obs = closeObserver {
                     NotificationCenter.default.removeObserver(obs)
@@ -90,6 +90,8 @@ enum DialupSound {
                 dismissWorkItem = nil
                 player?.stop()
                 player = nil
+                // Drop the hosting view so its TimelineView stops ticking now.
+                (note.object as? NSWindow)?.contentView = nil
                 window = nil
                 DockIconManager.windowDidClose()
             }

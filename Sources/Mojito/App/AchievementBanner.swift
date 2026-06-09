@@ -34,7 +34,7 @@ enum AchievementBanner {
     private static func showNext() {
         guard !queue.isEmpty else { return }
         let egg = queue.removeFirst()
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
+        guard let screen = ParticlePanel.primaryScreen() else { return }
 
         let visibleFrame = screen.visibleFrame
         let restingFrame = NSRect(
@@ -44,22 +44,15 @@ enum AchievementBanner {
             height: panelSize.height
         )
 
-        let panel = NSPanel(
-            contentRect: restingFrame,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
+        // Interactive: only the pill takes hits (it sets its own content
+        // shape); the transparent margin reports no SwiftUI hit, so clicks
+        // there fall through to whatever is underneath. hasShadow is off in
+        // the factory — SwiftUI draws its own shadow under the capsule.
+        let panel = ParticlePanel.makeFullScreen(
+            frame: restingFrame,
+            interactive: true,
+            level: NSWindow.Level(Int(CGWindowLevelForKey(.popUpMenuWindow)))
         )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false  // SwiftUI draws its own shadow under the capsule
-        panel.alphaValue = 1.0
-        // Clickable: only the pill takes hits (it sets its own content shape);
-        // the transparent margin reports no SwiftUI hit, so clicks there fall
-        // through to whatever is underneath.
-        panel.ignoresMouseEvents = false
-        panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.popUpMenuWindow)))
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
 
         let controller = BannerController()
         let host = NSHostingView(rootView: BannerView(egg: egg, controller: controller, onTap: {

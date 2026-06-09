@@ -8,6 +8,7 @@ import SwiftUI
 enum TicTacToeGame {
     private static var window: NSWindow?
     private static var closeObserver: NSObjectProtocol?
+    private static var cancelToken: (() -> Void)?
 
     static func dismiss() {
         window?.close()
@@ -22,7 +23,7 @@ enum TicTacToeGame {
 
         // Width fits the widest monologue line at 22pt mono + tracking 2.
         let size = NSSize(width: 640, height: 640)
-        let w = NSWindow(
+        let w = TicTacToeWindow(
             contentRect: NSRect(origin: .zero, size: size),
             styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
             backing: .buffered,
@@ -48,19 +49,36 @@ enum TicTacToeGame {
             forName: NSWindow.willCloseNotification,
             object: w,
             queue: .main
-        ) { _ in
+        ) { note in
             MainActor.assumeIsolated {
                 if let obs = closeObserver {
                     NotificationCenter.default.removeObserver(obs)
                     closeObserver = nil
                 }
+                // Drop the hosting view so the SwiftUI tree's onDisappear
+                // fires now — that's what stops the typewriter and
+                // terminates the narration process.
+                (note.object as? NSWindow)?.contentView = nil
+                cancelToken?(); cancelToken = nil
                 window = nil
                 DockIconManager.windowDidClose()
             }
         }
 
+        cancelToken = EffectDismisser.register {
+            MainActor.assumeIsolated { window?.close() }
+        }
+
         w.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
+/// Routes Esc (`cancelOperation`) to close — covers the case where the
+/// global event tap isn't running.
+private final class TicTacToeWindow: NSWindow {
+    override func cancelOperation(_ sender: Any?) {
+        close()
     }
 }
 
@@ -78,7 +96,7 @@ private struct TicTacToeView: View {
     /// Hides the board and shows the typewriter monologue.
     @State private var showMonologue = false
     @State private var typedCount: Int = 0
-    @State private var typeTimer: Timer?
+    @State private var typeTicker = AnimationTicker()
     @State private var sayTask: Process?
     /// Set at each `\n\n` so the on-screen pause matches the narration's
     /// `[[slnc …]]` beat.
@@ -212,8 +230,7 @@ private struct TicTacToeView: View {
             startTyping()
         }
         .onDisappear {
-            typeTimer?.invalidate()
-            typeTimer = nil
+            typeTicker.stop()
             sayTask?.terminate()
             sayTask = nil
         }
@@ -231,33 +248,30 @@ private struct TicTacToeView: View {
     private func startTyping() {
         typedCount = 0
         typeResumeAt = nil
-        typeTimer?.invalidate()
         startNarration()
         let chars = Array(monologue)
         // 0.085s/char keeps the typewriter roughly in sync with Fred at
         // his default ~175 wpm pace; the 700ms pause below mirrors
         // `[[slnc 700]]` so the mid-monologue beat lines up.
-        typeTimer = Timer.scheduledTimer(withTimeInterval: 0.085, repeats: true) { t in
-            DispatchQueue.main.async {
-                if let resumeAt = typeResumeAt, Date() < resumeAt {
-                    return
+        typeTicker.start(interval: 0.085) { _ in
+            if let resumeAt = typeResumeAt, Date() < resumeAt {
+                return
+            }
+            if typedCount >= chars.count {
+                typeTicker.stop()
+                // Backup dismiss for when the voice isn't installed;
+                // otherwise the narration delegate dismisses first.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    TicTacToeGame.dismiss()
                 }
-                if typedCount >= chars.count {
-                    t.invalidate()
-                    // Backup dismiss for when the voice isn't installed;
-                    // otherwise the narration delegate dismisses first.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                        TicTacToeGame.dismiss()
-                    }
-                    return
-                }
-                typedCount += 1
-                // Hold 700ms at a `\n\n` to match `[[slnc 700]]`.
-                if typedCount >= 2,
-                   chars[typedCount - 1] == "\n",
-                   chars[typedCount - 2] == "\n" {
-                    typeResumeAt = Date().addingTimeInterval(0.7)
-                }
+                return
+            }
+            typedCount += 1
+            // Hold 700ms at a `\n\n` to match `[[slnc 700]]`.
+            if typedCount >= 2,
+               chars[typedCount - 1] == "\n",
+               chars[typedCount - 2] == "\n" {
+                typeResumeAt = Date().addingTimeInterval(0.7)
             }
         }
     }
@@ -412,31 +426,18 @@ private struct TicTacToeView: View {
 /// `beep` high for O. Saves bundling two 80ms WAVs.
 @MainActor
 enum TicTacToeSounds {
-    private static let xPlayer: AVAudioPlayer? = makePlayer(frequency: 280, duration: 0.08)
-    private static let oPlayer: AVAudioPlayer? = makePlayer(frequency: 560, duration: 0.08)
+    private static let xPool = AudioPlayerPool(
+        data: makeWaveData(frequency: 280, duration: 0.08), size: 1, volume: 0.35)
+    private static let oPool = AudioPlayerPool(
+        data: makeWaveData(frequency: 560, duration: 0.08), size: 1, volume: 0.35)
 
-    static func boop() { trigger(xPlayer) }
-    static func beep() { trigger(oPlayer) }
-
-    private static func trigger(_ p: AVAudioPlayer?) {
-        guard let p = p else { return }
-        p.stop()
-        p.currentTime = 0
-        p.play()
-    }
-
-    private static func makePlayer(frequency: Double, duration: Double) -> AVAudioPlayer? {
-        let data = makeWaveData(frequency: frequency, duration: duration)
-        guard let p = try? AVAudioPlayer(data: data) else { return nil }
-        p.volume = 0.35
-        p.prepareToPlay()
-        return p
-    }
+    static func boop() { xPool.play() }
+    static func beep() { oPool.play() }
 
     /// Mono 16-bit PCM WAV: `frequency` Hz sine, triangular envelope
     /// to avoid attack/release pops.
     private static func makeWaveData(frequency: Double, duration: Double) -> Data {
-        let sampleRate: Double = 44100
+        let sampleRate = SynthRenderer.sampleRate
         let numSamples = Int(duration * sampleRate)
         let fadeSamples = min(numSamples / 8, Int(0.005 * sampleRate))
         let amplitude = Double(Int16.max) * 0.6
@@ -454,39 +455,7 @@ enum TicTacToeSounds {
             }
             samples.append(Int16(amplitude * sine * env))
         }
-
-        let dataSize = samples.count * MemoryLayout<Int16>.size
-        var data = Data()
-
-        func writeUInt32LE(_ value: UInt32) {
-            var v = value.littleEndian
-            withUnsafeBytes(of: &v) { data.append(contentsOf: $0) }
-        }
-        func writeUInt16LE(_ value: UInt16) {
-            var v = value.littleEndian
-            withUnsafeBytes(of: &v) { data.append(contentsOf: $0) }
-        }
-
-        data.append(contentsOf: "RIFF".utf8)
-        writeUInt32LE(UInt32(36 + dataSize))
-        data.append(contentsOf: "WAVE".utf8)
-        data.append(contentsOf: "fmt ".utf8)
-        writeUInt32LE(16)
-        writeUInt16LE(1)               // PCM
-        writeUInt16LE(1)               // mono
-        writeUInt32LE(UInt32(sampleRate))
-        writeUInt32LE(UInt32(sampleRate) * 2)
-        writeUInt16LE(2)               // block align (bytes/sample × channels)
-        writeUInt16LE(16)              // bits per sample
-        data.append(contentsOf: "data".utf8)
-        writeUInt32LE(UInt32(dataSize))
-        samples.withUnsafeBufferPointer { ptr in
-            data.append(UnsafeBufferPointer(
-                start: UnsafeRawPointer(ptr.baseAddress!).assumingMemoryBound(to: UInt8.self),
-                count: dataSize
-            ))
-        }
-        return data
+        return SynthRenderer.monoWaveData(samples: samples)
     }
 }
 

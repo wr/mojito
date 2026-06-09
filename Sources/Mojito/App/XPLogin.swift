@@ -9,30 +9,21 @@ enum XPLogin {
     private static var player: NSSound?
 
     static func start() {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
         player?.stop()
         player = nil
 
-        let panel = NSPanel(
-            contentRect: frame,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
-        )
-        panel.isOpaque = true
-        panel.backgroundColor = .black
-        panel.hasShadow = false
-        panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.statusWindow)))
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
+        // Interactive: the user tile takes clicks/hover.
+        let panel = ParticlePanel.makeFullScreen(frame: frame, interactive: true, backgroundColor: .black)
 
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
                 panel.orderOut(nil)
+                panel.contentView = nil
                 player?.stop()
                 player = nil
                 cancelToken?(); cancelToken = nil

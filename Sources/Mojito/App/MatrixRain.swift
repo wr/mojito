@@ -9,8 +9,7 @@ enum MatrixRain {
     private static var activeWindow: NSWindow?
 
     static func start(duration: TimeInterval = 7.0) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -26,6 +25,7 @@ enum MatrixRain {
             MainActor.assumeIsolated {
                 view.stop()
                 panel.orderOut(nil)
+                panel.contentView = nil
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }
@@ -41,9 +41,8 @@ enum MatrixRain {
 @MainActor
 private final class MatrixHostView: NSView {
     private let duration: TimeInterval
-    private var tickTimer: Timer?
+    private let ticker = AnimationTicker()
     private var columns: [MatrixColumn] = []
-    private let startDate = Date()
     private let glyphPool: [String]
     private let glyphSize: CGFloat = 24
     private let columnSpacing: CGFloat = 20
@@ -90,28 +89,17 @@ private final class MatrixHostView: NSView {
 
     private func start() {
         // 30 Hz halves CPU vs 60 Hz; cascade still reads smoothly.
-        tickTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated {
-                    guard let self else { return }
-                    self.advance()
-                }
-            }
+        ticker.start(interval: 1.0 / 30.0) { [weak self] elapsed in
+            self?.advance(elapsed: elapsed)
         }
     }
 
     func stop() {
-        tickTimer?.invalidate()
-        tickTimer = nil
+        ticker.stop()
         columns.removeAll()
     }
 
-    deinit {
-        if let t = tickTimer { t.invalidate() }
-    }
-
-    private func advance() {
-        let elapsed = Date().timeIntervalSince(startDate)
+    private func advance(elapsed: TimeInterval) {
         for i in columns.indices {
             let step = Int(elapsed / columns[i].cycleEvery)
             if step != columns[i].lastCycleStep {
@@ -126,7 +114,7 @@ private final class MatrixHostView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
-        let elapsed = Date().timeIntervalSince(startDate)
+        let elapsed = ticker.elapsed
         let globalFade = elapsed > duration - 0.6
             ? max(0.0, (duration - elapsed) / 0.6)
             : 1.0

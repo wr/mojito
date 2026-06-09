@@ -12,8 +12,7 @@ enum PrideWave {
     private static var activeWindow: NSWindow?
 
     static func start(duration: TimeInterval = 3.5) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         // Re-trigger replaces any in-flight wave.
         activeWindow?.orderOut(nil)
@@ -34,6 +33,7 @@ enum PrideWave {
         let dismiss = {
             MainActor.assumeIsolated {
                 panel.orderOut(nil)
+                panel.contentView = nil
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }
