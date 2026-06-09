@@ -32,13 +32,28 @@ final class EmojiBrowserViewModel: ObservableObject {
         let cells: [Cell]
         var id: EmojiCategory { category }
         var startIndex: Int { cells.first?.id ?? 0 }
+        var indices: Range<Int> { startIndex..<(startIndex + cells.count) }
     }
 
     @Published private(set) var query: String = ""
     /// Section currently at the top of the scroll view — drives the tab
-    /// highlight. Derived from scroll position, not set by tab taps directly.
-    @Published var activeCategory: EmojiCategory
+    /// highlight. Backed by a Combine subject (not `@Published`) so the
+    /// scroll-driven updates from `onPreferenceChange` don't invalidate the
+    /// `InlineBrowserView` body and re-evaluate the `ScrollView`/`LazyVGrid`
+    /// mid-scroll — on macOS 27 beta 1 that re-eval visibly snapped the scroll
+    /// position back to the top when crossing a section boundary. The tab bar
+    /// subscribes to `activeCategoryPublisher` via `.onReceive` and holds its
+    /// own local highlight state instead.
+    private let activeCategorySubject: CurrentValueSubject<EmojiCategory, Never>
+    let activeCategoryPublisher: AnyPublisher<EmojiCategory, Never>
+    var activeCategory: EmojiCategory { activeCategorySubject.value }
     @Published var selectedIndex: Int = 0
+    /// Cell the mouse is currently hovering over. Plain (non-`@Published`)
+    /// storage so cells passing under a stationary cursor during a slow scroll
+    /// don't invalidate the `InlineBrowserView` body and reset the scroll
+    /// position. `selectedEmoji` prefers this over `selectedIndex` so
+    /// hover-then-Enter still inserts the hovered cell.
+    var hoverIndex: Int?
     /// Flat cell index to scroll into view (keyboard nav / reset to top). The
     /// view clears it to nil after handling so the same index can repeat.
     @Published var scrollTarget: Int?
@@ -66,7 +81,9 @@ final class EmojiBrowserViewModel: ObservableObject {
         let flat = built.flatMap { $0.cells.map(\.emoji) }
         self.flat = flat
         self.current = flat  // query starts empty → whole library
-        self.activeCategory = built.first?.category ?? .smileysPeople
+        let subject = CurrentValueSubject<EmojiCategory, Never>(built.first?.category ?? .smileysPeople)
+        self.activeCategorySubject = subject
+        self.activeCategoryPublisher = subject.eraseToAnyPublisher()
     }
 
     /// The addressable list for selection + keyboard nav: search results when
@@ -93,6 +110,7 @@ final class EmojiBrowserViewModel: ObservableObject {
 
     var selectedEmoji: Emoji? {
         let items = current
+        if let h = hoverIndex, items.indices.contains(h) { return items[h] }
         guard items.indices.contains(selectedIndex) else { return items.first }
         return items[selectedIndex]
     }
@@ -102,6 +120,7 @@ final class EmojiBrowserViewModel: ObservableObject {
         current = computeCurrent()
         selectedIndex = 0
         scrollTarget = 0  // back to top on every query change
+        selectionStale = false
     }
 
     /// Tab tap: jump the scroll view to that category's section. Clears any
@@ -115,14 +134,49 @@ final class EmojiBrowserViewModel: ObservableObject {
         }
         // If we were searching the list was a flat result grid; rebuilding the
         // sectioned list first, then jumping, keeps the target laid out.
-        activeCategory = category
+        setActiveCategory(category)
         categoryTarget = category
+        selectionStale = false  // tab tap is an explicit selection action
         if wasSearching { scrollTarget = nil }
     }
+
+    private func setActiveCategory(_ value: EmojiCategory) {
+        guard activeCategorySubject.value != value else { return }
+        activeCategorySubject.send(value)
+    }
+
+    /// True iff the viewport has scrolled to a different section since the
+    /// last `move`/`selectCategory`/`setQuery`. Drives the one-shot resync in
+    /// `move(_:)` so an arrow press after a mouse scroll lands where the user
+    /// is looking instead of snapping back to where the selection happens to be.
+    private var selectionStale: Bool = false
+    /// Timestamp of the last `move(_:)` — used by `updateActiveCategory` to
+    /// suppress `selectionStale` during the scroll animation triggered by that
+    /// move. Otherwise a section transition mid-animation, with `activeCategory`
+    /// lagging one section behind `selectedIndex`, flags stale and a quick
+    /// second arrow press resyncs back — observed as an intermittent wrap.
+    private var lastMoveAt: Date = .distantPast
 
     func move(_ direction: GifMoveDirection) {
         let count = current.count
         guard count > 0 else { return }
+        lastMoveAt = Date()
+        // Only resync the selection if the user has mouse-scrolled the viewport
+        // away from where the selection lives since the last selection action.
+        // `selectionStale` is flipped by scroll-driven `setActiveCategory`; a
+        // resync here just from `move()` would race the scroll-driven category
+        // update and snap the selection back to the previous section.
+        if !isSearching, selectionStale,
+           let active = sections.first(where: { $0.category == activeCategory }),
+           !active.indices.contains(selectedIndex)
+        {
+            selectedIndex = active.startIndex
+            scrollTarget = selectedIndex
+            selectionStale = false
+            return
+        }
+        selectionStale = false
+        let prev = selectedIndex
         // Search results are one flat grid (no headers), so simple column
         // stepping lands directly above/below.
         if isSearching {
@@ -140,7 +194,12 @@ final class EmojiBrowserViewModel: ObservableObject {
             // not by a flat ±8, so the selection tracks straight up/down.
             selectedIndex = sectionedTarget(from: selectedIndex, direction: direction)
         }
-        scrollTarget = selectedIndex
+        // Only fire the scroll target when the selection actually changed —
+        // otherwise a held arrow key at the top/bottom edge re-fires
+        // `scrollTo(0, .top)` every tick and the viewport visibly jitters.
+        if selectedIndex != prev {
+            scrollTarget = selectedIndex
+        }
     }
 
     /// Column-preserving ↑/↓ (and clamped flat ←/→) across the sectioned grid.
@@ -193,7 +252,22 @@ final class EmojiBrowserViewModel: ObservableObject {
         let threshold: CGFloat = 1
         let atOrAboveTop = offsets.filter { $0.value <= threshold }
         guard let active = atOrAboveTop.max(by: { $0.value < $1.value })?.key else { return }
-        if active != activeCategory { activeCategory = active }
+        let changed = active != activeCategorySubject.value
+        setActiveCategory(active)
+        // Mark the selection stale only when the user has scrolled into a
+        // section that does NOT already contain `selectedIndex`, AND the scroll
+        // isn't the tail of an arrow-key animation. Arrow-induced scrolls
+        // animate over ~hundreds of ms; if `activeCategory` lags `selectedIndex`
+        // by one section during that window, we'd flag stale and a quick second
+        // arrow press would resync — observed as an intermittent wrap-to-top.
+        // The `Date()` read is deferred behind `changed` because most scroll
+        // frames don't transition section.
+        guard changed,
+              let section = sections.first(where: { $0.category == active }),
+              !section.indices.contains(selectedIndex),
+              Date().timeIntervalSince(lastMoveAt) >= 0.75
+        else { return }
+        selectionStale = true
     }
 
     private static func build(

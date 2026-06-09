@@ -171,6 +171,9 @@ final class PickerWindow {
     /// Anchors near the caret rect, or the mouse if nil.
     func show(near caret: CGRect?) {
         hidePillTooltip()  // clear any stale tooltip; re-shows on hover
+        // Pill / list mode tracks the caret; if the user dragged a previous
+        // expanded session, snap back to caret-anchored on the next open.
+        panel.isMovableByWindowBackground = false
         let anchor = caret ?? mouseAnchor()
         // Follow the live system appearance. A borderless panel created once
         // and reused otherwise stays pinned to its launch-time appearance, so
@@ -197,6 +200,10 @@ final class PickerWindow {
     func showExpanded(near caret: CGRect?) {
         hidePillTooltip()
         panel.appearance = NSApp.effectiveAppearance
+        // Browser window can be dragged from any background area (search row,
+        // tab bar, gaps between cells) — buttons and cells still receive their
+        // own clicks via AppKit's hit-testing.
+        panel.isMovableByWindowBackground = true
         setCornerRadius(BrowserLayout.cornerRadius)
         let size = CGSize(width: BrowserLayout.width, height: BrowserLayout.height)
 
