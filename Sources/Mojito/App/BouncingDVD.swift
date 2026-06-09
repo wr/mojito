@@ -22,10 +22,9 @@ enum BouncingDVD {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
-                // Drop the tree so TimelineView stops firing — otherwise
-                // physics runs invisibly and onCornerHit can re-fire.
-                panel.contentView = nil
+                // Dropping the tree matters beyond CPU here: invisible
+                // physics could re-fire onCornerHit.
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

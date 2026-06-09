@@ -22,8 +22,7 @@ enum XPLogin {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
-                panel.contentView = nil
+                ParticlePanel.dismiss(panel)
                 player?.stop()
                 player = nil
                 cancelToken?(); cancelToken = nil

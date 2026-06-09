@@ -26,8 +26,7 @@ enum BlueScreen {
 
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
-                panel.contentView = nil
+                ParticlePanel.dismiss(panel)
                 startupSound?.stop()
                 startupSound = nil
                 unregister?()

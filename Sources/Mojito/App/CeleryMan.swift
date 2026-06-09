@@ -137,6 +137,9 @@ enum CeleryMan {
 
         windows.insert(w)
         DockIconManager.windowDidOpen()
+        // Also drops the content view at close, so video playback /
+        // typewriter teardown happens then, not at some later dealloc.
+        ParticlePanel.tearDownOnClose(w)
 
         observers[ObjectIdentifier(w)] = NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,
@@ -149,9 +152,6 @@ enum CeleryMan {
                 if let obs = observers.removeValue(forKey: cid) {
                     NotificationCenter.default.removeObserver(obs)
                 }
-                // Drop the content view so video playback / typewriter
-                // teardown happens now, not at some later dealloc.
-                closed.contentView = nil
                 if windows.remove(closed) != nil {
                     DockIconManager.windowDidClose()
                 }

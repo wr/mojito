@@ -47,10 +47,7 @@ enum Snowfall {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
-                // Drop the tree so TimelineView stops driving frames —
-                // otherwise it animates off-screen and pegs the GPU.
-                panel.contentView = nil
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

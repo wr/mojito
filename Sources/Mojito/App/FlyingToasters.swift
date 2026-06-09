@@ -53,8 +53,7 @@ enum FlyingToasters {
         let dismiss = {
             MainActor.assumeIsolated {
                 field.stop()
-                panel.orderOut(nil)
-                panel.contentView = nil
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

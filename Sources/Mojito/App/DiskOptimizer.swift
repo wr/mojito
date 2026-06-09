@@ -31,8 +31,7 @@ enum DiskOptimizer {
             MainActor.assumeIsolated {
                 guard activeWindow === panel else { return }
                 DiskChatterSound.stop()
-                panel.contentView = nil   // drop the hosting view so its timeline stops
-                panel.orderOut(nil)
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 activeWindow = nil
                 activeDismiss = nil

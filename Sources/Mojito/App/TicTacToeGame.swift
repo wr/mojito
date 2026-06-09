@@ -44,21 +44,20 @@ enum TicTacToeGame {
         w.contentView = host
         window = w
         DockIconManager.windowDidOpen()
+        // The view-tree drop at close is what fires onDisappear — which
+        // stops the typewriter and terminates the narration process.
+        ParticlePanel.tearDownOnClose(w)
 
         closeObserver = NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,
             object: w,
             queue: .main
-        ) { note in
+        ) { _ in
             MainActor.assumeIsolated {
                 if let obs = closeObserver {
                     NotificationCenter.default.removeObserver(obs)
                     closeObserver = nil
                 }
-                // Drop the hosting view so the SwiftUI tree's onDisappear
-                // fires now — that's what stops the typewriter and
-                // terminates the narration process.
-                (note.object as? NSWindow)?.contentView = nil
                 cancelToken?(); cancelToken = nil
                 window = nil
                 DockIconManager.windowDidClose()

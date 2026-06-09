@@ -18,8 +18,7 @@ enum TrainGame {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
-                panel.contentView = nil
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

@@ -55,20 +55,20 @@ enum Trogdor {
         w.contentView = webView
         window = w
         DockIconManager.windowDidOpen()
+        // Also drops the web view at close, so page media stops now.
+        ParticlePanel.tearDownOnClose(w)
 
         closeObserver = NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,
             object: w,
             queue: .main
-        ) { note in
+        ) { _ in
             MainActor.assumeIsolated {
                 if let obs = closeObserver {
                     NotificationCenter.default.removeObserver(obs)
                     closeObserver = nil
                 }
                 cancelToken?(); cancelToken = nil
-                // Drop the web view so page media stops now.
-                (note.object as? NSWindow)?.contentView = nil
                 window = nil
                 DockIconManager.windowDidClose()
             }

@@ -44,19 +44,18 @@ enum WordleGame {
         w.contentView = host
         window = w
         DockIconManager.windowDidOpen()
+        ParticlePanel.tearDownOnClose(w)
 
         closeObserver = NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,
             object: w,
             queue: .main
-        ) { note in
+        ) { _ in
             MainActor.assumeIsolated {
                 if let obs = closeObserver {
                     NotificationCenter.default.removeObserver(obs)
                     closeObserver = nil
                 }
-                // Drop the hosting view so the SwiftUI tree tears down now.
-                (note.object as? NSWindow)?.contentView = nil
                 window = nil
                 DockIconManager.windowDidClose()
             }
