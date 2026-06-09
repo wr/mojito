@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Populate Resources/Localizable.xcstrings with LLM-drafted translations.
 
-Translations live in scripts/translations.json (key → locale → string) —
-they were drafted by an LLM and need a native-speaker pass before public
-release. Re-run this script after editing any value to apply changes to
-the catalog.
+Translations live in scripts/translations.json:
+    {"locales": [...], "strings": {key → locale → string}}
+"locales" is the single source of truth for the supported-locale list
+(check_localizations.py and release.sh read it too). The strings were
+drafted by an LLM and need a native-speaker pass before public release.
+Re-run this script after editing any value to apply changes to the
+catalog.
 
 The script is idempotent and additive: it sets `state` to `translated`
 for any (key, locale) pair present here. Anything you've manually edited
@@ -24,26 +27,18 @@ REPO = Path(__file__).resolve().parent.parent
 CATALOG = REPO / "Resources" / "Localizable.xcstrings"
 TRANSLATIONS_FILE = Path(__file__).resolve().parent / "translations.json"
 
-# Locales in column order. en is the source — translations elsewhere.
-LOCALES = [
-    "en-GB", "de", "es", "es-419", "fr", "it", "pt-BR",
-    "ja", "zh-Hans", "zh-Hant", "ko",
-    "hi", "ru", "pl", "nl",
-    "ar", "fa", "he",
-]
-
-
-def load_translations() -> dict[str, dict[str, str]]:
+def load_translations() -> tuple[list[str], dict[str, dict[str, str]]]:
     if not TRANSLATIONS_FILE.exists():
         sys.exit(f"missing translations file: {TRANSLATIONS_FILE}")
-    return json.loads(TRANSLATIONS_FILE.read_text())
+    data = json.loads(TRANSLATIONS_FILE.read_text())
+    return data["locales"], data["strings"]
 
 
 def main() -> None:
     if not CATALOG.exists():
         sys.exit(f"missing catalog: {CATALOG}")
 
-    translations_by_key = load_translations()
+    LOCALES, translations_by_key = load_translations()
     catalog = json.loads(CATALOG.read_text())
     strings = catalog.setdefault("strings", {})
 

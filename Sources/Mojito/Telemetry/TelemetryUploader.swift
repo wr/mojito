@@ -82,12 +82,14 @@ final class TelemetryUploader {
         ]
         if let app = appVersion() { payload["app"] = app }
         if !pending.emoji.isEmpty {
-            // The server keeps at most 300 emoji per ping; trimming here also
-            // bounds the request body if pending has grown across failed days.
+            // Mirrors MAX_EMOJI_PER_PING in stats-worker/src/index.js — the
+            // server drops everything past it, so trim client-side keeping
+            // the highest counts; also bounds the body across failed days.
+            let maxEmojiPerPing = 300
             var emoji = pending.emoji
-            if emoji.count > 300 {
+            if emoji.count > maxEmojiPerPing {
                 emoji = Dictionary(uniqueKeysWithValues:
-                    emoji.sorted { $0.value > $1.value }.prefix(300).map { ($0.key, $0.value) })
+                    emoji.sorted { $0.value > $1.value }.prefix(maxEmojiPerPing).map { ($0.key, $0.value) })
             }
             payload["emoji"] = emoji
         }

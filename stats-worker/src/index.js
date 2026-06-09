@@ -14,6 +14,8 @@
 
 const SITE_ORIGIN = "https://mojito.wells.ee";
 const MAX_BODY = 16 * 1024;
+// Mirrors maxEmojiPerPing in Sources/Mojito/Telemetry/TelemetryUploader.swift.
+const MAX_EMOJI_PER_PING = 300;
 
 // Allow-list of dimensions/features so a malformed or hostile payload can't
 // invent arbitrary rows.
@@ -109,7 +111,7 @@ async function ingest(request, env) {
   const emoji = body.emoji && typeof body.emoji === "object" ? body.emoji : {};
   let kept = 0;
   for (const [hexcode, count] of Object.entries(emoji)) {
-    if (kept >= 300) break;
+    if (kept >= MAX_EMOJI_PER_PING) break;
     if (!/^[0-9A-Fa-f-]{1,48}$/.test(hexcode)) continue;
     const n = clampCount(count, 1000);
     if (n <= 0) continue;

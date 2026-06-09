@@ -271,7 +271,8 @@ awk '/^## v[0-9]/ { p = 1 } p' "$REPO_ROOT/CHANGELOG.md" \
 # rendered set is passed to update_appcast.py so the appcast gets xml:lang links.
 echo "→ Rendering localized release notes"
 I18N_DIR="$REPO_ROOT/release-notes-i18n"
-LOCALES="en-GB de es es-419 fr it pt-BR ja zh-Hans zh-Hant ko hi ru pl nl ar fa he"
+# Locale list comes from translations.json — the single source of truth.
+LOCALES="$(python3 -c 'import json,sys; print(" ".join(json.load(open(sys.argv[1]))["locales"]))' "$REPO_ROOT/scripts/translations.json")"
 RENDERED_LOCALES=""
 for loc in $LOCALES; do
     src="$I18N_DIR/$loc.md"
