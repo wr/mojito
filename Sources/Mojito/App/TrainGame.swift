@@ -7,28 +7,18 @@ enum TrainGame {
     private static var activeWindow: NSWindow?
 
     static func start() {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
 
-        let panel = NSPanel(
-            contentRect: frame,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
-        )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false
-        panel.level = NSWindow.Level(Int(CGWindowLevelForKey(.statusWindow)))
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle, .stationary]
+        // Interactive so the tap-to-dismiss handler fires.
+        let panel = ParticlePanel.makeFullScreen(frame: frame, interactive: true)
 
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

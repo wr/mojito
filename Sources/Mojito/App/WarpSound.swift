@@ -6,14 +6,13 @@ import AppKit
 @MainActor
 enum WarpSound {
     private static var current: NSSound?
-    private static var fadeTimer: Timer?
+    private static let fadeTicker = AnimationTicker()
 
     /// Linear fade applied across the tail of the clip.
     private static let tailFade: TimeInterval = 1.5
 
     static func play() {
-        fadeTimer?.invalidate()
-        fadeTimer = nil
+        fadeTicker.stop()
         current?.stop()
         guard let sound = AudioBlob.load("s10") else { return }
         sound.volume = 1.0
@@ -41,30 +40,22 @@ enum WarpSound {
     /// no sound is playing, no-op.
     static func fadeOut(duration: TimeInterval) {
         guard let sound = current else { return }
-        fadeTimer?.invalidate()
         let startVolume = sound.volume
-        let startDate = Date()
-        let step: TimeInterval = 1.0 / 30.0
-        fadeTimer = Timer.scheduledTimer(withTimeInterval: step, repeats: true) { timer in
-            MainActor.assumeIsolated {
-                let elapsed = Date().timeIntervalSince(startDate)
-                let p = Float(min(1.0, elapsed / duration))
-                sound.volume = startVolume * (1.0 - p)
-                if p >= 1.0 {
-                    timer.invalidate()
-                    sound.stop()
-                    if current === sound {
-                        current = nil
-                        fadeTimer = nil
-                    }
+        fadeTicker.start(interval: 1.0 / 30.0) { elapsed in
+            let p = Float(min(1.0, elapsed / duration))
+            sound.volume = startVolume * (1.0 - p)
+            if p >= 1.0 {
+                fadeTicker.stop()
+                sound.stop()
+                if current === sound {
+                    current = nil
                 }
             }
         }
     }
 
     static func stop() {
-        fadeTimer?.invalidate()
-        fadeTimer = nil
+        fadeTicker.stop()
         current?.stop()
         current = nil
     }

@@ -9,8 +9,7 @@ enum Snowfall {
     private static var activeWindow: NSWindow?
 
     static func start(emitFor emit: TimeInterval = 8.0, particleLifetime: TimeInterval = 11.0) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -48,10 +47,7 @@ enum Snowfall {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
-                // Drop the tree so TimelineView stops driving frames —
-                // otherwise it animates off-screen and pegs the GPU.
-                panel.contentView = nil
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

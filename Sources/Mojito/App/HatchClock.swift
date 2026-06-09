@@ -16,8 +16,7 @@ enum HatchClock {
     private static var activeWindow: NSWindow?
 
     static func start() {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -32,8 +31,7 @@ enum HatchClock {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
-                panel.contentView = nil
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }
@@ -86,7 +84,9 @@ private struct HatchView: View {
     /// Layout: [H_hundreds][H_tens][H_ones] [M_tens][M_ones]. Final = "108:00".
     @State private var cells: [String] = ["0", "0", "0", "0", "3"]
     @State private var phase: Phase = .countdown
-    @State private var tickTimer: Timer?
+    @State private var tickTicker = AnimationTicker()
+    /// One-shot, self-rearming timers — they stay raw `Timer`s rather than
+    /// `AnimationTicker`s (which model repeating loops).
     @State private var glyphTimers: [Timer?] = Array(repeating: nil, count: 5)
     /// Starts at 3 ("000:03"); wraps to 108 * 60 after the cascade.
     @State private var totalSeconds: Int = 3
@@ -114,8 +114,7 @@ private struct HatchView: View {
         }
         .onAppear { runScript() }
         .onDisappear {
-            tickTimer?.invalidate()
-            tickTimer = nil
+            tickTicker.stop()
             for (i, t) in glyphTimers.enumerated() {
                 t?.invalidate()
                 glyphTimers[i] = nil
@@ -170,25 +169,19 @@ private struct HatchView: View {
     /// `onZero` fires once when `totalSeconds` reaches 0; if nil, the
     /// counter wraps to 108:00 and keeps going.
     private func startTicker(interval: TimeInterval, onZero: (() -> Void)?) {
-        tickTimer?.invalidate()
-        tickTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated {
-                    if totalSeconds <= 0 {
-                        if let onZero = onZero {
-                            tickTimer?.invalidate()
-                            tickTimer = nil
-                            onZero()
-                        } else {
-                            totalSeconds = 108 * 60
-                            refreshCells()
-                        }
-                        return
-                    }
-                    totalSeconds -= 1
+        tickTicker.start(interval: interval) { _ in
+            if totalSeconds <= 0 {
+                if let onZero = onZero {
+                    tickTicker.stop()
+                    onZero()
+                } else {
+                    totalSeconds = 108 * 60
                     refreshCells()
                 }
+                return
             }
+            totalSeconds -= 1
+            refreshCells()
         }
     }
 
@@ -551,35 +544,17 @@ private struct DigitHalf: View {
 /// don't cut each other off.
 @MainActor
 enum HatchSounds {
-    private static let poolSize = 5
-    private static let pool: [AVAudioPlayer] = makePool()
-    private static var nextIndex: Int = 0
+    private static let pool = AudioPlayerPool(data: makeClackWave(), size: 5, volume: 0.30)
 
     static func clack() {
-        guard !pool.isEmpty else { return }
-        let p = pool[nextIndex % pool.count]
-        nextIndex &+= 1
-        p.stop()
-        p.currentTime = 0
-        p.play()
-    }
-
-    private static func makePool() -> [AVAudioPlayer] {
-        let data = makeClackWave()
-        return (0..<poolSize).compactMap {
-            _ in
-            guard let p = try? AVAudioPlayer(data: data) else { return nil }
-            p.volume = 0.30
-            p.prepareToPlay()
-            return p
-        }
+        pool.play()
     }
 
     /// ~10ms broadband click: differenced white noise (≈ brick-wall HP)
     /// + faint 4 kHz sine. Short + steep decay keeps it from reading as
     /// a pitched "thock".
     private static func makeClackWave() -> Data {
-        let sampleRate: Double = 44100
+        let sampleRate = SynthRenderer.sampleRate
         let duration: Double = 0.010
         let numSamples = Int(duration * sampleRate)
         let amplitude = Double(Int16.max) * 0.55
@@ -600,36 +575,6 @@ enum HatchSounds {
             let decay = exp(-t * 380)
             samples.append(Int16(amplitude * mixed * attack * decay))
         }
-
-        let dataSize = samples.count * MemoryLayout<Int16>.size
-        var data = Data()
-        func writeUInt32LE(_ value: UInt32) {
-            var v = value.littleEndian
-            withUnsafeBytes(of: &v) { data.append(contentsOf: $0) }
-        }
-        func writeUInt16LE(_ value: UInt16) {
-            var v = value.littleEndian
-            withUnsafeBytes(of: &v) { data.append(contentsOf: $0) }
-        }
-        data.append(contentsOf: "RIFF".utf8)
-        writeUInt32LE(UInt32(36 + dataSize))
-        data.append(contentsOf: "WAVE".utf8)
-        data.append(contentsOf: "fmt ".utf8)
-        writeUInt32LE(16)
-        writeUInt16LE(1)
-        writeUInt16LE(1)
-        writeUInt32LE(UInt32(sampleRate))
-        writeUInt32LE(UInt32(sampleRate) * 2)
-        writeUInt16LE(2)
-        writeUInt16LE(16)
-        data.append(contentsOf: "data".utf8)
-        writeUInt32LE(UInt32(dataSize))
-        samples.withUnsafeBufferPointer { ptr in
-            data.append(UnsafeBufferPointer(
-                start: UnsafeRawPointer(ptr.baseAddress!).assumingMemoryBound(to: UInt8.self),
-                count: dataSize
-            ))
-        }
-        return data
+        return SynthRenderer.monoWaveData(samples: samples)
     }
 }

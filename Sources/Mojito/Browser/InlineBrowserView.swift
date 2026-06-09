@@ -99,7 +99,7 @@ struct InlineBrowserView: View {
                 Text(browser.query).foregroundStyle(.primary)
                 caret  // fixed slot — shows on click, never shifts the placeholder
                 if browser.query.isEmpty {
-                    Text("Type to search emoji").foregroundStyle(.tertiary)
+                    Text(String(localized: "Type to search emoji")).foregroundStyle(.tertiary)
                 }
             }
             Spacer(minLength: 0)
@@ -218,7 +218,7 @@ struct InlineBrowserView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 22))
                 .foregroundStyle(.tertiary)
-            Text("No emoji matching “\(browser.query)”")
+            Text(String(localized: "No emoji matching “\(browser.query)”"))
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
         }
@@ -291,6 +291,7 @@ private struct BrowserCell: View {
                     .fill(highlighted ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
             )
             .contentShape(Rectangle())
+            .accessibilityLabel(Text(verbatim: emoji.label))
             .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
                 showTooltip ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
             }

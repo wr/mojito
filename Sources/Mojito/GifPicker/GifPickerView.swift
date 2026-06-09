@@ -17,8 +17,6 @@ struct GifPickerView: View {
                 .frame(height: GifPickerLayout.contentHeight)
             Divider().opacity(0.4)
             footer
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
         }
         .frame(width: GifPickerLayout.width)
     }
@@ -26,7 +24,7 @@ struct GifPickerView: View {
     @ViewBuilder
     private var content: some View {
         if let message = viewModel.errorMessage {
-            placeholder(text: message)
+            errorState(message)
         } else if viewModel.results.isEmpty {
             placeholder(text: viewModel.query.isEmpty
                         ? String(localized: "Type to search GIFs.")
@@ -127,13 +125,32 @@ struct GifPickerView: View {
         .frame(maxWidth: .infinity)
     }
 
+    private func errorState(_ message: String) -> some View {
+        VStack(spacing: 12) {
+            Spacer()
+            Text(message)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+            if viewModel.lastSearchFailed {
+                Button(String(localized: "Try Again")) {
+                    viewModel.retrySearch()
+                }
+                .controlSize(.small)
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private var footer: some View {
-        HStack(spacing: 8) {
-            footerHint(key: "↑↓", label: nil)
-            footerHint(key: "←→", label: nil)
-            footerHint(key: "↵", label: "insert")
-            footerHint(key: "esc", label: "dismiss")
-            Spacer(minLength: 6)
+        HintsFooter([
+            KeyHint("↑↓"),
+            KeyHint("←→"),
+            KeyHint("↵", "insert"),
+            KeyHint("esc", "dismiss"),
+        ]) {
             (
                 Text(verbatim: "Powered by ").font(.system(size: 10))
                 + Text(verbatim: "GIPHY").font(.system(size: 12, weight: .bold)).tracking(-0.4)
@@ -141,23 +158,6 @@ struct GifPickerView: View {
             .foregroundStyle(.secondary)
             .fixedSize()
         }
-        .font(.system(size: 11))
-        .foregroundStyle(.secondary)
-    }
-
-    private func footerHint(key: String, label: LocalizedStringKey?) -> some View {
-        HStack(spacing: 4) {
-            Text(verbatim: key)
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
-                .padding(.horizontal, 4)
-                .padding(.vertical, 1)
-                .background(
-                    RoundedRectangle(cornerRadius: 3, style: .continuous)
-                        .fill(Color.primary.opacity(0.08))
-                )
-            if let label { Text(label).fixedSize() }
-        }
-        .fixedSize()
     }
 }
 

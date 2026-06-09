@@ -10,9 +10,9 @@ A string is considered translated for a locale when it has a non-empty
 and any entry explicitly marked `shouldTranslate: false` are skipped. The
 source language (en) is not checked — the catalog key *is* its value.
 
-To fix a reported gap: add the string to scripts/translate-localizable.py
-and run it, or set `"shouldTranslate": false` on the entry if it genuinely
-shouldn't be localized (brand names, symbols, etc.).
+To fix a reported gap: add the string to scripts/translations.json and
+run translate-localizable.py, or set `"shouldTranslate": false` on the
+entry if it genuinely shouldn't be localized (brand names, symbols, etc.).
 """
 from __future__ import annotations
 
@@ -22,13 +22,9 @@ from pathlib import Path
 
 CATALOG = Path(__file__).resolve().parent.parent / "Resources" / "Localizable.xcstrings"
 
-# Keep in sync with LOCALES in scripts/translate-localizable.py.
-TARGET_LOCALES = [
-    "en-GB", "de", "es", "es-419", "fr", "it", "pt-BR",
-    "ja", "zh-Hans", "zh-Hant", "ko",
-    "hi", "ru", "pl", "nl",
-    "ar", "fa", "he",
-]
+# Single source of truth for the supported-locale list.
+TRANSLATIONS_FILE = Path(__file__).resolve().parent / "translations.json"
+TARGET_LOCALES = json.loads(TRANSLATIONS_FILE.read_text())["locales"]
 
 # Present + current. "new" = never translated; "stale" = source changed since.
 OK_STATES = {"translated", "reviewed", "needs_review"}
@@ -62,7 +58,7 @@ def main() -> int:
             preview = key if len(key) <= 60 else key[:57] + "…"
             print(f"  • {preview!r}")
             print(f"      missing ({len(missing)}): {', '.join(missing)}")
-        print("\nAdd them to scripts/translate-localizable.py and run it, or set")
+        print("\nAdd them to scripts/translations.json and run translate-localizable.py, or set")
         print('"shouldTranslate": false on the entry if it shouldn\'t be localized.')
         return 1
 

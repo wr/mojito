@@ -18,8 +18,7 @@ enum WarpDrive {
     private static var activeWindow: NSWindow?
 
     static func start(duration: TimeInterval = 10.0) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -37,7 +36,7 @@ enum WarpDrive {
             MainActor.assumeIsolated {
                 view.stop()
                 WarpSound.stop()
-                panel.orderOut(nil)
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }
@@ -68,9 +67,8 @@ private struct WarpStar {
 @MainActor
 private final class WarpHostView: NSView {
     private let duration: TimeInterval
-    private var tickTimer: Timer?
+    private let ticker = AnimationTicker()
     private var stars: [WarpStar] = []
-    private let startDate = Date()
     private var lastFrameDate = Date()
 
     // Phase boundaries (seconds). No impulse drift; accel runs 0→3.0 then decel 3.0→3.5.
@@ -149,23 +147,14 @@ private final class WarpHostView: NSView {
     }
 
     private func start() {
-        tickTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated {
-                    self?.advance()
-                }
-            }
+        ticker.start(interval: 1.0 / 60.0) { [weak self] elapsed in
+            self?.advance(elapsed: elapsed)
         }
     }
 
     func stop() {
-        tickTimer?.invalidate()
-        tickTimer = nil
+        ticker.stop()
         stars.removeAll()
-    }
-
-    deinit {
-        if let t = tickTimer { t.invalidate() }
     }
 
     private func warpRate(at t: Double) -> CGFloat {
@@ -213,11 +202,10 @@ private final class WarpHostView: NSView {
         return 0
     }
 
-    private func advance() {
+    private func advance(elapsed: TimeInterval) {
         let now = Date()
         let dt = CGFloat(now.timeIntervalSince(lastFrameDate))
         lastFrameDate = now
-        let elapsed = now.timeIntervalSince(startDate)
         let rate = warpRate(at: elapsed)
 
         for i in stars.indices {
@@ -233,7 +221,7 @@ private final class WarpHostView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         guard let ctx = NSGraphicsContext.current?.cgContext else { return }
-        let elapsed = Date().timeIntervalSince(startDate)
+        let elapsed = ticker.elapsed
         let globalFade = elapsed > duration - 0.6
             ? max(0.0, (duration - elapsed) / 0.6)
             : 1.0

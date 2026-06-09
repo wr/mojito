@@ -8,8 +8,7 @@ enum KonamiPayoff {
     private static var activeWindow: NSWindow?
 
     static func start(duration: TimeInterval = 3.5) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -28,7 +27,7 @@ enum KonamiPayoff {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

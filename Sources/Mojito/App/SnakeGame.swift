@@ -42,6 +42,7 @@ enum SnakeGame {
         w.contentView = host
         window = w
         DockIconManager.windowDidOpen()
+        ParticlePanel.tearDownOnClose(w)
 
         closeObserver = NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,

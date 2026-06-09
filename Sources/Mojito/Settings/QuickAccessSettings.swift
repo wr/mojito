@@ -143,9 +143,9 @@ struct QuickAccessSection: View {
 
     private func slotHelp(_ slot: ResolvedSlot) -> String {
         if slot.pinned, let emoji = slot.emoji {
-            return "Pinned :\(emoji.primaryShortcode): — click to change"
+            return String(localized: "Pinned :\(emoji.primaryShortcode): — click to change")
         }
-        return "Most-used — click to pin a specific emoji"
+        return String(localized: "Most-used — click to pin a specific emoji")
     }
 
     private func displayGlyph(_ emoji: Emoji) -> String {

@@ -16,8 +16,7 @@ enum DiskOptimizer {
     static func start() {
         activeDismiss?()
 
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
         // Fixed window size (clamped to fit) so the dialog doesn't scale up on
         // large / 4K displays — its chrome, fonts, and blocks are point-sized.
         let winW = min(1040, frame.width - 80)
@@ -32,8 +31,7 @@ enum DiskOptimizer {
             MainActor.assumeIsolated {
                 guard activeWindow === panel else { return }
                 DiskChatterSound.stop()
-                panel.contentView = nil   // drop the hosting view so its timeline stops
-                panel.orderOut(nil)
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 activeWindow = nil
                 activeDismiss = nil

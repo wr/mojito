@@ -8,6 +8,9 @@ final class GifPickerViewModel: ObservableObject {
     @Published var selectedIndex: Int = 0
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    /// True when the last search died on a request failure (vs. an empty
+    /// result set) — gates the "Try Again" affordance.
+    @Published var lastSearchFailed: Bool = false
     @Published var isVisible: Bool = false
 
     /// 3-column grid; arrow keys + Enter handle navigation.
@@ -30,6 +33,10 @@ final class GifPickerViewModel: ObservableObject {
     /// Current trimmed query the result set belongs to. Used to detect
     /// stale loadMore completions after the user keeps typing.
     private var lastQuery: String = ""
+    // Monotonic token: each runSearch() invalidates every completion
+    // dispatched before it. Comparing query strings isn't enough — a
+    // same-query retry would let a stale completion through.
+    private var searchGeneration: Int = 0
     private var pageOffset: Int = 0
     /// False once Giphy returned an under-full page — stops further fetches.
     private var hasMore: Bool = false
@@ -51,6 +58,7 @@ final class GifPickerViewModel: ObservableObject {
         selectedIndex = 0
         isLoading = false
         errorMessage = nil
+        lastSearchFailed = false
         lastQuery = ""
         pageOffset = 0
         hasMore = false
@@ -107,6 +115,15 @@ final class GifPickerViewModel: ObservableObject {
         fetchNextPage()
     }
 
+    /// Re-runs the search that just failed (the "Try Again" button).
+    func retrySearch() {
+        let q = lastQuery.isEmpty
+            ? query.trimmingCharacters(in: .whitespacesAndNewlines)
+            : lastQuery
+        guard !q.isEmpty else { return }
+        runSearch(q)
+    }
+
     private func fetchNextPage() {
         guard hasMore, !isPaginating, !lastQuery.isEmpty else { return }
         isPaginating = true
@@ -115,12 +132,14 @@ final class GifPickerViewModel: ObservableObject {
         // the user. The button's own `disabled` state covers double-tap.
         let queryAtDispatch = lastQuery
         let offsetAtDispatch = pageOffset
+        let generation = searchGeneration
         searcher.search(query: queryAtDispatch, limit: pageSize, offset: offsetAtDispatch) { [weak self] result in
             guard let self else { return }
             self.isPaginating = false
-            // User retyped while the page was in flight — drop the stale
-            // append rather than splicing it onto a different result set.
-            guard self.lastQuery == queryAtDispatch else { return }
+            // A new search started while the page was in flight — drop the
+            // stale append rather than splicing it onto a different result
+            // set (or onto the same query's reset offset after a retry).
+            guard self.searchGeneration == generation else { return }
             switch result {
             case .success(let assets):
                 let oldCount = self.results.count
@@ -143,11 +162,14 @@ final class GifPickerViewModel: ObservableObject {
     }
 
     private func runSearch(_ q: String) {
+        searchGeneration += 1
+        let generation = searchGeneration
         let trimmed = q.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             results = []
             isLoading = false
             errorMessage = nil
+            lastSearchFailed = false
             selectedIndex = 0
             lastQuery = ""
             pageOffset = 0
@@ -161,6 +183,7 @@ final class GifPickerViewModel: ObservableObject {
         let queryChanged = (trimmed != lastQuery)
         isLoading = true
         errorMessage = nil
+        lastSearchFailed = false
         lastQuery = trimmed
         pageOffset = 0
         hasMore = true
@@ -176,10 +199,10 @@ final class GifPickerViewModel: ObservableObject {
         }
         searcher.search(query: trimmed, limit: pageSize, offset: 0) { [weak self] result in
             guard let self else { return }
+            // A newer search (typed or retried) was dispatched while this
+            // one was in flight — its cancellation is racy; drop the result.
+            guard self.searchGeneration == generation else { return }
             self.isLoading = false
-            // The user kept typing while this request was inflight — its
-            // cancellation was racy; drop the result.
-            guard self.lastQuery == trimmed else { return }
             switch result {
             case .success(let assets):
                 self.results = assets
@@ -191,6 +214,7 @@ final class GifPickerViewModel: ObservableObject {
             case .failure(let error):
                 self.results = []
                 self.errorMessage = error.userMessage
+                self.lastSearchFailed = true
                 self.hasMore = false
             }
         }

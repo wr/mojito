@@ -101,7 +101,8 @@ enum BrowserURL {
     private static func focusedWindow(in app: AXUIElement) -> AXUIElement? {
         var ref: AnyObject?
         let result = AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute as CFString, &ref)
-        guard result == .success, let window = ref else { return nil }
+        guard result == .success, let window = ref,
+              CFGetTypeID(window) == AXUIElementGetTypeID() else { return nil }
         return (window as! AXUIElement)
     }
 

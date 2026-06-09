@@ -63,6 +63,7 @@ enum DialupSound {
         w.contentView = glass
         window = w
         DockIconManager.windowDidOpen()
+        ParticlePanel.tearDownOnClose(w)
 
         // No fallback beep — better silent than system alert.
         if let sound = AudioBlob.load("s03") {

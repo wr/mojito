@@ -11,8 +11,7 @@ final class PickerWindow {
     private let hostingView: NSHostingView<PickerView>
     private let viewModel: PickerViewModel
     private let chrome: NSView
-    private var clickMonitorLocal: Any?
-    private var clickMonitorGlobal: Any?
+    private let clickAway = ClickAwayMonitor()
     /// Separate panel for the pill's number-hotkey tooltip — the pill panel
     /// is too short to host a label above its cells without clipping.
     private var tooltipPanel: NSPanel?
@@ -174,7 +173,7 @@ final class PickerWindow {
         // Pill / list mode tracks the caret; if the user dragged a previous
         // expanded session, snap back to caret-anchored on the next open.
         panel.isMovableByWindowBackground = false
-        let anchor = caret ?? mouseAnchor()
+        let anchor = caret ?? PanelPositioner.mouseAnchor()
         // Follow the live system appearance. A borderless panel created once
         // and reused otherwise stays pinned to its launch-time appearance, so
         // the picker looked stuck in light mode after a dark-mode switch.
@@ -219,7 +218,7 @@ final class PickerWindow {
                 panel.animator().setFrame(target, display: true)
             }
         } else {
-            let anchor = caret ?? mouseAnchor()
+            let anchor = caret ?? PanelPositioner.mouseAnchor()
             let frame = positionedFrame(anchor: anchor, size: size)
             panel.setFrame(frame, display: true)
             panel.orderFrontRegardless()
@@ -251,26 +250,13 @@ final class PickerWindow {
     // MARK: - Click-away
 
     private func installClickMonitors() {
-        guard clickMonitorLocal == nil else { return }
-        let types: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown]
-
-        clickMonitorLocal = NSEvent.addLocalMonitorForEvents(matching: types) { [weak self] event in
-            // Ignore clicks on the picker panel; dismiss otherwise.
-            if let self, event.window !== self.panel {
-                self.onClickAway?()
-            }
-            return event
-        }
-        clickMonitorGlobal = NSEvent.addGlobalMonitorForEvents(matching: types) { [weak self] _ in
+        clickAway.install(ignoring: panel) { [weak self] in
             self?.onClickAway?()
         }
     }
 
     private func removeClickMonitors() {
-        if let m = clickMonitorLocal { NSEvent.removeMonitor(m) }
-        if let m = clickMonitorGlobal { NSEvent.removeMonitor(m) }
-        clickMonitorLocal = nil
-        clickMonitorGlobal = nil
+        clickAway.remove()
     }
 
     // MARK: - Layout
@@ -294,54 +280,7 @@ final class PickerWindow {
     }
 
     private func positionedFrame(anchor: CGRect, size: CGSize) -> CGRect {
-        let screen = screenForAnchor(anchor)
-        let visible = screen.visibleFrame
-
-        let gap: CGFloat = 6
-        let belowOriginY = anchor.minY - size.height - gap
-        let aboveOriginY = anchor.maxY + gap
-
-        // Prefer below; flip above if no room downward.
-        var origin = CGPoint(
-            x: anchor.minX,
-            y: belowOriginY >= visible.minY ? belowOriginY : aboveOriginY
-        )
-
-        if origin.y + size.height > visible.maxY {
-            origin.y = visible.maxY - size.height - gap
-        }
-        if origin.y < visible.minY {
-            origin.y = visible.minY + gap
-        }
-
-        if origin.x + size.width > visible.maxX {
-            origin.x = visible.maxX - size.width - 8
-        }
-        if origin.x < visible.minX {
-            origin.x = visible.minX + 8
-        }
-
-        return CGRect(origin: origin, size: size)
-    }
-
-    private func mouseAnchor() -> CGRect {
-        let mouse = NSEvent.mouseLocation
-        return CGRect(x: mouse.x, y: mouse.y, width: 1, height: 16)
-    }
-
-    // Probe the anchor's center first, then any intersecting screen, before
-    // falling back to NSScreen.main. The corner-point probe used previously
-    // missed the right screen when the caret rect sat on a screen edge or
-    // when the panel had briefly become key on the primary display.
-    private func screenForAnchor(_ anchor: CGRect) -> NSScreen {
-        let center = CGPoint(x: anchor.midX, y: anchor.midY)
-        if let hit = NSScreen.screens.first(where: { $0.frame.contains(center) }) {
-            return hit
-        }
-        if let hit = NSScreen.screens.first(where: { $0.frame.intersects(anchor) }) {
-            return hit
-        }
-        return NSScreen.main ?? NSScreen.screens.first!
+        PanelPositioner.frame(anchor: anchor, size: size, probe: .anchorCenter, clampMinY: true)
     }
 }
 

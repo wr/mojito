@@ -13,8 +13,7 @@ enum EmojiRain {
 
     /// Re-trigger replaces any in-flight rain.
     static func start(emitFor emit: TimeInterval = 1.5, particleLifetime: TimeInterval = 4.0) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -53,7 +52,7 @@ enum EmojiRain {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }

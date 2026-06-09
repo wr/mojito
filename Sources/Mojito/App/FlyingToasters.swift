@@ -10,8 +10,7 @@ enum FlyingToasters {
     private static let sprite: NSImage? = ImageBlob.load("v12")
 
     static func start(duration: TimeInterval = 30.0) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         activeWindow?.orderOut(nil)
         activeWindow = nil
@@ -54,7 +53,7 @@ enum FlyingToasters {
         let dismiss = {
             MainActor.assumeIsolated {
                 field.stop()
-                panel.orderOut(nil)
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }
@@ -79,8 +78,7 @@ private final class ToasterField: NSView {
     private let imageViews: [NSImageView]
     private let bounds_: CGSize
     private let duration: TimeInterval
-    private var startDate: Date = Date()
-    private var timer: Timer?
+    private let ticker = AnimationTicker()
     /// 100×100 sprite; keeping native size — looks tiny on a 5K display
     /// but matches the After Dark feel.
     private let spriteSize: CGFloat = 100
@@ -107,22 +105,17 @@ private final class ToasterField: NSView {
     required init?(coder: NSCoder) { fatalError() }
 
     func start() {
-        startDate = Date()
         // 60 Hz movement; GIF wing-flap is driven independently by NSImageView.
-        let t = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.tick() }
+        ticker.start(interval: 1.0 / 60.0) { [weak self] elapsed in
+            self?.tick(elapsed: elapsed)
         }
-        RunLoop.main.add(t, forMode: .common)
-        timer = t
     }
 
     func stop() {
-        timer?.invalidate()
-        timer = nil
+        ticker.stop()
     }
 
-    private func tick() {
-        let elapsed = Date().timeIntervalSince(startDate)
+    private func tick(elapsed: TimeInterval) {
         // Last 0.5 s: fade the container so toasters trail out together.
         let endFade: CGFloat = elapsed > duration - 0.5
             ? max(0.0, CGFloat((duration - elapsed) / 0.5))

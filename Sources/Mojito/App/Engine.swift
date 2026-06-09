@@ -48,11 +48,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var prefsObserver: NSObjectProtocol?
     /// Cached because `FuzzyMatcher.search` reads them on every keystroke and
     /// direct UserDefaults reads are a measurable per-keystroke cost.
-    private var useFrequencyBoost: Bool
-    private var symbolsEnabled: Bool
-    private var symbolsRequireDoubleColon: Bool
-    private var gifSearchEnabled: Bool
-    private var gifBypassExclusions: Bool
+    /// Defaults mirror the pref defaults; `refreshPreferences()` overwrites
+    /// them at init and on every UserDefaults change.
+    private var useFrequencyBoost = true
+    private var symbolsEnabled = false
+    private var symbolsRequireDoubleColon = false
+    private var gifSearchEnabled = true
+    private var gifBypassExclusions = true
+    private var emoticonsEnabled = true
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -76,20 +79,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.exclusions = exclusions
         self.pickerWindow = PickerWindow(viewModel: viewModel)
         self.usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
-        self.useFrequencyBoost = (UserDefaults.standard.object(forKey: PrefsKey.useFrequencyBoost) as? Bool) ?? true
-        self.symbolsEnabled = (UserDefaults.standard.object(forKey: PrefsKey.symbolsEnabled) as? Bool) ?? false
-        self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
-        self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
-        self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
-        self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-        // The pill is summoned by `:?` when Quick Access is enabled.
-        let qaEnabled = (UserDefaults.standard.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
-        self.stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
-        // Arrows are inert unless both emoticons and the arrow sub-toggle are on
-        // — gating in the SM means a disabled arrow never defers or consumes a
-        // following char (which would otherwise be dropped when the insert is
-        // suppressed downstream).
-        self.stateMachine.arrowConversionEnabled = Engine.arrowConversionActive()
+        refreshPreferences()
 
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
@@ -178,26 +168,37 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated {
-                guard let self else { return }
-                self.useFrequencyBoost = (UserDefaults.standard.object(forKey: PrefsKey.useFrequencyBoost) as? Bool) ?? true
-                self.symbolsEnabled = (UserDefaults.standard.object(forKey: PrefsKey.symbolsEnabled) as? Bool) ?? false
-                self.symbolsRequireDoubleColon = (UserDefaults.standard.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
-                self.gifSearchEnabled = (UserDefaults.standard.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
-                self.gifBypassExclusions = (UserDefaults.standard.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
-                self.stateMachine.symbolsDoubleColonEnabled = self.symbolsEnabled && self.symbolsRequireDoubleColon
-                let qaEnabled = (UserDefaults.standard.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
-                self.stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
-                self.stateMachine.arrowConversionEnabled = Engine.arrowConversionActive()
+                self?.refreshPreferences()
             }
         }
     }
 
+    /// Re-reads the cached prefs from UserDefaults and pushes the derived
+    /// flags into the state machine.
+    private func refreshPreferences() {
+        let defaults = UserDefaults.standard
+        useFrequencyBoost = (defaults.object(forKey: PrefsKey.useFrequencyBoost) as? Bool) ?? true
+        symbolsEnabled = (defaults.object(forKey: PrefsKey.symbolsEnabled) as? Bool) ?? false
+        symbolsRequireDoubleColon = (defaults.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
+        gifSearchEnabled = (defaults.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
+        gifBypassExclusions = (defaults.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
+        emoticonsEnabled = (defaults.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
+        stateMachine.symbolsDoubleColonEnabled = symbolsEnabled && symbolsRequireDoubleColon
+        // The pill is summoned by `:?` when Quick Access is enabled.
+        let qaEnabled = (defaults.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
+        stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
+        // Arrows are inert unless both emoticons and the arrow sub-toggle are on
+        // — gating in the SM means a disabled arrow never defers or consumes a
+        // following char (which would otherwise be dropped when the insert is
+        // suppressed downstream).
+        stateMachine.arrowConversionEnabled = arrowConversionActive
+    }
+
     /// Arrow conversion runs only when emoticons *and* the arrow sub-toggle are
-    /// both on. Read fresh (cheap, off the keystroke path).
-    private static func arrowConversionActive() -> Bool {
-        let emoticonsOn = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
+    /// both on. The sub-toggle is read fresh (cheap, off the keystroke path).
+    private var arrowConversionActive: Bool {
         let arrowsOn = (UserDefaults.standard.object(forKey: PrefsKey.arrowConversionEnabled) as? Bool) ?? true
-        return emoticonsOn && arrowsOn
+        return emoticonsEnabled && arrowsOn
     }
 
     deinit {
@@ -302,9 +303,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         monitor.stop()
         pickerWindow.hide()
         stateMachine.reset()
-        captureContext = nil
-        captureFocusSnapshot = nil
-        captureFocusPID = nil
+        clearCaptureState()
         pendingEmoticonUndo = nil
         isActive = false
     }
@@ -497,10 +496,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // so typing back up to the threshold still respects the exclusion
             // and focus checks. Only tear it down once the SM has gone idle.
             if case .capturing = stateMachine.state { break }
-            captureContext = nil
-            captureFocusSnapshot = nil
-            captureFocusPID = nil
-            captureIsExcluded = false
+            clearCaptureState()
 
         case .openPicker(let q, let scope):
             if captureExcluded { break }
@@ -550,10 +546,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             pickerWindow.hide()
             stateMachine.reset()
             let wasExcluded = captureIsExcluded
-            captureContext = nil
-            captureFocusSnapshot = nil
-            captureFocusPID = nil
-            captureIsExcluded = false
+            clearCaptureState()
             if wasExcluded { break }
             // 80ms gives the passed-through terminator time to land in slow
             // text fields before synth-backspaces fire. One-tick wasn't
@@ -606,10 +599,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             viewModel.reset()
             pickerWindow.hide()
             stateMachine.reset()
-            captureContext = nil
-            captureFocusSnapshot = nil
-            captureFocusPID = nil
-            captureIsExcluded = false
+            clearCaptureState()
             pendingEmoticonUndo = nil
 
         case .maybeUndoEmoticon:
@@ -620,10 +610,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .triggerKonami(let deleteCount):
             viewModel.reset()
             pickerWindow.hide()
-            captureContext = nil
-            captureFocusSnapshot = nil
-            captureFocusPID = nil
-            captureIsExcluded = false
+            clearCaptureState()
             // Sequence chars are all consumed today so deleteCount is 0;
             // honor non-zero defensively in case that changes.
             DispatchQueue.main.async {
@@ -641,10 +628,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // the panel to the caret.
             viewModel.reset()
             pickerWindow.hide()
-            captureContext = nil
-            captureFocusSnapshot = nil
-            captureFocusPID = nil
-            captureIsExcluded = false
+            clearCaptureState()
             // Toggle off → `:::` is just three colons in text.
             if !gifSearchEnabled {
                 stateMachine.reset()
@@ -948,10 +932,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             stateMachine.reset()
             viewModel.reset()
             pickerWindow.hide()
-            captureContext = nil
-            captureFocusSnapshot = nil
-            captureFocusPID = nil
-            captureIsExcluded = false
+            clearCaptureState()
             // Any text-modifying action drops the pending emoticon undo.
             pendingEmoticonUndo = nil
         }
@@ -1211,7 +1192,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         let current = (defaults.object(forKey: PrefsKey.totalEmojiInserted) as? Int) ?? seedEmojiTotal()
         let next = current + 1
         defaults.set(next, forKey: PrefsKey.totalEmojiInserted)
-        checkEmojiMilestones(next)
+        recordMilestones(total: next, eggs: Self.emojiMilestoneEggs)
     }
 
     private func bumpSymbolCounter() {
@@ -1239,16 +1220,17 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         usage.reduce(0) { $1.key.hasPrefix("SYM_") ? $0 + $1.value : $0 }
     }
 
+    private static let milestoneThresholds = [1, 100, 1_000, 10_000, 100_000, 1_000_000]
+    private static let emojiMilestoneEggs: [EasterEgg] = [.k36, .k37, .k38, .k39, .k40, .k41]
+    private static let gifMilestoneEggs: [EasterEgg] = [.k43, .k44, .k45, .k46, .k47, .k48]
+
     /// `record(_:)` is idempotent, so we can check every threshold on every
     /// bump without gating. Backfilled users sweep the whole chain at once
     /// on their next insert.
-    private func checkEmojiMilestones(_ total: Int) {
-        if total >= 1         { EasterEggTracker.record(.k36) }
-        if total >= 100       { EasterEggTracker.record(.k37) }
-        if total >= 1_000     { EasterEggTracker.record(.k38) }
-        if total >= 10_000    { EasterEggTracker.record(.k39) }
-        if total >= 100_000   { EasterEggTracker.record(.k40) }
-        if total >= 1_000_000 { EasterEggTracker.record(.k41) }
+    private func recordMilestones(total: Int, eggs: [EasterEgg]) {
+        for (threshold, egg) in zip(Self.milestoneThresholds, eggs) where total >= threshold {
+            EasterEggTracker.record(egg)
+        }
     }
 
     private func recordGifInserted() {
@@ -1257,37 +1239,47 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         let current = (defaults.object(forKey: PrefsKey.totalGifInserted) as? Int) ?? 0
         let next = current + 1
         defaults.set(next, forKey: PrefsKey.totalGifInserted)
-        if next >= 1         { EasterEggTracker.record(.k43) }
-        if next >= 100       { EasterEggTracker.record(.k44) }
-        if next >= 1_000     { EasterEggTracker.record(.k45) }
-        if next >= 10_000    { EasterEggTracker.record(.k46) }
-        if next >= 100_000   { EasterEggTracker.record(.k47) }
-        if next >= 1_000_000 { EasterEggTracker.record(.k48) }
+        recordMilestones(total: next, eggs: Self.gifMilestoneEggs)
+    }
+
+    /// Shared tail of every emoticon conversion: replace the typed text,
+    /// bump the diagnostic counter, and arm the undo window.
+    private func convertEmoticon(charsToDelete: Int, replacement: String, originalText: String) {
+        TextInserter.replace(charactersToDelete: charsToDelete, with: replacement)
+        bumpEmoticonCounter()
+
+        pendingEmoticonUndo = EmoticonUndo(
+            emojiInserted: replacement,
+            originalText: originalText,
+            insertedAt: Date(),
+            pid: FocusedElementCache.shared.focusedPID
+        )
+    }
+
+    /// Ambient lookup, honoring the emoticon master toggle and the arrow
+    /// sub-toggle. `nil` means the word stays literal.
+    private func ambientEmoji(for word: String) -> String? {
+        guard emoticonsEnabled,
+              arrowConversionActive || !AmbientEmoticonTable.isArrow(word) else { return nil }
+        return AmbientEmoticonTable.emoji(for: word)
     }
 
     /// Convert `:query<terminator>` into an emoticon, or no-op.
     private func handleEmoticon(query: String, terminator: Character) {
-        let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        guard enabled, let match = EmoticonTable.match(query: query, terminator: terminator) else {
+        guard emoticonsEnabled, let match = EmoticonTable.match(query: query, terminator: terminator) else {
             pendingEmoticonUndo = nil
             return
         }
         DebugRecorder.record(.emoticon, "convert", ["consumesTerminator": "\(match.consumesTerminator)"])
         // App reads `:<query><terminator>` — delete all three. Restore the
         // terminator after the emoji unless it was part of the emoticon.
-        let charsToDelete = 1 + query.count + 1
         let replacement = match.consumesTerminator
             ? match.emoji
             : match.emoji + String(terminator)
-        TextInserter.replace(charactersToDelete: charsToDelete, with: replacement)
-        bumpEmoticonCounter()
-
-        let original = ":" + query + String(terminator)
-        pendingEmoticonUndo = EmoticonUndo(
-            emojiInserted: replacement,
-            originalText: original,
-            insertedAt: Date(),
-            pid: FocusedElementCache.shared.focusedPID
+        convertEmoticon(
+            charsToDelete: 1 + query.count + 1,
+            replacement: replacement,
+            originalText: ":" + query + String(terminator)
         )
     }
 
@@ -1299,50 +1291,32 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// (`<->`) — that char was consumed and is re-emitted here so the
     /// final field reads `←x` instead of `<←`.
     private func handleAmbientEmoticonImmediate(word: String, trailing: String) {
-        let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        guard enabled,
-              Engine.arrowConversionActive() || !AmbientEmoticonTable.isArrow(word),
-              let emoji = AmbientEmoticonTable.emoji(for: word) else {
+        guard let emoji = ambientEmoji(for: word) else {
             pendingEmoticonUndo = nil
             return
         }
         DebugRecorder.record(.emoticon, "ambientImmediate")
-        let replacement = emoji + trailing
-        TextInserter.replace(charactersToDelete: word.count, with: replacement)
-        bumpEmoticonCounter()
-
-        pendingEmoticonUndo = EmoticonUndo(
-            emojiInserted: replacement,
-            originalText: word + trailing,
-            insertedAt: Date(),
-            pid: FocusedElementCache.shared.focusedPID
+        convertEmoticon(
+            charsToDelete: word.count,
+            replacement: emoji + trailing,
+            originalText: word + trailing
         )
     }
 
     /// Ambient counterpart to `handleEmoticon` — a word with no leading `:`
     /// followed by a terminator, looked up in `AmbientEmoticonTable`.
     private func handleAmbientEmoticon(word: String, terminator: Character) {
-        let enabled = (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        guard enabled,
-              Engine.arrowConversionActive() || !AmbientEmoticonTable.isArrow(word),
-              let emoji = AmbientEmoticonTable.emoji(for: word) else {
+        guard let emoji = ambientEmoji(for: word) else {
             pendingEmoticonUndo = nil
             return
         }
         DebugRecorder.record(.emoticon, "ambient")
         // Ambient entries are letter/punct sequences with no trailing
         // whitespace, so the terminator always survives the conversion.
-        let charsToDelete = word.count + 1
-        let replacement = emoji + String(terminator)
-        TextInserter.replace(charactersToDelete: charsToDelete, with: replacement)
-        bumpEmoticonCounter()
-
-        let original = word + String(terminator)
-        pendingEmoticonUndo = EmoticonUndo(
-            emojiInserted: replacement,
-            originalText: original,
-            insertedAt: Date(),
-            pid: FocusedElementCache.shared.focusedPID
+        convertEmoticon(
+            charsToDelete: word.count + 1,
+            replacement: emoji + String(terminator),
+            originalText: word + String(terminator)
         )
     }
 

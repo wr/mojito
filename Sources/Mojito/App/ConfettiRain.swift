@@ -9,8 +9,7 @@ enum ConfettiRain {
     private static let gravity: CGFloat = 1500
 
     static func start(emitFor emit: TimeInterval = 0.7, particleLifetime: TimeInterval = 3.5) {
-        guard let screen = NSScreen.main ?? NSScreen.screens.first else { return }
-        let frame = screen.frame
+        guard let frame = ParticlePanel.primaryScreenFrame() else { return }
 
         // Re-trigger replaces any in-flight shower.
         activeWindow?.orderOut(nil)
@@ -67,7 +66,7 @@ enum ConfettiRain {
         var cancelToken: (() -> Void)?
         let dismiss = {
             MainActor.assumeIsolated {
-                panel.orderOut(nil)
+                ParticlePanel.dismiss(panel)
                 cancelToken?(); cancelToken = nil
                 if activeWindow === panel { activeWindow = nil }
             }
