@@ -104,7 +104,7 @@ private struct BannerView: View {
     @ObservedObject var controller: BannerController
     let onTap: () -> Void
 
-    private var pill: some View {
+    private var pillContent: some View {
         HStack(spacing: 8) {
             Text(egg.emojiGlyph ?? "🎉")
                 .font(.system(size: 20))
@@ -122,11 +122,29 @@ private struct BannerView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 10)
-        .background(
-            Capsule()
-                .fill(Color(nsColor: .systemBlue))
-                .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
-        )
+    }
+
+    @ViewBuilder
+    private var pill: some View {
+        Group {
+            if #available(macOS 26.0, *) {
+                // Glass draws its own edge highlight and shadow; the tint
+                // keeps the pill reading as blue while staying translucent
+                // (and tracking the macOS 27 transparency slider).
+                pillContent
+                    .glassEffect(
+                        .regular.tint(Color(nsColor: .systemBlue).opacity(0.8)).interactive(),
+                        in: .capsule
+                    )
+            } else {
+                pillContent
+                    .background(
+                        Capsule()
+                            .fill(Color(nsColor: .systemBlue))
+                            .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
+                    )
+            }
+        }
         .fixedSize()  // pill width hugs content
         .contentShape(Capsule())  // hits confined to the pill, not the margin
     }
