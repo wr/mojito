@@ -22,8 +22,7 @@ final class GifPickerWindow {
 
     private let panel: NSPanel
     private let viewModel: GifPickerViewModel
-    private var clickMonitorLocal: Any?
-    private var clickMonitorGlobal: Any?
+    private let clickAway = ClickAwayMonitor()
     private var copyTask: Task<Void, Never>?
 
     init() {
@@ -90,9 +89,9 @@ final class GifPickerWindow {
     var isVisible: Bool { viewModel.isVisible }
 
     func show(near caret: CGRect?) {
-        let anchor = caret ?? mouseAnchor()
+        let anchor = caret ?? PanelPositioner.mouseAnchor()
         let size = NSSize(width: GifPickerLayout.width, height: GifPickerLayout.panelHeight)
-        let frame = positionedFrame(anchor: anchor, size: size)
+        let frame = PanelPositioner.frame(anchor: anchor, size: size, probe: .anchorOrigin, clampMinY: false)
 
         viewModel.reset()
         panel.setFrame(frame, display: true)
@@ -191,51 +190,12 @@ final class GifPickerWindow {
     }
 
     private func installClickMonitors() {
-        guard clickMonitorLocal == nil else { return }
-        let types: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown]
-        clickMonitorLocal = NSEvent.addLocalMonitorForEvents(matching: types) { [weak self] event in
-            if let self, event.window !== self.panel {
-                self.onClickAway?()
-            }
-            return event
-        }
-        clickMonitorGlobal = NSEvent.addGlobalMonitorForEvents(matching: types) { [weak self] _ in
+        clickAway.install(ignoring: panel) { [weak self] in
             self?.onClickAway?()
         }
     }
 
     private func removeClickMonitors() {
-        if let m = clickMonitorLocal { NSEvent.removeMonitor(m) }
-        if let m = clickMonitorGlobal { NSEvent.removeMonitor(m) }
-        clickMonitorLocal = nil
-        clickMonitorGlobal = nil
-    }
-
-    private func positionedFrame(anchor: CGRect, size: CGSize) -> CGRect {
-        let screen = NSScreen.screens.first { $0.frame.contains(anchor.origin) }
-                  ?? NSScreen.main
-                  ?? NSScreen.screens.first!
-        let visible = screen.visibleFrame
-        let gap: CGFloat = 6
-
-        var origin = CGPoint(x: anchor.minX, y: anchor.minY - size.height - gap)
-        if origin.y < visible.minY {
-            origin.y = anchor.maxY + gap
-        }
-        if origin.y + size.height > visible.maxY {
-            origin.y = visible.maxY - size.height - gap
-        }
-        if origin.x + size.width > visible.maxX {
-            origin.x = visible.maxX - size.width - 8
-        }
-        if origin.x < visible.minX {
-            origin.x = visible.minX + 8
-        }
-        return CGRect(origin: origin, size: size)
-    }
-
-    private func mouseAnchor() -> CGRect {
-        let mouse = NSEvent.mouseLocation
-        return CGRect(x: mouse.x, y: mouse.y, width: 1, height: 16)
+        clickAway.remove()
     }
 }

@@ -8,6 +8,9 @@ final class GifPickerViewModel: ObservableObject {
     @Published var selectedIndex: Int = 0
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    /// True when the last search died on a request failure (vs. an empty
+    /// result set) — gates the "Try Again" affordance.
+    @Published var lastSearchFailed: Bool = false
     @Published var isVisible: Bool = false
 
     /// 3-column grid; arrow keys + Enter handle navigation.
@@ -51,6 +54,7 @@ final class GifPickerViewModel: ObservableObject {
         selectedIndex = 0
         isLoading = false
         errorMessage = nil
+        lastSearchFailed = false
         lastQuery = ""
         pageOffset = 0
         hasMore = false
@@ -107,6 +111,15 @@ final class GifPickerViewModel: ObservableObject {
         fetchNextPage()
     }
 
+    /// Re-runs the search that just failed (the "Try Again" button).
+    func retrySearch() {
+        let q = lastQuery.isEmpty
+            ? query.trimmingCharacters(in: .whitespacesAndNewlines)
+            : lastQuery
+        guard !q.isEmpty else { return }
+        runSearch(q)
+    }
+
     private func fetchNextPage() {
         guard hasMore, !isPaginating, !lastQuery.isEmpty else { return }
         isPaginating = true
@@ -148,6 +161,7 @@ final class GifPickerViewModel: ObservableObject {
             results = []
             isLoading = false
             errorMessage = nil
+            lastSearchFailed = false
             selectedIndex = 0
             lastQuery = ""
             pageOffset = 0
@@ -161,6 +175,7 @@ final class GifPickerViewModel: ObservableObject {
         let queryChanged = (trimmed != lastQuery)
         isLoading = true
         errorMessage = nil
+        lastSearchFailed = false
         lastQuery = trimmed
         pageOffset = 0
         hasMore = true
@@ -191,6 +206,7 @@ final class GifPickerViewModel: ObservableObject {
             case .failure(let error):
                 self.results = []
                 self.errorMessage = error.userMessage
+                self.lastSearchFailed = true
                 self.hasMore = false
             }
         }

@@ -76,34 +76,15 @@ struct PickerView: View {
     }
 
     private var footer: some View {
-        HStack(spacing: 12) {
-            footerHint(key: "↑↓", label: "select")
-            footerHint(key: "↵", label: "insert")
-            footerHint(key: "esc", label: "dismiss")
-            Spacer()
-        }
-        .font(.system(size: 12))
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-    }
-
-    private func footerHint(key: String, label: String) -> some View {
-        HStack(spacing: 5) {
-            Text(key)
-                .font(.system(size: 11, weight: .medium, design: .monospaced))
-                .padding(.horizontal, 5)
-                .padding(.vertical, 1)
-                .background(
-                    RoundedRectangle(cornerRadius: 3, style: .continuous)
-                        .fill(Color.primary.opacity(0.08))
-                )
-            Text(label)
-        }
+        HintsFooter([
+            KeyHint("↑↓", "select"),
+            KeyHint("↵", "insert"),
+            KeyHint("esc", "dismiss"),
+        ])
     }
 
     private var emptyState: some View {
-        Text("No emoji for :\(viewModel.query):")
+        Text(String(localized: "No emoji for :\(viewModel.query):"))
             .font(.system(size: 13))
             .foregroundStyle(.secondary)
             .padding(.horizontal, 14)
@@ -151,30 +132,23 @@ private struct PickerRow: View {
     @ViewBuilder
     private var leadingGlyph: some View {
         if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode {
-            return AnyView(
-                Image(systemName: "square.grid.2x2")
-                    .font(.system(size: 15))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 22, height: 22)
-            )
+            Image(systemName: "square.grid.2x2")
+                .font(.system(size: 15))
+                .foregroundStyle(.secondary)
+                .frame(width: 22, height: 22)
         } else if scored.emoji.hexcode == FuzzyMatcher.k03Hex,
            let nsImage = Self.dogcowImage {
             // Template picks up the current foreground color.
-            return AnyView(
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .interpolation(.high)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 22, height: 22)
-                    .foregroundStyle(.primary)
-            )
+            Image(nsImage: nsImage)
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 22, height: 22)
+                .foregroundStyle(.primary)
         } else {
             // Preview with the user's chosen skin tone.
-            let display = scored.emoji.tonedGlyph
-            return AnyView(
-                Text(display)
-                    .font(.system(size: 18))
-            )
+            Text(scored.emoji.tonedGlyph)
+                .font(.system(size: 18))
         }
     }
 
@@ -277,6 +251,9 @@ private struct CompactCell: View {
         }
         .frame(width: PickerLayout.compactCell, height: PickerLayout.compactCell)
         .contentShape(Rectangle())
+        .accessibilityLabel(
+            isBrowse ? Text("Browse all emojis…") : Text(verbatim: scored.emoji.label)
+        )
         .onTapGesture { viewModel.onActivate?(index) }
         .onHover { hovering in
             if hovering { viewModel.selectedIndex = index }
@@ -288,20 +265,4 @@ private struct CompactCell: View {
     private var glyph: String {
         scored.emoji.tonedGlyph
     }
-}
-
-struct VisualEffect: NSViewRepresentable {
-    let material: NSVisualEffectView.Material
-    let blending: NSVisualEffectView.BlendingMode
-
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.material = material
-        view.blendingMode = blending
-        view.state = .active
-        view.isEmphasized = true
-        return view
-    }
-
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
 }
