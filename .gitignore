@@ -41,6 +41,10 @@ dist/
 *.swp
 *~
 
+# Python
+__pycache__/
+*.pyc
+
 # Secrets / signing
 *.p12
 *.cer
