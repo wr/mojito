@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 /// The full-library grid, shown by *growing the picker panel* (not a separate
@@ -23,9 +24,6 @@ struct InlineBrowserView: View {
     /// editable `TextField`.
     var editableSearch: Bool = false
 
-    @State private var hoverIndex: Int?
-    @State private var tooltipIndex: Int?
-    @State private var hoverWork: DispatchWorkItem?
     @State private var tooltipSize: CGSize = .zero
     @State private var typedQuery = ""
     @FocusState private var searchFieldFocused: Bool
@@ -205,36 +203,14 @@ struct InlineBrowserView: View {
     }
 
     private func cell(_ emoji: Emoji, index: Int) -> some View {
-        let isSelected = index == browser.selectedIndex
-        let glyph = emoji.tonedGlyph
-        return Text(glyph)
-            .font(.system(size: 25))  // match the pill's glyph size
-            .frame(maxWidth: .infinity)
-            .frame(height: Self.cellHeight)
-            .background(
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
-            )
-            .contentShape(Rectangle())
-            .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
-                tooltipIndex == index ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
-            }
-            .onTapGesture { onPick(emoji) }
-            .onHover { hovering in
-                hoverWork?.cancel()
-                if hovering {
-                    browser.selectedIndex = index
-                    hoverIndex = index
-                    let work = DispatchWorkItem {
-                        if hoverIndex == index { tooltipIndex = index }
-                    }
-                    hoverWork = work
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
-                } else {
-                    if hoverIndex == index { hoverIndex = nil }
-                    if tooltipIndex == index { tooltipIndex = nil }
-                }
-            }
+        BrowserCell(
+            emoji: emoji,
+            index: index,
+            isKeyboardSelected: index == browser.selectedIndex,
+            cellHeight: Self.cellHeight,
+            onPick: onPick,
+            onHoverChanged: { browser.hoverIndex = $0 }
+        )
     }
 
     private var emptyResults: some View {
@@ -255,36 +231,16 @@ struct InlineBrowserView: View {
     private var categoryBar: some View {
         ZStack(alignment: .bottom) {
             tabBarBackdrop
-            tabBarIcons
+            CategoryTabBar(
+                categories: browser.visibleCategories,
+                isSearching: browser.isSearching,
+                activeCategoryPublisher: browser.activeCategoryPublisher,
+                initialActiveCategory: browser.activeCategory,
+                tabBarHeight: Self.tabBarHeight,
+                onCategory: onCategory
+            )
         }
         .frame(height: Self.tabBarHeight + Self.tabBarFade)
-    }
-
-    private var tabBarIcons: some View {
-        HStack(spacing: 1) {
-            ForEach(browser.visibleCategories) { category in
-                // Active = the section scrolled to the top (cleared while searching).
-                let isActive = !browser.isSearching && browser.activeCategory == category
-                Button {
-                    onCategory(category)
-                } label: {
-                    Image(systemName: category.tabSymbol)
-                        .font(.system(size: 13))
-                        .foregroundStyle(isActive ? Color.primary : Color.secondary)
-                        .frame(width: 30, height: 26)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .fill(isActive ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : .clear)
-                        )
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .help(category.title)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 8)
-        .frame(height: Self.tabBarHeight)
     }
 
     /// Glass/material masked by a vertical gradient so it fades *in* toward the
@@ -304,6 +260,111 @@ struct InlineBrowserView: View {
                     endPoint: .bottom
                 )
             )
+    }
+}
+
+/// One emoji cell, broken out so hover state is per-cell `@State` and a cell
+/// scrolling under the cursor only invalidates itself — not the parent
+/// `InlineBrowserView`, which would re-evaluate the `ScrollView` and reset the
+/// scroll position on macOS 27 beta 1.
+private struct BrowserCell: View {
+    let emoji: Emoji
+    let index: Int
+    let isKeyboardSelected: Bool
+    let cellHeight: CGFloat
+    let onPick: (Emoji) -> Void
+    let onHoverChanged: (Int?) -> Void
+
+    @State private var hovered: Bool = false
+    @State private var showTooltip: Bool = false
+    @State private var tooltipWork: DispatchWorkItem?
+
+    var body: some View {
+        let glyph = emoji.tonedGlyph
+        let highlighted = isKeyboardSelected || hovered
+        Text(glyph)
+            .font(.system(size: 25))  // match the pill's glyph size
+            .frame(maxWidth: .infinity)
+            .frame(height: cellHeight)
+            .background(
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .fill(highlighted ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
+            )
+            .contentShape(Rectangle())
+            .anchorPreference(key: TooltipAnchorKey.self, value: .bounds) { anchor in
+                showTooltip ? TooltipData(text: ":\(emoji.primaryShortcode):", anchor: anchor) : nil
+            }
+            .onTapGesture { onPick(emoji) }
+            .onHover { hovering in
+                tooltipWork?.cancel()
+                hovered = hovering
+                onHoverChanged(hovering ? index : nil)
+                if hovering {
+                    let work = DispatchWorkItem { showTooltip = true }
+                    tooltipWork = work
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+                } else {
+                    showTooltip = false
+                }
+            }
+    }
+}
+
+/// Tab bar pulled into its own view so the active-section highlight tracks the
+/// scroll position through a local `@State` driven by a Combine publisher,
+/// instead of through a `@Published` on `EmojiBrowserViewModel`. The point: a
+/// scroll-driven activeCategory change must not invalidate the parent
+/// `InlineBrowserView` body (and re-evaluate the `ScrollView`/`LazyVGrid`
+/// mid-scroll, which on macOS 27 beta 1 snapped the scroll position back).
+private struct CategoryTabBar: View {
+    let categories: [EmojiCategory]
+    let isSearching: Bool
+    let activeCategoryPublisher: AnyPublisher<EmojiCategory, Never>
+    let tabBarHeight: CGFloat
+    let onCategory: (EmojiCategory) -> Void
+    @State private var activeCategory: EmojiCategory
+
+    init(
+        categories: [EmojiCategory],
+        isSearching: Bool,
+        activeCategoryPublisher: AnyPublisher<EmojiCategory, Never>,
+        initialActiveCategory: EmojiCategory,
+        tabBarHeight: CGFloat,
+        onCategory: @escaping (EmojiCategory) -> Void
+    ) {
+        self.categories = categories
+        self.isSearching = isSearching
+        self.activeCategoryPublisher = activeCategoryPublisher
+        self.tabBarHeight = tabBarHeight
+        self.onCategory = onCategory
+        self._activeCategory = State(initialValue: initialActiveCategory)
+    }
+
+    var body: some View {
+        HStack(spacing: 1) {
+            ForEach(categories) { category in
+                let isActive = !isSearching && activeCategory == category
+                Button {
+                    onCategory(category)
+                } label: {
+                    Image(systemName: category.tabSymbol)
+                        .font(.system(size: 13))
+                        .foregroundStyle(isActive ? Color.primary : Color.secondary)
+                        .frame(width: 30, height: 26)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(isActive ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : .clear)
+                        )
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(category.title)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 8)
+        .frame(height: tabBarHeight)
+        .onReceive(activeCategoryPublisher) { activeCategory = $0 }
     }
 }
 
