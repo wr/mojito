@@ -47,6 +47,12 @@ export default {
 // ---- ingest --------------------------------------------------------------
 
 async function ingest(request, env) {
+  // Reject oversized bodies before buffering when the client declares a
+  // length; the post-read check still covers chunked uploads.
+  const declared = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > MAX_BODY) {
+    return new Response("Too large", { status: 413 });
+  }
   const raw = await request.text();
   if (raw.length > MAX_BODY) return new Response("Too large", { status: 413 });
 
@@ -62,7 +68,7 @@ async function ingest(request, env) {
 
   // Marginal dimensions.
   pushDim(stmts, env, day, "app", cleanVersion(body.app));
-  pushDim(stmts, env, day, "os", cleanInt(body.os, 2));
+  pushDim(stmts, env, day, "os", cleanInt(body.os));
   pushDim(stmts, env, day, "arch", body.arch === "arm64" || body.arch === "x86_64" ? body.arch : null);
   pushDim(stmts, env, day, "lang", cleanLang(body.lang));
   pushDim(stmts, env, day, "skinTone", SKIN_TONES.has(body.skinTone) ? body.skinTone : null);
@@ -235,9 +241,9 @@ function clampCount(v, max) {
   return Math.min(Math.floor(n), max);
 }
 
-function cleanInt(v, maxLen) {
+function cleanInt(v) {
   const s = String(v ?? "");
-  return /^[0-9]{1,3}$/.test(s) && s.length <= maxLen + 1 ? s : null;
+  return /^[0-9]{1,3}$/.test(s) ? s : null;
 }
 
 function cleanLang(v) {

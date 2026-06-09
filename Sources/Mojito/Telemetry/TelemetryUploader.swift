@@ -81,7 +81,16 @@ final class TelemetryUploader {
             "eggs": pending.eggs,
         ]
         if let app = appVersion() { payload["app"] = app }
-        if !pending.emoji.isEmpty { payload["emoji"] = pending.emoji }
+        if !pending.emoji.isEmpty {
+            // The server keeps at most 300 emoji per ping; trimming here also
+            // bounds the request body if pending has grown across failed days.
+            var emoji = pending.emoji
+            if emoji.count > 300 {
+                emoji = Dictionary(uniqueKeysWithValues:
+                    emoji.sorted { $0.value > $1.value }.prefix(300).map { ($0.key, $0.value) })
+            }
+            payload["emoji"] = emoji
+        }
         return payload
     }
 
