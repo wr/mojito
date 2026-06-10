@@ -104,7 +104,7 @@ private struct BannerView: View {
     @ObservedObject var controller: BannerController
     let onTap: () -> Void
 
-    private var pill: some View {
+    private var pillContent: some View {
         HStack(spacing: 8) {
             Text(egg.emojiGlyph ?? "🎉")
                 .font(.system(size: 20))
@@ -122,18 +122,62 @@ private struct BannerView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 10)
-        .background(
-            Capsule()
-                .fill(Color(nsColor: .systemBlue))
-                .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
-        )
+    }
+
+    @ViewBuilder
+    private var pill: some View {
+        Group {
+            if #available(macOS 26.0, *) {
+                // The system strips every glass-tint path in never-key
+                // panels (Glass.tint, .glassProminent, NSGlassEffectView
+                // .tintColor), and the compositor drops backdrop layers from
+                // filtered groups, so luminance-preserving tint is out.
+                // Instead: real glass blur underneath, with the vivid blue
+                // painted as a vertical gradient + rim highlight to read as
+                // tinted glass.
+                pillContent
+                    .background {
+                        ZStack {
+                            Color.clear.glassEffect(.regular, in: .capsule)
+                            Capsule().fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.30, green: 0.62, blue: 1.0).opacity(0.92),
+                                        Color(red: 0.0, green: 0.43, blue: 1.0).opacity(0.80),
+                                    ],
+                                    startPoint: .top, endPoint: .bottom
+                                )
+                            )
+                            Capsule().strokeBorder(
+                                LinearGradient(
+                                    colors: [
+                                        .white.opacity(0.60),
+                                        .white.opacity(0.12),
+                                        .cyan.opacity(0.40),
+                                    ],
+                                    startPoint: .top, endPoint: .bottom
+                                ),
+                                lineWidth: 1.2
+                            )
+                        }
+                        .shadow(color: .black.opacity(0.22), radius: 8, y: 2)
+                    }
+            } else {
+                pillContent
+                    .background(
+                        Capsule()
+                            .fill(Color(nsColor: .systemBlue))
+                            .shadow(color: .black.opacity(0.25), radius: 8, y: 2)
+                    )
+            }
+        }
         .fixedSize()  // pill width hugs content
         .contentShape(Capsule())  // hits confined to the pill, not the margin
+        .onTapGesture { onTap() }
     }
 
     var body: some View {
         pill
-            .onTapGesture { onTap() }
             .onHover { inside in
                 if inside { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
             }
