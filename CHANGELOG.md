@@ -5,6 +5,17 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.3.0
+
+## New
+- **Top emoji:** your most-used emoji now shows in About even at low usage volume ([#123](https://github.com/wr/mojito/pull/123))
+- **Compatibility:** updates for macOS 27 ([#127](https://github.com/wr/mojito/pull/127))
+
+## Fixed
+- **Web exclusions:** page URLs are now detected via the AXURL attribute, fixing URL matching in more browsers ([#126](https://github.com/wr/mojito/pull/126))
+- **Under the hood:** codebase cleanup and small optimizations ([#128](https://github.com/wr/mojito/pull/128))
+- Easter-egg polish ([#129](https://github.com/wr/mojito/pull/129))
+
 ## v1.2.3
 
 ## Fixed
