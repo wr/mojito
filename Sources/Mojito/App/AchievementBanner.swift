@@ -31,18 +31,6 @@ enum AchievementBanner {
         if currentPanel == nil { showNext() }
     }
 
-    #if DEBUG
-    /// Temporary styling scaffold (W-393): parks a banner on screen
-    /// indefinitely — no hold timer, taps ignored — with a high-contrast
-    /// test pattern rendered behind the pill so the glass/blur/tint
-    /// interaction is visible against known content. Remove before merge.
-    fileprivate static var parked = false
-    static func parkForStyling() {
-        parked = true
-        show(.k01)
-    }
-    #endif
-
     private static func showNext() {
         guard !queue.isEmpty else { return }
         let egg = queue.removeFirst()
@@ -68,9 +56,6 @@ enum AchievementBanner {
 
         let controller = BannerController()
         let host = NSHostingView(rootView: BannerView(egg: egg, controller: controller, onTap: {
-            #if DEBUG
-            if parked { return }
-            #endif
             NotificationCenter.default.post(name: .mojitoRevealEasterEgg, object: egg.rawValue)
             beginExit(panel, controller)
         }))
@@ -86,10 +71,6 @@ enum AchievementBanner {
         panel.contentView = container
         panel.orderFrontRegardless()
         currentPanel = panel
-
-        #if DEBUG
-        if parked { return }  // no hold timer — banner stays up
-        #endif
 
         // Entry + exit are both SwiftUI-driven scale springs in BannerView.
         // After the hold, play the shrink-down and order the panel out. A
@@ -195,47 +176,21 @@ private struct BannerView: View {
         .onTapGesture { onTap() }
     }
 
-    #if DEBUG
-    /// Sharp, colorful content behind the pill so blur/tint compositing is
-    /// observable against known pixels (W-393 scaffold).
-    private var debugBackdrop: some View {
-        ZStack {
-            LinearGradient(
-                colors: [.orange, .pink, .cyan, .green, .yellow],
-                startPoint: .topLeading, endPoint: .bottomTrailing
-            )
-            VStack(spacing: 4) {
-                ForEach(0..<5, id: \.self) { _ in
-                    Text(verbatim: "The quick brown fox jumps over the lazy dog 0123456789")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.black)
-                }
-            }
-        }
-        .allowsHitTesting(false)
-    }
-    #endif
-
     var body: some View {
-        ZStack {
-            #if DEBUG
-            if AchievementBanner.parked { debugBackdrop }
-            #endif
-            pill
-                .onHover { inside in
-                    if inside { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
-                }
-                // Bouncy scale-pop in/out from center. Both axes scale together so
-                // the pill grows from a tiny dot into its resting size with an
-                // elastic overshoot, and shrinks back to a dot on dismiss.
-                .scaleEffect(controller.visible ? 1.0 : 0.0, anchor: .center)
-                .opacity(controller.visible ? 1.0 : 0.0)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)  // center pill within the oversized panel stage
-        .onAppear {
-            withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) {
-                controller.visible = true
+        pill
+            .onHover { inside in
+                if inside { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
             }
-        }
+            // Bouncy scale-pop in/out from center. Both axes scale together so
+            // the pill grows from a tiny dot into its resting size with an
+            // elastic overshoot, and shrinks back to a dot on dismiss.
+            .scaleEffect(controller.visible ? 1.0 : 0.0, anchor: .center)
+            .opacity(controller.visible ? 1.0 : 0.0)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)  // center pill within the oversized panel stage
+            .onAppear {
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) {
+                    controller.visible = true
+                }
+            }
     }
 }
