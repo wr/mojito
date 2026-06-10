@@ -64,6 +64,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             openSettings: { [weak self] in self?.openSettings() }
         )
 
+        #if DEBUG
+        // Temporary (W-393): parked banner for styling iteration. Remove
+        // before merge.
+        AchievementBanner.parkForStyling()
+        #endif
+
         if let until = UserDefaults.standard.object(forKey: PrefsKey.pausedUntil) as? TimeInterval {
             let date = Date(timeIntervalSince1970: until)
             if date > Date() { engine.pausedUntil = date }

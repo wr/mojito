@@ -31,6 +31,18 @@ enum AchievementBanner {
         if currentPanel == nil { showNext() }
     }
 
+    #if DEBUG
+    /// Temporary styling scaffold (W-393): parks a banner on screen
+    /// indefinitely — no hold timer, taps ignored — with a high-contrast
+    /// test pattern rendered behind the pill so the glass/blur/tint
+    /// interaction is visible against known content. Remove before merge.
+    fileprivate static var parked = false
+    static func parkForStyling() {
+        parked = true
+        show(.k01)
+    }
+    #endif
+
     private static func showNext() {
         guard !queue.isEmpty else { return }
         let egg = queue.removeFirst()
@@ -56,6 +68,9 @@ enum AchievementBanner {
 
         let controller = BannerController()
         let host = NSHostingView(rootView: BannerView(egg: egg, controller: controller, onTap: {
+            #if DEBUG
+            if parked { return }
+            #endif
             NotificationCenter.default.post(name: .mojitoRevealEasterEgg, object: egg.rawValue)
             beginExit(panel, controller)
         }))
@@ -71,6 +86,10 @@ enum AchievementBanner {
         panel.contentView = container
         panel.orderFrontRegardless()
         currentPanel = panel
+
+        #if DEBUG
+        if parked { return }  // no hold timer — banner stays up
+        #endif
 
         // Entry + exit are both SwiftUI-driven scale springs in BannerView.
         // After the hold, play the shrink-down and order the panel out. A
@@ -128,14 +147,40 @@ private struct BannerView: View {
     private var pill: some View {
         Group {
             if #available(macOS 26.0, *) {
-                // Glass draws its own edge highlight and shadow; the tint
-                // keeps the pill reading as blue while staying translucent
-                // (and tracking the macOS 27 transparency slider).
+                // The system strips every glass-tint path in never-key
+                // panels (Glass.tint, .glassProminent, NSGlassEffectView
+                // .tintColor), and the compositor drops backdrop layers from
+                // filtered groups, so luminance-preserving tint is out.
+                // Instead: real glass blur underneath, with the vivid blue
+                // painted as a vertical gradient + rim highlight to read as
+                // tinted glass.
                 pillContent
-                    .glassEffect(
-                        .regular.tint(Color(nsColor: .systemBlue).opacity(0.8)).interactive(),
-                        in: .capsule
-                    )
+                    .background {
+                        ZStack {
+                            Color.clear.glassEffect(.regular, in: .capsule)
+                            Capsule().fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.30, green: 0.62, blue: 1.0).opacity(0.92),
+                                        Color(red: 0.0, green: 0.43, blue: 1.0).opacity(0.80),
+                                    ],
+                                    startPoint: .top, endPoint: .bottom
+                                )
+                            )
+                            Capsule().strokeBorder(
+                                LinearGradient(
+                                    colors: [
+                                        .white.opacity(0.60),
+                                        .white.opacity(0.12),
+                                        .cyan.opacity(0.40),
+                                    ],
+                                    startPoint: .top, endPoint: .bottom
+                                ),
+                                lineWidth: 1.2
+                            )
+                        }
+                        .shadow(color: .black.opacity(0.22), radius: 8, y: 2)
+                    }
             } else {
                 pillContent
                     .background(
@@ -147,24 +192,50 @@ private struct BannerView: View {
         }
         .fixedSize()  // pill width hugs content
         .contentShape(Capsule())  // hits confined to the pill, not the margin
+        .onTapGesture { onTap() }
     }
 
-    var body: some View {
-        pill
-            .onTapGesture { onTap() }
-            .onHover { inside in
-                if inside { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
-            }
-            // Bouncy scale-pop in/out from center. Both axes scale together so
-            // the pill grows from a tiny dot into its resting size with an
-            // elastic overshoot, and shrinks back to a dot on dismiss.
-            .scaleEffect(controller.visible ? 1.0 : 0.0, anchor: .center)
-            .opacity(controller.visible ? 1.0 : 0.0)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)  // center pill within the oversized panel stage
-            .onAppear {
-                withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) {
-                    controller.visible = true
+    #if DEBUG
+    /// Sharp, colorful content behind the pill so blur/tint compositing is
+    /// observable against known pixels (W-393 scaffold).
+    private var debugBackdrop: some View {
+        ZStack {
+            LinearGradient(
+                colors: [.orange, .pink, .cyan, .green, .yellow],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            VStack(spacing: 4) {
+                ForEach(0..<5, id: \.self) { _ in
+                    Text(verbatim: "The quick brown fox jumps over the lazy dog 0123456789")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.black)
                 }
             }
+        }
+        .allowsHitTesting(false)
+    }
+    #endif
+
+    var body: some View {
+        ZStack {
+            #if DEBUG
+            if AchievementBanner.parked { debugBackdrop }
+            #endif
+            pill
+                .onHover { inside in
+                    if inside { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
+                }
+                // Bouncy scale-pop in/out from center. Both axes scale together so
+                // the pill grows from a tiny dot into its resting size with an
+                // elastic overshoot, and shrinks back to a dot on dismiss.
+                .scaleEffect(controller.visible ? 1.0 : 0.0, anchor: .center)
+                .opacity(controller.visible ? 1.0 : 0.0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)  // center pill within the oversized panel stage
+        .onAppear {
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) {
+                controller.visible = true
+            }
+        }
     }
 }
