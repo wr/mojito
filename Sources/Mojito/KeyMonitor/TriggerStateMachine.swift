@@ -135,8 +135,13 @@ struct TriggerStateMachine {
     /// inert — never matched as a suffix, never deferred, never consume a
     /// following char — so they read as plain text. The Engine sets it from
     /// `PrefsKey.arrowConversionEnabled`. Other ambient emoticons (`<3`, …)
-    /// are unaffected.
-    var arrowConversionEnabled: Bool = true
+    /// are unaffected. Turning it off drops any deferred arrow match, so a
+    /// fire held back before the toggle flipped can't land after it.
+    var arrowConversionEnabled: Bool = true {
+        didSet {
+            if !arrowConversionEnabled { pendingImmediateFire = nil }
+        }
+    }
 
     /// The character that, typed right after a bare `:`, opens the Quick Access
     /// pill (e.g. `?` → `:?`). `nil` disables it. The Engine sets it from

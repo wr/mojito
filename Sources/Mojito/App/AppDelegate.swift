@@ -53,6 +53,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: PrefsKey.firstLaunchDate)
         }
 
+        // Arrows were a sub-toggle of emoticons before v1.4: emoticons off
+        // meant arrows implicitly off, and the hidden sub-toggle was never
+        // written. Pin that state now that the toggles are independent, so
+        // updating doesn't switch arrow conversion on behind anyone's back.
+        // Self-limiting: a no-op once the arrow key holds any value.
+        if UserDefaults.standard.object(forKey: PrefsKey.arrowConversionEnabled) == nil,
+           (UserDefaults.standard.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) == false {
+            UserDefaults.standard.set(false, forKey: PrefsKey.arrowConversionEnabled)
+        }
+
         // Anonymous, consent-gated daily stats. Self-gates — a no-op until the
         // user has seen the notice and left it enabled.
         TelemetryUploader.shared.uploadIfDue()

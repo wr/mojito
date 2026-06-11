@@ -187,18 +187,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // The pill is summoned by `:?` when Quick Access is enabled.
         let qaEnabled = (defaults.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
         stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
-        // Arrows are inert unless both emoticons and the arrow sub-toggle are on
-        // — gating in the SM means a disabled arrow never defers or consumes a
-        // following char (which would otherwise be dropped when the insert is
-        // suppressed downstream).
+        // Gating arrows in the SM means a disabled arrow never defers or
+        // consumes a following char (which would otherwise be dropped when
+        // the insert is suppressed downstream).
         stateMachine.arrowConversionEnabled = arrowConversionActive
     }
 
-    /// Arrow conversion runs only when emoticons *and* the arrow sub-toggle are
-    /// both on. The sub-toggle is read fresh (cheap, off the keystroke path).
+    /// Arrow conversion is independent of the emoticon toggle. Read fresh
+    /// (cheap, off the keystroke path).
     private var arrowConversionActive: Bool {
-        let arrowsOn = (UserDefaults.standard.object(forKey: PrefsKey.arrowConversionEnabled) as? Bool) ?? true
-        return emoticonsEnabled && arrowsOn
+        (UserDefaults.standard.object(forKey: PrefsKey.arrowConversionEnabled) as? Bool) ?? true
     }
 
     deinit {
@@ -1256,11 +1254,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         )
     }
 
-    /// Ambient lookup, honoring the emoticon master toggle and the arrow
-    /// sub-toggle. `nil` means the word stays literal.
+    /// Ambient lookup. Arrows answer to the arrow toggle, every other
+    /// ambient emoticon to the emoticon toggle — the two are independent.
+    /// `nil` means the word stays literal.
     private func ambientEmoji(for word: String) -> String? {
-        guard emoticonsEnabled,
-              arrowConversionActive || !AmbientEmoticonTable.isArrow(word) else { return nil }
+        if AmbientEmoticonTable.isArrow(word) {
+            guard arrowConversionActive else { return nil }
+        } else {
+            guard emoticonsEnabled else { return nil }
+        }
         return AmbientEmoticonTable.emoji(for: word)
     }
 

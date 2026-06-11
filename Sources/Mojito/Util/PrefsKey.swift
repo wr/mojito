@@ -43,8 +43,8 @@ enum PrefsKey {
     static let skinTone              = "mojito.skinTone"
     /// `:D` → 😃 conversion.
     static let emoticonsEnabled      = "mojito.emoticonsEnabled"
-    /// Sub-toggle of `emoticonsEnabled`: text-arrow conversion (`->` → →,
-    /// `<-` → ←, `<->` → ↔). Default on; off leaves arrows as literal text.
+    /// Text-arrow conversion (`->` → →, `<-` → ←, `<->` → ↔), independent
+    /// of `emoticonsEnabled`. Default on; off leaves arrows as literal text.
     static let arrowConversionEnabled = "mojito.arrowConversionEnabled"
     /// Experimental Symbols (★ ⌘ ⌥ …) included in fuzzy search.
     static let symbolsEnabled        = "mojito.symbolsEnabled"
