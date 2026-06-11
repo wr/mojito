@@ -539,6 +539,30 @@ struct TriggerStateMachineTests {
         #expect(sm.handle(.nameChar("3")).action == .insertAmbientEmoticon(word: "<3", trailing: ""))
     }
 
+    @Test func arrowToggleOffDropsDeferredArrowFire() {
+        // `<-` defers waiting for a possible `<->`. If the toggle flips off
+        // while the fire is pending, the pending match is dropped — the next
+        // char must not collapse it into an insert.
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.cancelChar("<"))
+        _ = sm.handle(.nameChar("-"))                                // deferred
+        sm.arrowConversionEnabled = false
+        let x = sm.handle(.nameChar("x"))
+        #expect(x.action == .none)
+        #expect(x.consumesKey == false)
+    }
+
+    @Test func arrowToggleOffThenOnRestoresConversion() {
+        var sm = TriggerStateMachine()
+        sm.arrowConversionEnabled = false
+        _ = sm.handle(.nameChar("-"))
+        #expect(sm.handle(.cancelChar(">")).action == .none)
+        sm.arrowConversionEnabled = true
+        _ = sm.handle(.cancelChar(" "))                              // clear buffer
+        _ = sm.handle(.nameChar("-"))
+        #expect(sm.handle(.cancelChar(">")).action == .insertAmbientEmoticon(word: "->", trailing: ""))
+    }
+
     @Test func ambientTerminatorChecksWordThenResetsBuffer() {
         var sm = TriggerStateMachine()
         for ch in "hello" { _ = sm.handle(.nameChar(ch)) }
