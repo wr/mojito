@@ -370,8 +370,9 @@ enum DiscoveryEffect {
     case standard
     /// Count-milestone achievements: banner + confetti shower, no fanfare.
     case confettiSilent
-    /// Banner only — no fanfare, no confetti. For the egg you get by turning
-    /// eggs off, where a celebration would rather miss the point.
+    /// Adds nothing to the unconditional banner — no fanfare, no confetti.
+    /// For the egg you get by turning eggs off, where a celebration would
+    /// rather miss the point.
     case silent
 }
 
@@ -379,8 +380,8 @@ enum DiscoveryEffect {
 @MainActor
 enum EasterEggTracker {
     /// Master switch (default on). When off, `record` drops every egg except
-    /// `.k53`, which is exempt. Trigger and effect sites consult this too, so
-    /// disabled means no egg fires at all.
+    /// the one triggered by disabling them. Trigger and effect sites consult
+    /// this too, so disabled means no egg fires at all.
     static var eggsEnabled: Bool {
         UserDefaults.standard.object(forKey: PrefsKey.eggsEnabled) as? Bool ?? true
     }
