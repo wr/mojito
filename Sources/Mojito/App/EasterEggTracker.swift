@@ -56,6 +56,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
     case k50
     case k51
     case k52
+    case k53
 
     var id: String { rawValue }
 
@@ -113,6 +114,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k50: return "Disk Optimizer"
         case .k51: return "Last Call"
         case .k52: return "One more round..."
+        case .k53: return "Joyless"
         }
     }
 
@@ -211,6 +213,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k50: return "`\(EggStrings.k50)` — tidying clusters, one seek at a time."
         case .k51: return "Solve the word, then survive the bonus round."
         case .k52: return "Manually clicked Check for Updates."
+        case .k53: return "You turned easter eggs off. The irony is noted."
         }
     }
 
@@ -268,6 +271,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k50: return "Those little colored blocks, all out of order."
         case .k51: return "Solve it to see what comes next."
         case .k52: return "Ask for a fresh mojito?"
+        case .k53: return "Sometimes you just want them gone."
         }
     }
 
@@ -324,6 +328,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k50: return "💽"
         case .k51: return "🍹"
         case .k52: return "🍸"
+        case .k53: return "🫥"
         }
     }
 
@@ -351,6 +356,8 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k37, .k38, .k39, .k40, .k41,
              .k44, .k45, .k46, .k47, .k48:
             return .confettiSilent
+        case .k53:
+            return .silent
         default:
             return .standard
         }
@@ -363,11 +370,22 @@ enum DiscoveryEffect {
     case standard
     /// Count-milestone achievements: banner + confetti shower, no fanfare.
     case confettiSilent
+    /// Adds nothing to the unconditional banner — no fanfare, no confetti.
+    /// For the egg you get by turning eggs off, where a celebration would
+    /// rather miss the point.
+    case silent
 }
 
 /// Persists the set of discovered effects.
 @MainActor
 enum EasterEggTracker {
+    /// Master switch (default on). When off, `record` drops every egg except
+    /// the one triggered by disabling them. Trigger and effect sites consult
+    /// this too, so disabled means no egg fires at all.
+    static var eggsEnabled: Bool {
+        UserDefaults.standard.object(forKey: PrefsKey.eggsEnabled) as? Bool ?? true
+    }
+
     /// One-time migration on first read: pre-obfuscation builds stored
     /// plain raw values; we hash those against `EggIndex` and rewrite to
     /// opaque ids. Legacy strings live only inside
@@ -395,6 +413,8 @@ enum EasterEggTracker {
 
     /// Idempotent — re-triggers don't re-notify.
     static func record(_ egg: EasterEgg) {
+        // Disabled eggs can't be discovered; the sole exception is the one triggered by disabling them.
+        guard eggsEnabled || egg == .k53 else { return }
         guard cache.insert(egg.rawValue).inserted else { return }
         UserDefaults.standard.set(Array(cache), forKey: PrefsKey.easterEggsDiscovered)
         // Feed the public community counter for genuine discoveries only;
@@ -410,6 +430,8 @@ enum EasterEggTracker {
             DiscoveryFanfare.play()
         case .confettiSilent:
             ConfettiRain.start()
+        case .silent:
+            break
         }
     }
 

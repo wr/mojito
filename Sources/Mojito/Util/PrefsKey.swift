@@ -39,6 +39,14 @@ enum PrefsKey {
     static let donated               = "mojito.donated"
     /// `[String]` of `EasterEgg` raw values.
     static let easterEggsDiscovered  = "mojito.easterEggs.discovered"
+    /// Master switch for easter eggs (default on). When off, no egg fires
+    /// or is discovered — except the one awarded for turning this off.
+    static let eggsEnabled           = "mojito.eggs.enabled"
+    /// Easter-egg audio toggles. Both default on; the visuals always play.
+    /// `discoverySound` gates the "egg found" chime (`DiscoveryFanfare`);
+    /// `effectSounds` gates the audio an individual egg makes while running.
+    static let eggDiscoverySoundEnabled = "mojito.eggs.discoverySound"
+    static let eggEffectSoundsEnabled   = "mojito.eggs.effectSounds"
     /// Raw value from `SkinTone`.
     static let skinTone              = "mojito.skinTone"
     /// `:D` → 😃 conversion.

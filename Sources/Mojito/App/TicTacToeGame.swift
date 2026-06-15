@@ -430,8 +430,14 @@ enum TicTacToeSounds {
     private static let oPool = AudioPlayerPool(
         data: makeWaveData(frequency: 560, duration: 0.08), size: 1, volume: 0.35)
 
-    static func boop() { xPool.play() }
-    static func beep() { oPool.play() }
+    static func boop() {
+        guard EggSound.effectSoundsEnabled else { return }
+        xPool.play()
+    }
+    static func beep() {
+        guard EggSound.effectSoundsEnabled else { return }
+        oPool.play()
+    }
 
     /// Mono 16-bit PCM WAV: `frequency` Hz sine, triangular envelope
     /// to avoid attack/release pops.

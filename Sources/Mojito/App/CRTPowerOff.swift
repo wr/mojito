@@ -40,7 +40,7 @@ enum CRTPowerOff {
         panel.orderFrontRegardless()
         activeWindow = panel
 
-        if let sound = AudioBlob.load("s13") {
+        if EggSound.effectSoundsEnabled, let sound = AudioBlob.load("s13") {
             player = sound
             sound.volume = 0.8
             sound.play()

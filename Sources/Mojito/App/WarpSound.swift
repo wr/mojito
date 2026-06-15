@@ -14,6 +14,7 @@ enum WarpSound {
     static func play() {
         fadeTicker.stop()
         current?.stop()
+        guard EggSound.effectSoundsEnabled else { return }
         guard let sound = AudioBlob.load("s10") else { return }
         sound.volume = 1.0
         current = sound

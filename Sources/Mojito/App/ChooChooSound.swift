@@ -16,6 +16,7 @@ enum ChooChooSound {
     private static let amplitude: Float = 0.12
 
     static func play() {
+        guard EggSound.effectSoundsEnabled else { return }
         guard let buffer = renderBuffer() else { return }
         player.play(buffer)
     }

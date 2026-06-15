@@ -85,6 +85,7 @@ enum WordleSounds {
     }
 
     private static func play(_ tones: [SynthTone]) {
+        guard EggSound.effectSoundsEnabled else { return }
         guard let buffer = SynthRenderer.buffer(tones: tones, waveform: .triangle, envelope: envelope) else { return }
         player.play(buffer)
     }

@@ -30,6 +30,7 @@ enum DiscoveryFanfare {
     )
 
     static func play() {
+        guard EggSound.discoveryFanfareEnabled else { return }
         guard let buffer = SynthRenderer.buffer(tones: melody, waveform: .square, envelope: envelope) else { return }
         player.play(buffer)
     }
