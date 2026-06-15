@@ -412,7 +412,7 @@ enum EasterEggTracker {
 
     /// Idempotent — re-triggers don't re-notify.
     static func record(_ egg: EasterEgg) {
-        // Disabled eggs can't be discovered; `.k53` is the sole exception.
+        // Disabled eggs can't be discovered; the sole exception is the one triggered by disabling them.
         guard eggsEnabled || egg == .k53 else { return }
         guard cache.insert(egg.rawValue).inserted else { return }
         UserDefaults.standard.set(Array(cache), forKey: PrefsKey.easterEggsDiscovered)

@@ -122,8 +122,8 @@ struct GeneralSettingsView: View {
                 Toggle("Enable easter eggs", isOn: $eggsEnabled)
                     .toggleStyle(.switch)
                     .onChange(of: eggsEnabled) { _, isOn in
-                        // Records .k53 once; it's persistent, so flipping
-                        // eggs back on keeps it.
+                        // Records the "turned eggs off" egg once; it's persistent,
+                        // so re-enabling keeps it.
                         if !isOn { EasterEggTracker.record(.k53) }
                     }
                 if eggsEnabled {
