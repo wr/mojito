@@ -615,6 +615,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 if deleteCount > 0 {
                     TextInserter.deleteBackward(deleteCount)
                 }
+                guard EasterEggTracker.eggsEnabled else { return }
                 KonamiPayoff.start()
                 EasterEggTracker.record(.k99)
             }
@@ -950,7 +951,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
                 return
             }
-            if scored.emoji.hexcode == FuzzyMatcher.k02Hex {
+            if EasterEggTracker.eggsEnabled, scored.emoji.hexcode == FuzzyMatcher.k02Hex {
                 guard let pick = database.all.randomElement() else { return }
                 TextInserter.replace(charactersToDelete: charsToDelete, with: pick.tonedGlyph)
                 EasterEggTracker.record(.k02)
@@ -986,7 +987,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // keywords don't appear in source or the binary. The returned id
             // matches the hexcode constant.
             if let id = EggIndex.id(forExactQuery: key) {
-                if id == FuzzyMatcher.k02Hex {
+                if EasterEggTracker.eggsEnabled, id == FuzzyMatcher.k02Hex {
                     guard let pick = database.all.randomElement() else { return }
                     TextInserter.replace(charactersToDelete: charsToDelete, with: pick.character)
                     EasterEggTracker.record(.k02)
@@ -1007,6 +1008,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
     /// Returns true if `hexcode` matched (and the text was already deleted).
     private func triggerEasterEgg(hexcode: String, deleteCount: Int) -> Bool {
+        guard EasterEggTracker.eggsEnabled else { return false }
         switch hexcode {
         case FuzzyMatcher.k01Hex:
             TextInserter.deleteBackward(deleteCount)

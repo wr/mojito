@@ -38,7 +38,7 @@ enum XPLogin {
             bounds: frame.size,
             onLogin: {
                 MainActor.assumeIsolated {
-                    if let sound = preloadedChord {
+                    if EggSound.effectSoundsEnabled, let sound = preloadedChord {
                         player = sound
                         sound.play()
                     }

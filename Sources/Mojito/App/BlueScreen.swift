@@ -43,7 +43,7 @@ enum BlueScreen {
         unregister = EffectDismisser.register(anyKey: true, dismiss)
 
         // Compy 386 startup chirp (~1s) — boot-failure vibe.
-        if let sound = AudioBlob.load("s15") {
+        if EggSound.effectSoundsEnabled, let sound = AudioBlob.load("s15") {
             sound.volume = 0.8
             startupSound = sound
             sound.play()

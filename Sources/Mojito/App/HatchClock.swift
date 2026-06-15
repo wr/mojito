@@ -547,6 +547,7 @@ enum HatchSounds {
     private static let pool = AudioPlayerPool(data: makeClackWave(), size: 5, volume: 0.30)
 
     static func clack() {
+        guard EggSound.effectSoundsEnabled else { return }
         pool.play()
     }
 

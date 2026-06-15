@@ -368,6 +368,7 @@ private enum FireworksSounds {
     private static var pools: [Double: AudioPlayerPool] = [:]
 
     static func pew(frequency: Double) {
+        guard EggSound.effectSoundsEnabled else { return }
         let pool: AudioPlayerPool
         if let existing = pools[frequency] {
             pool = existing

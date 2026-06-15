@@ -20,6 +20,7 @@ enum DiskChatterSound {
 
     /// Stand up the engine so subsequent `playTick`/`playRun` are instant.
     static func start() {
+        guard EggSound.effectSoundsEnabled else { return }
         ensureBuffers()
         player.warmUp()
         enabled = true

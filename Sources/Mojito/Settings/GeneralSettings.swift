@@ -12,6 +12,9 @@ struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.symbolsRequireDoubleColon) private var symbolsRequireDoubleColon: Bool = false
     @AppStorage(PrefsKey.gifSearchEnabled) private var gifSearchEnabled: Bool = true
     @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled: Bool = true
+    @AppStorage(PrefsKey.eggsEnabled) private var eggsEnabled: Bool = true
+    @AppStorage(PrefsKey.eggDiscoverySoundEnabled) private var eggDiscoverySound: Bool = true
+    @AppStorage(PrefsKey.eggEffectSoundsEnabled) private var eggEffectSounds: Bool = true
     @State private var autoUpdates: Bool = UpdaterCoordinator.shared.automaticUpdates
 
     var body: some View {
@@ -113,6 +116,30 @@ struct GeneralSettingsView: View {
                 Text("Press the same shortcut again while paused to resume.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Toggle("Enable easter eggs", isOn: $eggsEnabled)
+                    .toggleStyle(.switch)
+                    .onChange(of: eggsEnabled) { _, isOn in
+                        // Records .k53 once; it's persistent, so flipping
+                        // eggs back on keeps it.
+                        if !isOn { EasterEggTracker.record(.k53) }
+                    }
+                if eggsEnabled {
+                    Toggle("Play “Easter egg found” sound effect", isOn: $eggDiscoverySound)
+                        .toggleStyle(.switch)
+                    Toggle("Play sounds within easter eggs", isOn: $eggEffectSounds)
+                        .toggleStyle(.switch)
+                }
+            } header: {
+                Text("Easter eggs")
+            } footer: {
+                if eggsEnabled {
+                    Text("Easter eggs still play on screen — these control sound only.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .formStyle(.grouped)

@@ -137,6 +137,7 @@
 		D57C0BA3F93C45531A439D89 /* v07.bin in Resources */ = {isa = PBXBuildFile; fileRef = 7CCBA41F4C17CC47E155A9BE /* v07.bin */; };
 		D69A33630F4FD6D6EB950C67 /* UpdaterCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702AC2870CD686AB17CC518E /* UpdaterCoordinator.swift */; };
 		D7FD72169491380D742F69BC /* ChooChooSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = C060B27E6970531BEBA3673E /* ChooChooSound.swift */; };
+		DADDDB9ED8378048DF84B51A /* EggSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1732A13138B365E5C880F62 /* EggSound.swift */; };
 		DCE52DEE8C9CEC354443E7DB /* SettingsRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFC142D2205F1C089F7524D2 /* SettingsRoot.swift */; };
 		DD501615C4A6623E5BA03369 /* EmojiDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B842CBBD6C7466F9BA2786 /* EmojiDatabaseTests.swift */; };
 		DD75EE1DF9351238356F60E7 /* SkinTone.swift in Sources */ = {isa = PBXBuildFile; fileRef = B375DE27AC0AE1D8DE965403 /* SkinTone.swift */; };
@@ -313,6 +314,7 @@
 		CDB886D82441D68D2F815AD3 /* AppIconDev.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIconDev.icon; sourceTree = "<group>"; };
 		CDDFF6254C8A58E63AC223D5 /* DiskOptimizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskOptimizer.swift; sourceTree = "<group>"; };
 		D05EB6710B1D2B6310DE45AC /* s14.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s14.bin; sourceTree = "<group>"; };
+		D1732A13138B365E5C880F62 /* EggSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggSound.swift; sourceTree = "<group>"; };
 		D2C4C16E01184684E33C3437 /* MyLegSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyLegSound.swift; sourceTree = "<group>"; };
 		D2F34180D15CF8B53F58B2A2 /* TextInserter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInserter.swift; sourceTree = "<group>"; };
 		D3C7F5A4189B7652C993C384 /* v11.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v11.bin; sourceTree = "<group>"; };
@@ -579,6 +581,7 @@
 				C02F1996A3DED7A0A133E24C /* DockIconManager.swift */,
 				3188FF1FD6559BF8E64C19CC /* EasterEggTracker.swift */,
 				2D64E06BE48B822A5BA55952 /* EffectDismisser.swift */,
+				D1732A13138B365E5C880F62 /* EggSound.swift */,
 				90F7DB616A5940BE3DE17B77 /* EggStrings.swift */,
 				36BF5C449E03B6F883693B87 /* EmojiRain.swift */,
 				ED0A255DD094B85EF7DC67D2 /* Engine.swift */,
@@ -914,6 +917,7 @@
 				751B7D80FF9EA3BA8B30B8FC /* EasterEggsSettings.swift in Sources */,
 				F07DEA88DD7DFC70934988EF /* EffectDismisser.swift in Sources */,
 				42DC32C9130BAB5381534226 /* EggIndex.swift in Sources */,
+				DADDDB9ED8378048DF84B51A /* EggSound.swift in Sources */,
 				2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */,
 				87514A922406A1535D7BCB42 /* EmbeddedGiphyKey.swift in Sources */,
 				AC7748989CE2B7D96CBB21FE /* Emoji.swift in Sources */,

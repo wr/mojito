@@ -66,7 +66,7 @@ enum DialupSound {
         ParticlePanel.tearDownOnClose(w)
 
         // No fallback beep — better silent than system alert.
-        if let sound = AudioBlob.load("s03") {
+        if EggSound.effectSoundsEnabled, let sound = AudioBlob.load("s03") {
             player = sound
             sound.play()
         }

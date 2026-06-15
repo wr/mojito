@@ -98,7 +98,7 @@ enum CeleryMan {
         guard !didSwap else { return }
         didSwap = true
         // s16.bin is 4d3d3d3d.wav.
-        if let sound = AudioBlob.load("s16") {
+        if EggSound.effectSoundsEnabled, let sound = AudioBlob.load("s16") {
             engagePlayer = sound
             sound.play()
         }

@@ -203,6 +203,7 @@ struct FuzzyMatcher {
         // source. Skipped for `::symbols`.
         var specialRow: ScoredEmoji?
         if corpus != .symbolsOnly,
+           EasterEggTracker.eggsEnabled,
            lowercased.count >= specialMinPrefix,
            let hexcode = EggIndex.id(forPrefix: lowercased),
            let row = pinnedRows[hexcode] {
