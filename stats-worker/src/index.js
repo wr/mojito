@@ -157,8 +157,9 @@ function pushDim(stmts, env, day, dim, value) {
 async function stats(env) {
   const day = today();
   const win = day - 29; // trailing 30 days for "current population" views
+  const activeLo = day - 7; // headline avg over the last 7 *complete* UTC days
 
-  const [emoji, os, arch, lang, app, skin, features, totals, active30, eggs] =
+  const [emoji, os, arch, lang, app, skin, features, totals, active30, active7, eggs] =
     await Promise.all([
       env.DB.prepare(
         `SELECT hexcode, SUM(count) c FROM emoji_daily WHERE day >= ?
@@ -178,6 +179,12 @@ async function stats(env) {
         `SELECT COALESCE(SUM(count), 0) c, COUNT(DISTINCT day) d
          FROM totals_daily WHERE kind = 'active' AND day >= ?`
       ).bind(win).all(),
+      // Headline mean excludes the in-progress UTC day so it doesn't sag and
+      // climb through the day; it then settles once per UTC day.
+      env.DB.prepare(
+        `SELECT COALESCE(SUM(count), 0) c, COUNT(DISTINCT day) d
+         FROM totals_daily WHERE kind = 'active' AND day >= ? AND day < ?`
+      ).bind(activeLo, day).all(),
       env.DB.prepare(`SELECT value FROM meta WHERE key = 'community_eggs'`).all(),
     ]);
 
@@ -189,14 +196,17 @@ async function stats(env) {
                    pct: r.t ? Math.round((r.e / r.t) * 100) : 0 }))
     .sort((a, b) => b.pct - a.pct);
 
-  // macsSharingStats is person-days (kept for compat); avgDailyActive is the per-day mean.
+  // macsSharingStats is 30-day person-days (kept for compat); avgDailyActive is
+  // the headline per-day mean over the last 7 complete UTC days.
   const activeTotal = active30.results[0]?.c || 0;
-  const activeDays = active30.results[0]?.d || 0;
-  const avgDailyActive = activeDays ? Math.round(activeTotal / activeDays) : 0;
+  const a7Total = active7.results[0]?.c || 0;
+  const a7Days = active7.results[0]?.d || 0;
+  const avgDailyActive = a7Days ? Math.round(a7Total / a7Days) : 0;
 
   const payload = {
     generatedAt: new Date().toISOString(),
     window: { days: 30 },
+    activeWindow: { days: 7 },
     macsSharingStats: activeTotal,
     avgDailyActive,
     totals: {
