@@ -202,7 +202,7 @@ enum EasterEgg: String, CaseIterable, Identifiable {
         case .k39: return "10,000 emoji autocompleted. This is your life now."
         case .k40: return "100,000 emoji autocompleted. Are you okay?"
         case .k41: return "1,000,000 emoji autocompleted. Beyond reason."
-        case .k42: return "Inserted a symbol via `::name:`."
+        case .k42: return "Inserted a symbol via `::name::`."
         case .k43: return "Inserted your first GIF via `:::`."
         case .k44: return "100 GIFs inserted. Reactions only."
         case .k45: return "1,000 GIFs inserted. The thread is mostly GIFs now."
