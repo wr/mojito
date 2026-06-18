@@ -53,7 +53,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var useFrequencyBoost = true
     private var symbolsEnabled = false
     private var symbolsRequireDoubleColon = false
-    private var gifSearchEnabled = true
     private var gifBypassExclusions = true
     private var emoticonsEnabled = true
 
@@ -181,18 +180,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         useFrequencyBoost = (defaults.object(forKey: PrefsKey.useFrequencyBoost) as? Bool) ?? true
         symbolsEnabled = (defaults.object(forKey: PrefsKey.symbolsEnabled) as? Bool) ?? false
         symbolsRequireDoubleColon = (defaults.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
-        gifSearchEnabled = (defaults.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         gifBypassExclusions = (defaults.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
         emoticonsEnabled = (defaults.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        // Build the trigger config from current prefs. This phase keeps it
-        // equivalent to the historical hardcoded triggers; a future phase reads
-        // a user-editable `mojito.triggers` set instead.
-        let qaEnabled = (defaults.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
-        var config = TriggerConfig.default
-        config.symbols = Trigger(mode: .symbols, open: "::", close: ":",
-                                 enabled: symbolsEnabled && symbolsRequireDoubleColon)
-        config.quickAccess = Trigger(mode: .quickAccess, open: ":?", close: nil, enabled: qaEnabled)
-        stateMachine.setConfig(config)
+        // `symbolsEnabled` above stays the corpus switch (symbols-in-results);
+        // the symbols *trigger* now lives in the user-editable config.
+        stateMachine.setConfig(TriggerConfigStore.load())
         // Gating arrows in the SM means a disabled arrow never defers or
         // consumes a following char (which would otherwise be dropped when
         // the insert is suppressed downstream).
@@ -640,11 +632,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             viewModel.reset()
             pickerWindow.hide()
             clearCaptureState()
-            // Toggle off → `:::` is just three colons in text.
-            if !gifSearchEnabled {
-                stateMachine.reset()
-                break
-            }
+            // The gif trigger's enable now lives in the TriggerConfig, so a
+            // disabled gif trigger never reaches here (the state machine won't
+            // emit `.openGifPicker`). No legacy gate needed.
             // Re-evaluate the focused field. The state-machine `:::` path
             // is tracked across any state, so the secure-field guard at
             // the first-colon site (which only fires in `.idle`) does not

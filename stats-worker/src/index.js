@@ -22,6 +22,8 @@ const MAX_EMOJI_PER_PING = 300;
 const FEATURE_KEYS = [
   "symbols", "symbolsDoubleColon", "emoticons", "arrows", "gifSearch",
   "frequencyBoost", "launchAtLogin", "quickAccess", "menuBarIcon",
+  "emojiTriggerCustom", "symbolsTriggerCustom", "gifTriggerCustom",
+  "quickAccessTriggerCustom",
 ];
 const SKIN_TONES = new Set([
   "default", "light", "mediumLight", "medium", "mediumDark", "dark",

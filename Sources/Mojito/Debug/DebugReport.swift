@@ -138,6 +138,12 @@ enum DebugReport {
         s += "- totals.symbolInserted: \(d.integer(forKey: PrefsKey.totalSymbolInserted))\n"
         s += "- totals.gifInserted: \(d.integer(forKey: PrefsKey.totalGifInserted))\n"
         s += "- totals.emoticonInserted: \(d.integer(forKey: PrefsKey.totalEmoticonInserted))\n"
+        // Trigger strings are config, not user content — safe to include.
+        let triggers = TriggerConfigStore.load(defaults: d)
+        for t in triggers.all {
+            let close = t.close.map { "/'\($0)'" } ?? ""
+            s += "- triggers.\(t.mode.rawValue): '\(t.open)'\(close) enabled=\(t.enabled)\n"
+        }
         return s
     }
 

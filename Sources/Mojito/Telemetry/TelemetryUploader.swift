@@ -97,16 +97,25 @@ final class TelemetryUploader {
     }
 
     private func features() -> [String: Bool] {
-        [
+        let triggers = TriggerConfigStore.load()
+        let def = TriggerConfig.default
+        return [
             "symbols": bool(PrefsKey.symbolsEnabled, false),
-            "symbolsDoubleColon": bool(PrefsKey.symbolsRequireDoubleColon, false),
+            // Kept for back-compat: now reflects the symbols *trigger* being on.
+            "symbolsDoubleColon": triggers.symbols.enabled,
             "emoticons": bool(PrefsKey.emoticonsEnabled, true),
             "arrows": bool(PrefsKey.arrowConversionEnabled, true),
-            "gifSearch": bool(PrefsKey.gifSearchEnabled, true),
+            "gifSearch": triggers.gif.enabled,
             "frequencyBoost": bool(PrefsKey.useFrequencyBoost, true),
             "launchAtLogin": bool(PrefsKey.launchAtLogin, false),
-            "quickAccess": bool(PrefsKey.quickAccessEnabled, true),
+            "quickAccess": triggers.quickAccess.enabled,
             "menuBarIcon": bool(PrefsKey.showMenuBarIcon, true),
+            // Whether each mode's trigger strings differ from the shipped
+            // defaults — measures adoption of customization, no strings sent.
+            "emojiTriggerCustom": triggers.emoji != def.emoji,
+            "symbolsTriggerCustom": triggers.symbols != def.symbols,
+            "gifTriggerCustom": triggers.gif != def.gif,
+            "quickAccessTriggerCustom": triggers.quickAccess != def.quickAccess,
         ]
     }
 

@@ -9,8 +9,6 @@ struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.emoticonsEnabled) private var emoticonsEnabled: Bool = true
     @AppStorage(PrefsKey.arrowConversionEnabled) private var arrowConversionEnabled: Bool = true
     @AppStorage(PrefsKey.symbolsEnabled) private var symbolsEnabled: Bool = false
-    @AppStorage(PrefsKey.symbolsRequireDoubleColon) private var symbolsRequireDoubleColon: Bool = false
-    @AppStorage(PrefsKey.gifSearchEnabled) private var gifSearchEnabled: Bool = true
     @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled: Bool = true
     @AppStorage(PrefsKey.eggsEnabled) private var eggsEnabled: Bool = true
     @AppStorage(PrefsKey.eggDiscoverySoundEnabled) private var eggDiscoverySound: Bool = true
@@ -85,14 +83,7 @@ struct GeneralSettingsView: View {
 
             QuickAccessSection()
 
-            Section("GIFs and Symbols") {
-                Toggle(isOn: $gifSearchEnabled) {
-                    TitleAndCaption(
-                        title: "GIF search",
-                        caption: "Type `:::` then a search term to insert a GIF from Giphy."
-                    )
-                }
-                .toggleStyle(.switch)
+            Section("Symbols") {
                 Toggle(isOn: $symbolsEnabled) {
                     TitleAndCaption(
                         title: "Symbols",
@@ -100,11 +91,6 @@ struct GeneralSettingsView: View {
                     )
                 }
                 .toggleStyle(.switch)
-                if symbolsEnabled {
-                    Toggle("Require `::` to search symbols", isOn: $symbolsRequireDoubleColon)
-                        .toggleStyle(.switch)
-                        .padding(.leading, 20)
-                }
             }
 
             Section {

@@ -1,10 +1,11 @@
 import SwiftUI
 import KeyboardShortcuts
 
-/// The `:?` pill toggle, its 8 editable slots (styled like the pill itself),
-/// and the global emoji-browser hotkey. No section header — the toggle names it.
+/// The Quick Access slots editor (8 editable slots styled like the `:?` pill)
+/// plus the global emoji-browser hotkey. The `:?` *enable* toggle lives in
+/// Settings ▸ Triggers (it's one of the user-editable triggers); this section
+/// only manages the pinned slots and the browser shortcut.
 struct QuickAccessSection: View {
-    @AppStorage(PrefsKey.quickAccessEnabled) private var enabled: Bool = true
     @StateObject private var store = QuickAccessStore.shared
     @State private var editing: EditingSlot?
     @State private var hovered: Int?
@@ -17,20 +18,8 @@ struct QuickAccessSection: View {
     }
 
     var body: some View {
-        Section {
-            Toggle(isOn: $enabled) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Quick Access")
-                    Text("Type `:?` to quickly access your top emoji")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .toggleStyle(.switch)
-
-            if enabled {
-                slotGrid
-            }
+        Section("Quick Access") {
+            slotGrid
 
             LabeledContent("Emoji Browser shortcut") {
                 KeyboardShortcuts.Recorder("", name: .showEmojiBrowser)
