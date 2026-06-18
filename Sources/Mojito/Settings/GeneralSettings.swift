@@ -8,12 +8,19 @@ struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.skinTone) private var skinToneRaw: String = SkinTone.default.rawValue
     @AppStorage(PrefsKey.emoticonsEnabled) private var emoticonsEnabled: Bool = true
     @AppStorage(PrefsKey.arrowConversionEnabled) private var arrowConversionEnabled: Bool = true
-    @AppStorage(PrefsKey.symbolsEnabled) private var symbolsEnabled: Bool = false
     @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled: Bool = true
     @AppStorage(PrefsKey.eggsEnabled) private var eggsEnabled: Bool = true
     @AppStorage(PrefsKey.eggDiscoverySoundEnabled) private var eggDiscoverySound: Bool = true
     @AppStorage(PrefsKey.eggEffectSoundsEnabled) private var eggEffectSounds: Bool = true
     @State private var autoUpdates: Bool = UpdaterCoordinator.shared.automaticUpdates
+
+    /// The single source of truth for every trigger control on this page.
+    /// Persisted (normalized) on each change so the live Engine picks it up.
+    @State private var triggers: TriggerConfig = TriggerConfigStore.load()
+
+    private var diagnostics: [TriggerMode: TriggerDiagnostic] {
+        TriggerValidator.diagnostics(for: triggers)
+    }
 
     var body: some View {
         Form {
@@ -67,7 +74,8 @@ struct GeneralSettingsView: View {
                 }
             }
 
-            Section("Emoji") {
+            Section {
+                TriggerPicker(mode: .emoji, open: $triggers.emoji.open, diagnostic: diagnostics[.emoji])
                 HStack(alignment: .center) {
                     Text("Skin tone")
                     Spacer()
@@ -79,18 +87,37 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
                 Toggle("Convert text arrows (`->` to →)", isOn: $arrowConversionEnabled)
                     .toggleStyle(.switch)
+            } header: {
+                Text("Emoji")
+            } footer: {
+                HStack {
+                    Spacer()
+                    Button("Reset triggers to defaults") { resetTriggers() }
+                        .controlSize(.small)
+                }
             }
 
-            QuickAccessSection()
+            QuickAccessSection(enabled: $triggers.quickAccess.enabled, emojiOpen: triggers.emoji.open)
 
             Section("Symbols") {
-                Toggle(isOn: $symbolsEnabled) {
+                Toggle(isOn: $triggers.symbols.enabled) {
                     TitleAndCaption(
                         title: "Symbols",
-                        caption: "Include ★ ⌘ ⌥ and similar characters in results (experimental)."
+                        caption: "Include ★ ⌘ ⌥ and similar characters, reachable via their own trigger (experimental)."
                     )
                 }
                 .toggleStyle(.switch)
+                if triggers.symbols.enabled {
+                    TriggerPicker(mode: .symbols, open: $triggers.symbols.open, diagnostic: diagnostics[.symbols])
+                }
+            }
+
+            Section("GIF") {
+                Toggle("GIF search", isOn: $triggers.gif.enabled)
+                    .toggleStyle(.switch)
+                if triggers.gif.enabled {
+                    TriggerPicker(mode: .gif, open: $triggers.gif.open, diagnostic: diagnostics[.gif])
+                }
             }
 
             Section {
@@ -129,6 +156,17 @@ struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .onChange(of: triggers) { _, _ in
+            // Persisting normalizes and posts a UserDefaults change the Engine
+            // observes, so the live state machine picks up the edit at once.
+            TriggerConfigStore.save(triggers)
+        }
+    }
+
+    /// Reset only the trigger-related fields to `.default`, re-normalize, save.
+    private func resetTriggers() {
+        triggers = .default
+        triggers.normalize()
     }
 }
 

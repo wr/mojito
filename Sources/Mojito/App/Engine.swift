@@ -51,8 +51,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// Defaults mirror the pref defaults; `refreshPreferences()` overwrites
     /// them at init and on every UserDefaults change.
     private var useFrequencyBoost = true
-    private var symbolsEnabled = false
-    private var symbolsRequireDoubleColon = false
     private var gifBypassExclusions = true
     private var emoticonsEnabled = true
 
@@ -178,12 +176,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private func refreshPreferences() {
         let defaults = UserDefaults.standard
         useFrequencyBoost = (defaults.object(forKey: PrefsKey.useFrequencyBoost) as? Bool) ?? true
-        symbolsEnabled = (defaults.object(forKey: PrefsKey.symbolsEnabled) as? Bool) ?? false
-        symbolsRequireDoubleColon = (defaults.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool) ?? false
         gifBypassExclusions = (defaults.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
         emoticonsEnabled = (defaults.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        // `symbolsEnabled` above stays the corpus switch (symbols-in-results);
-        // the symbols *trigger* now lives in the user-editable config.
+        // Symbols are now reachable only via the symbols trigger (`::star::`);
+        // the trigger and its enable live entirely in the user-editable config.
         stateMachine.setConfig(TriggerConfigStore.load())
         // Gating arrows in the SM means a disabled arrow never defers or
         // consumes a following char (which would otherwise be dropped when
@@ -919,11 +915,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private func corpusFor(scope: CaptureScope) -> SearchCorpus {
         switch scope {
         case .symbolsOnly:
+            // Symbols are reachable only via the symbols trigger (`::star::`),
+            // never blended into normal `:fire:` results.
             return .symbolsOnly
         case .normal:
-            if symbolsEnabled && !symbolsRequireDoubleColon {
-                return .emojiAndSymbols
-            }
             return .emojiOnly
         }
     }
@@ -1174,10 +1169,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private func recordUsage(emoji: Emoji) {
         usage[emoji.hexcode, default: 0] += 1
         UserDefaults.standard.set(usage, forKey: PrefsKey.usageCounts)
-        // Symbols come from the mixed corpus too (`:foo:` with symbols on
-        // and no double-colon required), and pick paths route through here.
-        // Branch on the synthetic hexcode prefix so symbols don't pad the
-        // emoji milestone count.
+        // Symbols (from the `::query::` trigger) route through here too; branch
+        // on the synthetic hexcode prefix so they don't pad the emoji milestone.
         if emoji.hexcode.hasPrefix("SYM_") {
             TelemetryStore.recordSymbol()
             bumpSymbolCounter()

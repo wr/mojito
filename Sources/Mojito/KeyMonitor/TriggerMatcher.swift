@@ -42,11 +42,18 @@ struct TriggerMatcher: Equatable {
         openers.contains { $0.open.count >= buffer.count && hasPrefix($0.open, buffer) }
     }
 
-    /// The close string for a mode that finishes by typing a delimiter
-    /// (`.emoji` / `.symbols`); nil otherwise or if blank.
+    /// The close string for a mode that finishes by typing a delimiter. For
+    /// the bracketing modes (`.emoji` / `.symbols`) it's mirrored from the open
+    /// (`:foo:`, `::foo::`); `.gif` / `.quickAccess` open a sticky UI and have
+    /// no close. Nil if the mode is inactive or its open is blank.
     func close(for mode: TriggerMode) -> [Character]? {
-        guard let c = config.trigger(for: mode).close, !c.isEmpty else { return nil }
-        return Array(c)
+        switch mode {
+        case .emoji, .symbols:
+            let open = config.trigger(for: mode).open
+            return open.isEmpty ? nil : Array(open)
+        case .gif, .quickAccess:
+            return nil
+        }
     }
 
     /// Whether `:` is a prefix of any active trigger. Colon-emoticons (`:)`,

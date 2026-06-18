@@ -59,8 +59,9 @@ struct TriggerMatcherTests {
 
     @Test func symmetricDoubleColonOpenAndClose() {
         var cfg = TriggerConfig.default
-        cfg.emoji = Trigger(mode: .emoji, open: "::", close: "::", enabled: true)
-        cfg.symbols = Trigger(mode: .symbols, open: "::", close: ":", enabled: false)
+        // Emoji open `::`; close mirrors the open → `::`.
+        cfg.emoji = Trigger(mode: .emoji, open: "::", enabled: true)
+        cfg.symbols = Trigger(mode: .symbols, open: "::", enabled: false)
         let m = TriggerMatcher(config: cfg)
         #expect(m.terminalMode(for: chars("::")) == .emoji)
         #expect(m.close(for: .emoji) == chars("::"))
@@ -73,7 +74,7 @@ struct TriggerMatcherTests {
 
     @Test func nonNestedTriggersResolveIndependently() {
         var cfg = TriggerConfig.default
-        cfg.gif = Trigger(mode: .gif, open: ";", close: nil, enabled: true)
+        cfg.gif = Trigger(mode: .gif, open: ";", enabled: true)
         let m = TriggerMatcher(config: cfg)
         #expect(m.terminalMode(for: chars(";")) == .gif)
         #expect(m.canExtend(chars(";")) == false)
@@ -83,7 +84,7 @@ struct TriggerMatcherTests {
 
     @Test func disabledTriggerIsInert() {
         var cfg = TriggerConfig.default
-        cfg.gif = Trigger(mode: .gif, open: ":::", close: nil, enabled: false)
+        cfg.gif = Trigger(mode: .gif, open: ":::", enabled: false)
         let m = TriggerMatcher(config: cfg)
         #expect(m.terminalMode(for: chars(":::")) == nil)
         // With symbols off and gif off, `::` no longer extends anywhere.
@@ -92,7 +93,7 @@ struct TriggerMatcherTests {
 
     @Test func blankOpenIsExcluded() {
         var cfg = TriggerConfig.default
-        cfg.symbols = Trigger(mode: .symbols, open: "", close: ":", enabled: true)
+        cfg.symbols = Trigger(mode: .symbols, open: "", enabled: true)
         let m = TriggerMatcher(config: cfg)
         // Empty open never participates even when enabled.
         #expect(m.isViablePrefix([]) == false || m.terminalMode(for: []) == nil)
@@ -102,17 +103,17 @@ struct TriggerMatcherTests {
     @Test func collisionResolvesByPrecedence() {
         // Two modes share an open string → emoji wins (earlier in `all`).
         var cfg = TriggerConfig.default
-        cfg.emoji = Trigger(mode: .emoji, open: "##", close: ":", enabled: true)
-        cfg.symbols = Trigger(mode: .symbols, open: "##", close: ":", enabled: true)
+        cfg.emoji = Trigger(mode: .emoji, open: "##", enabled: true)
+        cfg.symbols = Trigger(mode: .symbols, open: "##", enabled: true)
         let m = TriggerMatcher(config: cfg)
         #expect(m.terminalMode(for: chars("##")) == .emoji)
     }
 
     @Test func customColonlessConfigReportsNoColonTrigger() {
         var cfg = TriggerConfig.default
-        cfg.emoji = Trigger(mode: .emoji, open: ";", close: ";", enabled: true)
-        cfg.gif = Trigger(mode: .gif, open: ";;;", close: nil, enabled: true)
-        cfg.quickAccess = Trigger(mode: .quickAccess, open: ";?", close: nil, enabled: true)
+        cfg.emoji = Trigger(mode: .emoji, open: ";", enabled: true)
+        cfg.gif = Trigger(mode: .gif, open: ";;;", enabled: true)
+        cfg.quickAccess = Trigger(mode: .quickAccess, open: ";?", enabled: true)
         // symbols disabled by default; nothing starts with `:`.
         let m = TriggerMatcher(config: cfg)
         #expect(m.colonStartsATrigger == false)

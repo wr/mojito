@@ -4,23 +4,22 @@ import Foundation
 /// strings that fire each one.
 enum TriggerMode: String, CaseIterable, Codable, Equatable {
     case emoji          // `:query:` → emoji picker / exact match
-    case symbols        // `::query:` → experimental symbol corpus
+    case symbols        // `::query::` → experimental symbol corpus
     case gif            // `:::query` → Giphy picker
-    case quickAccess    // `:?` → favorites pill
+    case quickAccess    // `:?` → favorites pill (open derived from emoji)
 }
 
-/// One mode's trigger strings. `close` is meaningful only for `.emoji` /
-/// `.symbols` (the modes you finish by typing a delimiter); `.gif` /
-/// `.quickAccess` open a sticky UI and have no typed close.
+/// One mode's open string. The close string for the bracketing modes
+/// (`.emoji` / `.symbols`) is mirrored from the open — there's no separate
+/// close field — and `.gif` / `.quickAccess` open a sticky UI with no close.
 struct Trigger: Equatable, Codable {
     let mode: TriggerMode
     var open: String
-    var close: String?
     var enabled: Bool
 }
 
 /// The active trigger set. `default` reproduces Mojito's historical hardcoded
-/// triggers exactly, so an untouched install behaves identically.
+/// triggers, so an untouched install behaves identically.
 struct TriggerConfig: Equatable, Codable {
     var emoji: Trigger
     var symbols: Trigger
@@ -28,10 +27,10 @@ struct TriggerConfig: Equatable, Codable {
     var quickAccess: Trigger
 
     static let `default` = TriggerConfig(
-        emoji:       Trigger(mode: .emoji,       open: ":",   close: ":", enabled: true),
-        symbols:     Trigger(mode: .symbols,     open: "::",  close: ":", enabled: false),
-        gif:         Trigger(mode: .gif,         open: ":::", close: nil, enabled: true),
-        quickAccess: Trigger(mode: .quickAccess, open: ":?",  close: nil, enabled: true)
+        emoji:       Trigger(mode: .emoji,       open: ":",   enabled: true),
+        symbols:     Trigger(mode: .symbols,     open: "::",  enabled: false),
+        gif:         Trigger(mode: .gif,         open: ":::", enabled: true),
+        quickAccess: Trigger(mode: .quickAccess, open: ":?",  enabled: true)
     )
 
     /// All four, in the canonical precedence order used to break open-string
@@ -57,5 +56,14 @@ struct TriggerConfig: Equatable, Codable {
         case .gif:         gif = trigger
         case .quickAccess: quickAccess = trigger
         }
+    }
+
+    /// Quick Access isn't independently editable — its open follows the emoji
+    /// trigger (`:` → `:?`, `::` → `::?`). Call after any edit, and on load /
+    /// before save, so the persisted config and live state machine stay
+    /// consistent: the `?` stays the last char of the open, which is what the
+    /// state machine's pill / escape-restore handling keys off.
+    mutating func normalize() {
+        quickAccess.open = emoji.open + "?"
     }
 }

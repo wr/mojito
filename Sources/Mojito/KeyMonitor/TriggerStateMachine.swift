@@ -13,8 +13,8 @@ enum TriggerState: Equatable {
     case browsing(query: String)
 }
 
-/// `:foo` = full corpus, `::foo` = experimental Symbols set
-/// (only reachable when `symbolsRequireDoubleColon` is on).
+/// `:foo:` = emoji corpus; `::foo::` = experimental Symbols set, reachable
+/// only when the symbols trigger is enabled.
 enum CaptureScope: Equatable {
     case normal
     case symbolsOnly
@@ -182,13 +182,12 @@ struct TriggerStateMachine {
 
     /// When true, `::` upgrades the capture to symbols-only instead of cancelling.
     /// Thin shim over `config`: existing callers flip this to enable/disable the
-    /// symbols trigger (open `::`, close `:`).
+    /// symbols trigger (open `::`; close mirrors the open → `::`).
     var symbolsDoubleColonEnabled: Bool {
         get { config.symbols.enabled }
         set {
             var t = config.symbols
             t.open = "::"
-            t.close = ":"
             t.enabled = newValue
             config.set(t)
             matcher = TriggerMatcher(config: config)
@@ -207,20 +206,23 @@ struct TriggerStateMachine {
         }
     }
 
-    /// The character that, typed right after a bare `:`, opens the Quick Access
-    /// pill (e.g. `?` → `:?`). `nil` disables it. Thin shim over `config`:
-    /// setting it rewrites the quickAccess open to `:` + char (enabled); `nil`
-    /// disables the quickAccess trigger.
+    /// The character that, typed right after the emoji open, opens the Quick
+    /// Access pill (e.g. `?` → `:?`). `nil` disables it. Thin shim over
+    /// `config`: setting it enables the quickAccess trigger with open
+    /// `emoji.open + char`; `nil` disables it. The pill open follows the emoji
+    /// trigger, so it's keyed off `emoji.open` rather than a hardcoded `:`.
     var quickAccessTrigger: Character? {
         get {
             let qa = config.quickAccess
-            guard qa.enabled, qa.open.count == 2, qa.open.first == ":" else { return nil }
+            let prefix = config.emoji.open
+            guard qa.enabled, !prefix.isEmpty,
+                  qa.open.count == prefix.count + 1, qa.open.hasPrefix(prefix) else { return nil }
             return qa.open.last
         }
         set {
             var t = config.quickAccess
             if let c = newValue {
-                t.open = ":" + String(c)
+                t.open = config.emoji.open + String(c)
                 t.enabled = true
             } else {
                 t.enabled = false

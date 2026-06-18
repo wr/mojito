@@ -2,10 +2,14 @@ import SwiftUI
 import KeyboardShortcuts
 
 /// The Quick Access slots editor (8 editable slots styled like the `:?` pill)
-/// plus the global emoji-browser hotkey. The `:?` *enable* toggle lives in
-/// Settings ▸ Triggers (it's one of the user-editable triggers); this section
-/// only manages the pinned slots and the browser shortcut.
+/// plus the global emoji-browser hotkey. The enable toggle binds the
+/// quickAccess trigger; its open isn't editable here — it follows the Emoji
+/// trigger (`:` → `:?`), so we only surface the resolved open as a hint.
 struct QuickAccessSection: View {
+    @Binding var enabled: Bool
+    /// The current Emoji open, used only to render the `…?` hint.
+    let emojiOpen: String
+
     @StateObject private var store = QuickAccessStore.shared
     @State private var editing: EditingSlot?
     @State private var hovered: Int?
@@ -19,6 +23,17 @@ struct QuickAccessSection: View {
 
     var body: some View {
         Section("Quick Access") {
+            Toggle(isOn: $enabled) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Quick Access")
+                    Text("Opens with `\(emojiOpen)?` — follows your Emoji trigger.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .toggleStyle(.switch)
+
             slotGrid
 
             LabeledContent("Emoji Browser shortcut") {

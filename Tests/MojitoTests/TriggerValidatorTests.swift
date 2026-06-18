@@ -19,11 +19,10 @@ struct TriggerValidatorTests {
 
     @Test func collisionFlagsBothEnabledTriggers() {
         var config = TriggerConfig.default
-        // Make symbols collide with quickAccess on an identical open.
+        // Make symbols collide with the DERIVED quickAccess open (`:?`).
         config.symbols.enabled = true
         config.symbols.open = ":?"
-        config.symbols.close = nil
-        // quickAccess default open is ":?", enabled.
+        // quickAccess open follows emoji (`:` → `:?`), enabled.
         let diags = TriggerValidator.diagnostics(for: config)
         #expect(diags[.symbols]?.severity == .error)
         #expect(diags[.quickAccess]?.severity == .error)
@@ -40,15 +39,12 @@ struct TriggerValidatorTests {
     }
 
     @Test func shadowedByNoQueryTriggerIsError() {
-        // quickAccess `:` (no-query) shadows emoji `:x` — `:` fires first.
+        // gif `;` (no-query) shadows emoji `;x` — `;` fires first.
         var config = TriggerConfig.default
-        config.quickAccess.open = ":"
-        config.emoji.open = ":x"
-        config.emoji.close = ":"
-        // Avoid the symbols `::` extension muddying things.
+        config.gif.open = ";"
+        config.emoji.open = ";x"
+        // Avoid the symbols extension muddying things.
         config.symbols.enabled = false
-        // gif `:::` also starts with `:` so it's shadowed too; just assert
-        // emoji here, the rule applies uniformly.
         let diags = TriggerValidator.diagnostics(for: config)
         #expect(diags[.emoji]?.severity == .error)
     }
@@ -78,25 +74,22 @@ struct TriggerValidatorTests {
     }
 
     @Test func colonEmoticonNoteWhenNothingUsesColon() {
-        // Move emoji off `:` and ensure nothing else uses it.
+        // Move emoji off `:` (quickAccess derives to `;?`) and ensure nothing
+        // else uses `:`.
         var config = TriggerConfig.default
         config.emoji.open = ";"
-        config.emoji.close = ";"
         config.symbols.enabled = false
         config.gif.open = ";;;"
-        config.quickAccess.open = ";?"
         let diags = TriggerValidator.diagnostics(for: config)
         #expect(diags[.emoji]?.severity == .note)
     }
 
     @Test func noColonNoteWhenSomethingStillUsesColon() {
-        // emoji on `;` but quickAccess still on `:?` → colon path alive.
+        // emoji on `;` but gif still on `:::` → colon path alive.
         var config = TriggerConfig.default
         config.emoji.open = ";"
-        config.emoji.close = ";"
         config.symbols.enabled = false
-        config.gif.open = ";;;"
-        // quickAccess stays ":?"
+        // gif stays ":::"
         let diags = TriggerValidator.diagnostics(for: config)
         #expect(diags[.emoji] == nil)
     }
@@ -107,7 +100,6 @@ struct TriggerValidatorTests {
         config.emoji.open = ""
         config.symbols.enabled = false
         config.gif.open = ";;;"
-        config.quickAccess.open = ";?"
         let diags = TriggerValidator.diagnostics(for: config)
         #expect(diags[.emoji]?.severity == .error)
     }

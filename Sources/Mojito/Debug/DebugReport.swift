@@ -141,8 +141,7 @@ enum DebugReport {
         // Trigger strings are config, not user content — safe to include.
         let triggers = TriggerConfigStore.load(defaults: d)
         for t in triggers.all {
-            let close = t.close.map { "/'\($0)'" } ?? ""
-            s += "- triggers.\(t.mode.rawValue): '\(t.open)'\(close) enabled=\(t.enabled)\n"
+            s += "- triggers.\(t.mode.rawValue): '\(t.open)' enabled=\(t.enabled)\n"
         }
         return s
     }

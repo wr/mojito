@@ -13,7 +13,11 @@ struct TriggerDiagnostic: Equatable {
 /// severe), so the UI never stacks badges on a single row. No AppKit — fully
 /// unit-testable.
 enum TriggerValidator {
-    static func diagnostics(for config: TriggerConfig) -> [TriggerMode: TriggerDiagnostic] {
+    static func diagnostics(for rawConfig: TriggerConfig) -> [TriggerMode: TriggerDiagnostic] {
+        // Quick Access's open is derived from the emoji open, so collisions /
+        // shadows must be checked against the resolved value.
+        var config = rawConfig
+        config.normalize()
         var result: [TriggerMode: TriggerDiagnostic] = [:]
 
         // emoji is always live (no enable toggle); the rest must be enabled
@@ -60,12 +64,11 @@ enum TriggerValidator {
 
         // --- warning: risky letters / digits / whitespace ---
         for t in active where result[t.mode] == nil {
-            let pieces = [t.open, t.close ?? ""]
-            if pieces.contains(where: { $0.contains(where: \.isWhitespace) }) {
+            if t.open.contains(where: \.isWhitespace) {
                 result[t.mode] = TriggerDiagnostic(
                     severity: .warning,
                     message: String(localized: "Spaces in a trigger are error-prone"))
-            } else if pieces.contains(where: { $0.contains(where: { $0.isLetter || $0.isNumber }) }) {
+            } else if t.open.contains(where: { $0.isLetter || $0.isNumber }) {
                 result[t.mode] = TriggerDiagnostic(
                     severity: .warning,
                     message: String(localized: "Letters can fire inside words like ‘gift’ — punctuation is safer"))
