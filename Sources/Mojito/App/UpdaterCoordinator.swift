@@ -4,7 +4,7 @@ import os.log
 import Sparkle
 
 @MainActor
-final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate {
+final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate, SPUStandardUserDriverDelegate {
     static let shared = UpdaterCoordinator()
 
     /// Sparkle's standard driver only shows errors for user-initiated checks.
@@ -19,7 +19,7 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate {
     @Published private(set) var hasUpdateAvailable = false
 
     private let log = OSLog(subsystem: "ee.wells.Mojito", category: "Updater")
-    private let driver = SPUStandardUserDriver(hostBundle: .main, delegate: nil)
+    private lazy var driver = SPUStandardUserDriver(hostBundle: .main, delegate: self)
     private lazy var updater: SPUUpdater = SPUUpdater(
         hostBundle: .main,
         applicationBundle: .main,
@@ -119,5 +119,19 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate {
             self.hasUpdateError = false
             self.hasUpdateAvailable = false
         }
+    }
+
+    // MARK: - SPUStandardUserDriverDelegate
+
+    /// Mojito is an `.accessory` app, so Sparkle orders its windows front but
+    /// never activates us — leaving the update window beneath the frontmost
+    /// app. Pull the app forward right before Sparkle presents any UI. These
+    /// fire on the main thread (they bracket AppKit window/alert presentation).
+    nonisolated func standardUserDriverWillHandleShowingUpdate(_ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem, state: SPUUserUpdateState) {
+        MainActor.assumeIsolated { NSApp.activate(ignoringOtherApps: true) }
+    }
+
+    nonisolated func standardUserDriverWillShowModalAlert() {
+        MainActor.assumeIsolated { NSApp.activate(ignoringOtherApps: true) }
     }
 }
