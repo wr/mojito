@@ -93,10 +93,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             guard let self, self.viewModel.compact else { return }
             guard index < self.viewModel.results.count else { return }
             self.viewModel.selectedIndex = index
+            let openLen = max(1, self.stateMachine.captureOpenLen)
             if self.viewModel.results[index].emoji.hexcode == EmojiBrowser.sentinelHexcode {
-                self.expandToBrowser(deleteCount: 1)  // the typed `:`
+                self.expandToBrowser(deleteCount: openLen)  // the typed open delimiter
             } else {
-                self.insert(query: "", mode: .fromPicker, scope: .normal)
+                self.insert(query: "", mode: .fromPicker, scope: .normal, openLen: openLen, closeLen: 0)
             }
         }
 
@@ -183,10 +184,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         gifSearchEnabled = (defaults.object(forKey: PrefsKey.gifSearchEnabled) as? Bool) ?? true
         gifBypassExclusions = (defaults.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
         emoticonsEnabled = (defaults.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        stateMachine.symbolsDoubleColonEnabled = symbolsEnabled && symbolsRequireDoubleColon
-        // The pill is summoned by `:?` when Quick Access is enabled.
+        // Build the trigger config from current prefs. This phase keeps it
+        // equivalent to the historical hardcoded triggers; a future phase reads
+        // a user-editable `mojito.triggers` set instead.
         let qaEnabled = (defaults.object(forKey: PrefsKey.quickAccessEnabled) as? Bool) ?? true
-        stateMachine.quickAccessTrigger = qaEnabled ? "?" : nil
+        var config = TriggerConfig.default
+        config.symbols = Trigger(mode: .symbols, open: "::", close: ":",
+                                 enabled: symbolsEnabled && symbolsRequireDoubleColon)
+        config.quickAccess = Trigger(mode: .quickAccess, open: ":?", close: nil, enabled: qaEnabled)
+        stateMachine.setConfig(config)
         // Gating arrows in the SM means a disabled arrow never defers or
         // consumes a following char (which would otherwise be dropped when
         // the insert is suppressed downstream).
@@ -421,15 +427,20 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // (`🙂 ` → `🙂:)`).
         pendingEmoticonUndo = nil
 
+        let output = stateMachine.handle(input)
+
         // Secure-field check short-circuits — we never want to inspect a
         // password field. The exclusion list is honored per-action: emoji
         // picker / emoticon conversion are suppressed in excluded apps,
         // but the GIF picker (`:::`) still fires so a user can excise
-        // Slack's native emoji UI without losing GIF search there.
-        if case .idle = stateMachine.state, case .colon = input {
+        // Slack's native emoji UI without losing GIF search there. The state
+        // machine flags the idle → capturing transition (`captureJustOpened`)
+        // so any trigger open — not just `:` — gets a snapshot.
+        if stateMachine.captureJustOpened {
             let context = AppContextDetector.current()
             if context.focusedFieldIsSecure {
                 DebugRecorder.record(.engine, "secureFieldBlocked")
+                stateMachine.reset()
                 return false
             }
             captureContext = context
@@ -443,8 +454,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             captureFocusSnapshot = FocusedElementCache.shared.element
             captureFocusPID = FocusedElementCache.shared.focusedPID
         }
-
-        let output = stateMachine.handle(input)
 
         // Return/Tab during capture resolves to `.fromPicker`, which the
         // state machine marks consumed so the key selects the highlighted
@@ -520,22 +529,25 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         case .insertEmoji(let q, let mode, let scope):
             if captureExcluded { break }
-            // `.exactMatch` passed the closing `:` through to the focused
-            // app — wait one tick for it to land before deleting `:query:`.
+            // Open/close delete spans ride alongside the action on the SM (the
+            // action's shape is pinned by tests), read synchronously here.
+            let openLen = stateMachine.lastInsertOpenLen
+            let closeLen = stateMachine.lastInsertCloseLen
+            // `.exactMatch` passed the closing delimiter through to the focused
+            // app — wait one tick for it to land before deleting the span.
             // `.fromPicker` consumed the key, so we can act immediately.
             switch mode {
             case .exactMatch:
                 DispatchQueue.main.async { [weak self] in
-                    self?.insert(query: q, mode: .exactMatch, scope: scope)
+                    self?.insert(query: q, mode: .exactMatch, scope: scope, openLen: openLen, closeLen: closeLen)
                 }
             case .fromPicker:
                 if viewModel.topResult?.emoji.hexcode == EmojiBrowser.sentinelHexcode {
                     // Browse row: grow the panel into the grid instead of
-                    // inserting. Delete count covers the typed `:` (+ `::`).
-                    let leading = (scope == .symbolsOnly) ? 2 : 1
-                    expandToBrowser(deleteCount: q.count + leading)
+                    // inserting. Delete count covers the typed open delimiter.
+                    expandToBrowser(deleteCount: q.count + openLen)
                 } else {
-                    insert(query: q, mode: .fromPicker, scope: scope)
+                    insert(query: q, mode: .fromPicker, scope: scope, openLen: openLen, closeLen: closeLen)
                 }
             }
 
@@ -700,8 +712,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             collapseBrowser()
 
         case .expandBrowser:
-            // ↓/↑ on the pill — the typed `:` (1 char) is erased on pick.
-            expandToBrowser(deleteCount: 1)
+            // ↓/↑ on the pill — the typed open delimiter is erased on pick.
+            expandToBrowser(deleteCount: max(1, stateMachine.captureOpenLen))
 
         case .pickIndex(let index):
             if captureExcluded { break }
@@ -710,7 +722,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // Never quick-pick the trailing Browse chevron.
             if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode { break }
             viewModel.selectedIndex = index
-            insert(query: "", mode: .fromPicker, scope: .normal)
+            insert(query: "", mode: .fromPicker, scope: .normal, openLen: max(1, stateMachine.captureOpenLen), closeLen: 0)
 
         case .closePickerRestoringQuestion:
             viewModel.reset()
@@ -818,10 +830,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         gifPickerWindow.hide()
         let deleteCount: Int
         if case .capturing(let q) = stateMachine.state {
-            // Erase the typed `:query` — or `::query` in symbols scope. Mirrors
-            // the keyboard Browse-row path in apply(.insertEmoji).
-            let leading = stateMachine.captureScope == .symbolsOnly ? 2 : 1
-            deleteCount = q.count + leading
+            // Erase the typed open delimiter + query (`:query`, or `::query` in
+            // symbols scope). Mirrors the keyboard Browse-row path in
+            // apply(.insertEmoji).
+            deleteCount = q.count + max(1, stateMachine.captureOpenLen)
         } else {
             deleteCount = 0
         }
@@ -926,7 +938,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
     }
 
-    private func insert(query: String, mode: InsertMode, scope: CaptureScope) {
+    private func insert(query: String, mode: InsertMode, scope: CaptureScope, openLen: Int, closeLen: Int) {
         defer {
             stateMachine.reset()
             viewModel.reset()
@@ -936,8 +948,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             pendingEmoticonUndo = nil
         }
 
-        // `:foo` = 1, `::foo` = 2.
-        let leadingColons = (scope == .symbolsOnly) ? 2 : 1
+        // Chars of the typed open delimiter to erase (`:foo` = 1, `::foo` = 2).
+        let leadingColons = openLen
 
         switch mode {
         case .fromPicker:
@@ -966,7 +978,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // something resolves; otherwise leave the text alone.
             let key = query.lowercased()
             DebugRecorder.record(.insert, "exactMatch", ["scope": "\(scope)"])
-            let charsToDelete = query.count + leadingColons + 1  // + trailing colon
+            let charsToDelete = query.count + leadingColons + closeLen  // + typed close delimiter
 
             // `::query:`: top-1 fuzzy against symbols, exact label only.
             // No easter eggs, no random.
