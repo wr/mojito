@@ -32,21 +32,29 @@ struct TriggerPicker: View {
     /// On a preset (and not "Same as emoji") → menu; otherwise the pill.
     private var isCustom: Bool { !followsEmoji && !Self.presets.contains(open) }
 
-    /// The mode's own name, used as the sample word so a row reads as what it
-    /// does (`:emoji`, `::symbol`, `:::gif`) instead of a bare, ambiguous
-    /// punctuation glyph.
-    private var noun: String {
-        switch mode {
-        case .emoji:       return String(localized: "emoji")
-        case .symbols:     return String(localized: "symbol")
-        case .gif:         return String(localized: "gif")
-        case .quickAccess: return ""
+    /// Human name for a preset glyph (`:` → "Colon") so options read
+    /// `: Colon` rather than a bare, ambiguous punctuation mark.
+    private func presetName(_ preset: String) -> String {
+        switch preset {
+        case ":":   return String(localized: "Colon")
+        case "::":  return String(localized: "Double colon")
+        case ":::": return String(localized: "Triple colon")
+        case ";":   return String(localized: "Semicolon")
+        case "/":   return String(localized: "Slash")
+        case "!":   return String(localized: "Exclamation mark")
+        case "#":   return String(localized: "Hash")
+        default:    return ""
         }
     }
 
-    /// What the menu's label shows for the current selection.
+    private func presetLabel(_ preset: String) -> String {
+        let name = presetName(preset)
+        return name.isEmpty ? preset : "\(preset) \(name)"
+    }
+
+    /// What the menu's button shows for the current selection.
     private var menuLabel: String {
-        followsEmoji ? String(localized: "Same as emoji") : open + noun
+        followsEmoji ? String(localized: "Same as emoji") : presetLabel(open)
     }
 
     var body: some View {
@@ -59,7 +67,7 @@ struct TriggerPicker: View {
             }
 
             if isCustom {
-                CustomTriggerPill(text: $open, noun: noun) {
+                CustomTriggerPill(text: $open) {
                     // ✗ → back to the preset default (pill disappears). Symbols
                     // keeps follow=false (it's a scoped trigger again).
                     open = defaultOpen
@@ -93,7 +101,7 @@ struct TriggerPicker: View {
                     sameAsEmoji?.wrappedValue = false
                     open = preset
                 } label: {
-                    Text(verbatim: preset + noun)
+                    Text(verbatim: presetLabel(preset))
                 }
                 .disabled(preset != open && takenOpens.contains(preset))
             }
@@ -105,7 +113,6 @@ struct TriggerPicker: View {
             }
         } label: {
             Text(verbatim: menuLabel)
-                .font(.system(.body, design: .monospaced))
         }
         .menuStyle(.button)
         .buttonStyle(.bordered)
@@ -114,32 +121,26 @@ struct TriggerPicker: View {
 }
 
 /// A keyboard-shortcut-recorder-style pill for a custom trigger: an editable
-/// monospaced field, a dimmed trailing noun (so it reads `;;symbol`), and a ✗
-/// to reset to the default preset. The literal string IS the trigger, so we
-/// trim nothing — but newlines would wreck the field, so they're stripped.
+/// field plus a ✗ to reset to the default preset. The literal string IS the
+/// trigger, so we trim nothing — but newlines would wreck the field, so
+/// they're stripped.
 private struct CustomTriggerPill: View {
     @Binding var text: String
-    let noun: String
     let onClear: () -> Void
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 4) {
+            // An editable TextField ignores `.fixedSize()` and expands to fill,
+            // so bound it explicitly — triggers are 1–3 chars.
             TextField("", text: $text)
                 .textFieldStyle(.plain)
-                .font(.system(.body, design: .monospaced))
-                .fixedSize()
-                .frame(minWidth: 24)
+                .frame(width: 64)
                 .multilineTextAlignment(.trailing)
                 .onChange(of: text) { _, newValue in
                     let stripped = newValue.replacingOccurrences(of: "\n", with: "")
                         .replacingOccurrences(of: "\r", with: "")
                     if stripped != newValue { text = stripped }
                 }
-            if !noun.isEmpty {
-                Text(verbatim: noun)
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
             Button(action: onClear) {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.secondary)
