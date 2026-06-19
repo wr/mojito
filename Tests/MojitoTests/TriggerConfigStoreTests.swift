@@ -28,8 +28,8 @@ struct TriggerConfigStoreTests {
     }
 
     @Test func decodingLegacyBlobWithCloseKeyIgnoresIt() throws {
-        // Synthesized Codable drops unknown keys, so a pre-redesign blob that
-        // still carries `close` decodes cleanly into the open-only model.
+        // The tolerant `init(from:)` drops unknown keys, so a pre-redesign blob
+        // that still carries `close` decodes cleanly into the open-only model.
         let legacy = """
         {"emoji":{"mode":"emoji","open":":","close":":","enabled":true},
          "symbols":{"mode":"symbols","open":"::","close":":","enabled":false},
@@ -38,6 +38,32 @@ struct TriggerConfigStoreTests {
         """
         let decoded = try JSONDecoder().decode(TriggerConfig.self, from: Data(legacy.utf8))
         #expect(decoded == .default)
+    }
+
+    @Test func blobMissingSymbolsFollowEmojiDefaultsTrue() throws {
+        // A blob written before `symbolsFollowEmoji` existed must decode with it
+        // defaulting true (and adding fields must never nuke the rest).
+        let old = """
+        {"emoji":{"mode":"emoji","open":":","enabled":true},
+         "symbols":{"mode":"symbols","open":"::","enabled":true},
+         "gif":{"mode":"gif","open":":::","enabled":true},
+         "quickAccess":{"mode":"quickAccess","open":":?","enabled":true}}
+        """
+        let decoded = try JSONDecoder().decode(TriggerConfig.self, from: Data(old.utf8))
+        #expect(decoded.symbolsFollowEmoji == true)
+        #expect(decoded.symbols.enabled == true)
+        #expect(decoded.emoji == TriggerConfig.default.emoji)
+        #expect(decoded.gif == TriggerConfig.default.gif)
+    }
+
+    @Test func blobMissingEverythingDecodesToDefault() throws {
+        // An empty object falls back to defaults for every field.
+        let decoded = try JSONDecoder().decode(TriggerConfig.self, from: Data("{}".utf8))
+        #expect(decoded == .default)
+    }
+
+    @Test func symbolsFollowEmojiDefaultsTrue() {
+        #expect(TriggerConfig.default.symbolsFollowEmoji == true)
     }
 
     // MARK: save / load
@@ -87,9 +113,8 @@ struct TriggerConfigStoreTests {
         #expect(TriggerConfig.default.symbols.enabled == false)
     }
 
-    @Test func migrationMapsSymbolsTriggerFromLegacyEnableAlone() {
-        // The old requireDoubleColon distinction is gone — legacy symbolsEnabled
-        // maps straight onto the symbols trigger.
+    @Test func migrationMapsSymbolsEnableOntoTrigger() {
+        // Legacy symbolsEnabled gates the symbols trigger.
         let on = freshSuite()
         on.set(true, forKey: PrefsKey.symbolsEnabled)
         #expect(TriggerConfigStore.load(defaults: on).symbols.enabled == true)
@@ -97,6 +122,32 @@ struct TriggerConfigStoreTests {
         let off = freshSuite()
         off.set(false, forKey: PrefsKey.symbolsEnabled)
         #expect(TriggerConfigStore.load(defaults: off).symbols.enabled == false)
+    }
+
+    @Test func migrationMapsTwoLegacySymbolModes() {
+        // enabled + requireDoubleColon → scoped (`::`, follow=false).
+        let scoped = freshSuite()
+        scoped.set(true, forKey: PrefsKey.symbolsEnabled)
+        scoped.set(true, forKey: PrefsKey.symbolsRequireDoubleColon)
+        let scopedCfg = TriggerConfigStore.load(defaults: scoped)
+        #expect(scopedCfg.symbols.enabled == true)
+        #expect(scopedCfg.symbolsFollowEmoji == false)
+        #expect(scopedCfg.symbols.open == "::")
+
+        // enabled + !requireDoubleColon → blended (follow=true), matching the
+        // old "symbols mixed into normal results" behavior.
+        let blended = freshSuite()
+        blended.set(true, forKey: PrefsKey.symbolsEnabled)
+        blended.set(false, forKey: PrefsKey.symbolsRequireDoubleColon)
+        let blendedCfg = TriggerConfigStore.load(defaults: blended)
+        #expect(blendedCfg.symbols.enabled == true)
+        #expect(blendedCfg.symbolsFollowEmoji == true)
+
+        // !enabled → off regardless of requireDoubleColon.
+        let offSuite = freshSuite()
+        offSuite.set(false, forKey: PrefsKey.symbolsEnabled)
+        offSuite.set(true, forKey: PrefsKey.symbolsRequireDoubleColon)
+        #expect(TriggerConfigStore.load(defaults: offSuite).symbols.enabled == false)
     }
 
     @Test func migrationMapsGifAndQuickAccessEnableFromLegacyPrefs() {

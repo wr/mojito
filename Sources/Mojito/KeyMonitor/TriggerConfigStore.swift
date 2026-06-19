@@ -32,10 +32,16 @@ enum TriggerConfigStore {
     /// Reproduces the historical hardcoded triggers from the legacy prefs, so
     /// an existing install keeps behaving identically after the upgrade.
     private static func migrate(from defaults: UserDefaults) -> TriggerConfig {
-        // The symbols *trigger* now means "symbols reachable via `::`". Legacy
-        // `symbolsEnabled` (whatever its truthiness) maps straight onto it; the
-        // old `symbolsRequireDoubleColon` distinction is gone.
+        // Legacy symbols had two modes: `symbolsEnabled` gated the feature, and
+        // `symbolsRequireDoubleColon` chose between a scoped `::` trigger and
+        // blending symbols into the normal `:foo:` results. Map both onto the
+        // new symbols trigger + `symbolsFollowEmoji`:
+        //   enabled + requireDoubleColon → scoped (`::`, follow=false)
+        //   enabled + !requireDoubleColon → blended (follow=true)
+        //   !enabled → off
         let symbolsEnabled = defaults.object(forKey: PrefsKey.symbolsEnabled) as? Bool ?? false
+        let requireDoubleColon = defaults.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool ?? false
+        let symbolsFollowEmoji = symbolsEnabled && !requireDoubleColon
         let gifEnabled = defaults.object(forKey: PrefsKey.gifSearchEnabled) as? Bool ?? true
         let qaEnabled = defaults.object(forKey: PrefsKey.quickAccessEnabled) as? Bool ?? true
 
@@ -43,7 +49,8 @@ enum TriggerConfigStore {
             emoji:       Trigger(mode: .emoji,       open: ":",   enabled: true),
             symbols:     Trigger(mode: .symbols,     open: "::",  enabled: symbolsEnabled),
             gif:         Trigger(mode: .gif,         open: ":::", enabled: gifEnabled),
-            quickAccess: Trigger(mode: .quickAccess, open: ":?",  enabled: qaEnabled)
+            quickAccess: Trigger(mode: .quickAccess, open: ":?",  enabled: qaEnabled),
+            symbolsFollowEmoji: symbolsFollowEmoji
         )
         config.normalize()
         return config

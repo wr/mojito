@@ -184,11 +184,13 @@ struct TriggerStateMachine {
     /// Thin shim over `config`: existing callers flip this to enable/disable the
     /// symbols trigger (open `::`; close mirrors the open → `::`).
     var symbolsDoubleColonEnabled: Bool {
-        get { config.symbols.enabled }
+        get { config.symbols.enabled && !config.symbolsFollowEmoji }
         set {
             var t = config.symbols
             t.open = "::"
             t.enabled = newValue
+            // A scoped `::` trigger, not the blended-into-emoji mode.
+            config.symbolsFollowEmoji = false
             config.set(t)
             matcher = TriggerMatcher(config: config)
         }

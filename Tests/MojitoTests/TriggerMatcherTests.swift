@@ -109,6 +109,46 @@ struct TriggerMatcherTests {
         #expect(m.terminalMode(for: chars("##")) == .emoji)
     }
 
+    // MARK: symbols-follow-emoji (blended, not a separate opener)
+
+    @Test func activeExcludesSymbolsWhenFollowingEmoji() {
+        var cfg = TriggerConfig.default
+        cfg.symbols.enabled = true
+        cfg.symbolsFollowEmoji = true
+        // Blended symbols isn't a standalone opener.
+        #expect(cfg.active.contains { $0.mode == .symbols } == false)
+    }
+
+    @Test func activeIncludesScopedSymbols() {
+        var cfg = TriggerConfig.default
+        cfg.symbols.enabled = true
+        cfg.symbolsFollowEmoji = false
+        #expect(cfg.active.contains { $0.mode == .symbols } == true)
+    }
+
+    @Test func followingSymbolsDoesNotRegisterDoubleColonOpener() {
+        // Blended symbols (follow=true): `::` must NOT resolve to symbols — it's
+        // not an opener — so `::` only extends toward `:::` (gif).
+        var cfg = TriggerConfig.default
+        cfg.symbols.enabled = true
+        cfg.symbolsFollowEmoji = true
+        cfg.normalize()  // mirrors symbols.open to emoji open
+        let m = TriggerMatcher(config: cfg)
+        #expect(m.terminalMode(for: chars("::")) == nil)
+        #expect(m.canExtend(chars("::")) == true)  // still heads toward `:::`
+    }
+
+    @Test func scopedSymbolsRegistersDoubleColonOpener() {
+        // Scoped symbols (follow=false): `::` resolves to the symbols trigger.
+        var cfg = TriggerConfig.default
+        cfg.symbols.enabled = true
+        cfg.symbolsFollowEmoji = false
+        cfg.symbols.open = "::"
+        let m = TriggerMatcher(config: cfg)
+        #expect(m.terminalMode(for: chars("::")) == .symbols)
+        #expect(m.close(for: .symbols) == chars("::"))
+    }
+
     @Test func customColonlessConfigReportsNoColonTrigger() {
         var cfg = TriggerConfig.default
         cfg.emoji = Trigger(mode: .emoji, open: ";", enabled: true)

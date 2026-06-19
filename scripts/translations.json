@@ -3860,6 +3860,26 @@
       "fa": "مانند %@ است — محرک‌های متفاوت انتخاب کنید",
       "he": "זהה ל-%@ — בחר טריגרים נפרדים"
     },
+    "Same as emoji": {
+      "en-GB": "Same as emoji",
+      "de": "Wie Emoji",
+      "es": "Igual que emoji",
+      "es-419": "Igual que emoji",
+      "fr": "Comme les emoji",
+      "it": "Come gli emoji",
+      "pt-BR": "Igual aos emoji",
+      "ja": "絵文字と同じ",
+      "zh-Hans": "与表情符号相同",
+      "zh-Hant": "與表情符號相同",
+      "ko": "이모지와 동일",
+      "hi": "इमोजी जैसा ही",
+      "ru": "Как у эмодзи",
+      "pl": "Tak jak emoji",
+      "nl": "Hetzelfde als emoji",
+      "ar": "مثل الرموز التعبيرية",
+      "fa": "مانند ایموجی",
+      "he": "זהה לאמוג'י"
+    },
     "‘%@’ fires first, so this never triggers": {
       "en-GB": "‘%@’ fires first, so this never triggers",
       "de": "„%@“ wird zuerst ausgelöst, daher greift dies nie",

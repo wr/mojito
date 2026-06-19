@@ -19,8 +19,10 @@ struct TriggerValidatorTests {
 
     @Test func collisionFlagsBothEnabledTriggers() {
         var config = TriggerConfig.default
-        // Make symbols collide with the DERIVED quickAccess open (`:?`).
+        // Scoped symbols (follow=false) so it's a real opener that can collide
+        // with the DERIVED quickAccess open (`:?`).
         config.symbols.enabled = true
+        config.symbolsFollowEmoji = false
         config.symbols.open = ":?"
         // quickAccess open follows emoji (`:` → `:?`), enabled.
         let diags = TriggerValidator.diagnostics(for: config)
@@ -38,6 +40,17 @@ struct TriggerValidatorTests {
         #expect(diags[.quickAccess] == nil)
     }
 
+    @Test func blendedSymbolsDoesNotFalseCollideWithEmoji() {
+        // Symbols following emoji mirrors the emoji open after normalize; it's
+        // not a separate opener, so it must not be flagged as colliding.
+        var config = TriggerConfig.default
+        config.symbols.enabled = true
+        config.symbolsFollowEmoji = true
+        let diags = TriggerValidator.diagnostics(for: config)
+        #expect(diags[.emoji] == nil)
+        #expect(diags[.symbols] == nil)
+    }
+
     @Test func shadowedByNoQueryTriggerIsError() {
         // gif `;` (no-query) shadows emoji `;x` — `;` fires first.
         var config = TriggerConfig.default
@@ -50,10 +63,11 @@ struct TriggerValidatorTests {
     }
 
     @Test func gifPrefixShadowsLongerTrigger() {
-        // gif `;` (no-query) shadows symbols `;;`.
+        // gif `;` (no-query) shadows scoped symbols `;;`.
         var config = TriggerConfig.default
         config.gif.open = ";"
         config.symbols.enabled = true
+        config.symbolsFollowEmoji = false  // scoped → a real opener that can be shadowed
         config.symbols.open = ";;"
         let diags = TriggerValidator.diagnostics(for: config)
         #expect(diags[.symbols]?.severity == .error)

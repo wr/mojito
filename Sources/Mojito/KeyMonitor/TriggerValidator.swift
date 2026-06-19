@@ -22,9 +22,12 @@ enum TriggerValidator {
 
         // emoji is always live (no enable toggle); the rest must be enabled
         // with a non-empty open to be in play. An empty-open *non-emoji*
-        // trigger is just "disabled", not an error.
+        // trigger is just "disabled", not an error. Symbols set to follow emoji
+        // isn't a standalone opener (it blends into emoji results, and its open
+        // mirrors emoji's after normalize), so it can't collide — drop it.
         let candidates: [Trigger] = config.all.filter { t in
-            t.mode == .emoji || (t.enabled && !t.open.isEmpty)
+            if t.mode == .symbols, config.symbolsFollowEmoji { return false }
+            return t.mode == .emoji || (t.enabled && !t.open.isEmpty)
         }
         // Triggers that can actually fire and contribute collisions/shadows.
         let active = candidates.filter { !$0.open.isEmpty }

@@ -1,30 +1,40 @@
 import SwiftUI
 
 /// A reusable trigger editor embedded inline in the feature sections of
-/// Settings ▸ General. A labeled Picker over the shared preset vocabulary, an
-/// optional narrow Custom field, a live preview, and a `TriggerValidator`
-/// badge. The Picker binds to a mode's `open` string; edits flow back to the
-/// caller, which persists the whole `TriggerConfig` via `TriggerConfigStore`.
+/// Settings ▸ General. Renders one of two states, right-aligned:
+///   - a native-looking pop-up `Menu` of preset triggers (+ "Custom…", and for
+///     symbols "Same as emoji") when the mode is on a preset, with taken
+///     presets grayed out; or
+///   - a keyboard-shortcut-recorder-style pill (editable monospaced field +
+///     dimmed noun + ✗) when the mode is on a custom trigger.
+/// The binding edits a mode's `open` string (and, for symbols, the shared
+/// `sameAsEmoji` flag); edits flow back to the caller, which persists the
+/// whole `TriggerConfig` via `TriggerConfigStore`.
 struct TriggerPicker: View {
     /// The mode this picker edits — drives the preview shape and validator row.
     let mode: TriggerMode
     @Binding var open: String
     let diagnostic: TriggerDiagnostic?
+    /// Open strings already claimed by the other active triggers — grayed out
+    /// in the menu so a preset pick can never collide. This mode's own open is
+    /// never in here.
+    let takenOpens: Set<String>
+    /// The preset to restore to when the pill's ✗ is tapped.
+    let defaultOpen: String
+    /// Symbols only: the shared "blend into emoji" flag. `nil` for emoji/gif.
+    var sameAsEmoji: Binding<Bool>?
 
-    /// Preset vocabulary, shared across modes. `nil` sentinel = "Custom…".
+    /// Preset vocabulary, shared across modes.
     private static let presets: [String] = [":", "::", ":::", ";", "/", "!", "#"]
-    private static let customTag = "\u{0}custom"
 
-    /// `open` matches a preset → that preset's tag; otherwise the Custom tag.
-    private var selectionTag: String {
-        Self.presets.contains(open) ? open : Self.customTag
-    }
+    private var followsEmoji: Bool { sameAsEmoji?.wrappedValue ?? false }
 
-    private var isCustom: Bool { selectionTag == Self.customTag }
+    /// On a preset (and not "Same as emoji") → menu; otherwise the pill.
+    private var isCustom: Bool { !followsEmoji && !Self.presets.contains(open) }
 
-    /// The mode's own name, used as the sample word in each option so a row
-    /// reads as what it does (`:emoji`, `::symbol`, `:::gif`) instead of a bare,
-    /// ambiguous punctuation glyph.
+    /// The mode's own name, used as the sample word so a row reads as what it
+    /// does (`:emoji`, `::symbol`, `:::gif`) instead of a bare, ambiguous
+    /// punctuation glyph.
     private var noun: String {
         switch mode {
         case .emoji:       return String(localized: "emoji")
@@ -34,52 +44,31 @@ struct TriggerPicker: View {
         }
     }
 
+    /// What the menu's label shows for the current selection.
+    private var menuLabel: String {
+        followsEmoji ? String(localized: "Same as emoji") : open + noun
+    }
+
     var body: some View {
         HStack(spacing: 10) {
             Text("Trigger")
             Spacer(minLength: 0)
 
-            if isCustom {
-                CustomTriggerField(text: $open)
-            }
             if let diagnostic {
                 DiagnosticBadge(diagnostic: diagnostic)
             }
 
-            // Right-aligned select; each row shows the trigger applied to the
-            // mode's name (`:::gif`) so the menu is self-describing.
-            Picker("", selection: Binding(
-                get: { selectionTag },
-                set: { newTag in
-                    if newTag == Self.customTag {
-                        // Switching into Custom starts from a clean field.
-                        if Self.presets.contains(open) { open = "" }
-                    } else {
-                        open = newTag
-                    }
+            if isCustom {
+                CustomTriggerPill(text: $open, noun: noun) {
+                    // ✗ → back to the preset default (pill disappears). Symbols
+                    // keeps follow=false (it's a scoped trigger again).
+                    open = defaultOpen
                 }
-            )) {
-                ForEach(Self.presets, id: \.self) { preset in
-                    Text(verbatim: preset + noun)
-                        .font(.system(.body, design: .monospaced))
-                        .tag(preset)
-                }
-                Text("Custom…").tag(Self.customTag)
+            } else {
+                triggerMenu
             }
-            .labelsHidden()
-            .fixedSize()
         }
         .padding(.vertical, 1)
-
-        // In Custom the menu just says "Custom…", so echo what it produces.
-        if isCustom, !open.isEmpty {
-            HStack {
-                Spacer()
-                Text(verbatim: open + noun)
-                    .font(.system(.callout, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
-        }
 
         if let diagnostic {
             Text(diagnostic.message)
@@ -88,24 +77,86 @@ struct TriggerPicker: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
+
+    /// A `Menu` (not `Picker`) so individual preset rows can be `.disabled()`.
+    /// Styled to read as a native pop-up button.
+    private var triggerMenu: some View {
+        Menu {
+            if sameAsEmoji != nil {
+                Button(String(localized: "Same as emoji")) {
+                    sameAsEmoji?.wrappedValue = true
+                }
+                Divider()
+            }
+            ForEach(Self.presets, id: \.self) { preset in
+                Button {
+                    sameAsEmoji?.wrappedValue = false
+                    open = preset
+                } label: {
+                    Text(verbatim: preset + noun)
+                }
+                .disabled(preset != open && takenOpens.contains(preset))
+            }
+            Divider()
+            Button(String(localized: "Custom…")) {
+                sameAsEmoji?.wrappedValue = false
+                // Clear so the pill appears empty, ready to type into.
+                open = ""
+            }
+        } label: {
+            Text(verbatim: menuLabel)
+                .font(.system(.body, design: .monospaced))
+        }
+        .menuStyle(.button)
+        .buttonStyle(.bordered)
+        .fixedSize()
+    }
 }
 
-/// A narrow monospaced field for a custom trigger. The literal string IS the
-/// trigger, so we trim nothing — but newlines would wreck the field, so
-/// they're stripped.
-private struct CustomTriggerField: View {
+/// A keyboard-shortcut-recorder-style pill for a custom trigger: an editable
+/// monospaced field, a dimmed trailing noun (so it reads `;;symbol`), and a ✗
+/// to reset to the default preset. The literal string IS the trigger, so we
+/// trim nothing — but newlines would wreck the field, so they're stripped.
+private struct CustomTriggerPill: View {
     @Binding var text: String
+    let noun: String
+    let onClear: () -> Void
 
     var body: some View {
-        TextField("", text: $text)
-            .textFieldStyle(.roundedBorder)
-            .font(.system(.body, design: .monospaced))
-            .frame(width: 70)
-            .onChange(of: text) { _, newValue in
-                let stripped = newValue.replacingOccurrences(of: "\n", with: "")
-                    .replacingOccurrences(of: "\r", with: "")
-                if stripped != newValue { text = stripped }
+        HStack(spacing: 2) {
+            TextField("", text: $text)
+                .textFieldStyle(.plain)
+                .font(.system(.body, design: .monospaced))
+                .fixedSize()
+                .frame(minWidth: 24)
+                .multilineTextAlignment(.trailing)
+                .onChange(of: text) { _, newValue in
+                    let stripped = newValue.replacingOccurrences(of: "\n", with: "")
+                        .replacingOccurrences(of: "\r", with: "")
+                    if stripped != newValue { text = stripped }
+                }
+            if !noun.isEmpty {
+                Text(verbatim: noun)
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundStyle(.secondary)
             }
+            Button(action: onClear) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(Color(nsColor: .controlBackgroundColor))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1)
+        )
+        .fixedSize()
     }
 }
 

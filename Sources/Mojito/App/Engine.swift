@@ -53,6 +53,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var useFrequencyBoost = true
     private var gifBypassExclusions = true
     private var emoticonsEnabled = true
+    /// The live trigger config, cached so `corpusFor` can decide whether the
+    /// normal scope blends symbols in without re-reading UserDefaults.
+    private var triggerConfig = TriggerConfig.default
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -178,9 +181,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         useFrequencyBoost = (defaults.object(forKey: PrefsKey.useFrequencyBoost) as? Bool) ?? true
         gifBypassExclusions = (defaults.object(forKey: PrefsKey.gifBypassExclusions) as? Bool) ?? true
         emoticonsEnabled = (defaults.object(forKey: PrefsKey.emoticonsEnabled) as? Bool) ?? true
-        // Symbols are now reachable only via the symbols trigger (`::star::`);
-        // the trigger and its enable live entirely in the user-editable config.
-        stateMachine.setConfig(TriggerConfigStore.load())
+        // The trigger config (incl. symbols mode) lives entirely in the
+        // user-editable config. Cache it so `corpusFor` can read it off the
+        // keystroke path.
+        triggerConfig = TriggerConfigStore.load()
+        stateMachine.setConfig(triggerConfig)
         // Gating arrows in the SM means a disabled arrow never defers or
         // consumes a following char (which would otherwise be dropped when
         // the insert is suppressed downstream).
@@ -915,11 +920,14 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private func corpusFor(scope: CaptureScope) -> SearchCorpus {
         switch scope {
         case .symbolsOnly:
-            // Symbols are reachable only via the symbols trigger (`::star::`),
-            // never blended into normal `:fire:` results.
+            // The scoped symbols trigger (`::star::`) searches symbols only.
             return .symbolsOnly
         case .normal:
-            return .emojiOnly
+            // When symbols are on and set to follow emoji, blend them into the
+            // normal `:fire:` results; otherwise emoji only.
+            return triggerConfig.symbols.enabled && triggerConfig.symbolsFollowEmoji
+                ? .emojiAndSymbols
+                : .emojiOnly
         }
     }
 

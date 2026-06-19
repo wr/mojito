@@ -22,6 +22,15 @@ struct GeneralSettingsView: View {
         TriggerValidator.diagnostics(for: triggers)
     }
 
+    /// Open strings claimed by every active trigger *except* `mode`, so each
+    /// menu can gray out presets that would collide. Uses normalized values
+    /// (so the derived quickAccess open is included).
+    private func takenOpens(excluding mode: TriggerMode) -> Set<String> {
+        var normalized = triggers
+        normalized.normalize()
+        return Set(normalized.active.filter { $0.mode != mode }.map(\.open))
+    }
+
     var body: some View {
         Form {
             Section {
@@ -75,7 +84,13 @@ struct GeneralSettingsView: View {
             }
 
             Section {
-                TriggerPicker(mode: .emoji, open: $triggers.emoji.open, diagnostic: diagnostics[.emoji])
+                TriggerPicker(
+                    mode: .emoji,
+                    open: $triggers.emoji.open,
+                    diagnostic: diagnostics[.emoji],
+                    takenOpens: takenOpens(excluding: .emoji),
+                    defaultOpen: TriggerConfig.default.emoji.open
+                )
                 HStack(alignment: .center) {
                     Text("Skin tone")
                     Spacer()
@@ -89,12 +104,6 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
             } header: {
                 Text("Emoji")
-            } footer: {
-                HStack {
-                    Spacer()
-                    Button("Reset triggers to defaults") { resetTriggers() }
-                        .controlSize(.small)
-                }
             }
 
             QuickAccessSection(enabled: $triggers.quickAccess.enabled, emojiOpen: triggers.emoji.open)
@@ -108,7 +117,14 @@ struct GeneralSettingsView: View {
                 }
                 .toggleStyle(.switch)
                 if triggers.symbols.enabled {
-                    TriggerPicker(mode: .symbols, open: $triggers.symbols.open, diagnostic: diagnostics[.symbols])
+                    TriggerPicker(
+                        mode: .symbols,
+                        open: $triggers.symbols.open,
+                        diagnostic: diagnostics[.symbols],
+                        takenOpens: takenOpens(excluding: .symbols),
+                        defaultOpen: TriggerConfig.default.symbols.open,
+                        sameAsEmoji: $triggers.symbolsFollowEmoji
+                    )
                 }
             }
 
@@ -116,7 +132,13 @@ struct GeneralSettingsView: View {
                 Toggle("GIF search", isOn: $triggers.gif.enabled)
                     .toggleStyle(.switch)
                 if triggers.gif.enabled {
-                    TriggerPicker(mode: .gif, open: $triggers.gif.open, diagnostic: diagnostics[.gif])
+                    TriggerPicker(
+                        mode: .gif,
+                        open: $triggers.gif.open,
+                        diagnostic: diagnostics[.gif],
+                        takenOpens: takenOpens(excluding: .gif),
+                        defaultOpen: TriggerConfig.default.gif.open
+                    )
                 }
             }
 
@@ -161,12 +183,6 @@ struct GeneralSettingsView: View {
             // observes, so the live state machine picks up the edit at once.
             TriggerConfigStore.save(triggers)
         }
-    }
-
-    /// Reset only the trigger-related fields to `.default`, re-normalize, save.
-    private func resetTriggers() {
-        triggers = .default
-        triggers.normalize()
     }
 }
 

@@ -233,9 +233,11 @@ struct TriggerStateMachineTests {
         #expect(sm.handle(.colon).action == .closePicker)
         #expect(sm.state == .idle)
 
-        // Enable the symbols trigger → `::star::` resolves in symbols scope.
+        // Enable the scoped symbols trigger → `::star::` resolves in symbols
+        // scope. (Blended symbols, `symbolsFollowEmoji`, isn't a `::` opener.)
         var cfg = TriggerConfig.default
         cfg.symbols.enabled = true
+        cfg.symbolsFollowEmoji = false
         sm = TriggerStateMachine()
         sm.setConfig(cfg)
         _ = sm.handle(.colon)
