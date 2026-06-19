@@ -156,16 +156,25 @@ struct SettingsSectionHeader: View {
     let tint: Color
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey
+    /// Per-icon point size — some glyphs read optically lighter/smaller than
+    /// others, so they need their own value to look balanced.
+    var iconSize: CGFloat = 13
+    /// Per-icon vertical nudge to correct a glyph's optical centering.
+    var iconOffsetY: CGFloat = 0
     /// nil for always-on features (emoji); a binding shows a large switch.
     var isOn: Binding<Bool>?
 
     var body: some View {
         HStack(spacing: 11) {
-            Image(systemName: systemImage)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(tint)
                 .frame(width: 28, height: 28)
-                .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(tint))
+                .overlay {
+                    Image(systemName: systemImage)
+                        .font(.system(size: iconSize, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .offset(y: iconOffsetY)
+                }
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                 Text(subtitle)

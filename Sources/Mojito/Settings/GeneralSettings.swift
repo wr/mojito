@@ -81,10 +81,12 @@ struct GeneralSettingsView: View {
 
             Section {
                 SettingsSectionHeader(
-                    systemImage: "face.smiling.inverse",
+                    systemImage: "face.smiling",
                     tint: .orange,
                     title: "Emoji",
                     subtitle: "Type a shortcut to insert any emoji.",
+                    iconSize: 16,
+                    iconOffsetY: -1,
                     isOn: $triggers.emoji.enabled
                 )
                 if triggers.emoji.enabled {
