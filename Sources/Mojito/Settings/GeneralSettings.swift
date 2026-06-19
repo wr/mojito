@@ -81,6 +81,7 @@ struct GeneralSettingsView: View {
 
             Section {
                 TriggerPicker(
+                    mode: .emoji,
                     open: $triggers.emoji.open,
                     takenOpens: takenOpens(excluding: .emoji),
                     defaultOpen: TriggerConfig.default.emoji.open
@@ -112,6 +113,7 @@ struct GeneralSettingsView: View {
                 .toggleStyle(.switch)
                 if triggers.symbols.enabled {
                     TriggerPicker(
+                        mode: .symbols,
                         open: $triggers.symbols.open,
                         takenOpens: takenOpens(excluding: .symbols),
                         defaultOpen: TriggerConfig.default.symbols.open,
@@ -125,6 +127,7 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
                 if triggers.gif.enabled {
                     TriggerPicker(
+                        mode: .gif,
                         open: $triggers.gif.open,
                         takenOpens: takenOpens(excluding: .gif),
                         defaultOpen: TriggerConfig.default.gif.open

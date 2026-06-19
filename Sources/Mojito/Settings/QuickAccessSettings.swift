@@ -26,7 +26,7 @@ struct QuickAccessSection: View {
             Toggle(isOn: $enabled) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Quick Access")
-                    Text("Opens with `\(emojiOpen)?` — follows your Emoji trigger.")
+                    Text("Opens with `\(emojiOpen)?`")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
