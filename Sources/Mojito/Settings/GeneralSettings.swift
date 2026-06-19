@@ -97,8 +97,6 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
                 Toggle("Convert text arrows (`->` to →)", isOn: $arrowConversionEnabled)
                     .toggleStyle(.switch)
-            } header: {
-                Text("Emoji")
             }
 
             QuickAccessSection(
@@ -113,7 +111,7 @@ struct GeneralSettingsView: View {
                 Toggle(isOn: $triggers.symbols.enabled) {
                     TitleAndCaption(
                         title: "Symbols",
-                        caption: "Search for symbols like ★ ⌘ ⌥ and arrows. Experimental."
+                        caption: "Symbols like ★ ⌘ ⌥ and arrows."
                     )
                 }
                 .toggleStyle(.switch)
@@ -133,7 +131,7 @@ struct GeneralSettingsView: View {
                 Toggle(isOn: $triggers.gif.enabled) {
                     TitleAndCaption(
                         title: "GIF search",
-                        caption: "Find a GIF on Giphy and drop it into any message."
+                        caption: "GIFs from Giphy."
                     )
                 }
                 .toggleStyle(.switch)

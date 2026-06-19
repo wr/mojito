@@ -29,7 +29,7 @@ struct QuickAccessSection: View {
             Toggle(isOn: $enabled) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Quick Access")
-                    Text("Pop up a pill of your favorite and most-used emoji.")
+                    Text("Your favorite and most-used emoji.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
