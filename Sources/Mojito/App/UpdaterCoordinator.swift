@@ -123,15 +123,69 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate, 
 
     // MARK: - SPUStandardUserDriverDelegate
 
-    /// Mojito is an `.accessory` app, so Sparkle orders its windows front but
-    /// never activates us — leaving the update window beneath the frontmost
-    /// app. Pull the app forward right before Sparkle presents any UI. These
-    /// fire on the main thread (they bracket AppKit window/alert presentation).
+    /// Getting Sparkle's window in front is harder than it looks for a menu-bar
+    /// (`.accessory`) app. Once the appcast round-trip finishes, the app no
+    /// longer owns the active event, so macOS denies activation — `NSApp
+    /// .activate` is a no-op (Sparkle calls it too, with the same result), and
+    /// the window lands behind whatever's frontmost. So instead of fighting
+    /// activation, we float the window above other apps by raising its window
+    /// *level* (the same trick the picker panel uses); that doesn't depend on
+    /// activation at all. Promotion to `.regular` is kept as well so the app
+    /// gets a dock icon / ⌘-Tab entry while the update UI is up, ref-counted
+    /// through `DockIconManager` so it composes with an open settings window.
+    private var didPromoteForUpdateUI = false
+
+    private func promoteForUpdateUI() {
+        if !didPromoteForUpdateUI {
+            didPromoteForUpdateUI = true
+            DockIconManager.windowDidOpen()
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        // The window doesn't exist yet when these hooks fire, and the no-update
+        // / error path then blocks the main thread in `runModal` — so schedule
+        // the raise across default + modal run-loop modes, on a short retry
+        // ladder to beat the show / runModal race.
+        for delay in [0.0, 0.1, 0.25] {
+            perform(#selector(raiseUpdaterWindow), with: nil, afterDelay: delay,
+                    inModes: [.default, .modalPanel, .common])
+        }
+    }
+
+    private func demoteAfterUpdateUI() {
+        NSObject.cancelPreviousPerformRequests(
+            withTarget: self, selector: #selector(raiseUpdaterWindow), object: nil)
+        guard didPromoteForUpdateUI else { return }
+        didPromoteForUpdateUI = false
+        DockIconManager.windowDidClose()
+    }
+
+    /// Float whichever window Sparkle just presented above other applications.
+    /// `modalWindow` covers the no-update / error `NSAlert`; the update-found
+    /// window is matched by the `SUUpdateAlert` identifier set in Sparkle's nib.
+    @objc private func raiseUpdaterWindow() {
+        let window = NSApp.modalWindow
+            ?? NSApp.windows.first { $0.isVisible && $0.identifier?.rawValue == "SUUpdateAlert" }
+        guard let window else { return }
+        if window.level.rawValue < NSWindow.Level.floating.rawValue {
+            window.level = .floating
+        }
+        window.orderFrontRegardless()
+    }
+
+    // These fire on the main thread (they bracket AppKit presentation).
     nonisolated func standardUserDriverWillHandleShowingUpdate(_ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem, state: SPUUserUpdateState) {
-        MainActor.assumeIsolated { NSApp.activate(ignoringOtherApps: true) }
+        MainActor.assumeIsolated { promoteForUpdateUI() }
     }
 
     nonisolated func standardUserDriverWillShowModalAlert() {
-        MainActor.assumeIsolated { NSApp.activate(ignoringOtherApps: true) }
+        MainActor.assumeIsolated { promoteForUpdateUI() }
+    }
+
+    nonisolated func standardUserDriverDidShowModalAlert() {
+        MainActor.assumeIsolated { demoteAfterUpdateUI() }
+    }
+
+    nonisolated func standardUserDriverWillFinishUpdateSession() {
+        MainActor.assumeIsolated { demoteAfterUpdateUI() }
     }
 }
