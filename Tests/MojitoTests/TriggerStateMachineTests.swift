@@ -225,6 +225,31 @@ struct TriggerStateMachineTests {
         #expect(next.action == .openPicker(query: "a", scope: .symbolsOnly))
     }
 
+    @Test func symbolsTriggerOffByDefaultButResolvesWhenEnabled() {
+        // Default config: symbols off → `::` cancels (no symbols scope).
+        var sm = TriggerStateMachine()
+        sm.setConfig(.default)
+        _ = sm.handle(.colon)
+        #expect(sm.handle(.colon).action == .closePicker)
+        #expect(sm.state == .idle)
+
+        // Enable the scoped symbols trigger → `::star::` resolves in symbols
+        // scope. (Blended symbols, `symbolsFollowEmoji`, isn't a `::` opener.)
+        var cfg = TriggerConfig.default
+        cfg.symbols.enabled = true
+        cfg.symbolsFollowEmoji = false
+        sm = TriggerStateMachine()
+        sm.setConfig(cfg)
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)            // `::` → symbolsOnly capture
+        for ch in "star" { _ = sm.handle(.nameChar(ch)) }
+        _ = sm.handle(.colon)            // first close char (mirror `::`)
+        let out = sm.handle(.colon)      // second close char completes `::`
+        #expect(out.action == .insertEmoji(query: "star", mode: .exactMatch, scope: .symbolsOnly))
+        #expect(sm.lastInsertOpenLen == 2)
+        #expect(sm.lastInsertCloseLen == 2)
+    }
+
     // MARK: konami (state-machine-driven payoff)
 
     @Test func konamiSequenceTriggersAfterColon() {
@@ -635,5 +660,81 @@ struct TriggerStateMachineTests {
         let out = sm.handle(.backspace)
         #expect(out.action == .none)
         #expect(sm.state == .idle)
+    }
+
+    // MARK: custom trigger configs
+
+    /// emoji open `::` (close mirrors → `::`), everything else off — the
+    /// symmetric `::emoji::` shape (#71).
+    private func symmetricDoubleColon() -> TriggerConfig {
+        var cfg = TriggerConfig.default
+        cfg.emoji = Trigger(mode: .emoji, open: "::", enabled: true)
+        cfg.symbols.enabled = false
+        cfg.gif.enabled = false
+        cfg.quickAccess.enabled = false
+        return cfg
+    }
+
+    @Test func symmetricDoubleColonClosesWithMatchingLengths() {
+        var sm = TriggerStateMachine()
+        sm.setConfig(symmetricDoubleColon())
+        _ = sm.handle(.colon)   // opening, viable prefix of `::`
+        _ = sm.handle(.colon)   // `::` opens emoji capture
+        _ = sm.handle(.nameChar("f"))
+        _ = sm.handle(.nameChar("o"))
+        let first = sm.handle(.colon)   // first close char — held, not fired
+        #expect(first.action == .none)
+        let out = sm.handle(.colon)     // second close char — completes `::`
+        #expect(out.action == .insertEmoji(query: "fo", mode: .exactMatch, scope: .normal))
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .idle)
+        // The delete spans threaded alongside the action cover `::` + query + `::`.
+        #expect(sm.lastInsertOpenLen == 2)
+        #expect(sm.lastInsertCloseLen == 2)
+    }
+
+    @Test func symmetricConfigLoneSingleColonDoesNotFire() {
+        // With emoji open `::`, a lone `:fo:` is never a trigger — the first
+        // query char after a single `:` finds no usable open and cancels.
+        var sm = TriggerStateMachine()
+        sm.setConfig(symmetricDoubleColon())
+        _ = sm.handle(.colon)
+        let f = sm.handle(.nameChar("f"))
+        #expect(f.action == .none)          // `:f` is not viable → capture abandoned
+        #expect(sm.state == .idle)
+        _ = sm.handle(.nameChar("o"))
+        let close = sm.handle(.colon)
+        // Nothing to close — no emoji insert is emitted.
+        #expect(close.action != .insertEmoji(query: "fo", mode: .exactMatch, scope: .normal))
+    }
+
+    @Test func nonNestedSemicolonOpensGifOnSingleChar() {
+        var cfg = TriggerConfig.default
+        cfg.gif = Trigger(mode: .gif, open: ";", enabled: true)
+        var sm = TriggerStateMachine()
+        sm.setConfig(cfg)
+        let out = sm.handle(.cancelChar(";"))
+        #expect(out.action == .openGifPicker)
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .gifSearching(query: ""))
+    }
+
+    @Test func multiCharCloseBackspacePeelsProgress() {
+        // Mid-close backspace drops the matched close char and reopens the
+        // picker on the still-typed query, so a second close char re-fires.
+        var sm = TriggerStateMachine()
+        sm.setConfig(symmetricDoubleColon())
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)            // `::` opens emoji
+        _ = sm.handle(.nameChar("f"))
+        _ = sm.handle(.nameChar("o"))    // query "fo"
+        _ = sm.handle(.colon)            // close progress 1
+        let peel = sm.handle(.backspace) // peel back to 0
+        #expect(peel.action == .refreshPicker(query: "fo", scope: .normal))
+        #expect(sm.state == .capturing(query: "fo"))
+        // Re-typing both close chars still fires the exact match.
+        _ = sm.handle(.colon)
+        let out = sm.handle(.colon)
+        #expect(out.action == .insertEmoji(query: "fo", mode: .exactMatch, scope: .normal))
     }
 }

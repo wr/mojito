@@ -75,7 +75,9 @@ final class EmojiBrowserViewModel: ObservableObject {
     init(database: EmojiDatabase, quickAccess: QuickAccessStore) {
         self.database = database
         self.usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
-        self.symbolsEnabled = UserDefaults.standard.bool(forKey: PrefsKey.symbolsEnabled)
+        // Symbols-on now lives in the trigger config (the legacy
+        // `symbolsEnabled` key is no longer written by Settings).
+        self.symbolsEnabled = TriggerConfigStore.load().symbols.enabled
         let built = Self.build(database: database, quickAccess: quickAccess, usage: self.usage)
         self.sections = built
         let flat = built.flatMap { $0.cells.map(\.emoji) }
@@ -295,7 +297,7 @@ final class EmojiBrowserViewModel: ObservableObject {
 
         // Typographic symbols (★ ⌘ ⌥ …) only when the Symbols feature is on —
         // the CoreText sweep is slow and the corpus is large.
-        if UserDefaults.standard.bool(forKey: PrefsKey.symbolsEnabled) {
+        if TriggerConfigStore.load().symbols.enabled {
             add(.specialCharacters, SymbolsDatabase.indexed().map(\.emoji))
         }
         return sections

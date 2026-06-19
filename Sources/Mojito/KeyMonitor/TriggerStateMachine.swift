@@ -13,8 +13,8 @@ enum TriggerState: Equatable {
     case browsing(query: String)
 }
 
-/// `:foo` = full corpus, `::foo` = experimental Symbols set
-/// (only reachable when `symbolsRequireDoubleColon` is on).
+/// `:foo:` = emoji corpus; `::foo::` = experimental Symbols set, reachable
+/// only when the symbols trigger is enabled.
 enum CaptureScope: Equatable {
     case normal
     case symbolsOnly
@@ -119,8 +119,9 @@ enum TriggerAction: Equatable {
     case expandBrowser
     /// Pill quick-pick: insert the row at this index (digit 1–8 → 0–7).
     case pickIndex(Int)
-    /// Close the pill and restore the swallowed `?` so `:?`+Esc leaves `:?`.
-    case closePickerRestoringQuestion
+    /// Close the pill and type back the swallowed trigger char so e.g. `:?`+Esc
+    /// leaves the literal `:?` (the char is the trigger's last, customizable).
+    case closePickerRestoringTrigger(Character)
 }
 
 enum GifMoveDirection: Equatable { case left, right, up, down }
@@ -128,8 +129,73 @@ enum GifMoveDirection: Equatable { case left, right, up, down }
 struct TriggerStateMachine {
     var state: TriggerState = .idle
 
+    /// The bare in-code default: emoji + gif only. Mirrors the old SM field
+    /// defaults (`symbolsDoubleColonEnabled = false`, `quickAccessTrigger = nil`)
+    /// so a `TriggerStateMachine()` constructed without `setConfig` behaves like
+    /// it always has. The Engine enables symbols / quickAccess from prefs.
+    private static let bareConfig: TriggerConfig = {
+        var c = TriggerConfig.default
+        c.symbols.enabled = false
+        c.quickAccess.enabled = false
+        return c
+    }()
+
+    /// The active trigger set. `setConfig` rebuilds the matcher alongside it.
+    private(set) var config: TriggerConfig = TriggerStateMachine.bareConfig
+    private var matcher = TriggerMatcher(config: TriggerStateMachine.bareConfig)
+
+    mutating func setConfig(_ config: TriggerConfig) {
+        self.config = config
+        self.matcher = TriggerMatcher(config: config)
+    }
+
+    // MARK: capture lifecycle (meaningful only while `state == .capturing`)
+
+    /// Opening-delimiter chars typed before the query starts (e.g. `[":"]`,
+    /// `[":",":"]`). Non-empty means we're still resolving which trigger this
+    /// is; cleared once a query char locks the capture (and on reset/idle).
+    private var openBuffer: [Character] = []
+    /// Which mode the live capture resolved to. Drives scope + insert lengths.
+    private var capturedMode: TriggerMode = .emoji
+    /// Length of the open string that opened this capture (1 for `:`, 2 for `::`).
+    private var capturedOpenLen: Int = 0
+    /// How many chars of the active mode's close string have matched so far
+    /// (0 = not mid-close). Lets a multi-char close (`::`) accumulate.
+    private var closeProgress: Int = 0
+
+    /// Open length of the live capture — read by the Engine's global-hotkey
+    /// browser entry, where the capture is still in `.capturing` and the typed
+    /// `:`/`::` must be erased on pick.
+    var captureOpenLen: Int { capturedOpenLen }
+
+    /// Open/close lengths of the most recent `.insertEmoji` action. The action's
+    /// associated values are deliberately left unchanged (tests pin their shape),
+    /// so the Engine reads the delete spans from here right after `handle()`.
+    /// Not cleared by `reset()` — the value must survive the same-tick reset the
+    /// closing keystroke triggers, until the next insert overwrites it.
+    private(set) var lastInsertOpenLen: Int = 1
+    private(set) var lastInsertCloseLen: Int = 1
+
+    /// True only for the `handle()` call that transitioned idle → capturing.
+    /// The Engine snapshots focus/secure-field/exclusion off this instead of
+    /// inspecting the raw input, so non-colon trigger opens snapshot too.
+    private(set) var captureJustOpened: Bool = false
+
     /// When true, `::` upgrades the capture to symbols-only instead of cancelling.
-    var symbolsDoubleColonEnabled: Bool = false
+    /// Thin shim over `config`: existing callers flip this to enable/disable the
+    /// symbols trigger (open `::`; close mirrors the open → `::`).
+    var symbolsDoubleColonEnabled: Bool {
+        get { config.symbols.enabled && !config.symbolsFollowEmoji }
+        set {
+            var t = config.symbols
+            t.open = "::"
+            t.enabled = newValue
+            // A scoped `::` trigger, not the blended-into-emoji mode.
+            config.symbolsFollowEmoji = false
+            config.set(t)
+            matcher = TriggerMatcher(config: config)
+        }
+    }
 
     /// Gates the arrow family (`->`, `<-`, `<->`). When false, arrows are
     /// inert — never matched as a suffix, never deferred, never consume a
@@ -143,11 +209,38 @@ struct TriggerStateMachine {
         }
     }
 
-    /// The character that, typed right after a bare `:`, opens the Quick Access
-    /// pill (e.g. `?` → `:?`). `nil` disables it. The Engine sets it from
-    /// `PrefsKey.quickAccessTriggerChar`. Must be a `.cancelChar`-class glyph
-    /// (punctuation/symbol) since it's matched in the cancelChar branch.
-    var quickAccessTrigger: Character?
+    /// The character that, typed right after the emoji open, opens the Quick
+    /// Access pill (e.g. `?` → `:?`). `nil` disables it. Thin shim over
+    /// `config`: setting it enables the quickAccess trigger with open
+    /// `emoji.open + char`; `nil` disables it. The pill open follows the emoji
+    /// trigger, so it's keyed off `emoji.open` rather than a hardcoded `:`.
+    var quickAccessTrigger: Character? {
+        get {
+            let qa = config.quickAccess
+            let prefix = config.emoji.open
+            guard qa.enabled, !prefix.isEmpty,
+                  qa.open.count == prefix.count + 1, qa.open.hasPrefix(prefix) else { return nil }
+            return qa.open.last
+        }
+        set {
+            var t = config.quickAccess
+            if let c = newValue {
+                t.open = config.emoji.open + String(c)
+                t.enabled = true
+            } else {
+                t.enabled = false
+            }
+            config.set(t)
+            matcher = TriggerMatcher(config: config)
+        }
+    }
+
+    /// The char swallowed when the Quick Access pill opened (its trigger's last
+    /// char) — typed back on Esc. Works for any trigger, not just `:?`.
+    var quickAccessRestoreChar: Character? {
+        let qa = config.quickAccess
+        return qa.enabled ? qa.open.last : nil
+    }
 
     /// True only once the empty-query favorites picker is actually on screen.
     /// The Engine sets it after the (debounced) show and clears it on hide,
@@ -163,11 +256,11 @@ struct TriggerStateMachine {
     /// instead of being swallowed.
     var pillEmojiCount: Int = 0
 
-    private var currentScope: CaptureScope = .normal
     /// The active capture's scope. Read by the Engine's global-hotkey browser
     /// entry, which synthesizes a pick outside the normal action flow and needs
-    /// to know whether the field holds `:query` or `::query`.
-    var captureScope: CaptureScope { currentScope }
+    /// to know whether the field holds `:query` or `::query`. Derived from the
+    /// resolved mode — symbols is the only scope-bearing mode.
+    var captureScope: CaptureScope { capturedMode == .symbols ? .symbolsOnly : .normal }
 
     private var konamiProgress: Int = 0
     private enum KonamiStep { case up, down, left, right, b, a }
@@ -230,6 +323,7 @@ struct TriggerStateMachine {
         // One timestamp per keystroke — every window check and stamp in
         // this pass measures against the same instant.
         let now = Date()
+        let wasIdle: Bool = { if case .idle = state { return true } else { return false } }()
 
         // Drop a stale ambient word after too long a pause (covers
         // click-to-move-caret followed by delayed typing). A deferred
@@ -244,12 +338,19 @@ struct TriggerStateMachine {
         }
 
         let output = process(input, now: now)
+        // Flag the idle → capturing transition so the Engine can snapshot the
+        // focused field/exclusion off the SM rather than the raw input.
+        captureJustOpened = wasIdle && { if case .capturing = state { return true } else { return false } }()
         if case .idle = state {
             switch input {
             case .nameChar: lastWasWordChar = true
             default:        lastWasWordChar = false
             }
             lastCaptureKeystrokeAt = nil
+            // Opening lifecycle fields are only meaningful mid-capture; clear
+            // them whenever we settle back to idle so a later capture starts clean.
+            openBuffer = []
+            closeProgress = 0
         } else {
             // Stamp every contributing keystroke so the >1s window is
             // measured against the most recent one, not the opening colon.
@@ -287,15 +388,9 @@ struct TriggerStateMachine {
             recentColonTimes = recentColonTimes.filter {
                 now.timeIntervalSince($0) <= Self.gifTripleColonWindow
             }
-            if recentColonTimes.count >= 3 {
+            if gifColonRunFires, recentColonTimes.count >= 3 {
                 recentColonTimes.removeAll()
-                state = .gifSearching(query: "")
-                currentScope = .normal
-                konamiProgress = 0
-                idleWord = ""
-                lastIdleKeystrokeAt = nil
-                pendingImmediateFire = nil
-                return TriggerOutput(action: .openGifPicker, consumesKey: false)
+                return enterGif()
             }
         } else {
             recentColonTimes.removeAll()
@@ -316,7 +411,6 @@ struct TriggerStateMachine {
                     NSLog("[mojito] konami: sequence complete; firing payoff")
                     state = .idle
                     konamiProgress = 0
-                    currentScope = .normal
                     return TriggerOutput(action: .triggerKonami(deleteCount: 1), consumesKey: true)
                 }
                 return .consume
@@ -324,6 +418,20 @@ struct TriggerStateMachine {
             konamiProgress = 0
         } else {
             konamiProgress = 0
+        }
+
+        // Opening phase: a capture whose query is still empty and whose
+        // opening-delimiter buffer is unresolved. Trigger chars (`:`, name,
+        // cancel) and backspace are routed through the matcher-driven opening
+        // logic; everything else (arrows / escape / return / focus) falls to
+        // the empty-query cases in the switch below, unchanged.
+        if !openBuffer.isEmpty, case .capturing(let q) = state, q.isEmpty {
+            if let c = Self.triggerChar(input) {
+                return handleOpening(char: c, input: input, now: now)
+            }
+            if case .backspace = input {
+                return handleOpeningBackspace()
+            }
         }
 
         switch (state, input) {
@@ -368,16 +476,10 @@ struct TriggerStateMachine {
                 // "5:35" / "foo:bar" — don't trigger.
                 return .passthrough
             }
-            currentScope = .normal
-            state = .capturing(query: "")
-            // Not visible yet — the Engine flips this on after the debounced
-            // show. Clearing here keeps a prior capture's value from leaking
-            // into a fresh `:`.
-            emptyPickerActive = false
-            // A bare `:` just starts capturing; the Quick Access pill is
-            // summoned by the trigger char that follows (`:?`), handled in the
-            // cancelChar branch below.
-            return TriggerOutput(action: .none, consumesKey: false)
+            // `:` isn't a trigger prefix in a colon-less custom config — leave
+            // it literal (it may still be an emoticon body char downstream).
+            guard matcher.isViablePrefix([":"]) else { return .passthrough }
+            return beginOpening(char: ":", input: input, now: now)
 
         case (.idle, .backspace):
             if !idleWord.isEmpty {
@@ -390,6 +492,15 @@ struct TriggerStateMachine {
         case (.idle, .nameChar(let c)):
             if let fire = resolvePendingFire(with: c) {
                 return fire
+            }
+            // A name char opens a capture only in a custom config whose trigger
+            // starts with it (default emoji `:` never reaches here). Word-char
+            // gating still applies so it can't fire mid-word.
+            if !lastWasWordChar, matcher.isViablePrefix([c]) {
+                idleWord = ""
+                lastIdleKeystrokeAt = nil
+                pendingImmediateFire = nil
+                return beginOpening(char: c, input: input, now: now)
             }
             idleWord += String(c)
             lastIdleKeystrokeAt = now
@@ -405,6 +516,15 @@ struct TriggerStateMachine {
             // `Foo<- ` convert (the whole-word lookup below would miss `Foo<-`).
             if let fire = resolvePendingFire(with: c) {
                 return fire
+            }
+            // A punctuation trigger char (custom configs, e.g. gif `;`) opens a
+            // capture before falling through to ambient/terminator handling.
+            // Default has no such trigger, so this never fires there.
+            if matcher.isViablePrefix([c]) {
+                idleWord = ""
+                lastIdleKeystrokeAt = nil
+                pendingImmediateFire = nil
+                return beginOpening(char: c, input: input, now: now)
             }
             if Self.ambientTerminators.contains(c) {
                 // Terminator — look up the buffered word, then reset.
@@ -437,26 +557,11 @@ struct TriggerStateMachine {
             pendingImmediateFire = nil
             return .passthrough
 
-        // MARK: capturing — colon
-
-        case (.capturing(let q), .colon) where q.isEmpty:
-            if symbolsDoubleColonEnabled, currentScope == .normal {
-                // `::` upgrades to symbols-only; second colon passes through.
-                currentScope = .symbolsOnly
-                return TriggerOutput(action: .none, consumesKey: false)
-            }
-            // `::` cancels. Both colons stay in text.
-            state = .idle
-            currentScope = .normal
-            return TriggerOutput(action: .closePicker, consumesKey: false)
+        // MARK: capturing — colon (locked capture; opening colons are routed
+        // to `handleOpening` above). A colon here is a close-string char.
 
         case (.capturing(let q), .colon):
-            // Closing `:` passes through so text reads `:query:`. Engine
-            // deletes the span only on exact match; near-misses stay put.
-            let scope = currentScope
-            state = .idle
-            currentScope = .normal
-            return TriggerOutput(action: .insertEmoji(query: q, mode: .exactMatch, scope: scope), consumesKey: false)
+            return handleCloseChar(":", query: q)
 
         // MARK: capturing — name characters
 
@@ -468,45 +573,35 @@ struct TriggerStateMachine {
                digit >= 1, digit <= min(8, pillEmojiCount) {
                 return TriggerOutput(action: .pickIndex(digit - 1), consumesKey: true)
             }
-            // First typed char leaves the empty-query state — drop the
-            // favorites picker if it was up.
-            let wasEmptyPicker = emptyPickerActive
-            emptyPickerActive = false
-            let next = q + String(c)
-            state = .capturing(query: next)
-            let threshold = pickerThreshold(for: currentScope, query: next)
-            let action: TriggerAction
-            if next.count < threshold {
-                // Keep capturing silently so a terminator can still fire
-                // `:D `, but don't surface the picker on a single char.
-                // If favorites were showing, close them as typing begins.
-                action = wasEmptyPicker ? .closePicker : .none
-            } else if q.count < threshold {
-                action = .openPicker(query: next, scope: currentScope)
-            } else {
-                action = .refreshPicker(query: next, scope: currentScope)
+            // A name char that is the next char of the close string (custom
+            // configs whose close uses letters/digits) drives the close instead
+            // of extending the query. Default close (`:`) never reaches here.
+            if let close = closeChar(query: q), close == c {
+                return handleCloseChar(c, query: q)
             }
-            return TriggerOutput(action: action, consumesKey: false)
+            return appendQueryChar(c, query: q)
 
         // MARK: capturing — backspace
 
         case (.capturing(let q), .backspace):
+            // Mid-close backspace peels one matched close char back off and
+            // reopens the picker on the still-typed query.
+            if closeProgress > 0 {
+                closeProgress -= 1
+                return TriggerOutput(action: .refreshPicker(query: q, scope: captureScope), consumesKey: false)
+            }
             if q.isEmpty {
-                // Symbols scope demotes to normal so the backspace deletes
-                // the second colon; normal scope goes fully idle.
-                if currentScope == .symbolsOnly {
-                    currentScope = .normal
-                    return TriggerOutput(action: .closePicker, consumesKey: false)
-                }
+                // Locked capture with an empty query only happens for a 1-char
+                // open (e.g. emoji `:`); backspacing the open char ends capture.
                 state = .idle
                 return TriggerOutput(action: .closePicker, consumesKey: false)
             }
             let next = String(q.dropLast())
             state = .capturing(query: next)
-            let threshold = pickerThreshold(for: currentScope, query: next)
+            let threshold = pickerThreshold(for: captureScope, query: next)
             let action: TriggerAction = next.count < threshold
                 ? .closePicker
-                : .refreshPicker(query: next, scope: currentScope)
+                : .refreshPicker(query: next, scope: captureScope)
             return TriggerOutput(action: action, consumesKey: false)
 
         // MARK: capturing — picker navigation
@@ -562,44 +657,45 @@ struct TriggerStateMachine {
                 if emptyPickerActive {
                     emptyPickerActive = false
                     state = .idle
-                    currentScope = .normal
+                    // Pill insert: the typed open (`:` for default) is erased on pick.
+                    lastInsertOpenLen = capturedOpenLen == 0 ? 1 : capturedOpenLen
+                    lastInsertCloseLen = 0
                     return TriggerOutput(action: .insertEmoji(query: "", mode: .fromPicker, scope: .normal), consumesKey: true)
                 }
                 state = .idle
-                currentScope = .normal
                 return TriggerOutput(action: .closePicker, consumesKey: false)
             }
-            let scope = currentScope
+            let scope = captureScope
             state = .idle
-            currentScope = .normal
+            lastInsertOpenLen = capturedOpenLen
+            lastInsertCloseLen = 0
             return TriggerOutput(action: .insertEmoji(query: q, mode: .fromPicker, scope: scope), consumesKey: true)
 
         // MARK: capturing — exits
 
         case (.capturing, .escape):
-            // `:?`+Esc should leave the literal `:?` — the `?` was swallowed
-            // when the pill opened, so ask the Engine to type it back.
-            let restoreQuestion = emptyPickerActive && quickAccessTrigger != nil
+            // The favorites pill is only summoned by the Quick Access trigger,
+            // whose last char is swallowed when it opens — type it back so Esc
+            // leaves the literal trigger (`:?`, or a custom one).
+            let restore: Character? = emptyPickerActive ? quickAccessRestoreChar : nil
             emptyPickerActive = false
             state = .idle
-            currentScope = .normal
             return TriggerOutput(
-                action: restoreQuestion ? .closePickerRestoringQuestion : .closePicker,
+                action: restore.map { .closePickerRestoringTrigger($0) } ?? .closePicker,
                 consumesKey: true
             )
 
-        case (.capturing(let q), .cancelChar(let c)) where q.isEmpty && quickAccessTrigger == c:
-            // `:<trigger>` (e.g. `:?`) summons the Quick Access pill. Swallow
-            // the trigger char so the focused app only ever holds the `:` —
-            // deleted on pick, so the insert delete-count stays 1.
-            return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: true)
-
         case (.capturing(let q), .cancelChar(let c)):
+            // A cancel char that is the next char of the close string closes the
+            // capture (custom configs whose close is punctuation). Default close
+            // is `:` (a `.colon`), so this never pre-empts emoticons there.
+            if let close = closeChar(query: q), close == c {
+                return handleCloseChar(c, query: q)
+            }
             // Symbols-only skips emoticons entirely (it's an emoji feature).
-            let wasSymbolsOnly = currentScope == .symbolsOnly
+            let wasSymbolsOnly = captureScope == .symbolsOnly
             let lastAt = lastCaptureKeystrokeAt
             state = .idle
-            currentScope = .normal
             if wasSymbolsOnly {
                 return TriggerOutput(action: .closePicker, consumesKey: false)
             }
@@ -612,7 +708,6 @@ struct TriggerStateMachine {
 
         case (.capturing, .focusChange):
             state = .idle
-            currentScope = .normal
             return TriggerOutput(action: .closePicker, consumesKey: false)
         }
     }
@@ -643,7 +738,10 @@ struct TriggerStateMachine {
 
     mutating func reset() {
         state = .idle
-        currentScope = .normal
+        capturedMode = .emoji
+        capturedOpenLen = 0
+        openBuffer = []
+        closeProgress = 0
         emptyPickerActive = false
         pillEmojiCount = 0
         lastWasWordChar = false
@@ -653,6 +751,243 @@ struct TriggerStateMachine {
         lastCaptureKeystrokeAt = nil
         recentColonTimes.removeAll()
         pendingImmediateFire = nil
+    }
+
+    // MARK: - Opening / closing helpers
+
+    /// The literal char an input contributes to a delimiter run, or nil for a
+    /// control input (backspace/arrows/return/etc.).
+    private static func triggerChar(_ input: TriggerInput) -> Character? {
+        switch input {
+        case .colon:           return ":"
+        case .nameChar(let c): return c
+        case .cancelChar(let c): return c
+        default:               return nil
+        }
+    }
+
+    /// True when the GIF trigger is a run of colons — those are detected by the
+    /// rolling `recentColonTimes` window (so `::`-cancel can coexist with the
+    /// `:::` open). A non-colon gif trigger (`;`) is opened positionally instead.
+    private var gifColonRunFires: Bool {
+        let gif = config.gif
+        return gif.enabled && !gif.open.isEmpty && gif.open.allSatisfy { $0 == ":" }
+    }
+
+    /// Begin a fresh capture from idle and resolve the first delimiter char.
+    private mutating func beginOpening(char c: Character, input: TriggerInput, now: Date) -> TriggerOutput {
+        state = .capturing(query: "")
+        openBuffer = []
+        closeProgress = 0
+        capturedMode = .emoji
+        capturedOpenLen = 0
+        // Not visible yet — the Engine flips this on after the debounced show.
+        emptyPickerActive = false
+        return handleOpening(char: c, input: input, now: now)
+    }
+
+    /// Resolve a delimiter char while the capture's query is still empty.
+    /// `openBuffer` holds the run so far (empty on the idle-entry call).
+    private mutating func handleOpening(char c: Character, input: TriggerInput, now: Date) -> TriggerOutput {
+        let cand = openBuffer + [c]
+
+        // A fully-determined no-query trigger (gif / quickAccess) fires now.
+        if let m = matcher.terminalMode(for: cand), m == .gif || m == .quickAccess, !matcher.canExtend(cand) {
+            switch m {
+            case .gif:
+                return enterGif()
+            case .quickAccess:
+                // The trigger char is swallowed, so only the chars already in
+                // the field (the buffer before this one) are erased on pick. The
+                // pill is a terminal open — clear the buffer so the capture is
+                // locked and following keys (digit pick / search) route normally.
+                capturedMode = .quickAccess
+                capturedOpenLen = openBuffer.count
+                openBuffer = []
+                return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: true)
+            default:
+                break
+            }
+        }
+
+        // A query-mode terminal (emoji / symbols): track it and keep building —
+        // a longer open (or the symbols upgrade) may still extend the run.
+        if let m = matcher.terminalMode(for: cand), m == .emoji || m == .symbols {
+            openBuffer = cand
+            capturedMode = m
+            capturedOpenLen = cand.count
+            return openingPassthrough()
+        }
+
+        // Still a viable prefix heading toward a longer emoji/symbols/quickAccess
+        // open — keep accumulating the run.
+        if matcher.isViablePrefix(cand), matcher.canExtend(cand, excluding: .gif) {
+            openBuffer = cand
+            return openingPassthrough()
+        }
+
+        // Dead end. If the run so far is a usable query-mode open, lock it and
+        // reprocess `c` as the first locked-capture input.
+        if let m = matcher.terminalMode(for: openBuffer), m == .emoji || m == .symbols {
+            capturedMode = m
+            capturedOpenLen = openBuffer.count
+            openBuffer = []
+            return lockedCapture(input, query: "", now: now)
+        }
+
+        // The run never formed a usable trigger — abandon capture, leave text.
+        state = .idle
+        return .passthrough
+    }
+
+    /// Output for staying in the opening phase: nothing happens, but if the
+    /// favorites pill was up (multi-char open mid-build) drop it.
+    private mutating func openingPassthrough() -> TriggerOutput {
+        if emptyPickerActive {
+            emptyPickerActive = false
+            return TriggerOutput(action: .closePicker, consumesKey: false)
+        }
+        return TriggerOutput(action: .none, consumesKey: false)
+    }
+
+    /// Transition into GIF search, clearing capture/ambient bookkeeping.
+    private mutating func enterGif() -> TriggerOutput {
+        state = .gifSearching(query: "")
+        openBuffer = []
+        closeProgress = 0
+        konamiProgress = 0
+        idleWord = ""
+        lastIdleKeystrokeAt = nil
+        pendingImmediateFire = nil
+        recentColonTimes.removeAll()
+        return TriggerOutput(action: .openGifPicker, consumesKey: false)
+    }
+
+    /// Backspace while still building the opening run: peel one delimiter char.
+    /// Emptying the buffer ends the capture; otherwise re-resolve the mode the
+    /// shorter run opens (so `::`→`:` demotes symbols back to emoji scope).
+    private mutating func handleOpeningBackspace() -> TriggerOutput {
+        openBuffer.removeLast()
+        if openBuffer.isEmpty {
+            state = .idle
+            return TriggerOutput(action: .closePicker, consumesKey: false)
+        }
+        if let m = matcher.terminalMode(for: openBuffer), m == .emoji || m == .symbols {
+            capturedMode = m
+            capturedOpenLen = openBuffer.count
+        }
+        return TriggerOutput(action: .closePicker, consumesKey: false)
+    }
+
+    /// The active mode's close string, or nil for no-close modes.
+    private func closeString() -> [Character]? {
+        matcher.close(for: capturedMode)
+    }
+
+    /// The single close char expected next given `closeProgress`, or nil if the
+    /// active mode has no close. Used by the locked nameChar/cancelChar cases to
+    /// decide whether an incoming char drives the close.
+    private func closeChar(query: String) -> Character? {
+        guard !query.isEmpty, let close = closeString(), closeProgress < close.count else { return nil }
+        return close[closeProgress]
+    }
+
+    /// Append a name char to a locked capture's query and surface/refresh/hold
+    /// the picker per the threshold. Shared by the nameChar case and lock-reentry.
+    private mutating func appendQueryChar(_ c: Character, query q: String) -> TriggerOutput {
+        let wasEmptyPicker = emptyPickerActive
+        emptyPickerActive = false
+        let next = q + String(c)
+        state = .capturing(query: next)
+        let scope = captureScope
+        let threshold = pickerThreshold(for: scope, query: next)
+        let action: TriggerAction
+        if next.count < threshold {
+            // Keep capturing silently so a terminator can still fire `:D `, but
+            // don't surface the picker on a single char. If favorites were
+            // showing, close them as typing begins.
+            action = wasEmptyPicker ? .closePicker : .none
+        } else if q.count < threshold {
+            action = .openPicker(query: next, scope: scope)
+        } else {
+            action = .refreshPicker(query: next, scope: scope)
+        }
+        return TriggerOutput(action: action, consumesKey: false)
+    }
+
+    /// Drive the multi-char close. `c` is known to be a close-string char (the
+    /// caller checked) or a colon in a locked capture. Completing the close
+    /// fires an exact-match insert; a partial match holds (the picker may drop);
+    /// a mismatch aborts the close and leaves the text alone.
+    private mutating func handleCloseChar(_ c: Character, query q: String) -> TriggerOutput {
+        guard let close = closeString() else {
+            // No close string — a stray delimiter is just a literal query char.
+            // Reachable only for odd custom configs; default never hits.
+            return appendQueryChar(c, query: q)
+        }
+        if q.isEmpty {
+            // Close delimiter typed with no query to close (`::` for default
+            // emoji) — cancel; both delimiters stay in the field as literal text.
+            state = .idle
+            closeProgress = 0
+            return TriggerOutput(action: .closePicker, consumesKey: false)
+        }
+        if c == close[closeProgress] {
+            closeProgress += 1
+            if closeProgress == close.count {
+                let scope = captureScope
+                let openLen = capturedOpenLen
+                let closeLen = close.count
+                state = .idle
+                lastInsertOpenLen = openLen
+                lastInsertCloseLen = closeLen
+                return TriggerOutput(action: .insertEmoji(query: q, mode: .exactMatch, scope: scope), consumesKey: false)
+            }
+            // Partial close: the char passes through; the picker may drop, which
+            // is acceptable (it reopens if the close aborts via backspace).
+            return TriggerOutput(action: .none, consumesKey: false)
+        }
+        // Mismatch after a partial close — abandon. Both the matched close chars
+        // and this one stay in the field.
+        closeProgress = 0
+        state = .idle
+        return .passthrough
+    }
+
+    /// Run the locked-capture transitions (`process`'s `(.capturing, …)` cases)
+    /// for an input, used when the opening run locks and reprocesses its first
+    /// query char. Mirrors the relevant switch arms.
+    private mutating func lockedCapture(_ input: TriggerInput, query q: String, now: Date) -> TriggerOutput {
+        switch input {
+        case .colon:
+            return handleCloseChar(":", query: q)
+        case .nameChar(let c):
+            if let close = closeChar(query: q), close == c {
+                return handleCloseChar(c, query: q)
+            }
+            return appendQueryChar(c, query: q)
+        case .cancelChar(let c):
+            if quickAccessTrigger == c, q.isEmpty {
+                // A locked-capture quickAccess char can only arise for an emoji
+                // open shorter than `:` + trigger; handled as the pill open.
+                return TriggerOutput(action: .openPicker(query: "", scope: .normal), consumesKey: true)
+            }
+            if let close = closeChar(query: q), close == c {
+                return handleCloseChar(c, query: q)
+            }
+            let wasSymbolsOnly = captureScope == .symbolsOnly
+            let lastAt = lastCaptureKeystrokeAt
+            state = .idle
+            if wasSymbolsOnly {
+                return TriggerOutput(action: .closePicker, consumesKey: false)
+            }
+            if let lastAt, now.timeIntervalSince(lastAt) > Self.emoticonMaxIdle {
+                return TriggerOutput(action: .abortEmoticon, consumesKey: false)
+            }
+            return TriggerOutput(action: .checkEmoticon(query: q, terminator: c), consumesKey: false)
+        default:
+            return .passthrough
+        }
     }
 
     /// 2 chars in the normal corpus so `:D` / `:s` don't briefly flash the
@@ -702,9 +1037,9 @@ struct TriggerStateMachine {
             return TriggerOutput(action: .closeGifPicker, consumesKey: true)
         case .returnKey, .tabKey:
             state = .idle
-            // `:::` + query are all sitting in the focused app — delete the
-            // full span so the GIF replaces the typed trigger.
-            return TriggerOutput(action: .pickGif(deleteCount: q.count + 3), consumesKey: true)
+            // The gif open + query are all sitting in the focused app — delete
+            // the full span so the GIF replaces the typed trigger.
+            return TriggerOutput(action: .pickGif(deleteCount: q.count + config.gif.open.count), consumesKey: true)
         case .arrowUp:
             return TriggerOutput(action: .moveGifSelection(direction: .up), consumesKey: true)
         case .arrowDown:

@@ -1,10 +1,18 @@
 import SwiftUI
 import KeyboardShortcuts
 
-/// The `:?` pill toggle, its 8 editable slots (styled like the pill itself),
-/// and the global emoji-browser hotkey. No section header — the toggle names it.
+/// The Quick Access trigger picker, the 8-slot favorites editor, and the
+/// global emoji-browser hotkey. The shortcut follows the Emoji trigger
+/// (`:` → `:?`) by default but can be set to any preset or custom trigger.
 struct QuickAccessSection: View {
-    @AppStorage(PrefsKey.quickAccessEnabled) private var enabled: Bool = true
+    @Binding var enabled: Bool
+    @Binding var open: String
+    @Binding var followEmoji: Bool
+    /// The current Emoji open, used to render the "follow" option's `:?` label.
+    let emojiOpen: String
+    /// Opens claimed by the other active triggers — grayed in the picker.
+    let takenOpens: Set<String>
+
     @StateObject private var store = QuickAccessStore.shared
     @State private var editing: EditingSlot?
     @State private var hovered: Int?
@@ -18,17 +26,24 @@ struct QuickAccessSection: View {
 
     var body: some View {
         Section {
-            Toggle(isOn: $enabled) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Quick Access")
-                    Text("Type `:?` to quickly access your top emoji")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .toggleStyle(.switch)
+            SettingsSectionHeader(
+                systemImage: "bolt.fill",
+                tint: .blue,
+                title: "Quick Access",
+                subtitle: "Your favorite and most-used emoji.",
+                isOn: $enabled
+            )
 
             if enabled {
+                TriggerPicker(
+                    mode: .quickAccess,
+                    open: $open,
+                    takenOpens: takenOpens,
+                    defaultOpen: TriggerConfig.default.quickAccess.open,
+                    sameAsEmoji: $followEmoji,
+                    followLabel: "\(emojiOpen)?",
+                    defaultFollowsEmoji: true
+                )
                 slotGrid
             }
 

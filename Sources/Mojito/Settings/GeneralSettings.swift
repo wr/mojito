@@ -8,14 +8,24 @@ struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.skinTone) private var skinToneRaw: String = SkinTone.default.rawValue
     @AppStorage(PrefsKey.emoticonsEnabled) private var emoticonsEnabled: Bool = true
     @AppStorage(PrefsKey.arrowConversionEnabled) private var arrowConversionEnabled: Bool = true
-    @AppStorage(PrefsKey.symbolsEnabled) private var symbolsEnabled: Bool = false
-    @AppStorage(PrefsKey.symbolsRequireDoubleColon) private var symbolsRequireDoubleColon: Bool = false
-    @AppStorage(PrefsKey.gifSearchEnabled) private var gifSearchEnabled: Bool = true
     @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled: Bool = true
     @AppStorage(PrefsKey.eggsEnabled) private var eggsEnabled: Bool = true
     @AppStorage(PrefsKey.eggDiscoverySoundEnabled) private var eggDiscoverySound: Bool = true
     @AppStorage(PrefsKey.eggEffectSoundsEnabled) private var eggEffectSounds: Bool = true
     @State private var autoUpdates: Bool = UpdaterCoordinator.shared.automaticUpdates
+
+    /// The single source of truth for every trigger control on this page.
+    /// Persisted (normalized) on each change so the live Engine picks it up.
+    @State private var triggers: TriggerConfig = TriggerConfigStore.load()
+
+    /// Open strings claimed by every active trigger *except* `mode`, so each
+    /// menu can gray out presets that would collide. Uses normalized values
+    /// (so the derived quickAccess open is included).
+    private func takenOpens(excluding mode: TriggerMode) -> Set<String> {
+        var normalized = triggers
+        normalized.normalize()
+        return Set(normalized.active.filter { $0.mode != mode }.map(\.open))
+    }
 
     var body: some View {
         Form {
@@ -69,7 +79,24 @@ struct GeneralSettingsView: View {
                 }
             }
 
-            Section("Emoji") {
+            Section {
+                SettingsSectionHeader(
+                    systemImage: "face.smiling",
+                    tint: .orange,
+                    title: "Emoji",
+                    subtitle: "Type a shortcut to insert any emoji.",
+                    iconSize: 16,
+                    iconOffsetY: -1,
+                    isOn: $triggers.emoji.enabled
+                )
+                if triggers.emoji.enabled {
+                    TriggerPicker(
+                        mode: .emoji,
+                        open: $triggers.emoji.open,
+                        takenOpens: takenOpens(excluding: .emoji),
+                        defaultOpen: TriggerConfig.default.emoji.open
+                    )
+                }
                 HStack(alignment: .center) {
                     Text("Skin tone")
                     Spacer()
@@ -77,33 +104,55 @@ struct GeneralSettingsView: View {
                 }
                 Toggle("Rank frequently used emoji higher", isOn: $useFrequencyBoost)
                     .toggleStyle(.switch)
-                Toggle("Convert emoticons (`:D` → 😃)", isOn: $emoticonsEnabled)
+                Toggle("Convert emoticons (`:D` becomes 😃)", isOn: $emoticonsEnabled)
                     .toggleStyle(.switch)
-                Toggle("Convert text arrows (`->` to →)", isOn: $arrowConversionEnabled)
+                Toggle("Convert text arrows (`->` becomes →)", isOn: $arrowConversionEnabled)
                     .toggleStyle(.switch)
             }
 
-            QuickAccessSection()
+            QuickAccessSection(
+                enabled: $triggers.quickAccess.enabled,
+                open: $triggers.quickAccess.open,
+                followEmoji: $triggers.quickAccessFollowEmoji,
+                emojiOpen: triggers.emoji.open,
+                takenOpens: takenOpens(excluding: .quickAccess)
+            )
 
-            Section("GIFs and Symbols") {
-                Toggle(isOn: $gifSearchEnabled) {
-                    TitleAndCaption(
-                        title: "GIF search",
-                        caption: "Type `:::` then a search term to insert a GIF from Giphy."
+            Section {
+                SettingsSectionHeader(
+                    systemImage: "command",
+                    tint: .indigo,
+                    title: "Symbols",
+                    subtitle: "Symbols like ★ ✓ ÷ ©.",
+                    isOn: $triggers.symbols.enabled
+                )
+                if triggers.symbols.enabled {
+                    TriggerPicker(
+                        mode: .symbols,
+                        open: $triggers.symbols.open,
+                        takenOpens: takenOpens(excluding: .symbols),
+                        defaultOpen: TriggerConfig.default.symbols.open,
+                        sameAsEmoji: $triggers.symbolsFollowEmoji,
+                        defaultFollowsEmoji: true
                     )
                 }
-                .toggleStyle(.switch)
-                Toggle(isOn: $symbolsEnabled) {
-                    TitleAndCaption(
-                        title: "Symbols",
-                        caption: "Include ★ ⌘ ⌥ and similar characters in results (experimental)."
+            }
+
+            Section {
+                SettingsSectionHeader(
+                    systemImage: "photo.fill",
+                    tint: .pink,
+                    title: "GIF search",
+                    subtitle: "GIFs from Giphy.",
+                    isOn: $triggers.gif.enabled
+                )
+                if triggers.gif.enabled {
+                    TriggerPicker(
+                        mode: .gif,
+                        open: $triggers.gif.open,
+                        takenOpens: takenOpens(excluding: .gif),
+                        defaultOpen: TriggerConfig.default.gif.open
                     )
-                }
-                .toggleStyle(.switch)
-                if symbolsEnabled {
-                    Toggle("Require `::` to search symbols", isOn: $symbolsRequireDoubleColon)
-                        .toggleStyle(.switch)
-                        .padding(.leading, 20)
                 }
             }
 
@@ -143,23 +192,14 @@ struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
-    }
-}
-
-private struct TitleAndCaption: View {
-    let title: LocalizedStringKey
-    let caption: LocalizedStringKey
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-            Text(caption)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+        .onChange(of: triggers) { _, _ in
+            // Persisting normalizes and posts a UserDefaults change the Engine
+            // observes, so the live state machine picks up the edit at once.
+            TriggerConfigStore.save(triggers)
         }
     }
 }
+
 
 struct StatsHelpButton: View {
     @State private var isShown = false

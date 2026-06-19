@@ -33,6 +33,11 @@ enum PrefsKey {
     static let quickAccessSlots      = "mojito.quickAccess"          // [String]  (8 slots; "" = auto)
     /// Whether the `:?` Quick Access pill is enabled (default true).
     static let quickAccessEnabled    = "mojito.quickAccessEnabled"
+    /// JSON-encoded `TriggerConfig` — the user-editable trigger strings for
+    /// emoji / symbols / GIF / quick-access. Absent on installs that predate
+    /// the feature; `TriggerConfigStore.load()` migrates from the legacy
+    /// per-feature prefs once and persists the result here.
+    static let triggers              = "mojito.triggers"
     /// Set once on first launch.
     static let firstLaunchDate       = "mojito.firstLaunchDate"
     /// Self-attested; no payment integration.

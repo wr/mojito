@@ -126,10 +126,7 @@ enum DebugReport {
         s += "- exclusions.urlPatternCount: \(urlExcl)\n"
         s += "- giphyApiKey.set: \(giphySet)\n"
         s += "- useFrequencyBoost: \(bool(PrefsKey.useFrequencyBoost, default: true))\n"
-        s += "- symbolsEnabled: \(bool(PrefsKey.symbolsEnabled, default: false))\n"
-        s += "- symbolsRequireDoubleColon: \(bool(PrefsKey.symbolsRequireDoubleColon, default: false))\n"
         s += "- emoticonsEnabled: \(bool(PrefsKey.emoticonsEnabled, default: true))\n"
-        s += "- gifSearchEnabled: \(bool(PrefsKey.gifSearchEnabled, default: true))\n"
         s += "- gifBypassExclusions: \(bool(PrefsKey.gifBypassExclusions, default: true))\n"
         s += "- launchAtLogin: \(bool(PrefsKey.launchAtLogin, default: false))\n"
         s += "- showMenuBarIcon: \(bool(PrefsKey.showMenuBarIcon, default: true))\n"
@@ -138,6 +135,11 @@ enum DebugReport {
         s += "- totals.symbolInserted: \(d.integer(forKey: PrefsKey.totalSymbolInserted))\n"
         s += "- totals.gifInserted: \(d.integer(forKey: PrefsKey.totalGifInserted))\n"
         s += "- totals.emoticonInserted: \(d.integer(forKey: PrefsKey.totalEmoticonInserted))\n"
+        // Trigger strings are config, not user content — safe to include.
+        let triggers = TriggerConfigStore.load(defaults: d)
+        for t in triggers.all {
+            s += "- triggers.\(t.mode.rawValue): '\(t.open)' enabled=\(t.enabled)\n"
+        }
         return s
     }
 
