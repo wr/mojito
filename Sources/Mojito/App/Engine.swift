@@ -53,9 +53,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var useFrequencyBoost = true
     private var gifBypassExclusions = true
     private var emoticonsEnabled = true
-    /// The live trigger config, cached so `corpusFor` can decide whether the
-    /// normal scope blends symbols in without re-reading UserDefaults.
-    private var triggerConfig = TriggerConfig.default
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -184,8 +181,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // The trigger config (incl. symbols mode) lives entirely in the
         // user-editable config. Cache it so `corpusFor` can read it off the
         // keystroke path.
-        triggerConfig = TriggerConfigStore.load()
-        stateMachine.setConfig(triggerConfig)
+        stateMachine.setConfig(TriggerConfigStore.load())
         // Gating arrows in the SM means a disabled arrow never defers or
         // consumes a following char (which would otherwise be dropped when
         // the insert is suppressed downstream).
@@ -715,14 +711,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             viewModel.selectedIndex = index
             insert(query: "", mode: .fromPicker, scope: .normal, openLen: max(1, stateMachine.captureOpenLen), closeLen: 0)
 
-        case .closePickerRestoringQuestion:
+        case .closePickerRestoringTrigger(let char):
             viewModel.reset()
             pickerWindow.hide()
             stateMachine.emptyPickerActive = false
             clearCaptureState()
-            // The `?` from `:?` was swallowed; type it back so the focused app
-            // shows the literal `:?` after Esc.
-            TextInserter.replace(charactersToDelete: 0, with: "?")
+            // The trigger's last char (e.g. `?` of `:?`) was swallowed when the
+            // pill opened; type it back so the focused app shows the literal
+            // trigger after Esc.
+            TextInserter.replace(charactersToDelete: 0, with: String(char))
         }
     }
 
@@ -925,7 +922,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .normal:
             // When symbols are on and set to follow emoji, blend them into the
             // normal `:fire:` results; otherwise emoji only.
-            return triggerConfig.symbols.enabled && triggerConfig.symbolsFollowEmoji
+            let config = stateMachine.config
+            return config.symbols.enabled && config.symbolsFollowEmoji
                 ? .emojiAndSymbols
                 : .emojiOnly
         }
@@ -941,9 +939,6 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             pendingEmoticonUndo = nil
         }
 
-        // Chars of the typed open delimiter to erase (`:foo` = 1, `::foo` = 2).
-        let leadingColons = openLen
-
         switch mode {
         case .fromPicker:
             // Closing colon was consumed; `:query` (or `::query`) is in the
@@ -951,7 +946,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // rows (🎁 ???, 🎲).
             guard let scored = viewModel.topResult else { return }
             DebugRecorder.record(.insert, "fromPicker", ["scope": "\(scope)"])
-            let charsToDelete = query.count + leadingColons
+            // `openLen` = chars of the typed open delimiter to erase (`:foo`=1).
+            let charsToDelete = query.count + openLen
             // The Browse sentinel is intercepted in `apply` before `insert`.
             if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
                 return
@@ -971,7 +967,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // something resolves; otherwise leave the text alone.
             let key = query.lowercased()
             DebugRecorder.record(.insert, "exactMatch", ["scope": "\(scope)"])
-            let charsToDelete = query.count + leadingColons + closeLen  // + typed close delimiter
+            let charsToDelete = query.count + openLen + closeLen  // + typed close delimiter
 
             // `::query:`: top-1 fuzzy against symbols, exact label only.
             // No easter eggs, no random.

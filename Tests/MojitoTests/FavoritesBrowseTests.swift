@@ -121,7 +121,7 @@ struct TriggerStateMachineBrowseTests {
         _ = sm.handle(.cancelChar("?"))
         sm.emptyPickerActive = true
         let esc = sm.handle(.escape)
-        #expect(esc.action == .closePickerRestoringQuestion)
+        #expect(esc.action == .closePickerRestoringTrigger("?"))
         #expect(esc.consumesKey == true)
         #expect(sm.state == .idle)
     }

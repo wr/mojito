@@ -32,8 +32,12 @@ struct TriggerMatcher: Equatable {
     /// Some opener's open string strictly extends `buffer` — i.e. typing more
     /// delimiter chars could still form a longer trigger. Drives progressive
     /// upgrade (`:` → `::` → `:::`).
-    func canExtend(_ buffer: [Character]) -> Bool {
-        openers.contains { $0.open.count > buffer.count && hasPrefix($0.open, buffer) }
+    func canExtend(_ buffer: [Character], excluding excludedMode: TriggerMode? = nil) -> Bool {
+        openers.contains { opener in
+            opener.mode != excludedMode
+                && opener.open.count > buffer.count
+                && hasPrefix(opener.open, buffer)
+        }
     }
 
     /// `buffer` is a viable start of some trigger (a prefix of, or equal to,

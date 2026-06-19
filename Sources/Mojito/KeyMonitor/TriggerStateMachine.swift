@@ -119,8 +119,9 @@ enum TriggerAction: Equatable {
     case expandBrowser
     /// Pill quick-pick: insert the row at this index (digit 1–8 → 0–7).
     case pickIndex(Int)
-    /// Close the pill and restore the swallowed `?` so `:?`+Esc leaves `:?`.
-    case closePickerRestoringQuestion
+    /// Close the pill and type back the swallowed trigger char so e.g. `:?`+Esc
+    /// leaves the literal `:?` (the char is the trigger's last, customizable).
+    case closePickerRestoringTrigger(Character)
 }
 
 enum GifMoveDirection: Equatable { case left, right, up, down }
@@ -232,6 +233,13 @@ struct TriggerStateMachine {
             config.set(t)
             matcher = TriggerMatcher(config: config)
         }
+    }
+
+    /// The char swallowed when the Quick Access pill opened (its trigger's last
+    /// char) — typed back on Esc. Works for any trigger, not just `:?`.
+    var quickAccessRestoreChar: Character? {
+        let qa = config.quickAccess
+        return qa.enabled ? qa.open.last : nil
     }
 
     /// True only once the empty-query favorites picker is actually on screen.
@@ -666,13 +674,14 @@ struct TriggerStateMachine {
         // MARK: capturing — exits
 
         case (.capturing, .escape):
-            // `:?`+Esc should leave the literal `:?` — the `?` was swallowed
-            // when the pill opened, so ask the Engine to type it back.
-            let restoreQuestion = emptyPickerActive && quickAccessTrigger != nil
+            // The favorites pill is only summoned by the Quick Access trigger,
+            // whose last char is swallowed when it opens — type it back so Esc
+            // leaves the literal trigger (`:?`, or a custom one).
+            let restore: Character? = emptyPickerActive ? quickAccessRestoreChar : nil
             emptyPickerActive = false
             state = .idle
             return TriggerOutput(
-                action: restoreQuestion ? .closePickerRestoringQuestion : .closePicker,
+                action: restore.map { .closePickerRestoringTrigger($0) } ?? .closePicker,
                 consumesKey: true
             )
 
@@ -765,17 +774,6 @@ struct TriggerStateMachine {
         return gif.enabled && !gif.open.isEmpty && gif.open.allSatisfy { $0 == ":" }
     }
 
-    /// Some active emoji/symbols/quickAccess open has `cand` as a strict prefix.
-    /// GIF is excluded so a colon-run heading only toward `:::` doesn't keep the
-    /// buffer alive (it must cancel, matching legacy `::`); the window handles gif.
-    private func headsTowardNonGifTrigger(_ cand: [Character]) -> Bool {
-        config.active.contains { t in
-            guard t.mode != .gif else { return false }
-            let open = Array(t.open)
-            return open.count > cand.count && Array(open.prefix(cand.count)) == cand
-        }
-    }
-
     /// Begin a fresh capture from idle and resolve the first delimiter char.
     private mutating func beginOpening(char c: Character, input: TriggerInput, now: Date) -> TriggerOutput {
         state = .capturing(query: "")
@@ -823,7 +821,7 @@ struct TriggerStateMachine {
 
         // Still a viable prefix heading toward a longer emoji/symbols/quickAccess
         // open — keep accumulating the run.
-        if matcher.isViablePrefix(cand), headsTowardNonGifTrigger(cand) {
+        if matcher.isViablePrefix(cand), matcher.canExtend(cand, excluding: .gif) {
             openBuffer = cand
             return openingPassthrough()
         }
