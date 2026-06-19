@@ -5,6 +5,11 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.5.1
+
+## Fixed
+- **Update window:** the "Check for Updates" window now reliably comes to the front instead of opening behind other apps — and no longer bounces the Dock icon. ([#138](https://github.com/wr/mojito/pull/138))
+
 ## v1.5.0
 
 ## New
