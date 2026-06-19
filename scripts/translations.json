@@ -4499,6 +4499,26 @@
       "ar": "إيموجي المفضلة والأكثر استخدامًا.",
       "fa": "ایموجی‌های دلخواه و پرکاربردت.",
       "he": "האימוג'י המועדפים והנפוצים שלך."
+    },
+    "Type a shortcut to insert any emoji.": {
+      "en-GB": "Type a shortcut to insert any emoji.",
+      "de": "Tippe ein Kürzel, um ein Emoji einzufügen.",
+      "es": "Escribe un atajo para insertar cualquier emoji.",
+      "es-419": "Escribe un atajo para insertar cualquier emoji.",
+      "fr": "Tape un raccourci pour insérer un emoji.",
+      "it": "Digita una scorciatoia per inserire un emoji.",
+      "pt-BR": "Digite um atalho para inserir qualquer emoji.",
+      "ja": "ショートカットを入力して絵文字を挿入。",
+      "zh-Hans": "输入快捷方式即可插入任意表情。",
+      "zh-Hant": "輸入快捷鍵即可插入任意表情。",
+      "ko": "단축키를 입력해 이모지를 넣으세요.",
+      "hi": "कोई भी इमोजी डालने के लिए शॉर्टकट टाइप करें।",
+      "ru": "Введите сочетание, чтобы вставить эмодзи.",
+      "pl": "Wpisz skrót, aby wstawić dowolne emoji.",
+      "nl": "Typ een sneltoets om een emoji in te voegen.",
+      "ar": "اكتب اختصارًا لإدراج أي إيموجي.",
+      "fa": "یک میانبر تایپ کن تا هر ایموجی را وارد کنی.",
+      "he": "הקלד קיצור כדי להוסיף כל אימוג'י."
     }
   }
 }

@@ -148,6 +148,43 @@ struct TriggerPicker: View {
     }
 }
 
+/// A System-Settings-style section header row: a colored squircle icon, a
+/// title + subtitle, and (for the optional-feature sections) a large enable
+/// switch on the trailing edge. The first row of each feature section.
+struct SettingsSectionHeader: View {
+    let systemImage: String
+    let tint: Color
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+    /// nil for always-on features (emoji); a binding shows a large switch.
+    var isOn: Binding<Bool>?
+
+    var body: some View {
+        HStack(spacing: 11) {
+            Image(systemName: systemImage)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 28, height: 28)
+                .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(tint))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                Text(subtitle)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            if let isOn {
+                Toggle("", isOn: isOn)
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.large)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+}
+
 /// A custom-trigger field styled to match the `KeyboardShortcuts` recorder
 /// pill used elsewhere on this page: a fixed-width capsule with centered text
 /// and a trailing clear (✗) button. The literal string IS the trigger, so we

@@ -80,6 +80,12 @@ struct GeneralSettingsView: View {
             }
 
             Section {
+                SettingsSectionHeader(
+                    systemImage: "face.smiling",
+                    tint: .orange,
+                    title: "Emoji",
+                    subtitle: "Type a shortcut to insert any emoji."
+                )
                 TriggerPicker(
                     mode: .emoji,
                     open: $triggers.emoji.open,
@@ -108,13 +114,13 @@ struct GeneralSettingsView: View {
             )
 
             Section {
-                Toggle(isOn: $triggers.symbols.enabled) {
-                    TitleAndCaption(
-                        title: "Symbols",
-                        caption: "Symbols like ★ ⌘ ⌥ and arrows."
-                    )
-                }
-                .toggleStyle(.switch)
+                SettingsSectionHeader(
+                    systemImage: "command",
+                    tint: .indigo,
+                    title: "Symbols",
+                    subtitle: "Symbols like ★ ⌘ ⌥ and arrows.",
+                    isOn: $triggers.symbols.enabled
+                )
                 if triggers.symbols.enabled {
                     TriggerPicker(
                         mode: .symbols,
@@ -128,13 +134,13 @@ struct GeneralSettingsView: View {
             }
 
             Section {
-                Toggle(isOn: $triggers.gif.enabled) {
-                    TitleAndCaption(
-                        title: "GIF search",
-                        caption: "GIFs from Giphy."
-                    )
-                }
-                .toggleStyle(.switch)
+                SettingsSectionHeader(
+                    systemImage: "play.rectangle.fill",
+                    tint: .pink,
+                    title: "GIF search",
+                    subtitle: "GIFs from Giphy.",
+                    isOn: $triggers.gif.enabled
+                )
                 if triggers.gif.enabled {
                     TriggerPicker(
                         mode: .gif,
@@ -189,20 +195,6 @@ struct GeneralSettingsView: View {
     }
 }
 
-private struct TitleAndCaption: View {
-    let title: LocalizedStringKey
-    let caption: LocalizedStringKey
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-            Text(caption)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-}
 
 struct StatsHelpButton: View {
     @State private var isShown = false

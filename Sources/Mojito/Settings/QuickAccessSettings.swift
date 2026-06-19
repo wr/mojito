@@ -26,16 +26,13 @@ struct QuickAccessSection: View {
 
     var body: some View {
         Section {
-            Toggle(isOn: $enabled) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Quick Access")
-                    Text("Your favorite and most-used emoji.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .toggleStyle(.switch)
+            SettingsSectionHeader(
+                systemImage: "bolt.fill",
+                tint: .blue,
+                title: "Quick Access",
+                subtitle: "Your favorite and most-used emoji.",
+                isOn: $enabled
+            )
 
             if enabled {
                 TriggerPicker(
