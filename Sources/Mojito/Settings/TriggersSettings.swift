@@ -22,11 +22,32 @@ struct TriggerPicker: View {
 
     private var isCustom: Bool { selectionTag == Self.customTag }
 
+    /// The mode's own name, used as the sample word in each option so a row
+    /// reads as what it does (`:emoji`, `::symbol`, `:::gif`) instead of a bare,
+    /// ambiguous punctuation glyph.
+    private var noun: String {
+        switch mode {
+        case .emoji:       return String(localized: "emoji")
+        case .symbols:     return String(localized: "symbol")
+        case .gif:         return String(localized: "gif")
+        case .quickAccess: return ""
+        }
+    }
+
     var body: some View {
         HStack(spacing: 10) {
             Text("Trigger")
-                .frame(width: 80, alignment: .leading)
+            Spacer(minLength: 0)
 
+            if isCustom {
+                CustomTriggerField(text: $open)
+            }
+            if let diagnostic {
+                DiagnosticBadge(diagnostic: diagnostic)
+            }
+
+            // Right-aligned select; each row shows the trigger applied to the
+            // mode's name (`:::gif`) so the menu is self-describing.
             Picker("", selection: Binding(
                 get: { selectionTag },
                 set: { newTag in
@@ -39,26 +60,26 @@ struct TriggerPicker: View {
                 }
             )) {
                 ForEach(Self.presets, id: \.self) { preset in
-                    Text(preset).font(.system(.body, design: .monospaced)).tag(preset)
+                    Text(verbatim: preset + noun)
+                        .font(.system(.body, design: .monospaced))
+                        .tag(preset)
                 }
                 Text("Custom…").tag(Self.customTag)
             }
             .labelsHidden()
             .fixedSize()
-
-            if isCustom {
-                CustomTriggerField(text: $open)
-            }
-
-            if let diagnostic {
-                DiagnosticBadge(diagnostic: diagnostic)
-            }
-
-            Spacer(minLength: 0)
-
-            TriggerPreview(mode: mode, open: open)
         }
         .padding(.vertical, 1)
+
+        // In Custom the menu just says "Custom…", so echo what it produces.
+        if isCustom, !open.isEmpty {
+            HStack {
+                Spacer()
+                Text(verbatim: open + noun)
+                    .font(.system(.callout, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+        }
 
         if let diagnostic {
             Text(diagnostic.message)
@@ -85,30 +106,6 @@ private struct CustomTriggerField: View {
                     .replacingOccurrences(of: "\r", with: "")
                 if stripped != newValue { text = stripped }
             }
-    }
-}
-
-/// Live, secondary/monospaced sample of what the trigger looks like in use.
-/// Bracketing modes show `open + sample + open` (`::fire::`); gif shows
-/// `open + sample` (`:::cat`).
-private struct TriggerPreview: View {
-    let mode: TriggerMode
-    let open: String
-
-    private var text: String {
-        guard !open.isEmpty else { return "" }
-        switch mode {
-        case .emoji, .symbols: return open + "fire" + open
-        case .gif:             return open + "cat"
-        case .quickAccess:     return open
-        }
-    }
-
-    var body: some View {
-        Text(text)
-            .font(.system(.callout, design: .monospaced))
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
     }
 }
 
