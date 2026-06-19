@@ -123,24 +123,15 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate, 
 
     // MARK: - SPUStandardUserDriverDelegate
 
-    /// Getting Sparkle's window in front is harder than it looks for a menu-bar
-    /// (`.accessory`) app. Once the appcast round-trip finishes, the app no
-    /// longer owns the active event, so macOS denies activation — `NSApp
-    /// .activate` is a no-op (Sparkle calls it too, with the same result), and
-    /// the window lands behind whatever's frontmost. So instead of fighting
-    /// activation, we float the window above other apps by raising its window
-    /// *level* (the same trick the picker panel uses); that doesn't depend on
-    /// activation at all. Promotion to `.regular` is kept as well so the app
-    /// gets a dock icon / ⌘-Tab entry while the update UI is up, ref-counted
-    /// through `DockIconManager` so it composes with an open settings window.
-    private var didPromoteForUpdateUI = false
-
-    private func promoteForUpdateUI() {
-        if !didPromoteForUpdateUI {
-            didPromoteForUpdateUI = true
-            DockIconManager.windowDidOpen()
-        }
-        NSApp.activate(ignoringOtherApps: true)
+    /// Getting Sparkle's window in front is hard for a menu-bar (`.accessory`)
+    /// app: once the appcast round-trip finishes the app no longer owns the
+    /// active event, so macOS denies activation (`NSApp.activate` is a no-op —
+    /// Sparkle calls it too, same result) and the window lands behind whatever's
+    /// frontmost. Fighting activation also makes the Dock bounce the icon for
+    /// attention. So don't fight it: float the window above other apps by
+    /// raising its window *level* (the activation-independent trick the picker
+    /// panel uses) and leave the app a quiet menu-bar app — no dock bounce.
+    private func raiseUpdaterWindowSoon() {
         // The window doesn't exist yet when these hooks fire, and the no-update
         // / error path then blocks the main thread in `runModal` — so schedule
         // the raise across default + modal run-loop modes, on a short retry
@@ -151,12 +142,9 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate, 
         }
     }
 
-    private func demoteAfterUpdateUI() {
+    private func cancelPendingRaise() {
         NSObject.cancelPreviousPerformRequests(
             withTarget: self, selector: #selector(raiseUpdaterWindow), object: nil)
-        guard didPromoteForUpdateUI else { return }
-        didPromoteForUpdateUI = false
-        DockIconManager.windowDidClose()
     }
 
     /// Float whichever window Sparkle just presented above other applications.
@@ -174,18 +162,18 @@ final class UpdaterCoordinator: NSObject, ObservableObject, SPUUpdaterDelegate, 
 
     // These fire on the main thread (they bracket AppKit presentation).
     nonisolated func standardUserDriverWillHandleShowingUpdate(_ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem, state: SPUUserUpdateState) {
-        MainActor.assumeIsolated { promoteForUpdateUI() }
+        MainActor.assumeIsolated { raiseUpdaterWindowSoon() }
     }
 
     nonisolated func standardUserDriverWillShowModalAlert() {
-        MainActor.assumeIsolated { promoteForUpdateUI() }
+        MainActor.assumeIsolated { raiseUpdaterWindowSoon() }
     }
 
     nonisolated func standardUserDriverDidShowModalAlert() {
-        MainActor.assumeIsolated { demoteAfterUpdateUI() }
+        MainActor.assumeIsolated { cancelPendingRaise() }
     }
 
     nonisolated func standardUserDriverWillFinishUpdateSession() {
-        MainActor.assumeIsolated { demoteAfterUpdateUI() }
+        MainActor.assumeIsolated { cancelPendingRaise() }
     }
 }
