@@ -178,7 +178,9 @@ struct SettingsSectionHeader: View {
                 Toggle("", isOn: isOn)
                     .labelsHidden()
                     .toggleStyle(.switch)
-                    .controlSize(.large)
+                    // A touch larger than default (there's no size between
+                    // `.regular` and the oversized `.large`).
+                    .scaleEffect(1.2, anchor: .trailing)
             }
         }
         .padding(.vertical, 2)

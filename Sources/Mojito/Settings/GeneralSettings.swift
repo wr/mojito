@@ -81,17 +81,20 @@ struct GeneralSettingsView: View {
 
             Section {
                 SettingsSectionHeader(
-                    systemImage: "face.smiling",
+                    systemImage: "face.smiling.inverse",
                     tint: .orange,
                     title: "Emoji",
-                    subtitle: "Type a shortcut to insert any emoji."
+                    subtitle: "Type a shortcut to insert any emoji.",
+                    isOn: $triggers.emoji.enabled
                 )
-                TriggerPicker(
-                    mode: .emoji,
-                    open: $triggers.emoji.open,
-                    takenOpens: takenOpens(excluding: .emoji),
-                    defaultOpen: TriggerConfig.default.emoji.open
-                )
+                if triggers.emoji.enabled {
+                    TriggerPicker(
+                        mode: .emoji,
+                        open: $triggers.emoji.open,
+                        takenOpens: takenOpens(excluding: .emoji),
+                        defaultOpen: TriggerConfig.default.emoji.open
+                    )
+                }
                 HStack(alignment: .center) {
                     Text("Skin tone")
                     Spacer()
@@ -99,9 +102,9 @@ struct GeneralSettingsView: View {
                 }
                 Toggle("Rank frequently used emoji higher", isOn: $useFrequencyBoost)
                     .toggleStyle(.switch)
-                Toggle("Convert emoticons (`:D` → 😃)", isOn: $emoticonsEnabled)
+                Toggle("Convert emoticons (`:D` becomes 😃)", isOn: $emoticonsEnabled)
                     .toggleStyle(.switch)
-                Toggle("Convert text arrows (`->` to →)", isOn: $arrowConversionEnabled)
+                Toggle("Convert text arrows (`->` becomes →)", isOn: $arrowConversionEnabled)
                     .toggleStyle(.switch)
             }
 
@@ -118,7 +121,7 @@ struct GeneralSettingsView: View {
                     systemImage: "command",
                     tint: .indigo,
                     title: "Symbols",
-                    subtitle: "Symbols like ★ ⌘ ⌥ and arrows.",
+                    subtitle: "Symbols like ★ ✓ ÷ ©.",
                     isOn: $triggers.symbols.enabled
                 )
                 if triggers.symbols.enabled {
@@ -135,7 +138,7 @@ struct GeneralSettingsView: View {
 
             Section {
                 SettingsSectionHeader(
-                    systemImage: "play.rectangle.fill",
+                    systemImage: "photo.fill",
                     tint: .pink,
                     title: "GIF search",
                     subtitle: "GIFs from Giphy.",

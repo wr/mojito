@@ -44,9 +44,8 @@ struct QuickAccessSection: View {
                     followLabel: "\(emojiOpen)?",
                     defaultFollowsEmoji: true
                 )
+                slotGrid
             }
-
-            slotGrid
 
             LabeledContent("Emoji Browser shortcut") {
                 KeyboardShortcuts.Recorder("", name: .showEmojiBrowser)
