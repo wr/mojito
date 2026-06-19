@@ -109,11 +109,11 @@ struct GeneralSettingsView: View {
                 takenOpens: takenOpens(excluding: .quickAccess)
             )
 
-            Section("Symbols") {
+            Section {
                 Toggle(isOn: $triggers.symbols.enabled) {
                     TitleAndCaption(
                         title: "Symbols",
-                        caption: "Include ★ ⌘ ⌥ and similar characters, reachable via their own trigger (experimental)."
+                        caption: "Search for symbols like ★ ⌘ ⌥ and arrows. Experimental."
                     )
                 }
                 .toggleStyle(.switch)
@@ -129,9 +129,14 @@ struct GeneralSettingsView: View {
                 }
             }
 
-            Section("GIF") {
-                Toggle("GIF search", isOn: $triggers.gif.enabled)
-                    .toggleStyle(.switch)
+            Section {
+                Toggle(isOn: $triggers.gif.enabled) {
+                    TitleAndCaption(
+                        title: "GIF search",
+                        caption: "Find a GIF on Giphy and drop it into any message."
+                    )
+                }
+                .toggleStyle(.switch)
                 if triggers.gif.enabled {
                     TriggerPicker(
                         mode: .gif,

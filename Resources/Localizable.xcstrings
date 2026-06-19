@@ -24568,6 +24568,342 @@
           }
         }
       }
+    },
+    "Search for symbols like ★ ⌘ ⌥ and arrows. Experimental.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search for symbols like ★ ⌘ ⌥ and arrows. Experimental."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suche nach Symbolen wie ★ ⌘ ⌥ und Pfeilen. Experimentell."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busca símbolos como ★ ⌘ ⌥ y flechas. Experimental."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busca símbolos como ★ ⌘ ⌥ y flechas. Experimental."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche des symboles comme ★ ⌘ ⌥ et des flèches. Expérimental."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca simboli come ★ ⌘ ⌥ e frecce. Sperimentale."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busque símbolos como ★ ⌘ ⌥ e setas. Experimental."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "★ ⌘ ⌥ や矢印などの記号を検索。実験的機能です。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索 ★ ⌘ ⌥ 和箭头等符号。实验性功能。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜尋 ★ ⌘ ⌥ 和箭頭等符號。實驗性功能。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "★ ⌘ ⌥ 및 화살표 같은 기호를 검색합니다. 실험적 기능."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "★ ⌘ ⌥ और तीर जैसे प्रतीक खोजें। प्रयोगात्मक।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ищите символы вроде ★ ⌘ ⌥ и стрелки. Экспериментально."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szukaj symboli jak ★ ⌘ ⌥ i strzałek. Eksperymentalne."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek symbolen zoals ★ ⌘ ⌥ en pijlen. Experimenteel."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ابحث عن رموز مثل ★ ⌘ ⌥ والأسهم. تجريبي."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نمادهایی مانند ★ ⌘ ⌥ و فلش‌ها را جستجو کنید. آزمایشی."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חפש סמלים כמו ★ ⌘ ⌥ וחיצים. ניסיוני."
+          }
+        }
+      }
+    },
+    "Find a GIF on Giphy and drop it into any message.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find a GIF on Giphy and drop it into any message."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finde ein GIF auf Giphy und füge es in jede Nachricht ein."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encuentra un GIF en Giphy y agrégalo a cualquier mensaje."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encuentra un GIF en Giphy y agrégalo a cualquier mensaje."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trouve un GIF sur Giphy et glisse-le dans n’importe quel message."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trova una GIF su Giphy e inseriscila in qualsiasi messaggio."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encontre um GIF no Giphy e adicione a qualquer mensagem."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GiphyでGIFを見つけて、どんなメッセージにも貼り付け。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Giphy 上找 GIF，插入任何消息。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Giphy 上找 GIF，插入任何訊息。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy에서 GIF를 찾아 어떤 메시지에든 넣으세요."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giphy पर GIF खोजें और किसी भी संदेश में डालें।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найдите GIF в Giphy и вставьте в любое сообщение."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znajdź GIF w Giphy i wstaw go do dowolnej wiadomości."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vind een GIF op Giphy en zet ’m in elk bericht."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ابحث عن صورة GIF على Giphy وأضِفها إلى أي رسالة."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "یک GIF در Giphy پیدا کن و در هر پیامی بگذار."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מצא GIF ב-Giphy ושלב אותו בכל הודעה."
+          }
+        }
+      }
+    },
+    "Pop up a pill of your favorite and most-used emoji.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pop up a pill of your favourite and most-used emoji."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeige eine Leiste deiner Lieblings- und meistgenutzten Emoji."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra una barra con tus emojis favoritos y más usados."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra una barra con tus emojis favoritos y más usados."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche une barre de tes emoji favoris et les plus utilisés."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra una barra dei tuoi emoji preferiti e più usati."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exiba uma barra com seus emojis favoritos e mais usados."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "お気に入りとよく使う絵文字のバーを表示。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "弹出你最爱和最常用表情的小条。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "彈出你最愛和最常用表情的小列。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "즐겨찾고 자주 쓰는 이모지 막대를 띄웁니다."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अपने पसंदीदा और सबसे ज़्यादा इस्तेमाल किए इमोजी की पिल दिखाएँ।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывает панель любимых и часто используемых эмодзи."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pokaż pasek ulubionych i najczęściej używanych emoji."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon een balk met je favoriete en meestgebruikte emoji."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أظهر شريطًا بإيموجي المفضلة والأكثر استخدامًا."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نواری از ایموجی‌های دلخواه و پرکاربردت را نمایش بده."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הצג רצועה של האימוג'י המועדפים והנפוצים שלך."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
