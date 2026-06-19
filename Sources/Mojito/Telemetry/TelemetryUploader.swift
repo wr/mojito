@@ -100,7 +100,7 @@ final class TelemetryUploader {
         let triggers = TriggerConfigStore.load()
         let def = TriggerConfig.default
         return [
-            "symbols": bool(PrefsKey.symbolsEnabled, false),
+            "symbols": triggers.symbols.enabled,
             // Kept for back-compat: now reflects the symbols *trigger* being on.
             "symbolsDoubleColon": triggers.symbols.enabled,
             "emoticons": bool(PrefsKey.emoticonsEnabled, true),

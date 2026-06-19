@@ -107,6 +107,12 @@ struct TriggerConfig: Equatable, Codable {
     /// consistent: the `?` stays the last char of the open, which is what the
     /// state machine's pill / escape-restore handling keys off.
     mutating func normalize() {
+        // Emoji is the core trigger and must never be left without one — e.g.
+        // if the user picks "Custom…" and leaves the field blank, fall back to
+        // the default so `:` never silently stops working.
+        if emoji.open.isEmpty {
+            emoji.open = TriggerConfig.default.emoji.open
+        }
         // Quick Access follows the emoji trigger unless given its own open.
         if quickAccessFollowEmoji {
             quickAccess.open = emoji.open + "?"
