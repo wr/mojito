@@ -1,14 +1,17 @@
 import SwiftUI
 import KeyboardShortcuts
 
-/// The Quick Access slots editor (8 editable slots styled like the `:?` pill)
-/// plus the global emoji-browser hotkey. The enable toggle binds the
-/// quickAccess trigger; its open isn't editable here — it follows the Emoji
-/// trigger (`:` → `:?`), so we only surface the resolved open as a hint.
+/// The Quick Access trigger picker, the 8-slot favorites editor, and the
+/// global emoji-browser hotkey. The shortcut follows the Emoji trigger
+/// (`:` → `:?`) by default but can be set to any preset or custom trigger.
 struct QuickAccessSection: View {
     @Binding var enabled: Bool
-    /// The current Emoji open, used only to render the `…?` hint.
+    @Binding var open: String
+    @Binding var followEmoji: Bool
+    /// The current Emoji open, used to render the "follow" option's `:?` label.
     let emojiOpen: String
+    /// Opens claimed by the other active triggers — grayed in the picker.
+    let takenOpens: Set<String>
 
     @StateObject private var store = QuickAccessStore.shared
     @State private var editing: EditingSlot?
@@ -26,13 +29,25 @@ struct QuickAccessSection: View {
             Toggle(isOn: $enabled) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Quick Access")
-                    Text("Opens with `\(emojiOpen)?`")
+                    Text("Pop up your favorite emoji, a keystroke away.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .toggleStyle(.switch)
+
+            if enabled {
+                TriggerPicker(
+                    mode: .quickAccess,
+                    open: $open,
+                    takenOpens: takenOpens,
+                    defaultOpen: TriggerConfig.default.quickAccess.open,
+                    sameAsEmoji: $followEmoji,
+                    followLabel: "\(emojiOpen)?",
+                    defaultFollowsEmoji: true
+                )
+            }
 
             slotGrid
 

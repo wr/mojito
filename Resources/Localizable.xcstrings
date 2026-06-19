@@ -24344,6 +24344,230 @@
           }
         }
       }
+    },
+    "Quick Access shortcut": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quick Access shortcut"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellzugriff-Kürzel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atajo de Acceso rápido"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atajo de Acceso rápido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raccourci Accès rapide"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scorciatoia Accesso rapido"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atalho de Acesso rápido"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クイックアクセスショートカット"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快速访问快捷方式"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快速存取快捷鍵"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "빠른 접근 단축키"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्विक एक्सेस शॉर्टकट"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сочетание для быстрого доступа"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skrót szybkiego dostępu"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snelle toegang-sneltoets"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختصار الوصول السريع"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "میانبر دسترسی سریع"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "קיצור גישה מהירה"
+          }
+        }
+      }
+    },
+    "Pop up your favorite emoji, a keystroke away.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pop up your favourite emoji, a keystroke away."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lass deine Lieblings-Emoji per Tastendruck erscheinen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra tus emojis favoritos con una pulsación."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra tus emojis favoritos con una pulsación."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiche tes emoji favoris en une frappe."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra i tuoi emoji preferiti con un tasto."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exiba seus emojis favoritos com uma tecla."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "お気に入りの絵文字をキー操作ひとつで表示。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一键弹出你最爱的表情。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一鍵彈出你最愛的表情。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "키 한 번으로 즐겨찾는 이모지를 띄웁니다."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "एक कीस्ट्रोक में अपने पसंदीदा इमोजी पॉप अप करें।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Любимые эмодзи в одно нажатие."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ulubione emoji jednym skrótem."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je favoriete emoji met één toetsaanslag."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أظهر الإيموجي المفضلة لديك بضغطة واحدة."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ایموجی‌های دلخواهت را با یک کلید نمایش بده."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הצג את האימוג'י המועדפים שלך בהקשה אחת."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -101,7 +101,13 @@ struct GeneralSettingsView: View {
                 Text("Emoji")
             }
 
-            QuickAccessSection(enabled: $triggers.quickAccess.enabled, emojiOpen: triggers.emoji.open)
+            QuickAccessSection(
+                enabled: $triggers.quickAccess.enabled,
+                open: $triggers.quickAccess.open,
+                followEmoji: $triggers.quickAccessFollowEmoji,
+                emojiOpen: triggers.emoji.open,
+                takenOpens: takenOpens(excluding: .quickAccess)
+            )
 
             Section("Symbols") {
                 Toggle(isOn: $triggers.symbols.enabled) {
@@ -117,7 +123,8 @@ struct GeneralSettingsView: View {
                         open: $triggers.symbols.open,
                         takenOpens: takenOpens(excluding: .symbols),
                         defaultOpen: TriggerConfig.default.symbols.open,
-                        sameAsEmoji: $triggers.symbolsFollowEmoji
+                        sameAsEmoji: $triggers.symbolsFollowEmoji,
+                        defaultFollowsEmoji: true
                     )
                 }
             }

@@ -30,14 +30,19 @@ struct TriggerConfig: Equatable, Codable {
     /// both corpora). When false, symbols are a scoped trigger via their own
     /// open (`::symbol::`). Defaults true.
     var symbolsFollowEmoji: Bool = true
+    /// When true, the Quick Access open follows the emoji trigger (`:` → `:?`).
+    /// When false, `quickAccess.open` is the user's own (preset or custom)
+    /// trigger. Defaults true.
+    var quickAccessFollowEmoji: Bool = true
 
     init(emoji: Trigger, symbols: Trigger, gif: Trigger, quickAccess: Trigger,
-         symbolsFollowEmoji: Bool = true) {
+         symbolsFollowEmoji: Bool = true, quickAccessFollowEmoji: Bool = true) {
         self.emoji = emoji
         self.symbols = symbols
         self.gif = gif
         self.quickAccess = quickAccess
         self.symbolsFollowEmoji = symbolsFollowEmoji
+        self.quickAccessFollowEmoji = quickAccessFollowEmoji
     }
 
     /// Tolerant decode: a blob written by an older build is missing newer keys
@@ -51,6 +56,7 @@ struct TriggerConfig: Equatable, Codable {
         gif         = try c.decodeIfPresent(Trigger.self, forKey: .gif)         ?? d.gif
         quickAccess = try c.decodeIfPresent(Trigger.self, forKey: .quickAccess) ?? d.quickAccess
         symbolsFollowEmoji = try c.decodeIfPresent(Bool.self, forKey: .symbolsFollowEmoji) ?? true
+        quickAccessFollowEmoji = try c.decodeIfPresent(Bool.self, forKey: .quickAccessFollowEmoji) ?? true
     }
 
     static let `default` = TriggerConfig(
@@ -58,7 +64,8 @@ struct TriggerConfig: Equatable, Codable {
         symbols:     Trigger(mode: .symbols,     open: "::",  enabled: false),
         gif:         Trigger(mode: .gif,         open: ":::", enabled: true),
         quickAccess: Trigger(mode: .quickAccess, open: ":?",  enabled: true),
-        symbolsFollowEmoji: true
+        symbolsFollowEmoji: true,
+        quickAccessFollowEmoji: true
     )
 
     /// All four, in the canonical precedence order used to break open-string
@@ -100,7 +107,10 @@ struct TriggerConfig: Equatable, Codable {
     /// consistent: the `?` stays the last char of the open, which is what the
     /// state machine's pill / escape-restore handling keys off.
     mutating func normalize() {
-        quickAccess.open = emoji.open + "?"
+        // Quick Access follows the emoji trigger unless given its own open.
+        if quickAccessFollowEmoji {
+            quickAccess.open = emoji.open + "?"
+        }
         // When symbols blend into emoji, the symbols open is unused as an
         // opener — keep it tidy by mirroring the emoji open so no stale value
         // lingers.

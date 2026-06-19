@@ -20,8 +20,15 @@ struct TriggerPicker: View {
     let takenOpens: Set<String>
     /// The preset to restore to when the pill's ✗ is tapped.
     let defaultOpen: String
-    /// Symbols only: the shared "blend into emoji" flag. `nil` for emoji/gif.
+    /// Symbols / quick access: the shared "follow the emoji trigger" flag.
+    /// `nil` for emoji/gif (no follow option).
     var sameAsEmoji: Binding<Bool>?
+    /// Menu text for the follow option. nil → "Same as emoji" (symbols);
+    /// quick access passes the derived `:?` so it reads as the actual trigger.
+    var followLabel: String?
+    /// When the mode's default *is* "follow emoji" (symbols / quick access),
+    /// the pill's ✗ returns to that rather than to a preset open.
+    var defaultFollowsEmoji: Bool = false
 
     /// Whether the custom pill is showing. Explicit state (not derived from
     /// `open`) so typing a value that happens to match a preset (`:`, `;`, …)
@@ -43,8 +50,13 @@ struct TriggerPicker: View {
         case .emoji:       return String(localized: "Emoji shortcut")
         case .symbols:     return String(localized: "Symbol shortcut")
         case .gif:         return String(localized: "GIF shortcut")
-        case .quickAccess: return String(localized: "Trigger")
+        case .quickAccess: return String(localized: "Quick Access shortcut")
         }
+    }
+
+    /// The follow-option text (and the menu's label while following).
+    private var resolvedFollowLabel: String {
+        followLabel ?? String(localized: "Same as emoji")
     }
 
     /// Human name for a preset glyph (`:` → "Colon") so options read
@@ -69,7 +81,7 @@ struct TriggerPicker: View {
 
     /// What the menu's button shows for the current selection.
     private var menuLabel: String {
-        followsEmoji ? String(localized: "Same as emoji") : presetLabel(open)
+        followsEmoji ? resolvedFollowLabel : presetLabel(open)
     }
 
     var body: some View {
@@ -78,9 +90,14 @@ struct TriggerPicker: View {
             Spacer(minLength: 0)
             if showPill {
                 CustomTriggerPill(text: $open) {
-                    // ✗ → back to the preset default (menu returns).
+                    // ✗ → the mode's default (menu returns): "follow emoji" for
+                    // symbols/quick access, else the preset open.
                     customMode = false
-                    open = defaultOpen
+                    if defaultFollowsEmoji {
+                        sameAsEmoji?.wrappedValue = true
+                    } else {
+                        open = defaultOpen
+                    }
                 }
             } else {
                 triggerMenu
@@ -99,7 +116,7 @@ struct TriggerPicker: View {
     private var triggerMenu: some View {
         Menu {
             if sameAsEmoji != nil {
-                Button(String(localized: "Same as emoji")) {
+                Button(resolvedFollowLabel) {
                     customMode = false
                     sameAsEmoji?.wrappedValue = true
                 }

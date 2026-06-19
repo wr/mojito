@@ -4339,6 +4339,46 @@
       "ar": "يفتح بـ `%@?`",
       "fa": "با `%@?` باز می‌شود",
       "he": "נפתח עם `%@?`"
+    },
+    "Quick Access shortcut": {
+      "en-GB": "Quick Access shortcut",
+      "de": "Schnellzugriff-Kürzel",
+      "es": "Atajo de Acceso rápido",
+      "es-419": "Atajo de Acceso rápido",
+      "fr": "Raccourci Accès rapide",
+      "it": "Scorciatoia Accesso rapido",
+      "pt-BR": "Atalho de Acesso rápido",
+      "ja": "クイックアクセスショートカット",
+      "zh-Hans": "快速访问快捷方式",
+      "zh-Hant": "快速存取快捷鍵",
+      "ko": "빠른 접근 단축키",
+      "hi": "क्विक एक्सेस शॉर्टकट",
+      "ru": "Сочетание для быстрого доступа",
+      "pl": "Skrót szybkiego dostępu",
+      "nl": "Snelle toegang-sneltoets",
+      "ar": "اختصار الوصول السريع",
+      "fa": "میانبر دسترسی سریع",
+      "he": "קיצור גישה מהירה"
+    },
+    "Pop up your favorite emoji, a keystroke away.": {
+      "en-GB": "Pop up your favourite emoji, a keystroke away.",
+      "de": "Lass deine Lieblings-Emoji per Tastendruck erscheinen.",
+      "es": "Muestra tus emojis favoritos con una pulsación.",
+      "es-419": "Muestra tus emojis favoritos con una pulsación.",
+      "fr": "Affiche tes emoji favoris en une frappe.",
+      "it": "Mostra i tuoi emoji preferiti con un tasto.",
+      "pt-BR": "Exiba seus emojis favoritos com uma tecla.",
+      "ja": "お気に入りの絵文字をキー操作ひとつで表示。",
+      "zh-Hans": "一键弹出你最爱的表情。",
+      "zh-Hant": "一鍵彈出你最愛的表情。",
+      "ko": "키 한 번으로 즐겨찾는 이모지를 띄웁니다.",
+      "hi": "एक कीस्ट्रोक में अपने पसंदीदा इमोजी पॉप अप करें।",
+      "ru": "Любимые эмодзи в одно нажатие.",
+      "pl": "Ulubione emoji jednym skrótem.",
+      "nl": "Je favoriete emoji met één toetsaanslag.",
+      "ar": "أظهر الإيموجي المفضلة لديك بضغطة واحدة.",
+      "fa": "ایموجی‌های دلخواهت را با یک کلید نمایش بده.",
+      "he": "הצג את האימוג'י המועדפים שלך בהקשה אחת."
     }
   }
 }
