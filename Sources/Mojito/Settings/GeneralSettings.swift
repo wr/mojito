@@ -18,10 +18,6 @@ struct GeneralSettingsView: View {
     /// Persisted (normalized) on each change so the live Engine picks it up.
     @State private var triggers: TriggerConfig = TriggerConfigStore.load()
 
-    private var diagnostics: [TriggerMode: TriggerDiagnostic] {
-        TriggerValidator.diagnostics(for: triggers)
-    }
-
     /// Open strings claimed by every active trigger *except* `mode`, so each
     /// menu can gray out presets that would collide. Uses normalized values
     /// (so the derived quickAccess open is included).
@@ -85,9 +81,7 @@ struct GeneralSettingsView: View {
 
             Section {
                 TriggerPicker(
-                    mode: .emoji,
                     open: $triggers.emoji.open,
-                    diagnostic: diagnostics[.emoji],
                     takenOpens: takenOpens(excluding: .emoji),
                     defaultOpen: TriggerConfig.default.emoji.open
                 )
@@ -118,9 +112,7 @@ struct GeneralSettingsView: View {
                 .toggleStyle(.switch)
                 if triggers.symbols.enabled {
                     TriggerPicker(
-                        mode: .symbols,
                         open: $triggers.symbols.open,
-                        diagnostic: diagnostics[.symbols],
                         takenOpens: takenOpens(excluding: .symbols),
                         defaultOpen: TriggerConfig.default.symbols.open,
                         sameAsEmoji: $triggers.symbolsFollowEmoji
@@ -133,9 +125,7 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
                 if triggers.gif.enabled {
                     TriggerPicker(
-                        mode: .gif,
                         open: $triggers.gif.open,
-                        diagnostic: diagnostics[.gif],
                         takenOpens: takenOpens(excluding: .gif),
                         defaultOpen: TriggerConfig.default.gif.open
                     )

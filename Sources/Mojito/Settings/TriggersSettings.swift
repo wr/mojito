@@ -2,19 +2,15 @@ import SwiftUI
 
 /// A reusable trigger editor embedded inline in the feature sections of
 /// Settings ▸ General. Renders one of two states, right-aligned:
-///   - a native-looking pop-up `Menu` of preset triggers (+ "Custom…", and for
-///     symbols "Same as emoji") when the mode is on a preset, with taken
-///     presets grayed out; or
-///   - a keyboard-shortcut-recorder-style pill (editable monospaced field +
-///     dimmed noun + ✗) when the mode is on a custom trigger.
+///   - a native-looking pop-up `Menu` of preset triggers (each shown as
+///     `: Colon`, plus "Custom…", and for symbols "Same as emoji"), with
+///     taken presets grayed out; or
+///   - a recorder-style capsule (editable field + ✗) when on a custom trigger.
 /// The binding edits a mode's `open` string (and, for symbols, the shared
 /// `sameAsEmoji` flag); edits flow back to the caller, which persists the
 /// whole `TriggerConfig` via `TriggerConfigStore`.
 struct TriggerPicker: View {
-    /// The mode this picker edits — drives the preview shape and validator row.
-    let mode: TriggerMode
     @Binding var open: String
-    let diagnostic: TriggerDiagnostic?
     /// Open strings already claimed by the other active triggers — grayed out
     /// in the menu so a preset pick can never collide. This mode's own open is
     /// never in here.
@@ -61,11 +57,6 @@ struct TriggerPicker: View {
         HStack(spacing: 10) {
             Text("Trigger")
             Spacer(minLength: 0)
-
-            if let diagnostic {
-                DiagnosticBadge(diagnostic: diagnostic)
-            }
-
             if isCustom {
                 CustomTriggerPill(text: $open) {
                     // ✗ → back to the preset default (pill disappears). Symbols
@@ -77,13 +68,6 @@ struct TriggerPicker: View {
             }
         }
         .padding(.vertical, 1)
-
-        if let diagnostic {
-            Text(diagnostic.message)
-                .font(.callout)
-                .foregroundStyle(diagnostic.severity == .note ? .secondary : .primary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
     }
 
     /// A `Menu` (not `Picker`) so individual preset rows can be `.disabled()`.
@@ -120,67 +104,39 @@ struct TriggerPicker: View {
     }
 }
 
-/// A keyboard-shortcut-recorder-style pill for a custom trigger: an editable
-/// field plus a ✗ to reset to the default preset. The literal string IS the
-/// trigger, so we trim nothing — but newlines would wreck the field, so
-/// they're stripped.
+/// A custom-trigger field styled to match the `KeyboardShortcuts` recorder
+/// pill used elsewhere on this page: a fixed-width capsule with centered text
+/// and a trailing clear (✗) button. The literal string IS the trigger, so we
+/// trim nothing — but newlines are stripped and the length is capped (a
+/// trigger is a short delimiter, never prose).
 private struct CustomTriggerPill: View {
     @Binding var text: String
     let onClear: () -> Void
 
+    private static let maxLength = 5
+
     var body: some View {
-        HStack(spacing: 4) {
-            // An editable TextField ignores `.fixedSize()` and expands to fill,
-            // so bound it explicitly — triggers are 1–3 chars.
+        HStack(spacing: 6) {
             TextField("", text: $text)
                 .textFieldStyle(.plain)
-                .frame(width: 64)
-                .multilineTextAlignment(.trailing)
+                .multilineTextAlignment(.center)
                 .onChange(of: text) { _, newValue in
-                    let stripped = newValue.replacingOccurrences(of: "\n", with: "")
+                    var v = newValue.replacingOccurrences(of: "\n", with: "")
                         .replacingOccurrences(of: "\r", with: "")
-                    if stripped != newValue { text = stripped }
+                    if v.count > Self.maxLength { v = String(v.prefix(Self.maxLength)) }
+                    if v != newValue { text = v }
                 }
             Button(action: onClear) {
                 Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 16))
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 7)
-        .padding(.vertical, 3)
-        .background(
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1)
-        )
-        .fixedSize()
-    }
-}
-
-/// Inline severity badge: red error / orange warning triangle, secondary
-/// info circle for a note. The message rides along as a tooltip.
-struct DiagnosticBadge: View {
-    let diagnostic: TriggerDiagnostic
-
-    private var color: Color {
-        switch diagnostic.severity {
-        case .error:   return .red
-        case .warning: return .orange
-        case .note:    return .secondary
-        }
-    }
-
-    private var symbol: String {
-        diagnostic.severity == .note ? "info.circle" : "exclamationmark.triangle.fill"
-    }
-
-    var body: some View {
-        Image(systemName: symbol)
-            .foregroundStyle(color)
-            .help(diagnostic.message)
+        .padding(.leading, 12)
+        .padding(.trailing, 7)
+        .frame(width: 132, height: 22)
+        .background(Capsule().fill(Color(nsColor: .textBackgroundColor)))
+        .overlay(Capsule().strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1))
     }
 }
