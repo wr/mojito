@@ -5,6 +5,14 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.5.0
+
+## New
+- **Customizable triggers:** Pick what fires each feature — emoji, symbols, GIF search, and Quick Access. Keep the defaults (`:emoji:`, `::`, `:::`, `:?`) or set your own, like `::emoji::`. Handy in languages that use `:` a lot, or alongside apps that have their own `:` emoji menu. ([#137](https://github.com/wr/mojito/pull/137))
+
+## Fixed
+- **Update prompt:** Mojito now comes to the front when it shows the "update available" window, instead of hiding behind other apps. ([#135](https://github.com/wr/mojito/pull/135))
+
 ## v1.4.0
 
 ## New
