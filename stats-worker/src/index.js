@@ -18,17 +18,31 @@ const MAX_BODY = 16 * 1024;
 const MAX_EMOJI_PER_PING = 300;
 
 // Allow-list of dimensions/features so a malformed or hostile payload can't
-// invent arbitrary rows.
+// invent arbitrary rows. This is the *ingest* set — everything the client may
+// report. Keep it in sync with features() in
+// Sources/Mojito/Telemetry/TelemetryUploader.swift (scripts/check_telemetry.py
+// fails the build if they drift).
 const FEATURE_KEYS = [
-  "symbols", "symbolsDoubleColon", "emoticons", "arrows", "gifSearch",
-  "frequencyBoost", "launchAtLogin", "quickAccess", "menuBarIcon",
-  "emojiTriggerCustom", "symbolsTriggerCustom", "gifTriggerCustom",
-  "quickAccessTriggerCustom",
+  "emoji", "symbols", "symbolsDoubleColon", "emoticons", "arrows", "gifSearch",
+  "frequencyBoost", "launchAtLogin", "quickAccess", "menuBarIcon", "easterEggs",
+  "triggersCustom", "emojiTriggerCustom", "symbolsTriggerCustom",
+  "gifTriggerCustom", "quickAccessTriggerCustom",
+];
+// The curated subset published on the public page, in display order. Minutiae
+// (arrows, symbolsDoubleColon) and the per-mode customization flags (collapsed
+// into triggersCustom) are ingested but never published. Must be a subset of
+// FEATURE_KEYS.
+const PUBLIC_FEATURE_KEYS = [
+  "emoji", "emoticons", "symbols", "gifSearch", "quickAccess",
+  "triggersCustom", "frequencyBoost", "easterEggs", "launchAtLogin",
+  "menuBarIcon",
 ];
 const SKIN_TONES = new Set([
   "default", "light", "mediumLight", "medium", "mediumDark", "dark",
 ]);
-const TOTAL_KINDS = ["emoji", "symbol", "gif", "emoticon"];
+const TOTAL_KINDS = ["emoji", "symbol", "gif", "emoticon", "quickAccess"];
+// Quick Access favorites: 8 slots, so cap the per-ping favorite histogram.
+const MAX_FAVORITES_PER_PING = 8;
 
 const today = () => Math.floor(Date.now() / 86_400_000);
 
@@ -97,6 +111,31 @@ async function ingest(request, env) {
     if (n > 0) stmts.push(totalStmt(env, day, kind, n));
   }
 
+  // Quick Access daily-active: one tick per ping that used the pill at all
+  // (the QA analogue of the `active` signal).
+  if (clampCount(totals.quickAccess, 100_000) > 0) {
+    stmts.push(totalStmt(env, day, "quickAccessActive", 1));
+  }
+
+  // Favorites pinned (0–8) as a marginal distribution. Recorded even at 0 so
+  // the adoption rate has the full reporting population as its denominator.
+  pushDim(stmts, env, day, "favorites", cleanFavCount(body.favoritesCount));
+
+  // Top-favorites histogram — charset-validated, capped at the slot count.
+  const favorites = Array.isArray(body.favorites) ? body.favorites : [];
+  let favKept = 0;
+  for (const hexcode of favorites) {
+    if (favKept >= MAX_FAVORITES_PER_PING) break;
+    if (typeof hexcode !== "string" || !/^[0-9A-Fa-f-]{1,48}$/.test(hexcode)) continue;
+    favKept++;
+    stmts.push(
+      env.DB.prepare(
+        `INSERT INTO favorite_daily (day, hexcode, count) VALUES (?, ?, 1)
+         ON CONFLICT(day, hexcode) DO UPDATE SET count = count + 1`
+      ).bind(day, hexcode.toUpperCase())
+    );
+  }
+
   // Easter-egg discoveries — a bare integer that feeds the community counter.
   const eggs = clampCount(body.eggs, 100);
   if (eggs > 0) {
@@ -161,7 +200,8 @@ async function stats(env) {
   const win = day - 29; // trailing 30 days for "current population" views
   const activeLo = day - 7; // headline avg over the last 7 *complete* UTC days
 
-  const [emoji, os, arch, lang, app, skin, features, totals, active30, active7, eggs] =
+  const [emoji, os, arch, lang, app, skin, features, totals, active30, active7,
+         eggs, qaActive7, favorites, topFav] =
     await Promise.all([
       env.DB.prepare(
         `SELECT hexcode, SUM(count) c FROM emoji_daily WHERE day >= ?
@@ -188,15 +228,30 @@ async function stats(env) {
          FROM totals_daily WHERE kind = 'active' AND day >= ? AND day < ?`
       ).bind(activeLo, day).all(),
       env.DB.prepare(`SELECT value FROM meta WHERE key = 'community_eggs'`).all(),
+      // Quick Access daily-active, same 7-complete-day window as avgDailyActive.
+      env.DB.prepare(
+        `SELECT COALESCE(SUM(count), 0) c, COUNT(DISTINCT day) d
+         FROM totals_daily WHERE kind = 'quickAccessActive' AND day >= ? AND day < ?`
+      ).bind(activeLo, day).all(),
+      dim(env, "favorites", win),
+      env.DB.prepare(
+        `SELECT hexcode, SUM(count) c FROM favorite_daily WHERE day >= ?
+         GROUP BY hexcode ORDER BY c DESC LIMIT 20`
+      ).bind(win).all(),
     ]);
 
   const totalsMap = {};
   for (const r of totals.results) totalsMap[r.kind] = r.c;
 
-  const featureList = features.results
-    .map((r) => ({ feature: r.feature, enabled: r.e, total: r.t,
-                   pct: r.t ? Math.round((r.e / r.t) * 100) : 0 }))
-    .sort((a, b) => b.pct - a.pct);
+  // Curated, fixed-order feature list — only keys in PUBLIC_FEATURE_KEYS that
+  // have actually been reported. Drops minutiae + the raw per-mode flags, and
+  // keeps the order stable day to day (no pct re-sorting).
+  const featMap = {};
+  for (const r of features.results) featMap[r.feature] = { e: r.e, t: r.t };
+  const featureList = PUBLIC_FEATURE_KEYS
+    .filter((k) => featMap[k] && featMap[k].t > 0)
+    .map((k) => ({ feature: k, enabled: featMap[k].e, total: featMap[k].t,
+                   pct: Math.round((featMap[k].e / featMap[k].t) * 100) }));
 
   // macsSharingStats is 30-day person-days (kept for compat); avgDailyActive is
   // the headline per-day mean over the last 7 complete UTC days.
@@ -205,21 +260,39 @@ async function stats(env) {
   const a7Days = active7.results[0]?.d || 0;
   const avgDailyActive = a7Days ? Math.round(a7Total / a7Days) : 0;
 
+  // Quick Access: per-day mean of installs that used the pill, same window.
+  const qaTotal = qaActive7.results[0]?.c || 0;
+  const qaDays = qaActive7.results[0]?.d || 0;
+  const avgQuickAccessActive = qaDays ? Math.round(qaTotal / qaDays) : 0;
+
+  // Favorites adoption: share of reporting installs that pinned ≥1 favorite.
+  let favWith = 0, favAll = 0;
+  for (const r of favorites) {
+    favAll += r.count;
+    if (Number(r.value) > 0) favWith += r.count;
+  }
+  const favoritesPinnedPct = favAll ? Math.round((favWith / favAll) * 100) : 0;
+
   const payload = {
     generatedAt: new Date().toISOString(),
     window: { days: 30 },
     activeWindow: { days: 7 },
     macsSharingStats: activeTotal,
     avgDailyActive,
+    avgQuickAccessActive,
+    favoritesPinnedPct,
     totals: {
       emoji: totalsMap.emoji || 0,
       symbol: totalsMap.symbol || 0,
       gif: totalsMap.gif || 0,
       emoticon: totalsMap.emoticon || 0,
+      quickAccess: totalsMap.quickAccess || 0,
     },
     communityDiscoveries: eggs.results[0]?.value || 0,
     // Top inserted emoji, capped — no count floor, so it never blanks at low volume.
     topEmoji: emoji.results.map((r) => ({ hexcode: r.hexcode, count: r.c })).slice(0, 12),
+    // Top pinned Quick Access favorites — same hexcode-only shape as topEmoji.
+    topFavorites: topFav.results.map((r) => ({ hexcode: r.hexcode, count: r.c })).slice(0, 12),
     os: os, arch: arch, lang: lang, appVersion: app, skinTone: skin,
     features: featureList,
   };
@@ -258,6 +331,14 @@ function clampCount(v, max) {
 function cleanInt(v) {
   const s = String(v ?? "");
   return /^[0-9]{1,3}$/.test(s) ? s : null;
+}
+
+// Favorites-pinned count: an integer 0–8 (the Quick Access slot count). Stored
+// as a string dimension value; out-of-range or non-integer → dropped.
+function cleanFavCount(v) {
+  const n = Number(v);
+  if (!Number.isInteger(n) || n < 0 || n > MAX_FAVORITES_PER_PING) return null;
+  return String(n);
 }
 
 function cleanLang(v) {

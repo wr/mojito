@@ -960,6 +960,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
             TextInserter.replace(charactersToDelete: charsToDelete, with: scored.emoji.tonedGlyph)
             recordUsage(emoji: scored.emoji)
+            // An empty query in the picker path means the pick came from the
+            // bare-`:` favorites pill — the Quick Access feature in action.
+            if query.isEmpty { TelemetryStore.recordQuickAccess() }
             SeasonalGates.fire(for: scored.emoji)
 
         case .exactMatch:
