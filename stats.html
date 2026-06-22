@@ -14,7 +14,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <link rel="stylesheet" href="style.css?v=72">
-<link rel="stylesheet" href="stats.css?v=12">
+<link rel="stylesheet" href="stats.css?v=13">
 <script src="i18n.js?v=2"></script>
 </head>
 <body>
@@ -158,12 +158,41 @@
       <h2 class="card-title" data-i18n="stats.card.features">Feature usage</h2>
     </div>
     <div class="feat-grid" id="bars-features">
+      <div class="feat-tile"><div class="feat-gauge" style="--p:97"></div><span class="feat-pct">97%</span><span class="feat-name">Emoji</span></div>
       <div class="feat-tile"><div class="feat-gauge" style="--p:91"></div><span class="feat-pct">91%</span><span class="feat-name">Frequency boost</span></div>
       <div class="feat-tile"><div class="feat-gauge" style="--p:79"></div><span class="feat-pct">79%</span><span class="feat-name">Launch at login</span></div>
       <div class="feat-tile"><div class="feat-gauge" style="--p:73"></div><span class="feat-pct">73%</span><span class="feat-name">GIF search</span></div>
       <div class="feat-tile"><div class="feat-gauge" style="--p:64"></div><span class="feat-pct">64%</span><span class="feat-name">Emoticons</span></div>
-      <div class="feat-tile"><div class="feat-gauge" style="--p:52"></div><span class="feat-pct">52%</span><span class="feat-name">Arrow conversion</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:55"></div><span class="feat-pct">55%</span><span class="feat-name">Easter eggs</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:41"></div><span class="feat-pct">41%</span><span class="feat-name">Quick Access</span></div>
       <div class="feat-tile"><div class="feat-gauge" style="--p:38"></div><span class="feat-pct">38%</span><span class="feat-name">Symbols</span></div>
+      <div class="feat-tile"><div class="feat-gauge" style="--p:22"></div><span class="feat-pct">22%</span><span class="feat-name">Custom triggers</span></div>
+    </div>
+  </section>
+
+  <!-- quick access -->
+  <section class="card reveal" aria-label="Quick Access" data-i18n-attr="aria-label:stats.aria.quickAccess">
+    <div class="card-head">
+      <h2 class="card-title" data-i18n="stats.card.quickAccess">Quick Access</h2>
+    </div>
+    <div class="qa-stats">
+      <div class="qa-stat">
+        <div class="qa-stat-value" id="qa-dau" data-count="1840" data-format="int">1,840</div>
+        <div class="qa-stat-label" data-i18n="stats.qa.dau">Avg. daily users</div>
+      </div>
+      <div class="qa-stat">
+        <div class="qa-stat-value" id="qa-fav-pct">34%</div>
+        <div class="qa-stat-label" data-i18n="stats.qa.favorites">Pin a favorite</div>
+      </div>
+    </div>
+    <h3 class="qa-sub" data-i18n="stats.qa.topFavorites">Top favorites</h3>
+    <div class="erows" id="fav-rows">
+      <div class="erow"><span class="erank">1</span><span class="eglyph" aria-hidden="true">🔥</span><span class="ecode">:fire:</span><span class="bar-track"><span class="bar-fill" data-w="100%"></span></span><span class="ecount">14,920</span></div>
+      <div class="erow"><span class="erank">2</span><span class="eglyph" aria-hidden="true">✅</span><span class="ecode">:white_check_mark:</span><span class="bar-track"><span class="bar-fill" data-w="82%"></span></span><span class="ecount">12,233</span></div>
+      <div class="erow"><span class="erank">3</span><span class="eglyph" aria-hidden="true">👍</span><span class="ecode">:thumbsup:</span><span class="bar-track"><span class="bar-fill" data-w="71%"></span></span><span class="ecount">10,604</span></div>
+      <div class="erow"><span class="erank">4</span><span class="eglyph" aria-hidden="true">🎉</span><span class="ecode">:tada:</span><span class="bar-track"><span class="bar-fill" data-w="58%"></span></span><span class="ecount">8,651</span></div>
+      <div class="erow"><span class="erank">5</span><span class="eglyph" aria-hidden="true">❤️</span><span class="ecode">:heart:</span><span class="bar-track"><span class="bar-fill" data-w="49%"></span></span><span class="ecount">7,302</span></div>
+      <div class="erow"><span class="erank">6</span><span class="eglyph" aria-hidden="true">😂</span><span class="ecode">:joy:</span><span class="bar-track"><span class="bar-fill" data-w="44%"></span></span><span class="ecount">6,489</span></div>
     </div>
   </section>
 
@@ -275,6 +304,6 @@
 })();
 </script>
 <script src="emoji-codes.js?v=1"></script>
-<script src="stats-live.js?v=9"></script>
+<script src="stats-live.js?v=10"></script>
 </body>
 </html>
