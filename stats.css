@@ -319,6 +319,47 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- quick access ------------------------------------------------------- */
+.qa-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.qa-stat {
+  background: var(--track);
+  border-radius: 14px;
+  padding: 16px 14px;
+  text-align: center;
+}
+
+.qa-stat-value {
+  font-size: clamp(24px, 3.5vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.qa-stat-label {
+  margin-top: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-soft);
+  letter-spacing: -0.005em;
+}
+
+.qa-sub {
+  margin: 24px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
 /* ---- emoji ranking ------------------------------------------------------ */
 .erows {
   display: flex;

@@ -16,10 +16,14 @@
     es: "Spanish", zh: "Chinese", ko: "Korean", pt: "Portuguese", it: "Italian",
     ru: "Russian", nl: "Dutch", pl: "Polish", hi: "Hindi", ar: "Arabic",
     fa: "Persian", he: "Hebrew", und: "Other" };
-  var FEATURE = { symbols: "Symbols", symbolsDoubleColon: "Require ::",
-    emoticons: "Emoticons", arrows: "Arrow conversion", gifSearch: "GIF search",
-    frequencyBoost: "Frequency boost", launchAtLogin: "Launch at login",
-    quickAccess: "Quick Access", menuBarIcon: "Menu-bar icon" };
+  // Curated labels for the published feature set. The worker only sends the
+  // keys in PUBLIC_FEATURE_KEYS (stats-worker/src/index.js), so minutiae and
+  // the raw per-mode trigger flags never reach this map.
+  var FEATURE = { emoji: "Emoji", emoticons: "Emoticons", symbols: "Symbols",
+    gifSearch: "GIF search", quickAccess: "Quick Access",
+    triggersCustom: "Custom triggers", frequencyBoost: "Frequency boost",
+    easterEggs: "Easter eggs", launchAtLogin: "Launch at login",
+    menuBarIcon: "Menu-bar icon" };
   var TONE_ORDER = ["default", "light", "mediumLight", "medium", "mediumDark", "dark"];
   var TONE_COLOR = { default: "#ffce4a", light: "#f3d3b0", mediumLight: "#e7b78c",
     medium: "#c68a52", mediumDark: "#9c6438", dark: "#5e4129" };
@@ -74,7 +78,8 @@
     num("bn-emoticon", d.totals.emoticon);
     num("egg-num", d.communityDiscoveries);
 
-    renderEmoji(d.topEmoji || []);
+    renderRanked("emoji-rows", d.topEmoji || [], "stats.empty.emoji", "No emoji inserted yet.");
+    renderQuickAccess(d);
     renderMix(d.totals);
     renderDist("bars-os", d.os, function (v) { return "macOS " + v; });
     renderDist("bars-arch", d.arch, function (v) {
@@ -86,10 +91,11 @@
     renderFeatures("bars-features", d.features || []);
   }
 
-  function renderEmoji(top) {
-    var el = byId("emoji-rows");
+  // Shared ranked emoji list — drives both Top emoji and Top favorites.
+  function renderRanked(id, top, emptyKey, emptyText) {
+    var el = byId(id);
     if (!el) return;
-    if (!top.length) { el.innerHTML = note(t("stats.empty.emoji", "No emoji inserted yet.")); return; }
+    if (!top.length) { el.innerHTML = note(t(emptyKey, emptyText)); return; }
     var max = top[0].count || 1;
     el.innerHTML = top.map(function (e, i) {
       var pct = Math.round((e.count / max) * 100);
@@ -100,6 +106,13 @@
         '%"></span></span><span class="ecount">' + e.count.toLocaleString(loc()) +
         "</span></div>";
     }).join("");
+  }
+
+  function renderQuickAccess(d) {
+    num("qa-dau", d.avgQuickAccessActive || 0);
+    setText("qa-fav-pct", (d.favoritesPinnedPct || 0) + "%");
+    renderRanked("fav-rows", d.topFavorites || [],
+      "stats.empty.favorites", "No favorites pinned yet.");
   }
 
   function renderMix(tot) {
