@@ -1,0 +1,29 @@
+name: telemetry
+
+# Fail a PR (or push to main) that lets the anonymous-stats pipeline drift:
+# the Swift client, the worker ingest allow-list, and the published feature set
+# must stay in sync. Pure-Python check — no Xcode/Wrangler needed, runs in
+# seconds.
+on:
+  pull_request:
+    paths:
+      - "Sources/Mojito/Telemetry/TelemetryUploader.swift"
+      - "stats-worker/src/index.js"
+      - "scripts/check_telemetry.py"
+      - ".github/workflows/telemetry.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Sources/Mojito/Telemetry/TelemetryUploader.swift"
+      - "stats-worker/src/index.js"
+      - "scripts/check_telemetry.py"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/check_telemetry.py

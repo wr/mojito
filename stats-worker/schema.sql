@@ -33,12 +33,24 @@ CREATE TABLE IF NOT EXISTS feature_daily (
 );
 
 -- Insertion volume + daily-active pings. kind ∈
--- emoji | symbol | gif | emoticon | active | eggs
+-- emoji | symbol | gif | emoticon | quickAccess | active | quickAccessActive | eggs
+-- (quickAccess = pill picks; quickAccessActive = installs that used the pill,
+-- one per ping — the Quick Access daily-active signal.)
 CREATE TABLE IF NOT EXISTS totals_daily (
   day   INTEGER NOT NULL,
   kind  TEXT    NOT NULL,
   count INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (day, kind)
+);
+
+-- Top Quick Access favorites: how many reporting installs had each emoji
+-- pinned that day (one increment per pinned slot per ping). Hexcodes only —
+-- the same already-public codepoints as emoji_daily, never an identifier.
+CREATE TABLE IF NOT EXISTS favorite_daily (
+  day     INTEGER NOT NULL,
+  hexcode TEXT    NOT NULL,
+  count   INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (day, hexcode)
 );
 
 -- Running scalars (e.g. lifetime community easter-egg discoveries — a bare

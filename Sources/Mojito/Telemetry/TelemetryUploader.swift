@@ -77,10 +77,18 @@ final class TelemetryUploader {
                 "symbol": pending.symbol,
                 "gif": pending.gif,
                 "emoticon": pending.emoticon,
+                "quickAccess": pending.quickAccess,
             ],
             "eggs": pending.eggs,
         ]
         if let app = appVersion() { payload["app"] = app }
+        // Quick Access favorites: how many of the 8 slots are pinned, plus the
+        // pinned hexcodes for the public "top favorites" rollup. Hexcodes are
+        // the same already-public emoji codepoints we send in `emoji`; symbol
+        // pins (`SYM_…`) are dropped so only real emoji reach the histogram.
+        let favorites = pinnedFavoriteHexcodes()
+        payload["favoritesCount"] = favorites.count
+        if !favorites.isEmpty { payload["favorites"] = favorites }
         if !pending.emoji.isEmpty {
             // Mirrors MAX_EMOJI_PER_PING in stats-worker/src/index.js — the
             // server drops everything past it, so trim client-side keeping
@@ -99,7 +107,14 @@ final class TelemetryUploader {
     private func features() -> [String: Bool] {
         let triggers = TriggerConfigStore.load()
         let def = TriggerConfig.default
+        let triggersCustom = triggers.emoji != def.emoji
+            || triggers.symbols != def.symbols
+            || triggers.gif != def.gif
+            || triggers.quickAccess != def.quickAccess
         return [
+            // The emoji trigger can now be disabled, so its on/off state is a
+            // real adoption signal rather than an always-true constant.
+            "emoji": triggers.emoji.enabled,
             "symbols": triggers.symbols.enabled,
             // Kept for back-compat: now reflects the symbols *trigger* being on.
             "symbolsDoubleColon": triggers.symbols.enabled,
@@ -110,13 +125,23 @@ final class TelemetryUploader {
             "launchAtLogin": bool(PrefsKey.launchAtLogin, false),
             "quickAccess": triggers.quickAccess.enabled,
             "menuBarIcon": bool(PrefsKey.showMenuBarIcon, true),
-            // Whether each mode's trigger strings differ from the shipped
-            // defaults — measures adoption of customization, no strings sent.
+            "easterEggs": bool(PrefsKey.eggsEnabled, true),
+            // Whether *any* trigger string differs from the shipped defaults —
+            // one combined customization-adoption signal, no strings sent.
+            "triggersCustom": triggersCustom,
+            // Per-mode customization, kept for the debug/internal view.
             "emojiTriggerCustom": triggers.emoji != def.emoji,
             "symbolsTriggerCustom": triggers.symbols != def.symbols,
             "gifTriggerCustom": triggers.gif != def.gif,
             "quickAccessTriggerCustom": triggers.quickAccess != def.quickAccess,
         ]
+    }
+
+    /// Pinned Quick Access slots, as real emoji hexcodes. Empty (`""`) auto
+    /// slots and symbol pins (`SYM_…`, which aren't emoji) are dropped.
+    private func pinnedFavoriteHexcodes() -> [String] {
+        let raw = (UserDefaults.standard.array(forKey: PrefsKey.quickAccessSlots) as? [String]) ?? []
+        return raw.filter { !$0.isEmpty && !$0.hasPrefix("SYM_") }
     }
 
     // MARK: - Environment (all coarse, marginal)

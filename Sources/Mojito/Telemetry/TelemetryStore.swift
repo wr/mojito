@@ -36,6 +36,9 @@ enum TelemetryStore {
     static func recordGif()      { guard isEnabled else { return }; bump(PrefsKey.telemetryPendingGif) }
     static func recordEmoticon() { guard isEnabled else { return }; bump(PrefsKey.telemetryPendingEmoticon) }
     static func recordEggDiscovery() { guard isEnabled else { return }; bump(PrefsKey.telemetryPendingEggs) }
+    /// A pick from the bare-`:` favorites pill. A non-zero daily count is what
+    /// the server reads as a Quick Access daily-active install.
+    static func recordQuickAccess() { guard isEnabled else { return }; bump(PrefsKey.telemetryPendingQuickAccess) }
 
     private static func bump(_ key: String) {
         defaults.set(defaults.integer(forKey: key) + 1, forKey: key)
@@ -50,6 +53,7 @@ enum TelemetryStore {
         var gif: Int
         var emoticon: Int
         var eggs: Int
+        var quickAccess: Int
     }
 
     static func snapshotPending() -> Pending {
@@ -59,7 +63,8 @@ enum TelemetryStore {
             symbol: defaults.integer(forKey: PrefsKey.telemetryPendingSymbol),
             gif: defaults.integer(forKey: PrefsKey.telemetryPendingGif),
             emoticon: defaults.integer(forKey: PrefsKey.telemetryPendingEmoticon),
-            eggs: defaults.integer(forKey: PrefsKey.telemetryPendingEggs)
+            eggs: defaults.integer(forKey: PrefsKey.telemetryPendingEggs),
+            quickAccess: defaults.integer(forKey: PrefsKey.telemetryPendingQuickAccess)
         )
     }
 
@@ -73,5 +78,6 @@ enum TelemetryStore {
         defaults.set(0, forKey: PrefsKey.telemetryPendingGif)
         defaults.set(0, forKey: PrefsKey.telemetryPendingEmoticon)
         defaults.set(0, forKey: PrefsKey.telemetryPendingEggs)
+        defaults.set(0, forKey: PrefsKey.telemetryPendingQuickAccess)
     }
 }

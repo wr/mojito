@@ -107,4 +107,5 @@ enum PrefsKey {
     static let telemetryPendingGif          = "mojito.telemetry.pending.gif"          // Int
     static let telemetryPendingEmoticon     = "mojito.telemetry.pending.emoticon"     // Int
     static let telemetryPendingEggs         = "mojito.telemetry.pending.eggs"         // Int
+    static let telemetryPendingQuickAccess  = "mojito.telemetry.pending.quickAccess"  // Int
 }
