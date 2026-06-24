@@ -3,6 +3,17 @@ import Foundation
 struct ScoredEmoji {
     let emoji: Emoji
     let matchedShortcode: String
+    /// True when `matchedShortcode` is a real shortcode/label starting with the
+    /// query (the prefix tier) — not a penalized tag match. The egg-hint
+    /// placement reads this; a tag display can start with the query yet not be
+    /// a prefix-tier match.
+    let isPrefix: Bool
+
+    init(emoji: Emoji, matchedShortcode: String, isPrefix: Bool = false) {
+        self.emoji = emoji
+        self.matchedShortcode = matchedShortcode
+        self.isPrefix = isPrefix
+    }
 }
 
 /// Built lazily so apps that never enable Symbols don't pay for it.
@@ -211,7 +222,7 @@ struct FuzzyMatcher {
             return lhs.emoji.order < rhs.emoji.order
         }
         var trimmed = results.prefix(limit).map {
-            ScoredEmoji(emoji: $0.emoji, matchedShortcode: $0.display)
+            ScoredEmoji(emoji: $0.emoji, matchedShortcode: $0.display, isPrefix: $0.isPrefix)
         }
 
         let lowercased = query.lowercased()
@@ -258,9 +269,7 @@ struct FuzzyMatcher {
         let insertAt: Int
         if let twin = real.firstIndex(where: { $0.emoji.character == specialRow.emoji.character }) {
             insertAt = twin + 1
-        } else if let lastPrefix = real.lastIndex(where: {
-            $0.matchedShortcode.lowercased().hasPrefix(lowercased)
-        }) {
+        } else if let lastPrefix = real.lastIndex(where: { $0.isPrefix }) {
             insertAt = lastPrefix + 1
         } else {
             insertAt = 0

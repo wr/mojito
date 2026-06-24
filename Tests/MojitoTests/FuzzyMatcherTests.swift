@@ -114,12 +114,13 @@ struct FuzzyMatcherTests {
 
     @Test func shortcodeMatchOutranksTagMatch() throws {
         // For "smile", 😄 (shortcode `smile`) sits in the prefix tier; 😀
-        // (grinning) matches "smile" only via a tag. The shortcode match must
-        // rank ahead of the tag-only one whenever both surface.
-        let results = realResults(search("smile"))
-        let shortcodeIdx = results.firstIndex { $0.emoji.hexcode == "1F604" }
-        let tagOnlyIdx = results.firstIndex { $0.emoji.hexcode == "1F600" }
-        try #require(shortcodeIdx != nil)
-        if let tagOnlyIdx { #expect(shortcodeIdx! < tagOnlyIdx) }
+        // (grinning) matches "smile" only via a tag. A tag-only match is
+        // penalized below every prefix-tier match, so 😄 must rank ahead of 😀.
+        // Search the whole corpus (the penalized 😀 doesn't make the default
+        // top-12) so both are present to compare.
+        let results = realResults(search("smile", limit: 2000))
+        let shortcodeIdx = try #require(results.firstIndex { $0.emoji.hexcode == "1F604" })
+        let tagOnlyIdx = try #require(results.firstIndex { $0.emoji.hexcode == "1F600" })
+        #expect(shortcodeIdx < tagOnlyIdx)
     }
 }
