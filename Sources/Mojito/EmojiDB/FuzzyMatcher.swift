@@ -68,12 +68,6 @@ struct FuzzyMatcher {
     /// a discovery hint.
     private static let specialMinPrefix = 2
 
-    /// Tag (keyword) haystacks are scored, then knocked down by this much so a
-    /// shortcode/label match for the same query always outranks a tag-only
-    /// match. Big enough to clear a full consecutive match (1.0/char) for the
-    /// short shortcodes that dominate the corpus; tags still surface when
-    /// nothing better matches (`:meditation` → 🧘).
-    private static let tagScorePenalty: Double = -6.0
     /// Tags ~triple the haystack count, so scan them only once the query is
     /// specific enough to be a real concept search. A 1-char needle already
     /// matches almost everything via shortcodes — adding tags there just
@@ -141,12 +135,13 @@ struct FuzzyMatcher {
         let needle = Array(query.lowercased())
         guard !needle.isEmpty else { return [] }
 
-        // Internal carrier so the sort can rank by (isPrefix, score) without
-        // baking a magic tier offset into a single Int.
+        // Internal carrier so the sort can rank by (isPrefix, score, isTag)
+        // without baking a magic tier offset into a single Int.
         struct Candidate {
             let emoji: Emoji
             let display: String
             let isPrefix: Bool
+            let isTag: Bool
             let score: Double
         }
         var results: [Candidate] = []
@@ -164,24 +159,27 @@ struct FuzzyMatcher {
         for indexed in pool {
             var bestScore: Double = -.infinity
             var bestDisplay: String?
+            var bestIsTag = false
             var prefixBestScore: Double = -.infinity
             var prefixBestDisplay: String?
             for haystack in indexed.haystacks {
                 if haystack.isTag && !scanTags { continue }
                 guard let raw = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
-                // Tags never join the prefix tier (a keyword starting with the
-                // query shouldn't outrank a real shortcode) and take a penalty.
+                // Tags never join the prefix tier — a keyword starting with the
+                // query shouldn't outrank a real shortcode. Within the
+                // non-prefix tier they compete on fzy relevance, so an exact
+                // tag match ("happy") beats a loose shortcode subsequence
+                // ("happ" scattered through "handicapped"); isTag is only a
+                // tiebreak (see the sort below).
                 if !haystack.isTag, haystack.chars.starts(with: needle) {
                     if raw > prefixBestScore {
                         prefixBestScore = raw
                         prefixBestDisplay = haystack.display
                     }
-                } else {
-                    let score = haystack.isTag ? raw + tagScorePenalty : raw
-                    if score > bestScore {
-                        bestScore = score
-                        bestDisplay = haystack.display
-                    }
+                } else if raw > bestScore {
+                    bestScore = raw
+                    bestDisplay = haystack.display
+                    bestIsTag = haystack.isTag
                 }
             }
 
@@ -190,12 +188,15 @@ struct FuzzyMatcher {
             let isPrefix = prefixBestDisplay != nil
             let display: String
             let baseScore: Double
+            let matchedIsTag: Bool
             if let prefixBestDisplay {
                 display = prefixBestDisplay
                 baseScore = prefixBestScore
+                matchedIsTag = false
             } else if let bestDisplay {
                 display = bestDisplay
                 baseScore = bestScore
+                matchedIsTag = bestIsTag
             } else {
                 continue
             }
@@ -211,18 +212,29 @@ struct FuzzyMatcher {
                 emoji: indexed.emoji,
                 display: display,
                 isPrefix: isPrefix,
+                isTag: matchedIsTag,
                 score: finalScore
             ))
         }
 
-        // Prefix-tier first, then by score, then by stable emoji order.
+        // Prefix-tier first, then by relevance, then shortcodes over tags at
+        // equal score, then stable emoji order.
         results.sort { lhs, rhs in
             if lhs.isPrefix != rhs.isPrefix { return lhs.isPrefix }
             if lhs.score != rhs.score { return lhs.score > rhs.score }
+            if lhs.isTag != rhs.isTag { return !lhs.isTag }
             return lhs.emoji.order < rhs.emoji.order
         }
         var trimmed = results.prefix(limit).map {
-            ScoredEmoji(emoji: $0.emoji, matchedShortcode: $0.display, isPrefix: $0.isPrefix)
+            // A tag match drives ranking but isn't a typable shortcode, and many
+            // emoji share one keyword — labelling the row with the tag yields a
+            // run of identical ":happy:" rows. Show the emoji's own primary
+            // shortcode instead so rows stay distinct and canonical.
+            ScoredEmoji(
+                emoji: $0.emoji,
+                matchedShortcode: $0.isTag ? $0.emoji.primaryShortcode : $0.display,
+                isPrefix: $0.isPrefix
+            )
         }
 
         let lowercased = query.lowercased()

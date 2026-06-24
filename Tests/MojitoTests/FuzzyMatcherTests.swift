@@ -112,6 +112,26 @@ struct FuzzyMatcherTests {
         #expect(search("happy").contains { $0.emoji.hexcode == "1F600" })
     }
 
+    @Test func relevantTagMatchOutranksLooseSubsequence() throws {
+        // ":happ" — 😀 matches the exact tag "happy"; ♿️ matches "happ" only as
+        // a scattered subsequence of its "handicapped" shortcode (h‑a‑..‑p‑p).
+        // The relevant exact-tag match must rank above the junk subsequence —
+        // it didn't while tags carried a flat score penalty.
+        let results = realResults(search("happ", limit: 2000))
+        let happyIdx = try #require(results.firstIndex { $0.emoji.hexcode == "1F600" })
+        let wheelchairIdx = try #require(results.firstIndex { $0.emoji.hexcode == "267F" })
+        #expect(happyIdx < wheelchairIdx)
+    }
+
+    @Test func tagMatchLabelsWithPrimaryShortcode() throws {
+        // A row that matched via the "happy" tag must label itself with the
+        // emoji's own primary shortcode (😀 → grinning), not the shared tag
+        // word — otherwise the picker shows a run of identical ":happy:" rows.
+        let results = realResults(search("happ", limit: 2000))
+        let grinning = try #require(results.first { $0.emoji.hexcode == "1F600" })
+        #expect(grinning.matchedShortcode == "grinning")
+    }
+
     @Test func shortcodeMatchOutranksTagMatch() throws {
         // For "smile", 😄 (shortcode `smile`) sits in the prefix tier; 😀
         // (grinning) matches "smile" only via a tag. A tag-only match is
