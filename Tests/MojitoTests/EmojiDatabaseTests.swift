@@ -36,6 +36,20 @@ struct EmojiDatabaseTests {
         #expect(db.byHexcode[smile.hexcode]?.character == smile.character)
     }
 
+    @Test func componentModifiersAreExcluded() {
+        let db = EmojiDatabase.shared
+        // Group 2 (component): bare skin-tone + hair modifiers, never standalone.
+        #expect(db.all.allSatisfy { $0.group != EmojiDatabase.componentGroup })
+        // The reported case: the bare medium skin-tone swatch (🏽) is gone.
+        #expect(db.byHexcode["1F3FD"] == nil)
+        // And it doesn't surface in search.
+        let hits = FuzzyMatcher.search(
+            query: "medium", in: db, usage: [:],
+            corpus: .emojiOnly, useFrequencyBoost: false, limit: 50
+        )
+        #expect(!hits.contains { $0.emoji.character == "🏽" })
+    }
+
     @Test func indexedHaystacksIncludeEveryShortcode() throws {
         let db = EmojiDatabase.shared
         let smile = try #require(db.exact("smile"))
