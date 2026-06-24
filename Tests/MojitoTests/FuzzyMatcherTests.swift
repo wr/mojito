@@ -98,4 +98,28 @@ struct FuzzyMatcherTests {
         #expect(!search("smile", corpus: .emojiAndSymbols).isEmpty)
         #expect(search("cmd", corpus: .emojiAndSymbols).contains { $0.emoji.character == "⌘" })
     }
+
+    @Test func tagKeywordSurfacesEmoji() {
+        // "meditation" is only a keyword (tag) on 🧘 — its shortcodes are
+        // person_in_lotus_position / lotus_position, neither a subsequence of
+        // the query. Before tags were indexed this returned nothing relevant.
+        #expect(search("meditation").contains { $0.emoji.hexcode.hasPrefix("1F9D8") })
+    }
+
+    @Test func conceptKeywordSurfacesUnshortcodedEmoji() {
+        // 😀 (grinning) carries "happy" only as a tag; "happy" isn't a
+        // subsequence of grinning/grinning_face.
+        #expect(search("happy").contains { $0.emoji.hexcode == "1F600" })
+    }
+
+    @Test func shortcodeMatchOutranksTagMatch() throws {
+        // For "smile", 😄 (shortcode `smile`) sits in the prefix tier; 😀
+        // (grinning) matches "smile" only via a tag. The shortcode match must
+        // rank ahead of the tag-only one whenever both surface.
+        let results = realResults(search("smile"))
+        let shortcodeIdx = results.firstIndex { $0.emoji.hexcode == "1F604" }
+        let tagOnlyIdx = results.firstIndex { $0.emoji.hexcode == "1F600" }
+        try #require(shortcodeIdx != nil)
+        if let tagOnlyIdx { #expect(shortcodeIdx! < tagOnlyIdx) }
+    }
 }

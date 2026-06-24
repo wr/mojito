@@ -57,6 +57,18 @@ struct FuzzyMatcher {
     /// a discovery hint.
     private static let specialMinPrefix = 2
 
+    /// Tag (keyword) haystacks are scored, then knocked down by this much so a
+    /// shortcode/label match for the same query always outranks a tag-only
+    /// match. Big enough to clear a full consecutive match (1.0/char) for the
+    /// short shortcodes that dominate the corpus; tags still surface when
+    /// nothing better matches (`:meditation` → 🧘).
+    private static let tagScorePenalty: Double = -6.0
+    /// Tags ~triple the haystack count, so scan them only once the query is
+    /// specific enough to be a real concept search. A 1-char needle already
+    /// matches almost everything via shortcodes — adding tags there just
+    /// doubles the cost of the worst query for no useful results.
+    private static let tagMinNeedle = 2
+
     private struct PinnedRow {
         let hexcode: String
         let character: String
@@ -129,6 +141,8 @@ struct FuzzyMatcher {
         var results: [Candidate] = []
         results.reserveCapacity(64)
 
+        let scanTags = needle.count >= tagMinNeedle
+
         let pool: [IndexedEmoji]
         switch corpus {
         case .emojiOnly:        pool = database.indexed
@@ -142,15 +156,21 @@ struct FuzzyMatcher {
             var prefixBestScore: Double = -.infinity
             var prefixBestDisplay: String?
             for haystack in indexed.haystacks {
-                guard let score = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
-                if haystack.chars.starts(with: needle) {
-                    if score > prefixBestScore {
-                        prefixBestScore = score
+                if haystack.isTag && !scanTags { continue }
+                guard let raw = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
+                // Tags never join the prefix tier (a keyword starting with the
+                // query shouldn't outrank a real shortcode) and take a penalty.
+                if !haystack.isTag, haystack.chars.starts(with: needle) {
+                    if raw > prefixBestScore {
+                        prefixBestScore = raw
                         prefixBestDisplay = haystack.display
                     }
-                } else if score > bestScore {
-                    bestScore = score
-                    bestDisplay = haystack.display
+                } else {
+                    let score = haystack.isTag ? raw + tagScorePenalty : raw
+                    if score > bestScore {
+                        bestScore = score
+                        bestDisplay = haystack.display
+                    }
                 }
             }
 
