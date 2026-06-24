@@ -3,6 +3,17 @@ import Foundation
 struct ScoredEmoji {
     let emoji: Emoji
     let matchedShortcode: String
+    /// True when `matchedShortcode` is a real shortcode/label starting with the
+    /// query (the prefix tier) — not a penalized tag match. The egg-hint
+    /// placement reads this; a tag display can start with the query yet not be
+    /// a prefix-tier match.
+    let isPrefix: Bool
+
+    init(emoji: Emoji, matchedShortcode: String, isPrefix: Bool = false) {
+        self.emoji = emoji
+        self.matchedShortcode = matchedShortcode
+        self.isPrefix = isPrefix
+    }
 }
 
 /// Built lazily so apps that never enable Symbols don't pay for it.
@@ -56,6 +67,12 @@ struct FuzzyMatcher {
     /// Below this we skip the hash lookup, so short prefixes don't surface
     /// a discovery hint.
     private static let specialMinPrefix = 2
+
+    /// Tags ~triple the haystack count, so scan them only once the query is
+    /// specific enough to be a real concept search. A 1-char needle already
+    /// matches almost everything via shortcodes — adding tags there just
+    /// doubles the cost of the worst query for no useful results.
+    private static let tagMinNeedle = 2
 
     private struct PinnedRow {
         let hexcode: String
@@ -118,16 +135,19 @@ struct FuzzyMatcher {
         let needle = Array(query.lowercased())
         guard !needle.isEmpty else { return [] }
 
-        // Internal carrier so the sort can rank by (isPrefix, score) without
-        // baking a magic tier offset into a single Int.
+        // Internal carrier so the sort can rank by (isPrefix, score, isTag)
+        // without baking a magic tier offset into a single Int.
         struct Candidate {
             let emoji: Emoji
             let display: String
             let isPrefix: Bool
+            let isTag: Bool
             let score: Double
         }
         var results: [Candidate] = []
         results.reserveCapacity(64)
+
+        let scanTags = needle.count >= tagMinNeedle
 
         let pool: [IndexedEmoji]
         switch corpus {
@@ -139,18 +159,27 @@ struct FuzzyMatcher {
         for indexed in pool {
             var bestScore: Double = -.infinity
             var bestDisplay: String?
+            var bestIsTag = false
             var prefixBestScore: Double = -.infinity
             var prefixBestDisplay: String?
             for haystack in indexed.haystacks {
-                guard let score = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
-                if haystack.chars.starts(with: needle) {
-                    if score > prefixBestScore {
-                        prefixBestScore = score
+                if haystack.isTag && !scanTags { continue }
+                guard let raw = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
+                // Tags never join the prefix tier — a keyword starting with the
+                // query shouldn't outrank a real shortcode. Within the
+                // non-prefix tier they compete on fzy relevance, so an exact
+                // tag match ("happy") beats a loose shortcode subsequence
+                // ("happ" scattered through "handicapped"); isTag is only a
+                // tiebreak (see the sort below).
+                if !haystack.isTag, haystack.chars.starts(with: needle) {
+                    if raw > prefixBestScore {
+                        prefixBestScore = raw
                         prefixBestDisplay = haystack.display
                     }
-                } else if score > bestScore {
-                    bestScore = score
+                } else if raw > bestScore {
+                    bestScore = raw
                     bestDisplay = haystack.display
+                    bestIsTag = haystack.isTag
                 }
             }
 
@@ -159,12 +188,15 @@ struct FuzzyMatcher {
             let isPrefix = prefixBestDisplay != nil
             let display: String
             let baseScore: Double
+            let matchedIsTag: Bool
             if let prefixBestDisplay {
                 display = prefixBestDisplay
                 baseScore = prefixBestScore
+                matchedIsTag = false
             } else if let bestDisplay {
                 display = bestDisplay
                 baseScore = bestScore
+                matchedIsTag = bestIsTag
             } else {
                 continue
             }
@@ -180,18 +212,29 @@ struct FuzzyMatcher {
                 emoji: indexed.emoji,
                 display: display,
                 isPrefix: isPrefix,
+                isTag: matchedIsTag,
                 score: finalScore
             ))
         }
 
-        // Prefix-tier first, then by score, then by stable emoji order.
+        // Prefix-tier first, then by relevance, then shortcodes over tags at
+        // equal score, then stable emoji order.
         results.sort { lhs, rhs in
             if lhs.isPrefix != rhs.isPrefix { return lhs.isPrefix }
             if lhs.score != rhs.score { return lhs.score > rhs.score }
+            if lhs.isTag != rhs.isTag { return !lhs.isTag }
             return lhs.emoji.order < rhs.emoji.order
         }
         var trimmed = results.prefix(limit).map {
-            ScoredEmoji(emoji: $0.emoji, matchedShortcode: $0.display)
+            // A tag match drives ranking but isn't a typable shortcode, and many
+            // emoji share one keyword — labelling the row with the tag yields a
+            // run of identical ":happy:" rows. Show the emoji's own primary
+            // shortcode instead so rows stay distinct and canonical.
+            ScoredEmoji(
+                emoji: $0.emoji,
+                matchedShortcode: $0.isTag ? $0.emoji.primaryShortcode : $0.display,
+                isPrefix: $0.isPrefix
+            )
         }
 
         let lowercased = query.lowercased()
@@ -238,9 +281,7 @@ struct FuzzyMatcher {
         let insertAt: Int
         if let twin = real.firstIndex(where: { $0.emoji.character == specialRow.emoji.character }) {
             insertAt = twin + 1
-        } else if let lastPrefix = real.lastIndex(where: {
-            $0.matchedShortcode.lowercased().hasPrefix(lowercased)
-        }) {
+        } else if let lastPrefix = real.lastIndex(where: { $0.isPrefix }) {
             insertAt = lastPrefix + 1
         } else {
             insertAt = 0

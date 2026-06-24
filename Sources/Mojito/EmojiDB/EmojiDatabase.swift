@@ -5,6 +5,15 @@ import Foundation
 struct EmojiHaystack {
     let display: String
     let chars: [Character]
+    /// Emojibase keyword (e.g. "meditation" on 🧘). Scored with a penalty and
+    /// never eligible for the prefix tier, so real shortcodes always win.
+    let isTag: Bool
+
+    init(display: String, chars: [Character], isTag: Bool = false) {
+        self.display = display
+        self.chars = chars
+        self.isTag = isTag
+    }
 }
 
 /// `FuzzyMatcher` iterates these directly so the per-keystroke loop never allocates.
@@ -105,7 +114,7 @@ final class EmojiDatabase: ObservableObject {
                     index[shortcode.lowercased()] = emoji
                 }
                 var haystacks: [EmojiHaystack] = []
-                haystacks.reserveCapacity(emoji.shortcodes.count + 1 + activeLocales.count * 2)
+                haystacks.reserveCapacity(emoji.shortcodes.count + 1 + emoji.tags.count + activeLocales.count * 2)
                 for shortcode in emoji.shortcodes {
                     haystacks.append(EmojiHaystack(
                         display: shortcode,
@@ -117,6 +126,16 @@ final class EmojiDatabase: ObservableObject {
                     display: labelKey,
                     chars: Array(labelKey.lowercased())
                 ))
+                // Emojibase keywords (`meditation`, `happy`, …). Searchable but
+                // not exact-typable — kept out of `index` so `:happy:` doesn't
+                // resolve to an arbitrary one of the dozens that share the tag.
+                for tag in emoji.tags {
+                    haystacks.append(EmojiHaystack(
+                        display: tag,
+                        chars: Array(tag.lowercased()),
+                        isTag: true
+                    ))
+                }
                 for locale in activeLocales {
                     guard let localCodes = emoji.localizedShortcodes[locale] else { continue }
                     for code in localCodes {
