@@ -42,6 +42,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// True if the current capture's app/URL is in the exclusion list.
     /// Emoji-related actions get suppressed; GIF picker still fires.
     private var captureIsExcluded: Bool = false
+    /// Scope of the live list search, cached so a mouse-pick can rebuild the
+    /// same insert the keyboard `.fromPicker` path uses (keyboard reads it off
+    /// the state-machine action; a click has no action to carry it).
+    private var captureScope: CaptureScope = .normal
     private var usage: [String: Int]
     private var workspaceObserver: NSObjectProtocol?
     private var spaceObserver: NSObjectProtocol?
@@ -95,6 +99,25 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 self.expandToBrowser(deleteCount: openLen)  // the typed open delimiter
             } else {
                 self.insert(query: "", mode: .fromPicker, scope: .normal, openLen: openLen, closeLen: 0)
+            }
+        }
+
+        // Mouse-pick on a vertical-list row — same resolution as Return on the
+        // selected row: insert it (`.fromPicker` reads `topResult`), or grow
+        // into the grid for the trailing Browse row. The typed `:query` (no
+        // closing colon) is what's in the focused app, so the delete span is
+        // query + open delimiter.
+        viewModel.onPickRow = { [weak self] index in
+            guard let self, !self.viewModel.compact, !self.viewModel.expanded else { return }
+            guard index >= 0, index < self.viewModel.results.count else { return }
+            if self.captureExcluded { return }
+            self.viewModel.selectedIndex = index
+            let q = self.viewModel.query
+            let openLen = max(1, self.stateMachine.captureOpenLen)
+            if self.viewModel.results[index].emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                self.expandToBrowser(deleteCount: q.count + openLen)
+            } else {
+                self.insert(query: q, mode: .fromPicker, scope: self.captureScope, openLen: openLen, closeLen: 0)
             }
         }
 
@@ -886,6 +909,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     private func updateResults(query: String, scope: CaptureScope) {
+        captureScope = scope
         // Empty query → the compact favorites pill; anything typed → the
         // vertical shortcode list.
         viewModel.compact = query.isEmpty

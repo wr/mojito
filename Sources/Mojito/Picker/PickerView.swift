@@ -125,6 +125,11 @@ private struct PickerRow: View {
                 .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : .clear)
                 .padding(.horizontal, 4)
         )
+        .contentShape(Rectangle())
+        .onTapGesture { viewModel.onPickRow?(index) }
+        .onHover { hovering in
+            if hovering { viewModel.selectedIndex = index }
+        }
     }
 
     /// Defaults to the Text glyph; eggs that need a custom asset

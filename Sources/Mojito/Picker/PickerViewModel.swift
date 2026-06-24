@@ -19,6 +19,9 @@ final class PickerViewModel: ObservableObject {
     /// Mouse-pick from the picker (compact bar cells). The Engine sets this;
     /// the index is the cell tapped.
     var onActivate: ((Int) -> Void)?
+    /// Mouse-pick on a vertical-list row (the typed-query shortcode list). The
+    /// Engine sets this; the index is the row clicked.
+    var onPickRow: ((Int) -> Void)?
     /// Hover over a pill cell (nil = hover ended). PickerWindow shows the
     /// number-hotkey tooltip above that cell. The pill panel is too short to
     /// host the tooltip itself, so it lives in a separate panel.
