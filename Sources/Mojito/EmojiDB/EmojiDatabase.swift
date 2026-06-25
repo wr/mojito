@@ -66,6 +66,10 @@ final class EmojiDatabase: ObservableObject {
     /// O(haystacks). 2 + English is a comfortable budget.
     static let maxAdditionalLocales = 2
 
+    /// emojibase group id for "component" (skin-tone + hair modifiers) — kept
+    /// out of the corpus entirely; see `load()`.
+    static let componentGroup = 2
+
     private func activeAdditionalLocales() -> [String] {
         var seen: Set<String> = []
         var out: [String] = []
@@ -99,7 +103,12 @@ final class EmojiDatabase: ObservableObject {
         }
         do {
             let data = try Data(contentsOf: url)
+            // emojibase group 2 is "component": bare skin-tone (🏻–🏿) and hair
+            // (🦰🦱🦳🦲) modifiers that only combine with another emoji, never
+            // stand alone. The browser already skips this group; drop it here so
+            // it can't surface as a standalone search hit either.
             let decoded = try JSONDecoder().decode([Emoji].self, from: data)
+                .filter { $0.group != Self.componentGroup }
             self.all = decoded
             let activeLocales = activeAdditionalLocales()
             var index: [String: Emoji] = [:]
