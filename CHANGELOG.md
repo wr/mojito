@@ -5,6 +5,14 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.6.0
+
+## New
+- **Search by keyword:** find emoji by meaning, not just the exact shortcode — `:happy` surfaces 😀, `:meditation` finds 🧘, plus `:zen`, `:laugh`, and the rest. ([#145](https://github.com/wr/mojito/pull/145))
+
+## Fixed
+- **Clickable picker:** autocomplete results respond to the mouse now — click a row to insert it, and rows highlight on hover. ([#146](https://github.com/wr/mojito/pull/146))
+
 ## v1.5.1
 
 ## Fixed
