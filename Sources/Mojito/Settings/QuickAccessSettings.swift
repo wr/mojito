@@ -47,9 +47,7 @@ struct QuickAccessSection: View {
                 slotGrid
             }
 
-            LabeledContent("Emoji Browser shortcut") {
-                KeyboardShortcuts.Recorder("", name: .showEmojiBrowser)
-            }
+            EmojiBrowserHotkeyRow()
         }
         .sheet(item: $editing) { slot in
             QuickAccessBrowserSheet { emoji in store.pin(emoji.hexcode, at: slot.id) }
@@ -165,6 +163,101 @@ struct QuickAccessSection: View {
 
     private func displayGlyph(_ emoji: Emoji) -> String {
         emoji.tonedGlyph
+    }
+}
+
+/// The system-emoji-picker controls: a Raycast-style hotkey row (Replace
+/// button + recorder + reset-to-default) plus an independent Globe-key toggle.
+/// "Replace System Picker" claims ⌃⌘Space, suppresses the macOS panel, and turns
+/// on the Globe key; reset restores the ⌃⌥Space default and all three off. The
+/// Globe key is also toggleable on its own. State is driven by the persisted
+/// flags and the authoritative shortcut handed to each handler — never re-read
+/// from `getShortcut`, which (in dev) reflects the release-app fallback.
+private struct EmojiBrowserHotkeyRow: View {
+    @State private var replacesPanel = SystemEmojiPickerReplacer.shared.replacesPanel
+    @State private var atDefault = KeyboardShortcuts.getShortcut(for: .showEmojiBrowser)
+        == SystemEmojiPickerReplacer.defaultShortcut
+    @State private var globeOn = SystemEmojiPickerReplacer.shared.globeEnabled
+    @State private var needsLogout = SystemEmojiPickerReplacer.shared.needsLogoutForGlobe
+
+    var body: some View {
+        Group {
+            // A plain HStack (not LabeledContent) so the label center-aligns with
+            // the custom recorder, which has no text baseline to align against.
+            HStack(spacing: 8) {
+                Text("Emoji Browser")
+                Spacer(minLength: 8)
+                ShortcutRecorder(name: .showEmojiBrowser) { shortcut in
+                    syncPanel(to: shortcut)
+                }
+                if !atDefault {
+                    Button { reset() } label: {
+                        Image(systemName: "arrow.counterclockwise")
+                    }
+                    .help("Reset to default (⌃⌥Space) and restore the system picker")
+                }
+            }
+
+            if !replacesPanel {
+                HStack {
+                    Spacer()
+                    Button("Replace System Picker") { replace() }
+                        .help("Open Mojito on ⌃⌘Space instead of the macOS Emoji & Symbols panel, and turn on the Globe key")
+                }
+            }
+
+            Toggle(isOn: Binding(get: { globeOn }, set: setGlobe)) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Open with the \(Image(systemName: "globe")) key")
+                    if globeOn && needsLogout {
+                        Text("Log out and back in to finish handing the \(Image(systemName: "globe")) key to Mojito.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .toggleStyle(.switch)
+        }
+    }
+
+    private func replace() {
+        SystemEmojiPickerReplacer.shared.replaceSystemPicker()
+        replacesPanel = true
+        atDefault = false
+        globeOn = true
+        needsLogout = SystemEmojiPickerReplacer.shared.needsLogoutForGlobe
+    }
+
+    private func reset() {
+        SystemEmojiPickerReplacer.shared.restoreSystemPicker()
+        replacesPanel = false
+        atDefault = true
+        globeOn = false
+        needsLogout = false
+    }
+
+    /// Recorder edits manage only the ⌃⌘Space panel replacement — the Globe key
+    /// is its own toggle.
+    private func syncPanel(to shortcut: KeyboardShortcuts.Shortcut?) {
+        if shortcut == SystemEmojiPickerReplacer.systemShortcut {
+            SystemEmojiPickerReplacer.shared.enablePanelReplacement()
+            replacesPanel = true
+        } else {
+            SystemEmojiPickerReplacer.shared.disablePanelReplacement()
+            replacesPanel = false
+        }
+        atDefault = shortcut == SystemEmojiPickerReplacer.defaultShortcut
+    }
+
+    private func setGlobe(_ on: Bool) {
+        if on {
+            SystemEmojiPickerReplacer.shared.enableGlobe()
+        } else {
+            SystemEmojiPickerReplacer.shared.disableGlobe()
+        }
+        globeOn = on
+        needsLogout = SystemEmojiPickerReplacer.shared.needsLogoutForGlobe
     }
 }
 

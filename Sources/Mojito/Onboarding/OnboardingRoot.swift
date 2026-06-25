@@ -6,6 +6,7 @@ struct OnboardingRoot: View {
     private enum Step: Int, CaseIterable {
         case welcome
         case permissions
+        case replaceEmoji
         case done
 
         var isFirst: Bool { self == .welcome }
@@ -89,6 +90,7 @@ struct OnboardingRoot: View {
                 openAccessibilitySettings: permissions.openAccessibilitySettings,
                 openInputMonitoringSettings: permissions.openInputMonitoringSettings
             )
+        case .replaceEmoji:      ReplaceEmojiStep()
         case .done:              DoneStep()
         }
     }

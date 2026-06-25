@@ -89,8 +89,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             self?.toggleOrPause(until: Self.tomorrowMorning())
         }
         KeyboardShortcuts.onKeyDown(for: .showEmojiBrowser) { [weak self] in
-            self?.engine.showBrowser()
+            self?.engine.toggleBrowser()
         }
+        // Re-assert the runtime-only system-panel suppression (the ⌃⌘Space
+        // binding and Fn pref persist on their own).
+        SystemEmojiPickerReplacer.shared.applyAtLaunch()
 
         // Force onboarding any time permissions aren't granted — revoked
         // perms / fresh accounts get the guided fix, not a silent break.
