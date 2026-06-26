@@ -148,6 +148,7 @@ struct PrivacyDetailsRows: View {
 /// Surfaced by the onboarding permissions step.
 struct PrivacyDetailsSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled: Bool = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -169,6 +170,14 @@ struct PrivacyDetailsSheet: View {
 
                 Form {
                     PrivacyDetailsRows()
+
+                    Toggle(isOn: $telemetryEnabled) {
+                        HStack(spacing: 4) {
+                            Text("Share anonymous usage stats")
+                            StatsHelpButton()
+                        }
+                    }
+                    .toggleStyle(.switch)
                 }
                 .formStyle(.grouped)
                 .scrollDisabled(true)
@@ -182,6 +191,11 @@ struct PrivacyDetailsSheet: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
         }
-        .frame(width: 500, height: 520)
+        .frame(width: 500, height: 560)
+        .onAppear {
+            // Seeing the privacy sheet (with the stats toggle + anonymity
+            // explanation) satisfies the one-time stats-consent gate.
+            UserDefaults.standard.set(true, forKey: PrefsKey.telemetryConsentSeen)
+        }
     }
 }

@@ -39,7 +39,7 @@ enum TriggerConfigStore {
         //   enabled + requireDoubleColon → scoped (`::`, follow=false)
         //   enabled + !requireDoubleColon → blended (follow=true)
         //   !enabled → off
-        let symbolsEnabled = defaults.object(forKey: PrefsKey.symbolsEnabled) as? Bool ?? false
+        let symbolsEnabled = defaults.object(forKey: PrefsKey.symbolsEnabled) as? Bool ?? true
         let requireDoubleColon = defaults.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool ?? false
         let symbolsFollowEmoji = symbolsEnabled && !requireDoubleColon
         let gifEnabled = defaults.object(forKey: PrefsKey.gifSearchEnabled) as? Bool ?? true

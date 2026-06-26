@@ -133,6 +133,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             .sink { [weak self] _ in self?.engine.showBrowser() }
             .store(in: &observers)
 
+        // Onboarding's Done step asks the engine to go live early so its
+        // "try it out" field expands shortcuts. Idempotent — start() reconciles.
+        NotificationCenter.default.publisher(for: .mojitoShouldStartEngine)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.engine.start() }
+            .store(in: &observers)
+
         // Discovery banner click: open Settings, then ask the navigator to
         // reveal the egg. Order matters — open first so a fresh window's
         // views mount and pick up the (already-set) reveal request on appear.

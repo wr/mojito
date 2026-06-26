@@ -32,7 +32,7 @@ struct TriggerConfigStoreTests {
         // that still carries `close` decodes cleanly into the open-only model.
         let legacy = """
         {"emoji":{"mode":"emoji","open":":","close":":","enabled":true},
-         "symbols":{"mode":"symbols","open":"::","close":":","enabled":false},
+         "symbols":{"mode":"symbols","open":"::","close":":","enabled":true},
          "gif":{"mode":"gif","open":":::","enabled":true},
          "quickAccess":{"mode":"quickAccess","open":":?","enabled":true}}
         """
@@ -99,18 +99,20 @@ struct TriggerConfigStoreTests {
 
     // MARK: migration from legacy prefs
 
-    @Test func migrationOnEmptyDefaultsMatchesHistoricalDefault() {
+    @Test func migrationOnEmptyDefaultsEnablesAllFeatures() {
         let suite = freshSuite()
         let config = TriggerConfigStore.load(defaults: suite)
-        // No legacy prefs set → symbols trigger off, everything else default.
+        // No legacy prefs set → every feature on; symbols blends into emoji
+        // search (follow=true), so its open mirrors the emoji open.
         #expect(config.emoji == Trigger(mode: .emoji, open: ":", enabled: true))
-        #expect(config.symbols == Trigger(mode: .symbols, open: "::", enabled: false))
+        #expect(config.symbols.enabled == true)
+        #expect(config.symbolsFollowEmoji == true)
         #expect(config.gif == Trigger(mode: .gif, open: ":::", enabled: true))
         #expect(config.quickAccess == Trigger(mode: .quickAccess, open: ":?", enabled: true))
     }
 
-    @Test func symbolsTriggerDefaultsOff() {
-        #expect(TriggerConfig.default.symbols.enabled == false)
+    @Test func symbolsTriggerDefaultsOn() {
+        #expect(TriggerConfig.default.symbols.enabled == true)
     }
 
     @Test func migrationMapsSymbolsEnableOntoTrigger() {
