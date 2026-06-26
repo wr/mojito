@@ -41,6 +41,10 @@ struct AboutSettingsView: View {
                             .padding(.vertical, rowPadding)
                         acknowledgement("KeyboardShortcuts", url: URL(string: "https://github.com/sindresorhus/KeyboardShortcuts")!)
                             .padding(.vertical, rowPadding)
+                        acknowledgement("fzy", url: URL(string: "https://github.com/jhawthorn/fzy")!)
+                            .padding(.vertical, rowPadding)
+                        acknowledgement("GIPHY", url: URL(string: "https://giphy.com")!)
+                            .padding(.vertical, rowPadding)
                     }
                 }
                 .formStyle(.grouped)
