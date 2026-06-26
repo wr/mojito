@@ -191,12 +191,6 @@ struct GeneralSettingsView: View {
                 }
             } header: {
                 Text("Easter eggs")
-            } footer: {
-                if eggsEnabled {
-                    Text("Easter eggs still play on screen — these control sound only.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
             }
         }
         .formStyle(.grouped)

@@ -185,7 +185,7 @@ private struct EmojiBrowserHotkeyRow: View {
             // A plain HStack (not LabeledContent) so the label center-aligns with
             // the custom recorder, which has no text baseline to align against.
             HStack(spacing: 8) {
-                Text("Emoji Browser")
+                Text("Emoji Browser shortcut")
                 Spacer(minLength: 8)
                 ShortcutRecorder(name: .showEmojiBrowser) { shortcut in
                     syncPanel(to: shortcut)
@@ -208,7 +208,7 @@ private struct EmojiBrowserHotkeyRow: View {
 
             Toggle(isOn: Binding(get: { globeOn }, set: setGlobe)) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("Open with the \(Image(systemName: "globe")) key")
+                    Text("Press \(Image(systemName: "globe")) key to open Mojito")
                     if globeOn && needsLogout {
                         Text("Log out and back in to finish handing the \(Image(systemName: "globe")) key to Mojito.")
                             .font(.callout)

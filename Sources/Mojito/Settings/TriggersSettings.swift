@@ -3,15 +3,15 @@ import AppKit
 
 /// A reusable trigger editor embedded inline in the feature sections of
 /// Settings ▸ General. Renders one of two states, right-aligned:
-///   - a native-looking pop-up `Menu` of preset triggers (each shown as
-///     `: Colon`, plus "Custom…", and for symbols "Same as emoji"), with
-///     taken presets grayed out; or
+///   - a native-looking pop-up `Menu` of preset triggers (each shown as its
+///     glyph — `:`, `;`, and `;?` for quick access — plus "Custom…", and for
+///     symbols "Same as emoji"), with taken presets grayed out; or
 ///   - a recorder-style capsule (editable field + ✗) when on a custom trigger.
 /// The binding edits a mode's `open` string (and, for symbols, the shared
 /// `sameAsEmoji` flag); edits flow back to the caller, which persists the
 /// whole `TriggerConfig` via `TriggerConfigStore`.
 struct TriggerPicker: View {
-    /// Labels the row ("Emoji shortcut" / …) — the picker is otherwise identical.
+    /// Labels the row ("Emoji trigger" / …) — the picker is otherwise identical.
     let mode: TriggerMode
     @Binding var open: String
     /// Open strings already claimed by the other active triggers — grayed out
@@ -47,10 +47,10 @@ struct TriggerPicker: View {
     /// The row label, per feature (mirrors "Emoji Browser shortcut").
     private var rowLabel: String {
         switch mode {
-        case .emoji:       return String(localized: "Emoji shortcut")
-        case .symbols:     return String(localized: "Symbol shortcut")
-        case .gif:         return String(localized: "GIF shortcut")
-        case .quickAccess: return String(localized: "Quick Access shortcut")
+        case .emoji:       return String(localized: "Emoji trigger")
+        case .symbols:     return String(localized: "Symbol trigger")
+        case .gif:         return String(localized: "GIF trigger")
+        case .quickAccess: return String(localized: "Quick Access trigger")
         }
     }
 
@@ -59,29 +59,22 @@ struct TriggerPicker: View {
         followLabel ?? String(localized: "Same as emoji")
     }
 
-    /// Human name for a preset glyph (`:` → "Colon") so options read
-    /// `: Colon` rather than a bare, ambiguous punctuation mark.
-    private func presetName(_ preset: String) -> String {
-        switch preset {
-        case ":":   return String(localized: "Colon")
-        case "::":  return String(localized: "Double colon")
-        case ":::": return String(localized: "Triple colon")
-        case ";":   return String(localized: "Semicolon")
-        case "/":   return String(localized: "Slash")
-        case "!":   return String(localized: "Exclamation mark")
-        case "#":   return String(localized: "Hash")
-        default:    return ""
-        }
+    private var isQuickAccess: Bool { mode == .quickAccess }
+
+    /// The open a preset maps to. Quick Access always carries the `?` marker
+    /// (`#` → `#?`), matching the follow-emoji default (`:?`).
+    private func presetOpen(_ preset: String) -> String {
+        isQuickAccess ? preset + "?" : preset
     }
 
-    private func presetLabel(_ preset: String) -> String {
-        let name = presetName(preset)
-        return name.isEmpty ? preset : "\(preset) \(name)"
+    /// The base preset behind an open (strips the Quick Access `?`).
+    private func baseOf(_ open: String) -> String {
+        isQuickAccess && open.hasSuffix("?") ? String(open.dropLast()) : open
     }
 
-    /// What the menu's button shows for the current selection.
+    /// What the menu's button shows for the current selection — the glyph itself.
     private var menuLabel: String {
-        followsEmoji ? resolvedFollowLabel : presetLabel(open)
+        followsEmoji ? resolvedFollowLabel : open
     }
 
     var body: some View {
@@ -108,7 +101,15 @@ struct TriggerPicker: View {
         // jump when toggling between the menu and the (taller) custom pill.
         .frame(minHeight: 26)
         // Seed the pill from a persisted custom trigger (a non-preset open).
-        .onAppear { customMode = !followsEmoji && !Self.presets.contains(open) }
+        .onAppear { customMode = !followsEmoji && !Self.presets.contains(baseOf(open)) }
+    }
+
+    /// Presets shown in the menu. For Quick Access, drop the one that would
+    /// render identically to the "follow emoji" option (`:` → `:?`), so the
+    /// menu doesn't show a duplicate of the follow row.
+    private var menuPresets: [String] {
+        guard isQuickAccess, sameAsEmoji != nil else { return Self.presets }
+        return Self.presets.filter { presetOpen($0) != resolvedFollowLabel }
     }
 
     /// A `Menu` (not `Picker`) so individual preset rows can be `.disabled()`.
@@ -122,15 +123,17 @@ struct TriggerPicker: View {
                 }
                 Divider()
             }
-            ForEach(Self.presets, id: \.self) { preset in
+            ForEach(menuPresets, id: \.self) { preset in
                 Button {
                     customMode = false
                     sameAsEmoji?.wrappedValue = false
-                    open = preset
+                    open = presetOpen(preset)
                 } label: {
-                    Text(verbatim: presetLabel(preset))
+                    Text(verbatim: presetOpen(preset))
                 }
-                .disabled(preset != open && takenOpens.contains(preset))
+                // Collision is on the base char — `#?` can't coexist with a `#`
+                // trigger — so the taken check stays keyed on the bare preset.
+                .disabled(presetOpen(preset) != open && takenOpens.contains(preset))
             }
             Divider()
             Button(String(localized: "Custom…")) {
@@ -196,61 +199,61 @@ struct SettingsSectionHeader: View {
     }
 }
 
-/// A custom-trigger field styled to match the `KeyboardShortcuts` recorder
-/// pill used elsewhere on this page: a fixed-width capsule with centered text
-/// and a trailing clear (✗) button. The literal string IS the trigger, so we
-/// trim nothing — but newlines are stripped and the length is capped (a
-/// trigger is a short delimiter, never prose).
+/// A custom-trigger field styled to match the global-shortcut recorder box: a
+/// fixed-size rounded field (white fill, hairline border, accent border while
+/// editing) with a trailing clear (✗) button. Unlike the recorder it takes free
+/// text — the literal string IS the trigger, so we trim nothing, but newlines
+/// are stripped and the length is capped (a trigger is a short delimiter).
 private struct CustomTriggerPill: View {
     @Binding var text: String
     let onClear: () -> Void
 
+    @State private var isEditing = false
     private static let maxLength = 5
 
     var body: some View {
-        HStack(spacing: 6) {
-            // A SwiftUI TextField in a Form right-aligns its text and won't
-            // budge via `.multilineTextAlignment`; a bare NSTextField with
-            // `.alignment = .left` is the reliable way to keep it left-aligned.
-            LeadingTriggerField(text: $text, maxLength: Self.maxLength)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(spacing: 4) {
+            TriggerTextField(text: $text, maxLength: Self.maxLength) { isEditing = $0 }
+                .frame(maxWidth: .infinity)
             Button(action: onClear) {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.tertiary)
             }
             .buttonStyle(.plain)
         }
-        .padding(.leading, 12)
-        .padding(.trailing, 7)
-        .frame(width: 132, height: 26)
-        .background(Capsule().fill(Color(nsColor: .textBackgroundColor)))
-        .overlay(Capsule().strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1))
-        .padding(.trailing, 4)
+        .padding(.leading, 8)
+        .padding(.trailing, 6)
+        .frame(width: 124, height: 24)
+        .background(RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(Color(nsColor: .textBackgroundColor)))
+        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .strokeBorder(isEditing ? Color(nsColor: .controlAccentColor) : Color(nsColor: .separatorColor),
+                          lineWidth: isEditing ? 2 : 1))
     }
 }
 
-/// A borderless, left-aligned, single-line editable field. SwiftUI's TextField
-/// inherits a Form's right text alignment, so this drops to NSTextField to pin
-/// the text left. Strips newlines and caps the length (a trigger is a short
-/// delimiter, never prose).
-private struct LeadingTriggerField: NSViewRepresentable {
+/// A borderless, centered, single-line editable field. SwiftUI's TextField
+/// inherits a Form's right text alignment, so this drops to NSTextField to
+/// control alignment and report focus. Strips newlines and caps the length.
+private struct TriggerTextField: NSViewRepresentable {
     @Binding var text: String
     let maxLength: Int
+    var onFocusChange: ((Bool) -> Void)? = nil
 
     func makeNSView(context: Context) -> NSTextField {
         let field = NSTextField()
         field.isBordered = false
         field.drawsBackground = false
         field.focusRingType = .none
-        field.alignment = .left
+        field.alignment = .center
         field.lineBreakMode = .byClipping
         field.usesSingleLineMode = true
         field.font = .systemFont(ofSize: NSFont.systemFontSize)
         field.delegate = context.coordinator
         field.setContentHuggingPriority(.defaultLow, for: .horizontal)
         field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        // Auto-focus when the pill first appears empty — i.e. the user just
+        // Auto-focus when the field first appears empty — i.e. the user just
         // chose "Custom…" — so they can type immediately. A pre-existing custom
         // trigger (non-empty on open) is left unfocused.
         if text.isEmpty {
@@ -266,8 +269,11 @@ private struct LeadingTriggerField: NSViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     final class Coordinator: NSObject, NSTextFieldDelegate {
-        let parent: LeadingTriggerField
-        init(_ parent: LeadingTriggerField) { self.parent = parent }
+        let parent: TriggerTextField
+        init(_ parent: TriggerTextField) { self.parent = parent }
+
+        func controlTextDidBeginEditing(_ obj: Notification) { parent.onFocusChange?(true) }
+        func controlTextDidEndEditing(_ obj: Notification) { parent.onFocusChange?(false) }
 
         func controlTextDidChange(_ obj: Notification) {
             guard let field = obj.object as? NSTextField else { return }

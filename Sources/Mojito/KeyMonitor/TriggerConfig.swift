@@ -113,9 +113,13 @@ struct TriggerConfig: Equatable, Codable {
         if emoji.open.isEmpty {
             emoji.open = TriggerConfig.default.emoji.open
         }
-        // Quick Access follows the emoji trigger unless given its own open.
+        // Quick Access always carries the `?` marker as its last char (the
+        // state machine's pill / escape-restore keys off it). When following
+        // emoji it's `<emoji.open>?`; otherwise append `?` to the chosen open.
         if quickAccessFollowEmoji {
             quickAccess.open = emoji.open + "?"
+        } else if !quickAccess.open.isEmpty, !quickAccess.open.hasSuffix("?") {
+            quickAccess.open += "?"
         }
         // When symbols blend into emoji, the symbols open is unused as an
         // opener — keep it tidy by mirroring the emoji open so no stale value
