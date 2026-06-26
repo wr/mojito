@@ -61,7 +61,7 @@ struct TriggerConfig: Equatable, Codable {
 
     static let `default` = TriggerConfig(
         emoji:       Trigger(mode: .emoji,       open: ":",   enabled: true),
-        symbols:     Trigger(mode: .symbols,     open: "::",  enabled: false),
+        symbols:     Trigger(mode: .symbols,     open: "::",  enabled: true),
         gif:         Trigger(mode: .gif,         open: ":::", enabled: true),
         quickAccess: Trigger(mode: .quickAccess, open: ":?",  enabled: true),
         symbolsFollowEmoji: true,

@@ -465,61 +465,87 @@ struct PermissionsStep: View {
     }
 }
 
-// MARK: - Replace system emoji picker
+// MARK: - Features
 
-struct ReplaceEmojiStep: View {
-    @AppStorage(PrefsKey.replaceSystemEmojiPickerEnabled) private var enabled: Bool = false
-    @State private var needsLogout = false
+/// Enable/disable the emoji, symbols, and GIF features and pick each one's
+/// trigger — the same controls as Settings ▸ General, reusing
+/// `SettingsSectionHeader` + `TriggerPicker`. Edits persist immediately.
+struct FeaturesStep: View {
+    @State private var triggers: TriggerConfig = TriggerConfigStore.load()
 
-    var body: some View {
-        VStack(spacing: 22) {
-            Image(systemName: "face.smiling")
-                .font(.system(size: 44))
-                .foregroundStyle(.tint)
-
-            VStack(spacing: 6) {
-                Text("Replace the system emoji picker")
-                    .font(.system(size: 22, weight: .semibold))
-                Text("Make ⌃⌘Space and the \(Image(systemName: "globe")) key open \(AppInfo.displayName) instead of the macOS Emoji & Symbols panel.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 480)
-            }
-
-            Button(action: toggle) {
-                Label(
-                    enabled ? "Using \(AppInfo.displayName)" : "Replace system emoji picker",
-                    systemImage: enabled ? "checkmark.circle.fill" : "wand.and.stars"
-                )
-                .frame(maxWidth: 300)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .tint(enabled ? .green : .accentColor)
-
-            VStack(spacing: 4) {
-                if enabled && needsLogout {
-                    Text("Log out and back in to finish handing over the \(Image(systemName: "globe")) key.")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                }
-                Text("Optional — you can change this any time in Settings.")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.tertiary)
-            }
-
-            Spacer(minLength: 0)
-        }
+    /// Opens claimed by the other active triggers, so each menu grays collisions.
+    private func takenOpens(excluding mode: TriggerMode) -> Set<String> {
+        var normalized = triggers
+        normalized.normalize()
+        return Set(normalized.active.filter { $0.mode != mode }.map(\.open))
     }
 
-    private func toggle() {
-        if enabled {
-            SystemEmojiPickerReplacer.shared.restoreSystemPicker()
-            needsLogout = false
-        } else {
-            SystemEmojiPickerReplacer.shared.replaceSystemPicker()
-            needsLogout = SystemEmojiPickerReplacer.shared.needsLogoutForGlobe
+    var body: some View {
+        Form {
+            Section {
+                SettingsSectionHeader(
+                    systemImage: "face.smiling.fill",
+                    tint: .orange,
+                    title: "Emoji",
+                    subtitle: "Type a shortcut to insert any emoji.",
+                    iconSize: 16,
+                    iconOffsetY: -1,
+                    isOn: $triggers.emoji.enabled
+                )
+                if triggers.emoji.enabled {
+                    TriggerPicker(
+                        mode: .emoji,
+                        open: $triggers.emoji.open,
+                        takenOpens: takenOpens(excluding: .emoji),
+                        defaultOpen: TriggerConfig.default.emoji.open
+                    )
+                }
+            }
+
+            Section {
+                SettingsSectionHeader(
+                    systemImage: "command",
+                    tint: .indigo,
+                    title: "Symbols",
+                    subtitle: "Symbols like ★ ✓ ÷ ©.",
+                    isOn: $triggers.symbols.enabled
+                )
+                if triggers.symbols.enabled {
+                    TriggerPicker(
+                        mode: .symbols,
+                        open: $triggers.symbols.open,
+                        takenOpens: takenOpens(excluding: .symbols),
+                        defaultOpen: TriggerConfig.default.symbols.open,
+                        sameAsEmoji: $triggers.symbolsFollowEmoji,
+                        defaultFollowsEmoji: true
+                    )
+                }
+            }
+
+            Section {
+                SettingsSectionHeader(
+                    systemImage: "photo.fill",
+                    tint: .pink,
+                    title: "GIF search",
+                    subtitle: "GIFs from Giphy.",
+                    isOn: $triggers.gif.enabled
+                )
+                if triggers.gif.enabled {
+                    TriggerPicker(
+                        mode: .gif,
+                        open: $triggers.gif.open,
+                        takenOpens: takenOpens(excluding: .gif),
+                        defaultOpen: TriggerConfig.default.gif.open
+                    )
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .scrollDisabled(true)
+        .frame(maxWidth: 480)
+        .onChange(of: triggers) { _, _ in
+            TriggerConfigStore.save(triggers)
         }
     }
 }
@@ -527,10 +553,13 @@ struct ReplaceEmojiStep: View {
 // MARK: - Done
 
 struct DoneStep: View {
-    @AppStorage(PrefsKey.launchAtLogin) private var launchAtLogin: Bool = false
     @AppStorage(PrefsKey.skinTone) private var skinToneRaw: String = SkinTone.default.rawValue
-    @AppStorage(PrefsKey.telemetryEnabled) private var telemetryEnabled: Bool = true
+    @AppStorage(PrefsKey.replaceSystemEmojiPickerEnabled) private var replacePicker: Bool = false
+    @AppStorage(PrefsKey.launchAtLogin) private var launchAtLogin: Bool = false
     @State private var autoUpdates: Bool = UpdaterCoordinator.shared.automaticUpdates
+    @State private var replaceNeedsLogout = false
+    @State private var tryItText = ""
+    @FocusState private var tryItFocused: Bool
 
     var body: some View {
         VStack(spacing: 16) {
@@ -542,76 +571,108 @@ struct DoneStep: View {
                 VStack(spacing: 6) {
                     Text("You're all set")
                         .font(.system(size: 24, weight: .semibold))
-                    Text("\(AppInfo.displayName) lives in your menu bar. Try typing `:tada:` in any text field.")
+                    Text("\(AppInfo.displayName) lives in your menu bar — give it a try:")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: 440)
                 }
+
+                TextField("Try typing :smile", text: $tryItText)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 15))
+                    .frame(maxWidth: 280)
+                    .focused($tryItFocused)
             }
             .padding(.top, 4)
 
             Form {
-                HStack {
-                    Text("Skin tone")
-                    Spacer(minLength: 12)
-                    HStack(spacing: 4) {
-                        ForEach(SkinTone.allCases) { tone in
-                            Button {
-                                skinToneRaw = tone.rawValue
-                            } label: {
-                                Text(tone.swatchEmoji)
-                                    .font(.system(size: 18))
-                                    .frame(width: 26, height: 26)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                            .fill(skinToneRaw == tone.rawValue
-                                                  ? Color.accentColor.opacity(0.22)
-                                                  : Color.clear)
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                            .strokeBorder(
-                                                skinToneRaw == tone.rawValue ? Color.accentColor : Color.clear,
-                                                lineWidth: 1.5
-                                            )
-                                    )
+                Section {
+                    HStack {
+                        Text("Skin tone")
+                        Spacer(minLength: 12)
+                        skinToneSwatches
+                    }
+
+                    Toggle(isOn: $replacePicker) {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Replace system emoji picker")
+                            Text("Open \(AppInfo.displayName) on ⌃⌘Space and the \(Image(systemName: "globe")) key.")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if replacePicker && replaceNeedsLogout {
+                                Text("Log out and back in to finish handing over the \(Image(systemName: "globe")) key.")
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
                             }
-                            .buttonStyle(.plain)
-                            .help(tone.displayName)
+                        }
+                    }
+                    .toggleStyle(.switch)
+                    .onChange(of: replacePicker) { _, on in
+                        if on {
+                            SystemEmojiPickerReplacer.shared.replaceSystemPicker()
+                            replaceNeedsLogout = SystemEmojiPickerReplacer.shared.needsLogoutForGlobe
+                        } else {
+                            SystemEmojiPickerReplacer.shared.restoreSystemPicker()
+                            replaceNeedsLogout = false
                         }
                     }
                 }
 
-                Toggle("Automatic updates", isOn: $autoUpdates)
-                    .toggleStyle(.switch)
-                    .onChange(of: autoUpdates) { _, newValue in
-                        UpdaterCoordinator.shared.automaticUpdates = newValue
-                    }
+                Section {
+                    Toggle("Automatic updates", isOn: $autoUpdates)
+                        .toggleStyle(.switch)
+                        .onChange(of: autoUpdates) { _, newValue in
+                            UpdaterCoordinator.shared.automaticUpdates = newValue
+                        }
 
-                Toggle("Start at login", isOn: $launchAtLogin)
-                    .toggleStyle(.switch)
-                    .onChange(of: launchAtLogin) { _, newValue in
-                        LaunchAtLogin.apply(newValue)
-                    }
-
-                Toggle(isOn: $telemetryEnabled) {
-                    HStack(spacing: 4) {
-                        Text("Share anonymous usage stats")
-                        StatsHelpButton()
-                    }
+                    Toggle("Start at login", isOn: $launchAtLogin)
+                        .toggleStyle(.switch)
+                        .onChange(of: launchAtLogin) { _, newValue in
+                            LaunchAtLogin.apply(newValue)
+                        }
                 }
-                .toggleStyle(.switch)
             }
             .formStyle(.grouped)
             .scrollContentBackground(.hidden)
             .scrollDisabled(true)
             .frame(maxWidth: 460)
-            .onAppear {
-                // Reaching the final step discloses stats sharing, so it
-                // satisfies the consent gate — no separate launch alert needed
-                // for users who just finished onboarding.
-                UserDefaults.standard.set(true, forKey: PrefsKey.telemetryConsentSeen)
+        }
+        .onAppear {
+            // Bring the engine live so the "try it out" field actually expands
+            // shortcuts — it isn't started until onboarding finishes otherwise.
+            NotificationCenter.default.post(name: .mojitoShouldStartEngine, object: nil)
+            // Focus the field once the step's transition has settled.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { tryItFocused = true }
+        }
+    }
+
+    private var skinToneSwatches: some View {
+        HStack(spacing: 4) {
+            ForEach(SkinTone.allCases) { tone in
+                Button {
+                    skinToneRaw = tone.rawValue
+                } label: {
+                    Text(tone.swatchEmoji)
+                        .font(.system(size: 18))
+                        .frame(width: 26, height: 26)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(skinToneRaw == tone.rawValue
+                                      ? Color.accentColor.opacity(0.22)
+                                      : Color.clear)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .strokeBorder(
+                                    skinToneRaw == tone.rawValue ? Color.accentColor : Color.clear,
+                                    lineWidth: 1.5
+                                )
+                        )
+                }
+                .buttonStyle(.plain)
+                .help(tone.displayName)
             }
         }
     }

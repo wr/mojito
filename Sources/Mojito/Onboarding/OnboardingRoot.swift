@@ -5,8 +5,8 @@ struct OnboardingRoot: View {
     /// content switch all derive from this enum.
     private enum Step: Int, CaseIterable {
         case welcome
+        case features
         case permissions
-        case replaceEmoji
         case done
 
         var isFirst: Bool { self == .welcome }
@@ -81,6 +81,7 @@ struct OnboardingRoot: View {
     private var content: some View {
         switch step {
         case .welcome:           WelcomeStep()
+        case .features:          FeaturesStep()
         case .permissions:
             PermissionsStep(
                 accessibilityGranted: permissions.accessibility,
@@ -90,7 +91,6 @@ struct OnboardingRoot: View {
                 openAccessibilitySettings: permissions.openAccessibilitySettings,
                 openInputMonitoringSettings: permissions.openInputMonitoringSettings
             )
-        case .replaceEmoji:      ReplaceEmojiStep()
         case .done:              DoneStep()
         }
     }
@@ -191,4 +191,6 @@ extension Notification.Name {
     static let mojitoShouldShowOnboarding = Notification.Name("mojitoShouldShowOnboarding")
     /// Opens the full-library emoji browser window.
     static let mojitoShouldOpenBrowser = Notification.Name("mojitoShouldOpenBrowser")
+    /// Starts the engine early (the onboarding Done step's "try it out" field).
+    static let mojitoShouldStartEngine = Notification.Name("mojitoShouldStartEngine")
 }
