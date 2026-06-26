@@ -11,7 +11,7 @@ import AppKit
 /// `sameAsEmoji` flag); edits flow back to the caller, which persists the
 /// whole `TriggerConfig` via `TriggerConfigStore`.
 struct TriggerPicker: View {
-    /// Labels the row ("Emoji shortcut" / …) — the picker is otherwise identical.
+    /// Labels the row ("Emoji trigger" / …) — the picker is otherwise identical.
     let mode: TriggerMode
     @Binding var open: String
     /// Open strings already claimed by the other active triggers — grayed out
@@ -47,10 +47,10 @@ struct TriggerPicker: View {
     /// The row label, per feature (mirrors "Emoji Browser shortcut").
     private var rowLabel: String {
         switch mode {
-        case .emoji:       return String(localized: "Emoji shortcut")
-        case .symbols:     return String(localized: "Symbol shortcut")
-        case .gif:         return String(localized: "GIF shortcut")
-        case .quickAccess: return String(localized: "Quick Access shortcut")
+        case .emoji:       return String(localized: "Emoji trigger")
+        case .symbols:     return String(localized: "Symbol trigger")
+        case .gif:         return String(localized: "GIF trigger")
+        case .quickAccess: return String(localized: "Quick Access trigger")
         }
     }
 
