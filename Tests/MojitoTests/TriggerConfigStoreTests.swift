@@ -183,4 +183,15 @@ struct TriggerConfigStoreTests {
         config.normalize()
         #expect(config.quickAccess.open == ";?")
     }
+
+    @Test func normalizeAppendsQuestionToNonFollowQuickAccessOpen() {
+        var config = TriggerConfig.default
+        config.quickAccessFollowEmoji = false
+        config.quickAccess.open = "#"
+        config.normalize()
+        #expect(config.quickAccess.open == "#?")
+        // Idempotent — an open that already ends in `?` is left alone.
+        config.normalize()
+        #expect(config.quickAccess.open == "#?")
+    }
 }
