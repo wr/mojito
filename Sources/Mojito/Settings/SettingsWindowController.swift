@@ -7,12 +7,20 @@ import SwiftUI
 @MainActor
 final class SettingsWindowController {
     private var window: NSWindow?
+    private weak var engine: Engine?
+
+    /// While Settings is key, suspend the global event tap so it doesn't fight
+    /// `KeyboardShortcuts.Recorder` (and any open browser) for keystrokes.
+    func setKey(_ isKey: Bool) {
+        engine?.setMonitorSuspended(isKey)
+    }
 
     func show(
         permissions: PermissionsCoordinator,
         exclusions: ExclusionStore,
         engine: Engine
     ) {
+        self.engine = engine
         if let window {
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
@@ -67,10 +75,19 @@ final class SettingsWindowDelegate: NSObject, NSWindowDelegate {
         self.controller = controller
     }
 
+    func windowDidBecomeKey(_ notification: Notification) {
+        controller?.setKey(true)
+    }
+
+    func windowDidResignKey(_ notification: Notification) {
+        controller?.setKey(false)
+    }
+
     func windowWillClose(_ notification: Notification) {
         // Detach so close() doesn't recurse into the closing window.
         let c = controller
         controller = nil
+        c?.setKey(false)
         c?.close()
         DockIconManager.windowDidClose()
     }

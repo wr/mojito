@@ -8,6 +8,12 @@ protocol KeyMonitorDelegate: AnyObject {
     /// Returns true if the event should be consumed (not delivered to the focused app).
     func keyMonitor(_ monitor: KeyMonitor, didReceive input: TriggerInput) -> Bool
     func keyMonitorDidLoseTap(_ monitor: KeyMonitor)
+    /// A lone Globe/Fn key was tapped (pressed and released with no other key
+    /// in between). Not consumed — fn is just a modifier here, and consuming
+    /// the key-up doesn't suppress the system panel anyway (macOS resolves
+    /// Globe below the session tap), so suppression is handled by the
+    /// AppleFnUsageType takeover instead.
+    func keyMonitorDidTapGlobeKey(_ monitor: KeyMonitor)
 }
 
 @MainActor
@@ -17,6 +23,12 @@ final class KeyMonitor {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private(set) var isRunning = false
+
+    /// Lone Globe/Fn-tap detection: fn-down then fn-up within the threshold
+    /// with no key pressed in between. `nil` timestamp = no press in flight.
+    private var fnDownTimestamp: CGEventTimestamp?
+    private var fnTapInterrupted = false
+    private static let globeTapMaxDuration: CGEventTimestamp = 300_000_000  // ns
 
     func start() -> Bool {
         // Engine's `MainActor.assumeIsolated` callback dispatch is only safe
@@ -82,13 +94,39 @@ final class KeyMonitor {
             delegate?.keyMonitorDidLoseTap(self)
             return Unmanaged.passUnretained(event)
         }
+        if type == .flagsChanged {
+            handleFlagsChanged(event)
+            return Unmanaged.passUnretained(event)
+        }
         guard type == .keyDown else { return Unmanaged.passUnretained(event) }
+
+        // A real keypress during an fn hold means it wasn't a lone Globe tap.
+        if fnDownTimestamp != nil { fnTapInterrupted = true }
 
         let input = translate(event: event)
         guard let input else { return Unmanaged.passUnretained(event) }
 
         let consumed = delegate?.keyMonitor(self, didReceive: input) ?? false
         return consumed ? nil : Unmanaged.passUnretained(event)
+    }
+
+    private func handleFlagsChanged(_ event: CGEvent) {
+        let keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
+        guard keyCode == kVK_Function else {
+            // A different modifier toggled mid-press — not a lone Globe tap.
+            if fnDownTimestamp != nil { fnTapInterrupted = true }
+            return
+        }
+        if event.flags.contains(.maskSecondaryFn) {
+            fnDownTimestamp = event.timestamp
+            fnTapInterrupted = false
+        } else {
+            defer { fnDownTimestamp = nil }
+            guard let down = fnDownTimestamp, !fnTapInterrupted,
+                  event.timestamp >= down,
+                  event.timestamp - down < Self.globeTapMaxDuration else { return }
+            delegate?.keyMonitorDidTapGlobeKey(self)
+        }
     }
 
     private func translate(event: CGEvent) -> TriggerInput? {

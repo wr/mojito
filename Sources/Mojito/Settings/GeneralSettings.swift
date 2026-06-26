@@ -157,8 +157,16 @@ struct GeneralSettingsView: View {
             }
 
             Section {
-                KeyboardShortcuts.Recorder("Pause for 1 hour", name: .pauseHour)
-                KeyboardShortcuts.Recorder("Pause until tomorrow", name: .pauseUntilTomorrow)
+                HStack {
+                    Text("Pause for 1 hour")
+                    Spacer(minLength: 8)
+                    ShortcutRecorder(name: .pauseHour)
+                }
+                HStack {
+                    Text("Pause until tomorrow")
+                    Spacer(minLength: 8)
+                    ShortcutRecorder(name: .pauseUntilTomorrow)
+                }
             } header: {
                 Text("Pausing")
             } footer: {

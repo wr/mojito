@@ -88,6 +88,19 @@ enum PrefsKey {
     /// debug report can show whether conversions are landing at all.
     static let totalEmoticonInserted = "mojito.totals.emoticonInserted"
 
+    // MARK: Replace system emoji picker
+    /// When true, the browser hotkey owns ⌃⌘Space and the macOS Emoji & Symbols
+    /// panel is best-effort suppressed. Independent of the Globe toggle below.
+    static let replaceSystemEmojiPickerEnabled = "mojito.replaceSystemEmojiPicker.enabled"
+    /// When true, a lone Globe/Fn tap opens the browser (its own toggle).
+    static let globeKeyEnabled                 = "mojito.replaceSystemEmojiPicker.globeEnabled"
+    /// `AppleFnUsageType` value captured before we set it to 0, restored when the
+    /// Globe toggle goes off. Absent unless the Globe takeover is on.
+    static let priorFnUsageType                = "mojito.replaceSystemEmojiPicker.priorFnUsageType"
+    /// Whether symbolic hotkey 50 (Character Viewer) was enabled before we
+    /// disabled it, restored when panel replacement goes off.
+    static let priorCharacterPaletteEnabled    = "mojito.replaceSystemEmojiPicker.priorPaletteEnabled"
+
     // MARK: Anonymous usage statistics
     /// Opt-out master switch. Default true, but nothing is sent until
     /// `telemetryConsentSeen` is also true (Homebrew-style consent gate).

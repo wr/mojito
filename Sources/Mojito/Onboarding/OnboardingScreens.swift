@@ -465,6 +465,65 @@ struct PermissionsStep: View {
     }
 }
 
+// MARK: - Replace system emoji picker
+
+struct ReplaceEmojiStep: View {
+    @AppStorage(PrefsKey.replaceSystemEmojiPickerEnabled) private var enabled: Bool = false
+    @State private var needsLogout = false
+
+    var body: some View {
+        VStack(spacing: 22) {
+            Image(systemName: "face.smiling")
+                .font(.system(size: 44))
+                .foregroundStyle(.tint)
+
+            VStack(spacing: 6) {
+                Text("Replace the system emoji picker")
+                    .font(.system(size: 22, weight: .semibold))
+                Text("Make ⌃⌘Space and the \(Image(systemName: "globe")) key open \(AppInfo.displayName) instead of the macOS Emoji & Symbols panel.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 480)
+            }
+
+            Button(action: toggle) {
+                Label(
+                    enabled ? "Using \(AppInfo.displayName)" : "Replace system emoji picker",
+                    systemImage: enabled ? "checkmark.circle.fill" : "wand.and.stars"
+                )
+                .frame(maxWidth: 300)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .tint(enabled ? .green : .accentColor)
+
+            VStack(spacing: 4) {
+                if enabled && needsLogout {
+                    Text("Log out and back in to finish handing over the \(Image(systemName: "globe")) key.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                }
+                Text("Optional — you can change this any time in Settings.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.tertiary)
+            }
+
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func toggle() {
+        if enabled {
+            SystemEmojiPickerReplacer.shared.restoreSystemPicker()
+            needsLogout = false
+        } else {
+            SystemEmojiPickerReplacer.shared.replaceSystemPicker()
+            needsLogout = SystemEmojiPickerReplacer.shared.needsLogoutForGlobe
+        }
+    }
+}
+
 // MARK: - Done
 
 struct DoneStep: View {

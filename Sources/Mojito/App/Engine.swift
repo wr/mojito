@@ -9,6 +9,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     @Published private(set) var isActive: Bool = false
     @Published var pausedUntil: Date?
 
+    /// True while Mojito's Settings window holds key focus — see
+    /// `setMonitorSuspended`. Keeps the tap from fighting recorders there.
+    private var uiSuspended = false
+
     /// State-machine label for diagnostic reports. Query contents are
     /// elided so the value is anonymous.
     var triggerStateLabel: String {
@@ -354,12 +358,26 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         UserDefaults.standard.set(0, forKey: PrefsKey.totalEmoticonInserted)
     }
 
+    /// Suspends the event tap while Mojito's own Settings window is key — the
+    /// global tap would otherwise compete with `KeyboardShortcuts.Recorder` for
+    /// keystrokes (and the browser, if open, eats them), so recorders there go
+    /// flaky. Triggers in other apps resume the moment Settings isn't key.
+    func setMonitorSuspended(_ suspended: Bool) {
+        guard uiSuspended != suspended else { return }
+        uiSuspended = suspended
+        reconcile()
+    }
+
     private func reconcile() {
         guard let permissions, permissions.allGranted else {
             stop()
             return
         }
         if let until = pausedUntil, until > Date() {
+            stop()
+            return
+        }
+        if uiSuspended {
             stop()
             return
         }
@@ -383,6 +401,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // Tap may have died because the user revoked Input Monitoring —
             // let the coordinator resume polling and surface the UI state.
             self.permissions?.handleInputMonitoringLost()
+        }
+    }
+
+    nonisolated func keyMonitorDidTapGlobeKey(_ monitor: KeyMonitor) {
+        MainActor.assumeIsolated {
+            guard SystemEmojiPickerReplacer.shared.globeOpensBrowser else { return }
+            self.toggleBrowser()
         }
     }
 
@@ -825,6 +850,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     // MARK: - Full-library browser (the picker panel, grown)
+
+    /// Globe / ⌃⌘Space entry for the "replace system emoji picker" feature.
+    /// Mirrors the macOS panel: the key that opens the browser also closes it.
+    func toggleBrowser() {
+        if case .browsing = stateMachine.state {
+            collapseBrowser()
+            return
+        }
+        showBrowser()
+    }
 
     /// Menu-bar / global-hotkey entry. These fire independently of the event
     /// tap, so — unlike the `:` paths — they must explicitly honor pause +
