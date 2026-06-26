@@ -81,7 +81,7 @@ struct GeneralSettingsView: View {
 
             Section {
                 SettingsSectionHeader(
-                    systemImage: "face.smiling",
+                    systemImage: "face.smiling.fill",
                     tint: .orange,
                     title: "Emoji",
                     subtitle: "Type a shortcut to insert any emoji.",
