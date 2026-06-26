@@ -20,6 +20,8 @@
     {
       "layers" : [
         {
+          "fill" : "none",
+          "glass" : true,
           "image-name" : "Vectoraa.svg",
           "name" : "Vectoraa",
           "position" : {
