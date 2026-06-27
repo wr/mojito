@@ -5,6 +5,13 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.7.0
+
+## New
+- **Replace the system emoji picker:** turn it on and ⌃⌘Space — or a tap of the 🌐 Globe key — opens Mojito's emoji browser instead of the macOS Emoji & Symbols panel. Set it up in onboarding or Settings ▸ General. ([#149](https://github.com/wr/mojito/pull/149))
+- **Smoother setup:** onboarding now lets you turn features on or off and pick each trigger up front, and ends on a live field to try a shortcut on the spot. ([#153](https://github.com/wr/mojito/pull/153))
+- **New app icon** with a Liquid Glass look for macOS Golden Gate. ([#150](https://github.com/wr/mojito/pull/150))
+
 ## v1.6.0
 
 ## New
