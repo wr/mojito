@@ -38,7 +38,9 @@ final class GifPickerWindow {
             defer: false
         )
         panel.isFloatingPanel = true
-        panel.level = .floating
+        // See PickerWindow: `.popUpMenu` so app pop-ups at `.floating` (owned
+        // by the active app) can't cover our background-app picker.
+        panel.level = .popUpMenu
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true

@@ -29,7 +29,12 @@ final class PickerWindow {
             defer: false
         )
         panel.isFloatingPanel = true
-        panel.level = .floating
+        // `.popUpMenu`, not `.floating`: app pop-ups (quick-entry sheets,
+        // menu-bar panels) often sit at `.floating` themselves, and since
+        // they belong to the active app they'd win the tie and cover our
+        // background-app picker. Matches where NSMenu / the native emoji
+        // candidate window sit — above any app's floating UI.
+        panel.level = .popUpMenu
         panel.isOpaque = false
         panel.backgroundColor = .clear
         // System menu shadow matches NSMenu's drop shadow exactly.
@@ -95,7 +100,7 @@ final class PickerWindow {
                 backing: .buffered, defer: false
             )
             tip.isFloatingPanel = true
-            tip.level = .floating
+            tip.level = .popUpMenu  // same band as the picker so app pop-ups can't slip above it
             tip.isOpaque = false
             tip.backgroundColor = .clear
             tip.hasShadow = false  // bubble carries its own soft SwiftUI shadow
