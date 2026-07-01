@@ -100,7 +100,7 @@ final class PickerWindow {
                 backing: .buffered, defer: false
             )
             tip.isFloatingPanel = true
-            tip.level = .popUpMenu  // stay above the picker, which is also .popUpMenu
+            tip.level = .popUpMenu  // same band as the picker so app pop-ups can't slip above it
             tip.isOpaque = false
             tip.backgroundColor = .clear
             tip.hasShadow = false  // bubble carries its own soft SwiftUI shadow
