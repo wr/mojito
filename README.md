@@ -4,6 +4,9 @@ Type emoji shortcodes anywhere on macOS. `:tada:` becomes 🎉 in any text field
 
 Requires macOS 14 or later.
 
+> [!TIP]
+> Did you find my work useful? [Your support](https://buymeacoffee.com/wellsriley) helps fund future projects. Thank you!
+
 ## Install
 
 Download the latest DMG from the Releases page and move Mojito to Applications. The app walks through granting Accessibility and Input Monitoring access on first launch. Updates arrive automatically — when one is ready, the menu-bar icon shows a badge.
