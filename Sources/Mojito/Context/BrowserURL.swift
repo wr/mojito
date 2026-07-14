@@ -21,7 +21,37 @@ enum BrowserURL {
         if let raw = focusedAddressBarValue(in: app), let url = normalizedURL(from: raw) {
             return url
         }
+
+        // Arc suppresses the Chromium web-content a11y tree entirely — no
+        // AXWebArea, no AXURL, and its address bar is a transient command bar
+        // with no persistent AXTextField. The AX paths above always return nil
+        // there, so per-site exclusions silently can't fire. AppleScript is the
+        // only way to read Arc's tab URL. It's gated to this one bundle ID
+        // because it's the sole browser we've found that needs it (Dia, same
+        // vendor, exposes AXURL fine) and because the first call triggers a
+        // one-time Automation permission prompt we don't want to inflict on
+        // browsers the AX path already handles.
+        if appleScriptURLBundleIDs.contains(bundleID),
+           let url = appleScriptURL(bundleID: bundleID) {
+            return url
+        }
         return nil
+    }
+
+    private static let appleScriptURLBundleIDs: Set<String> = [
+        "company.thebrowser.Browser",   // Arc
+    ]
+
+    /// `URL of active tab of front window` via AppleScript. Returns nil on any
+    /// failure — no window, denied Automation permission, or a non-URL value —
+    /// so callers fall through to "no URL" exactly as if AX had come up empty.
+    private static func appleScriptURL(bundleID: String) -> URL? {
+        let source = "tell application id \"\(bundleID)\" to return URL of active tab of front window"
+        guard let script = NSAppleScript(source: source) else { return nil }
+        var error: NSDictionary?
+        let result = script.executeAndReturnError(&error)
+        guard error == nil, let raw = result.stringValue else { return nil }
+        return normalizedURL(from: raw)
     }
 
     private static func isBrowser(bundleID: String) -> Bool {

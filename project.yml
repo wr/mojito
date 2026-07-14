@@ -164,6 +164,10 @@ targets:
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.utilities
         NSHumanReadableCopyright: "© 2026 Wells Riley"
+        # Required for the AppleScript fallback that reads Arc's active-tab URL
+        # (Arc hides it from accessibility). Without this key macOS denies the
+        # Apple event outright instead of prompting. Only Arc triggers it.
+        NSAppleEventsUsageDescription: "Mojito reads the current tab's URL in Arc to apply your per-site exclusions."
         SUFeedURL: "https://mojito.wells.ee/appcast.xml"
         SUEnableInstallerLauncherService: true
         SUPublicEDKey: "NUW/cpxaKEqfwn2Uca4Zz9n01EmxhN0RRwhdma8GIuM="
