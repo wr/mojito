@@ -30,6 +30,8 @@
 	<string>14.0</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Mojito reads the current tab's URL in Arc to apply your per-site exclusions.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 Wells Riley</string>
 	<key>SUEnableInstallerLauncherService</key>
