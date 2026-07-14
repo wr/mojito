@@ -74,6 +74,11 @@ struct FuzzyMatcher {
     /// doubles the cost of the worst query for no useful results.
     private static let tagMinNeedle = 2
 
+    /// Score bonus for a user-defined alias haystack. Set above the +5.0
+    /// frequency-boost cap so an aliased emoji reliably beats even a
+    /// heavily-used built-in when the query is the alias term.
+    static let aliasBonus = 6.0
+
     private struct PinnedRow {
         let hexcode: String
         let character: String
@@ -135,6 +140,90 @@ struct FuzzyMatcher {
         let needle = Array(query.lowercased())
         guard !needle.isEmpty else { return [] }
 
+        let scanTags = needle.count >= tagMinNeedle
+
+        let pool: [IndexedEmoji]
+        switch corpus {
+        case .emojiOnly:        pool = database.indexed
+        case .emojiAndSymbols:  pool = database.indexed + SymbolsCorpus.entries
+        case .symbolsOnly:      pool = SymbolsCorpus.entries
+        }
+
+        let trimmed = rankedResults(
+            needle: needle,
+            pool: pool,
+            usage: usage,
+            useFrequencyBoost: useFrequencyBoost,
+            scanTags: scanTags,
+            limit: limit
+        )
+
+        let lowercased = query.lowercased()
+
+        // Discovery hint sits just below the top real match — a normal
+        // shortcode surfaces the actual emoji first, but the hint stays
+        // visible right under it — and only once enough of the trigger is
+        // typed. Hash the query against `EggIndex` — no plaintext keywords in
+        // source. Skipped for `::symbols`.
+        var specialRow: ScoredEmoji?
+        if corpus != .symbolsOnly,
+           EasterEggTracker.eggsEnabled,
+           lowercased.count >= specialMinPrefix,
+           let hexcode = EggIndex.id(forPrefix: lowercased),
+           let row = pinnedRows[hexcode] {
+            // Reveal the trigger keyword once the user has discovered the egg —
+            // a row stuck on "???" after discovery is just dead weight in the
+            // picker.
+            var label = row.label
+            if label == "???",
+               let egg = EasterEgg(rawValue: hexcode),
+               EasterEggTracker.isDiscovered(egg) {
+                label = egg.pickerLabel
+            }
+            specialRow = makeSpecialRow(
+                hexcode: row.hexcode,
+                character: row.character,
+                label: label,
+                order: row.order
+            )
+        }
+
+        guard let specialRow else {
+            return Array(trimmed.prefix(limit))
+        }
+        // Rank the hint among the real matches by how well they fit the query,
+        // so a genuine match always wins but loose subsequence matches don't:
+        //   • right after its lookalike emoji (same glyph), if one matched; else
+        //   • right after the last prefix-tier match (shortcode starts with the
+        //     query); else
+        //   • at the top, when nothing real actually starts with the query.
+        let real = Array(trimmed.prefix(max(0, limit - 1)))
+        guard !real.isEmpty else { return [specialRow] }
+        let insertAt: Int
+        if let twin = real.firstIndex(where: { $0.emoji.character == specialRow.emoji.character }) {
+            insertAt = twin + 1
+        } else if let lastPrefix = real.lastIndex(where: { $0.isPrefix }) {
+            insertAt = lastPrefix + 1
+        } else {
+            insertAt = 0
+        }
+        var output = real
+        output.insert(specialRow, at: insertAt)
+        return output
+    }
+
+    /// The scoring core: rank a haystack pool against `needle` and return the
+    /// top `limit` rows. Split out from `search` so the ranking (including the
+    /// alias bonus) is testable with a synthetic pool, without the easter-egg
+    /// splicing that `search` layers on top.
+    static func rankedResults(
+        needle: [Character],
+        pool: [IndexedEmoji],
+        usage: [String: Int],
+        useFrequencyBoost: Bool,
+        scanTags: Bool,
+        limit: Int
+    ) -> [ScoredEmoji] {
         // Internal carrier so the sort can rank by (isPrefix, score, isTag)
         // without baking a magic tier offset into a single Int.
         struct Candidate {
@@ -147,15 +236,6 @@ struct FuzzyMatcher {
         var results: [Candidate] = []
         results.reserveCapacity(64)
 
-        let scanTags = needle.count >= tagMinNeedle
-
-        let pool: [IndexedEmoji]
-        switch corpus {
-        case .emojiOnly:        pool = database.indexed
-        case .emojiAndSymbols:  pool = database.indexed + SymbolsCorpus.entries
-        case .symbolsOnly:      pool = SymbolsCorpus.entries
-        }
-
         for indexed in pool {
             var bestScore: Double = -.infinity
             var bestDisplay: String?
@@ -164,7 +244,10 @@ struct FuzzyMatcher {
             var prefixBestDisplay: String?
             for haystack in indexed.haystacks {
                 if haystack.isTag && !scanTags { continue }
-                guard let raw = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
+                guard let base = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
+                // A user alias gets a fixed lift so the aliased emoji wins its
+                // alias term over built-ins that merely prefix-match it.
+                let raw = haystack.isAlias ? base + aliasBonus : base
                 // Tags never join the prefix tier — a keyword starting with the
                 // query shouldn't outrank a real shortcode. Within the
                 // non-prefix tier they compete on fzy relevance, so an exact
@@ -225,7 +308,7 @@ struct FuzzyMatcher {
             if lhs.isTag != rhs.isTag { return !lhs.isTag }
             return lhs.emoji.order < rhs.emoji.order
         }
-        var trimmed = results.prefix(limit).map {
+        return results.prefix(limit).map {
             // A tag match drives ranking but isn't a typable shortcode, and many
             // emoji share one keyword — labelling the row with the tag yields a
             // run of identical ":happy:" rows. Show the emoji's own primary
@@ -236,59 +319,6 @@ struct FuzzyMatcher {
                 isPrefix: $0.isPrefix
             )
         }
-
-        let lowercased = query.lowercased()
-
-        // Discovery hint sits just below the top real match — a normal
-        // shortcode surfaces the actual emoji first, but the hint stays
-        // visible right under it — and only once enough of the trigger is
-        // typed. Hash the query against `EggIndex` — no plaintext keywords in
-        // source. Skipped for `::symbols`.
-        var specialRow: ScoredEmoji?
-        if corpus != .symbolsOnly,
-           EasterEggTracker.eggsEnabled,
-           lowercased.count >= specialMinPrefix,
-           let hexcode = EggIndex.id(forPrefix: lowercased),
-           let row = pinnedRows[hexcode] {
-            // Reveal the trigger keyword once the user has discovered the egg —
-            // a row stuck on "???" after discovery is just dead weight in the
-            // picker.
-            var label = row.label
-            if label == "???",
-               let egg = EasterEgg(rawValue: hexcode),
-               EasterEggTracker.isDiscovered(egg) {
-                label = egg.pickerLabel
-            }
-            specialRow = makeSpecialRow(
-                hexcode: row.hexcode,
-                character: row.character,
-                label: label,
-                order: row.order
-            )
-        }
-
-        guard let specialRow else {
-            return Array(trimmed.prefix(limit))
-        }
-        // Rank the hint among the real matches by how well they fit the query,
-        // so a genuine match always wins but loose subsequence matches don't:
-        //   • right after its lookalike emoji (same glyph), if one matched; else
-        //   • right after the last prefix-tier match (shortcode starts with the
-        //     query); else
-        //   • at the top, when nothing real actually starts with the query.
-        let real = Array(trimmed.prefix(max(0, limit - 1)))
-        guard !real.isEmpty else { return [specialRow] }
-        let insertAt: Int
-        if let twin = real.firstIndex(where: { $0.emoji.character == specialRow.emoji.character }) {
-            insertAt = twin + 1
-        } else if let lastPrefix = real.lastIndex(where: { $0.isPrefix }) {
-            insertAt = lastPrefix + 1
-        } else {
-            insertAt = 0
-        }
-        var output = real
-        output.insert(specialRow, at: insertAt)
-        return output
     }
 
     private static func makeSpecialRow(hexcode: String, character: String, label: String, order: Int) -> ScoredEmoji {
