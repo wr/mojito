@@ -141,14 +141,24 @@ final class ExclusionStore: ObservableObject {
         return try? NSRegularExpression(pattern: regexPattern)
     }
 
-    /// Pure host/pattern decision. Equality unless the pattern carries a
-    /// `*` wildcard. Compiles on demand — the instance hot path uses the
-    /// `compiledPatterns` cache instead to avoid per-`:` recompilation.
+    /// Pure host/pattern decision. A wildcard pattern goes through the regex;
+    /// a plain pattern matches the domain itself or any subdomain of it
+    /// (label-boundary suffix), so `google.com` covers `mail.google.com` but
+    /// not `notgoogle.com`. Compiles on demand — the instance hot path uses
+    /// the `compiledPatterns` cache instead to avoid per-`:` recompilation.
     nonisolated static func matches(host: String, pattern: String) -> Bool {
-        guard pattern.contains("*") else { return host == pattern }
+        guard pattern.contains("*") else { return hostMatchesDomain(host, pattern) }
         guard let regex = compiledGlob(for: pattern) else { return false }
         let range = NSRange(host.startIndex..., in: host)
         return regex.firstMatch(in: host, range: range) != nil
+    }
+
+    /// A plain (non-wildcard) pattern matches its apex and every subdomain.
+    /// The leading `.` on the suffix check keeps the match on a label
+    /// boundary — `notgoogle.com` shares the `google.com` suffix but isn't a
+    /// subdomain, so it must not match.
+    nonisolated static func hostMatchesDomain(_ host: String, _ pattern: String) -> Bool {
+        host == pattern || host.hasSuffix("." + pattern)
     }
 
     func isExcluded(bundleID: String?, url: URL?) -> Bool {
@@ -184,9 +194,10 @@ final class ExclusionStore: ObservableObject {
         allowedURLPatterns = []
     }
 
-    /// `*` matches any single subdomain segment.
+    /// `*` matches any single subdomain segment; a plain pattern matches the
+    /// domain and its subdomains (see `hostMatchesDomain`).
     private func matches(host: String, pattern: String) -> Bool {
-        if !pattern.contains("*") { return host == pattern }
+        if !pattern.contains("*") { return Self.hostMatchesDomain(host, pattern) }
         guard let regex = compiledPatterns[pattern] else { return false }
         let range = NSRange(host.startIndex..., in: host)
         return regex.firstMatch(in: host, range: range) != nil
