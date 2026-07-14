@@ -12,6 +12,6 @@
     "db:init:remote": "wrangler d1 execute mojito_stats --remote --file=./schema.sql"
   },
   "devDependencies": {
-    "wrangler": "^4.97.0"
+    "wrangler": "^4.103.0"
   }
 }
