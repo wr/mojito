@@ -5,6 +5,18 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.8.0
+
+## New
+- **Insert several emoji in one go:** hold Shift when picking — Shift+Return, Shift+Tab, or Shift+click — and the picker stays open for the next one. Type to search again, plain Return to insert and close. Works in the shortcode list and the full browser grid. ([#163](https://github.com/wr/mojito/pull/163))
+- **Custom aliases:** map your own `:word:` to any emoji or symbol in Settings ▸ Aliases — they work alongside the built-in shortcodes. ([#161](https://github.com/wr/mojito/pull/161))
+
+## Fixed
+- Per-site exclusions now match subdomains of plain URL patterns (`example.com` covers `app.example.com`). ([#160](https://github.com/wr/mojito/pull/160))
+- Per-site exclusions now work in Arc, whose tab URL isn't exposed the usual way. ([#159](https://github.com/wr/mojito/pull/159))
+- Shortcut recording in Settings ends cleanly when the window loses focus. ([#162](https://github.com/wr/mojito/pull/162))
+- Pickers can no longer be covered by an app's own pop-up windows. ([#155](https://github.com/wr/mojito/pull/155))
+
 ## v1.7.0
 
 ## New
