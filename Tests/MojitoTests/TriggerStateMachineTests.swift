@@ -51,7 +51,7 @@ struct TriggerStateMachineTests {
         _ = sm.handle(.nameChar("f"))
         _ = sm.handle(.nameChar("o"))
         _ = sm.handle(.nameChar("o"))
-        let out = sm.handle(.returnKey)
+        let out = sm.handle(.returnKey(shift: false))
         #expect(out.action == .insertEmoji(query: "foo", mode: .fromPicker, scope: .normal))
         #expect(out.consumesKey == true)
         #expect(sm.state == .idle)
@@ -62,7 +62,7 @@ struct TriggerStateMachineTests {
         _ = sm.handle(.colon)
         _ = sm.handle(.nameChar("f"))
         _ = sm.handle(.nameChar("o"))
-        let out = sm.handle(.tabKey)
+        let out = sm.handle(.tabKey(shift: false))
         #expect(out.action == .insertEmoji(query: "fo", mode: .fromPicker, scope: .normal))
         #expect(out.consumesKey == true)
     }
@@ -341,7 +341,7 @@ struct TriggerStateMachineTests {
     @Test func gifReturnPicksAndDeletesTripleColonPlusQuery() {
         var sm = enterGifSearching()
         for ch in "dog" { _ = sm.handle(.nameChar(ch)) }
-        let out = sm.handle(.returnKey)
+        let out = sm.handle(.returnKey(shift: false))
         // deleteCount = query.count (3) + the three colons typed through.
         #expect(out.action == .pickGif(deleteCount: 6))
         #expect(out.consumesKey == true)
@@ -350,7 +350,7 @@ struct TriggerStateMachineTests {
 
     @Test func gifTabAlsoPicksWithEmptyQuery() {
         var sm = enterGifSearching()
-        let out = sm.handle(.tabKey)
+        let out = sm.handle(.tabKey(shift: false))
         #expect(out.action == .pickGif(deleteCount: 3))
         #expect(out.consumesKey == true)
     }
@@ -385,7 +385,7 @@ struct TriggerStateMachineTests {
 
     @Test func resumeGifSearchingReentersState() {
         var sm = enterGifSearching()
-        _ = sm.handle(.returnKey)  // pickGif transitions to idle
+        _ = sm.handle(.returnKey(shift: false))  // pickGif transitions to idle
         #expect(sm.state == .idle)
         // Engine calls this when the picker stayed open (e.g. "Load more").
         sm.resumeGifSearching(query: "cats")
@@ -736,5 +736,180 @@ struct TriggerStateMachineTests {
         _ = sm.handle(.colon)
         let out = sm.handle(.colon)
         #expect(out.action == .insertEmoji(query: "fo", mode: .exactMatch, scope: .normal))
+    }
+}
+
+/// Shift+Return keep-open picks and the `.stickyPicking` session that
+/// follows: everything is consumed (the typed `:query` is gone from the
+/// field), in-session picks delete nothing, and typing after a pick starts
+/// a fresh search.
+struct StickyPickingTests {
+
+    /// `:foo` captured, ready for a pick.
+    private func capturingFoo() -> TriggerStateMachine {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        for ch in "foo" { _ = sm.handle(.nameChar(ch)) }
+        return sm
+    }
+
+    private func stickyFoo() -> TriggerStateMachine {
+        var sm = capturingFoo()
+        _ = sm.handle(.returnKey(shift: true))
+        return sm
+    }
+
+    @Test func shiftReturnEntersStickyAndDeletesTypedQuery() {
+        var sm = capturingFoo()
+        let out = sm.handle(.returnKey(shift: true))
+        // deleteCount = "foo" (3) + the typed `:`.
+        #expect(out.action == .stickyPick(scope: .normal, deleteCount: 4, keepOpen: true))
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .stickyPicking(query: "foo"))
+    }
+
+    @Test func shiftTabAlsoEntersSticky() {
+        var sm = capturingFoo()
+        let out = sm.handle(.tabKey(shift: true))
+        #expect(out.action == .stickyPick(scope: .normal, deleteCount: 4, keepOpen: true))
+        #expect(sm.state == .stickyPicking(query: "foo"))
+    }
+
+    @Test func plainReturnStillInsertsAndCloses() {
+        var sm = capturingFoo()
+        let out = sm.handle(.returnKey(shift: false))
+        #expect(out.action == .insertEmoji(query: "foo", mode: .fromPicker, scope: .normal))
+        #expect(sm.state == .idle)
+    }
+
+    @Test func stickyShiftReturnPicksAgainWithNothingToDelete() {
+        var sm = stickyFoo()
+        let out = sm.handle(.returnKey(shift: true))
+        #expect(out.action == .stickyPick(scope: .normal, deleteCount: 0, keepOpen: true))
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .stickyPicking(query: "foo"))
+    }
+
+    @Test func stickyPlainReturnPicksAndCloses() {
+        var sm = stickyFoo()
+        let out = sm.handle(.returnKey(shift: false))
+        #expect(out.action == .stickyPick(scope: .normal, deleteCount: 0, keepOpen: false))
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func typingAfterPickStartsFreshQueryAndIsConsumed() {
+        var sm = stickyFoo()
+        let out = sm.handle(.nameChar("c"))
+        // Not "fooc" — a pick just fired, so typing means a new search.
+        #expect(out.action == .refreshPicker(query: "c", scope: .normal))
+        #expect(out.consumesKey == true)
+        let out2 = sm.handle(.nameChar("a"))
+        #expect(out2.action == .refreshPicker(query: "ca", scope: .normal))
+        #expect(sm.state == .stickyPicking(query: "ca"))
+    }
+
+    @Test func backspaceAfterPickEditsOldQuery() {
+        var sm = stickyFoo()
+        let out = sm.handle(.backspace)
+        #expect(out.action == .refreshPicker(query: "fo", scope: .normal))
+        #expect(out.consumesKey == true)
+        // Backspace opted into editing — typing now extends, not restarts.
+        let out2 = sm.handle(.nameChar("x"))
+        #expect(out2.action == .refreshPicker(query: "fox", scope: .normal))
+    }
+
+    @Test func backspacePastEmptyClosesSession() {
+        var sm = stickyFoo()
+        _ = sm.handle(.backspace)  // "fo"
+        _ = sm.handle(.backspace)  // "f"
+        let out = sm.handle(.backspace)
+        #expect(out.action == .closePicker)
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func escapeClosesSessionAndConsumes() {
+        var sm = stickyFoo()
+        let out = sm.handle(.escape)
+        #expect(out.action == .closePicker)
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func arrowsNavigateAndConsume() {
+        var sm = stickyFoo()
+        #expect(sm.handle(.arrowDown).action == .moveSelection(delta: 1))
+        #expect(sm.handle(.arrowUp).action == .moveSelection(delta: -1))
+        let left = sm.handle(.arrowLeft)
+        #expect(left.action == .none)
+        #expect(left.consumesKey == true)
+        #expect(sm.state == .stickyPicking(query: "foo"))
+    }
+
+    @Test func focusChangeClosesWithoutConsuming() {
+        var sm = stickyFoo()
+        let out = sm.handle(.focusChange)
+        #expect(out.action == .closePicker)
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .idle)
+    }
+
+    @Test func stickySurvivesSymbolsScope() {
+        var cfg = TriggerConfig.default
+        cfg.symbols.enabled = true
+        cfg.symbolsFollowEmoji = false
+        var sm = TriggerStateMachine()
+        sm.setConfig(cfg)
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)  // `::` upgrades to symbols scope
+        _ = sm.handle(.nameChar("s"))
+        let out = sm.handle(.returnKey(shift: true))
+        #expect(out.action == .stickyPick(scope: .symbolsOnly, deleteCount: 3, keepOpen: true))
+        // In-session refreshes keep the symbols corpus.
+        let typed = sm.handle(.nameChar("x"))
+        #expect(typed.action == .refreshPicker(query: "x", scope: .symbolsOnly))
+    }
+
+    @Test func enterStickyPickingMirrorsShiftClick() {
+        var sm = capturingFoo()
+        // Engine calls this for a Shift+click pick.
+        sm.enterStickyPicking(query: "foo")
+        #expect(sm.state == .stickyPicking(query: "foo"))
+        // Fresh-query behavior applies to mouse picks too.
+        let out = sm.handle(.nameChar("z"))
+        #expect(out.action == .refreshPicker(query: "z", scope: .normal))
+    }
+
+    @Test func shiftReturnOnPillStillInsertsAndCloses() {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        sm.emptyPickerActive = true
+        let out = sm.handle(.returnKey(shift: true))
+        #expect(out.action == .insertEmoji(query: "", mode: .fromPicker, scope: .normal))
+        #expect(sm.state == .idle)
+    }
+
+    @Test func browserShiftReturnKeepsBrowsing() {
+        var sm = TriggerStateMachine()
+        sm.enterBrowsing(query: "")
+        let out = sm.handle(.returnKey(shift: true))
+        #expect(out.action == .pickBrowser(keepOpen: true))
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .browsing(query: ""))
+        let plain = sm.handle(.returnKey(shift: false))
+        #expect(plain.action == .pickBrowser(keepOpen: false))
+        #expect(sm.state == .idle)
+    }
+
+    @Test func resetClearsFreshQueryFlag() {
+        var sm = stickyFoo()
+        sm.reset()
+        #expect(sm.state == .idle)
+        // A brand-new capture types normally (flag didn't leak).
+        _ = sm.handle(.colon)
+        _ = sm.handle(.nameChar("f"))
+        let out = sm.handle(.nameChar("o"))
+        #expect(out.action == .openPicker(query: "fo", scope: .normal))
     }
 }
