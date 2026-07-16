@@ -88,8 +88,16 @@ struct FuzzyMatcherTests {
     }
 
     @Test func emojiOnlyCorpusExcludesSymbols() {
-        let results = search("cmd", corpus: .emojiOnly)
-        #expect(!results.contains { $0.emoji.character == "⌘" })
+        // The swept symbol corpus stays out of .emojiOnly. A symbol the user
+        // has explicitly aliased becomes a permanent indexed row, so it's the
+        // one legitimate exception — assert no *un-aliased* swept symbol leaks.
+        let aliasedSymbolHexes = Set(
+            AliasStore.shared.aliases.map(\.hexcode).filter { $0.hasPrefix("SYM_") }
+        )
+        let leaked = search("cmd", corpus: .emojiOnly).filter {
+            $0.emoji.hexcode.hasPrefix("SYM_") && !aliasedSymbolHexes.contains($0.emoji.hexcode)
+        }
+        #expect(leaked.isEmpty)
     }
 
     @Test func emojiAndSymbolsCorpusSpansBoth() {
