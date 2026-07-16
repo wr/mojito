@@ -293,6 +293,72 @@ enum SymbolsDatabase {
         .init(character: "§",  shortcodes: ["section"]),
         .init(character: "¶",  shortcodes: ["pilcrow"]),
 
+        // Math & logic. All swept too, but the Unicode names are unsearchable
+        // ("N-ARY UNION", "THERE EXISTS") — give them the terms people type.
+        .init(character: "∫",  shortcodes: ["integral"]),
+        .init(character: "∂",  shortcodes: ["partial", "differential"]),
+        .init(character: "∇",  shortcodes: ["nabla", "del", "gradient"]),
+        .init(character: "∈",  shortcodes: ["element_of", "elem"]),
+        .init(character: "∉",  shortcodes: ["not_element", "not_in"]),
+        .init(character: "⊂",  shortcodes: ["subset"]),
+        .init(character: "⊆",  shortcodes: ["subset_equal"]),
+        .init(character: "⊃",  shortcodes: ["superset"]),
+        .init(character: "∪",  shortcodes: ["union"]),
+        .init(character: "∩",  shortcodes: ["intersection", "intersect"]),
+        .init(character: "∴",  shortcodes: ["therefore"]),
+        .init(character: "∵",  shortcodes: ["because"]),
+        .init(character: "∝",  shortcodes: ["proportional", "propto"]),
+        .init(character: "∅",  shortcodes: ["empty_set", "emptyset", "null_set"]),
+        .init(character: "∀",  shortcodes: ["forall", "for_all"]),
+        .init(character: "∃",  shortcodes: ["exists", "there_exists"]),
+        .init(character: "¬",  shortcodes: ["not", "negation", "logical_not"]),
+        .init(character: "∧",  shortcodes: ["wedge", "logical_and", "conjunction"]),
+        .init(character: "∨",  shortcodes: ["vee", "logical_or", "disjunction"]),
+        .init(character: "⊕",  shortcodes: ["oplus", "xor", "direct_sum"]),
+        .init(character: "≡",  shortcodes: ["equivalent", "identical", "equiv"]),
+        .init(character: "≅",  shortcodes: ["congruent", "cong"]),
+        .init(character: "∼",  shortcodes: ["sim", "similar"]),
+
+        // More arrows — rotate/refresh and the mapping arrows the swept names
+        // ("CLOCKWISE OPEN CIRCLE ARROW", "RIGHTWARDS ARROW FROM BAR") bury.
+        .init(character: "↔",  shortcodes: ["left_right", "leftright"]),
+        .init(character: "↕",  shortcodes: ["up_down", "updown"]),
+        .init(character: "↻",  shortcodes: ["refresh", "reload", "rotate", "rotate_cw"]),
+        .init(character: "↺",  shortcodes: ["rotate_ccw", "undo_rotate"]),
+        .init(character: "↦",  shortcodes: ["mapsto", "maps_to"]),
+
+        // Typography & editorial marks
+        .init(character: "†",  shortcodes: ["dagger", "obelisk"]),
+        .init(character: "‡",  shortcodes: ["double_dagger", "ddagger", "diesis"]),
+        .init(character: "№",  shortcodes: ["numero", "numero_sign"]),
+        .init(character: "′",  shortcodes: ["prime", "minutes", "feet"]),
+        .init(character: "″",  shortcodes: ["double_prime", "seconds", "inches"]),
+        .init(character: "‰",  shortcodes: ["permille", "per_mille"]),
+        .init(character: "·",  shortcodes: ["middot", "interpunct", "middle_dot"]),
+        .init(character: "‽",  shortcodes: ["interrobang"]),
+        .init(character: "※",  shortcodes: ["reference_mark", "kome"]),
+        .init(character: "℅",  shortcodes: ["care_of", "c_o"]),
+        .init(character: "℠",  shortcodes: ["service_mark", "sm"]),
+
+        // Plain-text checkboxes & bullets (todo lists in any field)
+        .init(character: "☐",  shortcodes: ["checkbox", "ballot", "unchecked"]),
+        .init(character: "☑",  shortcodes: ["checkbox_checked", "ballot_check", "checked"]),
+        .init(character: "☒",  shortcodes: ["checkbox_x", "ballot_x", "crossed"]),
+        .init(character: "◦",  shortcodes: ["white_bullet", "hollow_bullet"]),
+        .init(character: "‣",  shortcodes: ["triangle_bullet", "tri_bullet"]),
+
+        // Music notation
+        .init(character: "♩",  shortcodes: ["quarter_note"]),
+        .init(character: "♪",  shortcodes: ["note", "eighth_note"]),
+        .init(character: "♫",  shortcodes: ["notes", "beamed_notes"]),
+        .init(character: "♭",  shortcodes: ["flat", "flat_sign"]),
+        .init(character: "♮",  shortcodes: ["natural", "natural_sign"]),
+        .init(character: "♯",  shortcodes: ["sharp", "sharp_sign"]),
+
+        // Extra fractions (⅓ ⅔ read terribly as "VULGAR FRACTION ONE THIRD")
+        .init(character: "⅓",  shortcodes: ["one_third", "third"]),
+        .init(character: "⅔",  shortcodes: ["two_thirds"]),
+
         //  Apple logo (U+F8FF). A private-use codepoint only Apple's system
         // fonts draw — renders here and in any Apple app, but pastes as tofu on
         // Windows/Android/most web fonts. It's why the programmatic sweep skips
