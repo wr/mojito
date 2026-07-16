@@ -40,6 +40,8 @@ final class ShortcutRecorderView: NSView {
     private let clearButton = NSButton()
     /// Installed only while recording, to dismiss when the user clicks elsewhere.
     private var clickMonitor: Any?
+    /// Ends recording when our window stops being key (see `observeKeyLoss`).
+    private var keyLossObserver: (any NSObjectProtocol)?
 
     static let size = NSSize(width: 124, height: 24)
 
@@ -94,6 +96,7 @@ final class ShortcutRecorderView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
+        observeKeyLoss()
         // Removed from the hierarchy (e.g. switched settings tabs) mid-record.
         if window == nil {
             recording = false
@@ -184,6 +187,30 @@ final class ShortcutRecorderView: NSView {
         if let clickMonitor {
             NSEvent.removeMonitor(clickMonitor)
             self.clickMonitor = nil
+        }
+    }
+
+    /// A recording box is its window's first responder, and that status outlives
+    /// the window losing key (clicking another app, or the emoji browser panel
+    /// stealing key). Keystrokes stop arriving, but the box stays "recording" —
+    /// focus ring showing — while the global event tap resumes the moment
+    /// Settings isn't key (see `SettingsWindowController`). The two then fight
+    /// over the keyboard: keys get swallowed or leak elsewhere, and because
+    /// `mouseDown` no-ops while `recording`, clicking the box won't recover it.
+    /// End recording as soon as our window resigns key so the state can't stick.
+    private func observeKeyLoss() {
+        if let keyLossObserver {
+            NotificationCenter.default.removeObserver(keyLossObserver)
+            self.keyLossObserver = nil
+        }
+        guard let window else { return }
+        keyLossObserver = NotificationCenter.default.addObserver(
+            forName: NSWindow.didResignKeyNotification, object: window, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.recording else { return }
+                self.window?.makeFirstResponder(nil)
+            }
         }
     }
 
