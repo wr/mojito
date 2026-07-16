@@ -119,7 +119,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             self.viewModel.selectedIndex = index
             let q = self.viewModel.query
             // In a live sticky session the typed `:query` is already gone.
-            let deleteCount = self.inStickySession ? 0 : q.count + max(1, self.stateMachine.captureOpenLen)
+            // Mid-close, the partial close chars passed through — cover them.
+            let deleteCount = self.inStickySession
+                ? 0
+                : q.count + max(1, self.stateMachine.captureOpenLen) + self.stateMachine.captureCloseProgress
             if self.viewModel.results[index].emoji.hexcode == EmojiBrowser.sentinelHexcode {
                 self.expandToBrowser(deleteCount: deleteCount)
                 return
@@ -331,6 +334,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     func stop() {
         monitor.stop()
         pickerWindow.hide()
+        // Clear results too — stale rows would otherwise make `topResult`
+        // non-nil for a later capture that never surfaced the picker.
+        viewModel.reset()
         stateMachine.reset()
         clearCaptureState()
         pendingEmoticonUndo = nil
@@ -524,13 +530,17 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             consumesKey = false
         }
 
+        // Snapshot before `apply` — teardown paths inside it (e.g. a dead-end
+        // stickyPick's cancelCapture) clear the flag, and the consume decision
+        // must reflect the capture state this keystroke arrived under.
+        let wasExcluded = captureIsExcluded
         apply(action: output.action)
         // In excluded apps `apply` suppresses the picker / insertion, but
         // returning a true `consumesKey` would still swallow the keystroke
         // (e.g. Return / Esc / arrows during an invisible capture) and break
         // the host app — see Vim in Terminal, where `:q<Enter>` needed two
         // Enters to quit.
-        return captureIsExcluded ? false : consumesKey
+        return wasExcluded ? false : consumesKey
     }
 
     /// True while a keep-open multi-pick session owns the keyboard.
@@ -960,8 +970,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // the focused field even in excluded apps.
         let copy = !(captureContext?.focusedFieldIsEditable ?? true)
         if keepOpen {
-            // Shift-pick: the grid stays up. The first pick consumed any
-            // typed `:query`; later ones have nothing left to erase.
+            // Shift-pick: the grid stays up. Nothing selected (e.g. a
+            // no-match search) → keep the pending delete span intact for a
+            // later real pick. Otherwise the first pick consumes the typed
+            // `:query`; later ones have nothing left to erase.
+            guard emoji != nil else { return }
             browserDeleteCount = 0
         } else {
             collapseBrowser()

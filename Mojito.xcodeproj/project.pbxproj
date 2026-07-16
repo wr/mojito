@@ -31,6 +31,7 @@
 		2B36C9A8EE648C8DC1836F33 /* EmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2009C3B36DF9228B873244 /* EmoticonTable.swift */; };
 		2B3FD6118D1C2D7AB0D24588 /* SymbolsDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6666150B793721D5095E72A8 /* SymbolsDatabase.swift */; };
 		2BF7E787E46AB243597A38CB /* VideoBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83366C0C02EF9F599EC2B65A /* VideoBlob.swift */; };
+		2C2FD54F6E35CCD0374213BB /* PickerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */; };
 		2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F7DB616A5940BE3DE17B77 /* EggStrings.swift */; };
 		304C8571D431917AC25596C3 /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3A3B5079FC9275F5947104 /* PickerView.swift */; };
 		30C268985E8FC43E95617345 /* OnboardingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1F4596F8DFA66A87D50D02 /* OnboardingWindowController.swift */; };
@@ -200,6 +201,7 @@
 		088608D6A2243D8E95953095 /* WilhelmScream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WilhelmScream.swift; sourceTree = "<group>"; };
 		100317FDEDAED8905256B964 /* AboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettings.swift; sourceTree = "<group>"; };
 		127F100886742DCE05A171B4 /* v04.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v04.bin; sourceTree = "<group>"; };
+		12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewModelTests.swift; sourceTree = "<group>"; };
 		137C5B7AB01C74DA68FE7B74 /* SingleInstanceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleInstanceCoordinator.swift; sourceTree = "<group>"; };
 		151DC25F7CEE4F3BE8F23650 /* CRTPowerOff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRTPowerOff.swift; sourceTree = "<group>"; };
 		160FA9BBA311F77BEBE0C6A4 /* GifPickerWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifPickerWindow.swift; sourceTree = "<group>"; };
@@ -398,6 +400,7 @@
 				48BC327DAE8D5D1A43640CF2 /* FavoritesBrowseTests.swift */,
 				42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */,
 				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
+				12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */,
 				9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */,
 				D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */,
 				E25EC50F4D58E03E218947DF /* SymbolsDatabaseTests.swift */,
@@ -1059,6 +1062,7 @@
 				01491C879FFA29F7F655A6E3 /* FavoritesBrowseTests.swift in Sources */,
 				4F9E4BA7A275583B07011809 /* FuzzyMatcherTests.swift in Sources */,
 				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
+				2C2FD54F6E35CCD0374213BB /* PickerViewModelTests.swift in Sources */,
 				C025CD4AE30320C3FE69028A /* SeasonalGatesTests.swift in Sources */,
 				917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */,
 				91A5F2A800EA1FC0700394EA /* SymbolsDatabaseTests.swift in Sources */,

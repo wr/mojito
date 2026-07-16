@@ -181,6 +181,10 @@ struct TriggerStateMachine {
     /// `:`/`::` must be erased on pick.
     var captureOpenLen: Int { capturedOpenLen }
 
+    /// Chars of the active close string already typed through (mid-close).
+    /// Mouse picks read it so their delete span covers the partial close.
+    var captureCloseProgress: Int { closeProgress }
+
     /// Open/close lengths of the most recent `.insertEmoji` action. The action's
     /// associated values are deliberately left unchanged (tests pin their shape),
     /// so the Engine reads the delete spans from here right after `handle()`.
@@ -694,12 +698,15 @@ struct TriggerStateMachine {
             let scope = captureScope
             if shift {
                 // Keep-open pick: this first pick erases the typed
-                // `:query`; the session then owns the keyboard.
+                // `:query` — including any partially-typed close chars,
+                // which passed through — and the session then owns the
+                // keyboard.
+                let deleteCount = q.count + capturedOpenLen + closeProgress
                 closeProgress = 0
                 stickyPickJustFired = true
                 state = .stickyPicking(query: q)
                 return TriggerOutput(
-                    action: .stickyPick(scope: scope, deleteCount: q.count + capturedOpenLen, keepOpen: true),
+                    action: .stickyPick(scope: scope, deleteCount: deleteCount, keepOpen: true),
                     consumesKey: true
                 )
             }

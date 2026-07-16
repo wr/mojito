@@ -902,6 +902,27 @@ struct StickyPickingTests {
         #expect(sm.state == .idle)
     }
 
+    @Test func enteringPickCoversPartiallyTypedClose() {
+        // Symmetric `::` open/close: `::fo:` leaves 5 chars in the field
+        // (open 2 + query 2 + partial close 1) — the entering keep-open
+        // pick must erase all of them.
+        var cfg = TriggerConfig.default
+        cfg.emoji = Trigger(mode: .emoji, open: "::", enabled: true)
+        cfg.symbols.enabled = false
+        cfg.gif.enabled = false
+        cfg.quickAccess.enabled = false
+        var sm = TriggerStateMachine()
+        sm.setConfig(cfg)
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)
+        _ = sm.handle(.nameChar("f"))
+        _ = sm.handle(.nameChar("o"))
+        _ = sm.handle(.colon)  // partial close, passes through
+        let out = sm.handle(.returnKey(shift: true))
+        #expect(out.action == .stickyPick(scope: .normal, deleteCount: 5, keepOpen: true))
+        #expect(sm.state == .stickyPicking(query: "fo"))
+    }
+
     @Test func resetClearsFreshQueryFlag() {
         var sm = stickyFoo()
         sm.reset()
