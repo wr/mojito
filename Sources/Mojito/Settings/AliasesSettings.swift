@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// Settings ▸ Shortcuts. Lets the user add their own `:shortcode:` → emoji
+/// Settings ▸ Aliases. Lets the user add their own `:word:` → emoji or symbol
 /// mappings on top of the baked corpus (W-453). Editing writes through
 /// `AliasStore`, which re-merges the emoji index live.
-struct CustomShortcutsSettingsView: View {
+struct AliasesSettingsView: View {
     @StateObject private var store = AliasStore.shared
     private let database = EmojiDatabase.shared
 
@@ -25,9 +25,9 @@ struct CustomShortcutsSettingsView: View {
                 if store.aliases.count > 1 {
                     HStack {
                         Spacer()
-                        Button("Clear all shortcuts") { confirmClear = true }
+                        Button("Clear all aliases") { confirmClear = true }
                             .confirmationDialog(
-                                "Remove all custom shortcuts?",
+                                "Remove all aliases?",
                                 isPresented: $confirmClear,
                                 titleVisibility: .visible
                             ) {
@@ -49,6 +49,7 @@ struct CustomShortcutsSettingsView: View {
 
     private func glyph(for alias: CustomAlias) -> String? {
         database.byHexcode[alias.hexcode]?.tonedGlyph
+            ?? SymbolsDatabase.byHexcode[alias.hexcode]?.tonedGlyph
     }
 
     private func removeSelected() {
@@ -95,7 +96,7 @@ private struct AliasCard: View {
     }
 
     private var header: some View {
-        Text("Type these shortcuts to insert their emoji. They work alongside the built-in ones.")
+        Text("Type these aliases to insert their emoji or symbol. They work alongside the built-in shortcodes.")
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -104,7 +105,7 @@ private struct AliasCard: View {
     }
 
     private var emptyState: some View {
-        Text("No custom shortcuts yet. Add one to type `:yourword:` for any emoji.")
+        Text("No aliases yet. Add one to type `:yourword:` for any emoji or symbol.")
             .font(.callout)
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -173,8 +174,8 @@ private struct AliasCard: View {
 
 // MARK: - Add sheet
 
-/// Type the shortcut, pick its emoji, add. The emoji is chosen with the same
-/// browser used everywhere else, nested in a sheet.
+/// Type the alias, pick its emoji or symbol, add. The target is chosen with the
+/// same browser used everywhere else, nested in a sheet.
 private struct AddAliasSheet: View {
     @ObservedObject var store: AliasStore
     let onClose: () -> Void
@@ -193,14 +194,14 @@ private struct AddAliasSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Add shortcut").font(.headline)
+            Text("Add alias").font(.headline)
 
             VStack(alignment: .leading, spacing: 6) {
-                TextField("Your shortcut, e.g. check", text: $text)
+                TextField("Your alias, e.g. check", text: $text)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit { if canAdd { add() } }
                 if isDuplicate {
-                    Text(":\(normalized ?? ""): already exists — adding updates its emoji.")
+                    Text(":\(normalized ?? ""): already exists — adding updates its target.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
@@ -214,7 +215,7 @@ private struct AddAliasSheet: View {
                         Text(pickedGlyph ?? "🙂")
                             .font(.system(size: 24))
                             .opacity(pickedGlyph == nil ? 0.35 : 1)
-                        Text(pickedGlyph == nil ? "Choose emoji…" : "Change emoji")
+                        Text(pickedGlyph == nil ? "Choose emoji or symbol…" : "Change")
                     }
                 }
                 Spacer()
@@ -246,20 +247,21 @@ private struct AddAliasSheet: View {
     }
 }
 
-/// The shared emoji browser hosted in a sheet, returning the chosen emoji.
-/// Mirrors the Quick Access slot picker.
+/// The shared emoji browser hosted in a sheet, returning the chosen emoji or
+/// symbol. Symbols are forced in (`includeSymbols`) so they're pickable as
+/// alias targets regardless of the global Symbols toggle.
 private struct EmojiPickerSheet: View {
     let onPick: (Emoji) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @StateObject private var browser = EmojiBrowserViewModel(
-        database: .shared, quickAccess: .shared
+        database: .shared, quickAccess: .shared, includeSymbols: true
     )
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Pick an emoji").font(.headline)
+                Text("Pick an emoji or symbol").font(.headline)
                 Spacer()
                 Button("Cancel") { dismiss() }
                     .keyboardShortcut(.cancelAction)

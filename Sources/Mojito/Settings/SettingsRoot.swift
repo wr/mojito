@@ -3,13 +3,13 @@ import SwiftUI
 
 struct SettingsRoot: View {
     enum Tab: Hashable, CaseIterable, Identifiable {
-        case general, shortcuts, exclusions, easterEggs, privacy, about
+        case general, aliases, exclusions, easterEggs, privacy, about
         var id: Self { self }
 
         var title: String {
             switch self {
             case .general:    return String(localized: "General")
-            case .shortcuts:  return String(localized: "Shortcuts")
+            case .aliases:    return String(localized: "Aliases")
             case .exclusions: return String(localized: "Exclusions")
             case .easterEggs: return String(localized: "Easter eggs")
             case .privacy:    return String(localized: "Privacy")
@@ -20,7 +20,7 @@ struct SettingsRoot: View {
         var symbol: String {
             switch self {
             case .general:    return "gearshape"
-            case .shortcuts:  return "text.badge.plus"
+            case .aliases:    return "arrow.left.arrow.right"
             case .exclusions: return "xmark.octagon"
             case .easterEggs: return "sparkles"
             case .privacy:    return "lock.shield"
@@ -45,7 +45,7 @@ struct SettingsRoot: View {
             Group {
                 switch selection {
                 case .general:    GeneralSettingsView()
-                case .shortcuts:  CustomShortcutsSettingsView()
+                case .aliases:    AliasesSettingsView()
                 case .exclusions: ExclusionsSettingsView()
                 case .easterEggs: EasterEggsSettingsView()
                 case .privacy:    PrivacyPermissionsSettingsView()

@@ -72,13 +72,15 @@ final class EmojiBrowserViewModel: ObservableObject {
 
     var visibleCategories: [EmojiCategory] { sections.map(\.category) }
 
-    init(database: EmojiDatabase, quickAccess: QuickAccessStore) {
+    /// `includeSymbols` forces the symbol corpus in regardless of the global
+    /// Symbols toggle — the alias picker always offers symbols as alias targets.
+    init(database: EmojiDatabase, quickAccess: QuickAccessStore, includeSymbols: Bool = false) {
         self.database = database
         self.usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
         // Symbols-on now lives in the trigger config (the legacy
         // `symbolsEnabled` key is no longer written by Settings).
-        self.symbolsEnabled = TriggerConfigStore.load().symbols.enabled
-        let built = Self.build(database: database, quickAccess: quickAccess, usage: self.usage)
+        self.symbolsEnabled = TriggerConfigStore.load().symbols.enabled || includeSymbols
+        let built = Self.build(database: database, quickAccess: quickAccess, usage: self.usage, symbolsEnabled: self.symbolsEnabled)
         self.sections = built
         let flat = built.flatMap { $0.cells.map(\.emoji) }
         self.flat = flat
@@ -275,7 +277,8 @@ final class EmojiBrowserViewModel: ObservableObject {
     private static func build(
         database: EmojiDatabase,
         quickAccess: QuickAccessStore,
-        usage: [String: Int]
+        usage: [String: Int],
+        symbolsEnabled: Bool
     ) -> [Section] {
         var sections: [Section] = []
         var cursor = 0
@@ -295,9 +298,10 @@ final class EmojiBrowserViewModel: ObservableObject {
             add(category, database.all.filter { groups.contains($0.group) })
         }
 
-        // Typographic symbols (★ ⌘ ⌥ …) only when the Symbols feature is on —
-        // the CoreText sweep is slow and the corpus is large.
-        if TriggerConfigStore.load().symbols.enabled {
+        // Typographic symbols (★ ⌘ ⌥ …) only when enabled — the CoreText sweep
+        // is slow and the corpus is large. Forced on in the alias picker so a
+        // symbol can be chosen as an alias target.
+        if symbolsEnabled {
             add(.specialCharacters, SymbolsDatabase.indexed().map(\.emoji))
         }
         return sections

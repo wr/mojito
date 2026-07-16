@@ -231,6 +231,33 @@ final class EmojiDatabase: ObservableObject {
             index[entry.alias.lowercased()] = target
         }
 
+        // Symbol-targeted aliases (⌘, →, π …). Symbols aren't in the emoji
+        // corpus, so resolve them against `SymbolsDatabase` and add each as a
+        // first-class indexed row — typable + searchable by its alias term even
+        // when the Symbols feature is off. Touching `SymbolsDatabase.byHexcode`
+        // kicks off a slow CoreText sweep, so only reach for it when a symbol
+        // alias actually exists.
+        let symbolAliases = aliases.filter { $0.hexcode.hasPrefix("SYM_") && byHex[$0.hexcode] == nil }
+        if !symbolAliases.isEmpty {
+            var order: [String] = []
+            var bySymHex: [String: [String]] = [:]
+            for entry in symbolAliases {
+                if bySymHex[entry.hexcode] == nil { order.append(entry.hexcode) }
+                bySymHex[entry.hexcode, default: []].append(entry.alias.lowercased())
+            }
+            for hex in order {
+                guard let symbol = SymbolsDatabase.byHexcode[hex] else { continue }
+                byHex[hex] = symbol
+                var haystacks: [EmojiHaystack] = []
+                haystacks.reserveCapacity(bySymHex[hex]?.count ?? 0)
+                for alias in bySymHex[hex] ?? [] {
+                    haystacks.append(EmojiHaystack(display: alias, chars: Array(alias), isAlias: true))
+                    index[alias] = symbol
+                }
+                indexedBuf.append(IndexedEmoji(emoji: symbol, haystacks: haystacks))
+            }
+        }
+
         return IndexResult(byShortcode: index, byHexcode: byHex, indexed: indexedBuf)
     }
 

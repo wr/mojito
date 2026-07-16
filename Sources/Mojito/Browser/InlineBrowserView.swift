@@ -142,7 +142,15 @@ struct InlineBrowserView: View {
                 } else {
                     LazyVGrid(columns: columns, spacing: Self.rowSpacing) {
                         if browser.isSearching {
-                            ForEach(Array(browser.current.enumerated()), id: \.offset) { index, emoji in
+                            // Key by hexcode, not the positional offset: the
+                            // sectioned branch identifies cells by a 0-based
+                            // integer index, and a search list keyed by 0-based
+                            // offsets collides with it — SwiftUI then reuses the
+                            // library cells (the most-used row) for the first
+                            // search render instead of rebuilding with the
+                            // result glyphs. A hexcode id keeps the two identity
+                            // spaces disjoint so the transition always refreshes.
+                            ForEach(Array(browser.current.enumerated()), id: \.element.hexcode) { index, emoji in
                                 cell(emoji, index: index)
                             }
                         } else {

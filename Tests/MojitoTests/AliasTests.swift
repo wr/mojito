@@ -123,6 +123,22 @@ struct AliasIndexTests {
         #expect(result.indexed.allSatisfy { !$0.haystacks.contains { $0.isAlias } })
     }
 
+    @Test func aliasCanTargetSymbol() {
+        // ⌘ lives in SymbolsDatabase (hexcode "SYM_cmd"), not the emoji corpus.
+        let result = build([CustomAlias(alias: "apple", hexcode: "SYM_cmd")])
+        #expect(result.byShortcode["apple"]?.character == "⌘")
+        #expect(result.byHexcode["SYM_cmd"]?.character == "⌘")
+        let row = result.indexed.first { $0.emoji.hexcode == "SYM_cmd" }
+        #expect(row?.haystacks.contains { $0.isAlias && $0.display == "apple" } == true)
+    }
+
+    @Test func symbolAliasIsSearchable() {
+        // A symbol alias becomes a first-class indexed row, so typing its term
+        // surfaces the symbol even though it's not in the emoji corpus.
+        let result = build([CustomAlias(alias: "apple", hexcode: "SYM_cmd")])
+        #expect(rank("apple", result).first == "SYM_cmd")
+    }
+
     private func rank(_ query: String, _ result: EmojiDatabase.IndexResult, usage: [String: Int] = [:]) -> [String] {
         FuzzyMatcher.rankedResults(
             needle: Array(query.lowercased()),
