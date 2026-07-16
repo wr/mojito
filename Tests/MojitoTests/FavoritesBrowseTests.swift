@@ -53,7 +53,7 @@ struct TriggerStateMachineBrowseTests {
     @Test func returnIsLiteralUntilPillVisible() {
         var sm = TriggerStateMachine()
         _ = sm.handle(.colon)
-        let ret = sm.handle(.returnKey)
+        let ret = sm.handle(.returnKey(shift: false))
         #expect(ret.action == .closePicker)
         #expect(ret.consumesKey == false)
     }
@@ -138,7 +138,7 @@ struct TriggerStateMachineBrowseTests {
         var sm = TriggerStateMachine()
         _ = sm.handle(.colon)
         sm.emptyPickerActive = true
-        let ret = sm.handle(.returnKey)
+        let ret = sm.handle(.returnKey(shift: false))
         #expect(ret.action == .insertEmoji(query: "", mode: .fromPicker, scope: .normal))
         #expect(ret.consumesKey == true)
         #expect(sm.state == .idle)
@@ -189,8 +189,8 @@ struct TriggerStateMachineBrowseTests {
         #expect(down.action == .moveBrowser(direction: .down))
         #expect(down.consumesKey == true)
 
-        let pick = sm.handle(.returnKey)
-        #expect(pick.action == .pickBrowser)
+        let pick = sm.handle(.returnKey(shift: false))
+        #expect(pick.action == .pickBrowser(keepOpen: false))
         #expect(pick.consumesKey == true)
         #expect(sm.state == .idle)
     }

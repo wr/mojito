@@ -151,8 +151,8 @@ final class KeyMonitor {
 
         switch keyCode {
         case kVK_Escape:        return .escape
-        case kVK_Return, kVK_ANSI_KeypadEnter: return .returnKey
-        case kVK_Tab:           return .tabKey
+        case kVK_Return, kVK_ANSI_KeypadEnter: return .returnKey(shift: flags.contains(.maskShift))
+        case kVK_Tab:           return .tabKey(shift: flags.contains(.maskShift))
         case kVK_UpArrow:       return .arrowUp
         case kVK_DownArrow:     return .arrowDown
         case kVK_Delete, kVK_ForwardDelete: return .backspace

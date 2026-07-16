@@ -76,10 +76,13 @@ struct PickerView: View {
     }
 
     private var footer: some View {
+        // Bare `esc` keycap: the label had to go to make room for the
+        // keep-open hint in the 280 pt panel.
         HintsFooter([
             KeyHint("↑↓", "select"),
             KeyHint("↵", "insert"),
-            KeyHint("esc", "dismiss"),
+            KeyHint("⇧↵", "more"),
+            KeyHint("esc"),
         ])
     }
 

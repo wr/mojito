@@ -11,6 +11,11 @@ enum TriggerState: Equatable {
     /// grown). Consumes keystrokes and routes them to the browser — search,
     /// grid navigation, pick — so nothing leaks into the focused app.
     case browsing(query: String)
+    /// Active after a keep-open pick (Shift+Return / Shift+click) on the
+    /// shortcode list. The typed `:query` was already erased by the entering
+    /// pick, so — like `.browsing` — keystrokes are consumed and routed to
+    /// the picker, and in-session picks delete nothing from the field.
+    case stickyPicking(query: String)
 }
 
 /// `:foo:` = emoji corpus; `::foo::` = experimental Symbols set, reachable
@@ -26,8 +31,10 @@ enum TriggerInput {
     case backspace
     case colon
     case escape
-    case returnKey
-    case tabKey
+    /// `shift` distinguishes the keep-open pick (Shift+Return / Shift+Tab)
+    /// from the normal insert-and-close.
+    case returnKey(shift: Bool)
+    case tabKey(shift: Bool)
     case arrowUp
     case arrowDown
     case arrowLeft
@@ -111,8 +118,9 @@ enum TriggerAction: Equatable {
     case refreshBrowser(query: String)
     /// Arrow-key navigation across the browser grid.
     case moveBrowser(direction: GifMoveDirection)
-    /// Enter / click in the browser — insert the selected emoji.
-    case pickBrowser
+    /// Enter / click in the browser — insert the selected emoji. `keepOpen`
+    /// (Shift held) leaves the grid up for further picks.
+    case pickBrowser(keepOpen: Bool)
     /// Close the browser grid (esc, backspace past empty, click-away).
     case closeBrowser
     /// Grow the favorites pill into the full browser grid (↓/↑ on the pill).
@@ -122,6 +130,11 @@ enum TriggerAction: Equatable {
     /// Close the pill and type back the swallowed trigger char so e.g. `:?`+Esc
     /// leaves the literal `:?` (the char is the trigger's last, customizable).
     case closePickerRestoringTrigger(Character)
+    /// Insert the selected picker row, erasing `deleteCount` typed chars.
+    /// `keepOpen` (Shift+Return / Shift+Tab) holds the picker open in
+    /// `.stickyPicking` for further picks — the entering pick erases the
+    /// typed `:query`; in-session picks erase nothing (deleteCount 0).
+    case stickyPick(scope: CaptureScope, deleteCount: Int, keepOpen: Bool)
 }
 
 enum GifMoveDirection: Equatable { case left, right, up, down }
@@ -167,6 +180,10 @@ struct TriggerStateMachine {
     /// browser entry, where the capture is still in `.capturing` and the typed
     /// `:`/`::` must be erased on pick.
     var captureOpenLen: Int { capturedOpenLen }
+
+    /// Chars of the active close string already typed through (mid-close).
+    /// Mouse picks read it so their delete span covers the partial close.
+    var captureCloseProgress: Int { closeProgress }
 
     /// Open/close lengths of the most recent `.insertEmoji` action. The action's
     /// associated values are deliberately left unchanged (tests pin their shape),
@@ -305,6 +322,12 @@ struct TriggerStateMachine {
     /// the pending word fires now with that extra char carried as `trailing`.
     private var pendingImmediateFire: (word: String, emoji: String)?
 
+    /// True right after a keep-open pick. The next typed char starts a fresh
+    /// search instead of extending the old query — after inserting from
+    /// ":thumbs" the user typing "heart" means a new search, not
+    /// ":thumbsheart". Backspace clears it (user wants to edit the old query).
+    private var stickyPickJustFired = false
+
     /// Sliding window of recent colon timestamps used to detect `:::`
     /// (the GIF-search trigger) regardless of the current capture state.
     private var recentColonTimes: [Date] = []
@@ -380,6 +403,12 @@ struct TriggerStateMachine {
             return handleBrowsing(input)
         }
 
+        // Same for a sticky multi-pick session: the typed `:query` is gone
+        // from the field, so nothing may leak through.
+        if case .stickyPicking = state {
+            return handleSticky(input)
+        }
+
         // `:::` within `gifTripleColonWindow` opens the GIF picker no
         // matter what the capture state is. Runs before everything else
         // so it overrides the normal colon flow.
@@ -437,7 +466,7 @@ struct TriggerStateMachine {
         switch (state, input) {
 
         // Unreachable — handled by the early returns above; kept for exhaustiveness.
-        case (.gifSearching, _), (.browsing, _):
+        case (.gifSearching, _), (.browsing, _), (.stickyPicking, _):
             return .passthrough
 
         // MARK: Cmd+Z — must come before the `(.idle, _)` catch-all below.
@@ -649,11 +678,12 @@ struct TriggerStateMachine {
             }
             return .consume
 
-        case (.capturing(let q), .returnKey), (.capturing(let q), .tabKey):
+        case (.capturing(let q), .returnKey(let shift)), (.capturing(let q), .tabKey(let shift)):
             if q.isEmpty {
                 // Favorites picker visible: Return/Tab picks the highlighted
                 // favorite (or the Browse row). Otherwise `:`+Return is just
-                // a literal colon — pass it through untouched.
+                // a literal colon — pass it through untouched. Shift is
+                // ignored on the pill — it always inserts and closes.
                 if emptyPickerActive {
                     emptyPickerActive = false
                     state = .idle
@@ -666,6 +696,20 @@ struct TriggerStateMachine {
                 return TriggerOutput(action: .closePicker, consumesKey: false)
             }
             let scope = captureScope
+            if shift {
+                // Keep-open pick: this first pick erases the typed
+                // `:query` — including any partially-typed close chars,
+                // which passed through — and the session then owns the
+                // keyboard.
+                let deleteCount = q.count + capturedOpenLen + closeProgress
+                closeProgress = 0
+                stickyPickJustFired = true
+                state = .stickyPicking(query: q)
+                return TriggerOutput(
+                    action: .stickyPick(scope: scope, deleteCount: deleteCount, keepOpen: true),
+                    consumesKey: true
+                )
+            }
             state = .idle
             lastInsertOpenLen = capturedOpenLen
             lastInsertCloseLen = 0
@@ -728,6 +772,18 @@ struct TriggerStateMachine {
         konamiProgress = 0
     }
 
+    /// Engine calls this when a Shift+click pick keeps the picker open —
+    /// hand the keyboard to the sticky session (mirrors the Shift+Return
+    /// path, which transitions internally).
+    mutating func enterStickyPicking(query: String) {
+        state = .stickyPicking(query: query)
+        stickyPickJustFired = true
+        emptyPickerActive = false
+        openBuffer = []
+        closeProgress = 0
+        konamiProgress = 0
+    }
+
     /// Keep the state machine's browser query in sync when a mouse action
     /// (category tab) resets the search.
     mutating func setBrowsingQuery(_ query: String) {
@@ -751,6 +807,7 @@ struct TriggerStateMachine {
         lastCaptureKeystrokeAt = nil
         recentColonTimes.removeAll()
         pendingImmediateFire = nil
+        stickyPickJustFired = false
     }
 
     // MARK: - Opening / closing helpers
@@ -1088,9 +1145,13 @@ struct TriggerStateMachine {
         case .escape:
             state = .idle
             return TriggerOutput(action: .closeBrowser, consumesKey: true)
-        case .returnKey, .tabKey:
+        case .returnKey(let shift), .tabKey(let shift):
+            if shift {
+                // Keep-open pick: stay in the grid for more inserts.
+                return TriggerOutput(action: .pickBrowser(keepOpen: true), consumesKey: true)
+            }
             state = .idle
-            return TriggerOutput(action: .pickBrowser, consumesKey: true)
+            return TriggerOutput(action: .pickBrowser(keepOpen: false), consumesKey: true)
         case .arrowUp:
             return TriggerOutput(action: .moveBrowser(direction: .up), consumesKey: true)
         case .arrowDown:
@@ -1106,6 +1167,70 @@ struct TriggerStateMachine {
             state = .idle
             return TriggerOutput(action: .closeBrowser, consumesKey: false)
         }
+    }
+
+    /// Routes keystrokes while a sticky multi-pick session is up (entered by
+    /// Shift+Return / Shift+click on the shortcode list). The typed `:query`
+    /// was already erased by the entering pick, so — like the browser —
+    /// everything is consumed; nothing may leak into the focused app.
+    private mutating func handleSticky(_ input: TriggerInput) -> TriggerOutput {
+        guard case .stickyPicking(let q) = state else { return .passthrough }
+        switch input {
+        case .nameChar(let c), .cancelChar(let c):
+            return stickyAppend(c, to: q)
+        case .colon:
+            return stickyAppend(":", to: q)
+        case .backspace:
+            stickyPickJustFired = false
+            let next = String(q.dropLast())
+            if next.isEmpty {
+                state = .idle
+                return TriggerOutput(action: .closePicker, consumesKey: true)
+            }
+            state = .stickyPicking(query: next)
+            return TriggerOutput(action: .refreshPicker(query: next, scope: captureScope), consumesKey: true)
+        case .escape:
+            state = .idle
+            return TriggerOutput(action: .closePicker, consumesKey: true)
+        case .returnKey(let shift), .tabKey(let shift):
+            if shift {
+                stickyPickJustFired = true
+                return TriggerOutput(
+                    action: .stickyPick(scope: captureScope, deleteCount: 0, keepOpen: true),
+                    consumesKey: true
+                )
+            }
+            state = .idle
+            return TriggerOutput(
+                action: .stickyPick(scope: captureScope, deleteCount: 0, keepOpen: false),
+                consumesKey: true
+            )
+        case .arrowUp:
+            return TriggerOutput(action: .moveSelection(delta: -1), consumesKey: true)
+        case .arrowDown:
+            return TriggerOutput(action: .moveSelection(delta: 1), consumesKey: true)
+        case .arrowLeft, .arrowRight:
+            // No caret to move and the list is vertical — swallow so the
+            // caret can't drift under the live session.
+            return .consume
+        case .focusChange:
+            state = .idle
+            return TriggerOutput(action: .closePicker, consumesKey: false)
+        case .cmdZ:
+            // Engine intercepts cmdZ before the state machine; kept for
+            // exhaustiveness (mirrors the browser).
+            state = .idle
+            return TriggerOutput(action: .closePicker, consumesKey: false)
+        }
+    }
+
+    /// Append (or, right after a pick, restart with) a typed char and refresh
+    /// the sticky session's search.
+    private mutating func stickyAppend(_ c: Character, to q: String) -> TriggerOutput {
+        let next = stickyPickJustFired ? String(c) : q + String(c)
+        stickyPickJustFired = false
+        state = .stickyPicking(query: next)
+        return TriggerOutput(action: .refreshPicker(query: next, scope: captureScope), consumesKey: true)
     }
 
     /// Fire if `idleWord` is a complete ambient that needs no terminator.

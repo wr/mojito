@@ -36,9 +36,16 @@ final class PickerViewModel: ObservableObject {
     }
 
     func update(query: String, results: [ScoredEmoji]) {
+        // A new query invalidates the old highlight — snap to the top hit
+        // (the list also scrolls to top). Same-query refreshes keep the
+        // (clamped) position.
+        if query != self.query {
+            selectedIndex = 0
+        } else {
+            selectedIndex = min(selectedIndex, max(0, results.count - 1))
+        }
         self.query = query
         self.results = results
-        self.selectedIndex = min(selectedIndex, max(0, results.count - 1))
     }
 
     func selectNext() {

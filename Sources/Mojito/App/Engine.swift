@@ -21,6 +21,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .capturing:     return "capturing"
         case .gifSearching:  return "gifSearching"
         case .browsing:      return "browsing"
+        case .stickyPicking: return "stickyPicking"
         }
     }
 
@@ -117,19 +118,30 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if self.captureExcluded { return }
             self.viewModel.selectedIndex = index
             let q = self.viewModel.query
-            let openLen = max(1, self.stateMachine.captureOpenLen)
+            // In a live sticky session the typed `:query` is already gone.
+            // Mid-close, the partial close chars passed through — cover them.
+            let deleteCount = self.inStickySession
+                ? 0
+                : q.count + max(1, self.stateMachine.captureOpenLen) + self.stateMachine.captureCloseProgress
             if self.viewModel.results[index].emoji.hexcode == EmojiBrowser.sentinelHexcode {
-                self.expandToBrowser(deleteCount: q.count + openLen)
-            } else {
-                self.insert(query: q, mode: .fromPicker, scope: self.captureScope, openLen: openLen, closeLen: 0)
+                self.expandToBrowser(deleteCount: deleteCount)
+                return
             }
+            // Shift+click keeps the picker open for more picks, mirroring
+            // Shift+Return — hand the keyboard to the sticky session.
+            let keepOpen = NSEvent.modifierFlags.contains(.shift)
+            if keepOpen, !self.inStickySession {
+                self.stateMachine.enterStickyPicking(query: q)
+            }
+            self.insertFromPicker(scope: self.captureScope, charsToDelete: deleteCount, isPillPick: false, keepOpen: keepOpen)
         }
 
-        // Mouse pick / category tab inside the expanded grid.
+        // Mouse pick / category tab inside the expanded grid. Shift+click
+        // keeps the grid open for more picks.
         viewModel.onBrowserPick = { [weak self] emoji in
             guard let self else { return }
             self.viewModel.browser?.select(emoji)
-            self.pickFromBrowser()
+            self.pickFromBrowser(keepOpen: NSEvent.modifierFlags.contains(.shift))
         }
         viewModel.onBrowserCategory = { [weak self] category in
             guard let self else { return }
@@ -240,7 +252,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         if bundleID == Bundle.main.bundleIdentifier { return }
         pendingEmoticonUndo = nil
         switch stateMachine.state {
-        case .capturing:
+        case .capturing, .stickyPicking:
             guard bundleID != captureContext?.bundleID else { return }
             cancelCapture()
         case .browsing:
@@ -259,7 +271,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // jump, Spotlight) means our target moved — dismiss it, exactly as a
         // capture does. Cross-app switches are handled by handleAppActivated.
         switch stateMachine.state {
-        case .capturing:
+        case .capturing, .stickyPicking:
             break
         case .browsing:
             // The browser can be opened over a no-focus context (e.g. the
@@ -322,6 +334,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     func stop() {
         monitor.stop()
         pickerWindow.hide()
+        // Clear results too — stale rows would otherwise make `topResult`
+        // non-nil for a later capture that never surfaced the picker.
+        viewModel.reset()
         stateMachine.reset()
         clearCaptureState()
         pendingEmoticonUndo = nil
@@ -464,6 +479,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // (`🙂 ` → `🙂:)`).
         pendingEmoticonUndo = nil
 
+        // Snapshot before `handle` — a Shift+Return pick transitions into
+        // `.stickyPicking`, and the consume decision below needs to know
+        // whether the session was already live.
+        let wasInStickySession = inStickySession
+
         let output = stateMachine.handle(input)
 
         // Secure-field check short-circuits — we never want to inspect a
@@ -503,14 +523,30 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         if case .insertEmoji(_, .fromPicker, _) = output.action, viewModel.topResult == nil {
             consumesKey = false
         }
+        // Same guard for the sticky entering pick (Shift+Return): if the
+        // picker never surfaced there's no row to pick — let the key through.
+        // Once a session is live the keyboard is owned, so keep consuming.
+        if case .stickyPick = output.action, viewModel.topResult == nil, !wasInStickySession {
+            consumesKey = false
+        }
 
+        // Snapshot before `apply` — teardown paths inside it (e.g. a dead-end
+        // stickyPick's cancelCapture) clear the flag, and the consume decision
+        // must reflect the capture state this keystroke arrived under.
+        let wasExcluded = captureIsExcluded
         apply(action: output.action)
         // In excluded apps `apply` suppresses the picker / insertion, but
         // returning a true `consumesKey` would still swallow the keystroke
         // (e.g. Return / Esc / arrows during an invisible capture) and break
         // the host app — see Vim in Terminal, where `:q<Enter>` needed two
         // Enters to quit.
-        return captureIsExcluded ? false : consumesKey
+        return wasExcluded ? false : consumesKey
+    }
+
+    /// True while a keep-open multi-pick session owns the keyboard.
+    private var inStickySession: Bool {
+        if case .stickyPicking = stateMachine.state { return true }
+        return false
     }
 
     /// Exclusion verdict for the active capture. Prefers the flag cached at
@@ -740,8 +776,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .moveBrowser(let direction):
             viewModel.browser?.move(direction)
 
-        case .pickBrowser:
-            pickFromBrowser()
+        case .pickBrowser(let keepOpen):
+            pickFromBrowser(keepOpen: keepOpen)
 
         case .closeBrowser:
             collapseBrowser()
@@ -758,6 +794,21 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             if scored.emoji.hexcode == EmojiBrowser.sentinelHexcode { break }
             viewModel.selectedIndex = index
             insert(query: "", mode: .fromPicker, scope: .normal, openLen: max(1, stateMachine.captureOpenLen), closeLen: 0)
+
+        case .stickyPick(let scope, let deleteCount, let keepOpen):
+            guard !captureExcluded, let top = viewModel.topResult else {
+                // The state machine moved to `.stickyPicking`, which owns the
+                // keyboard — an entering pick with nothing to pick (picker
+                // never surfaced, or an excluded app) must tear the session
+                // down so keys can't be eaten by an invisible session.
+                cancelCapture()
+                break
+            }
+            if top.emoji.hexcode == EmojiBrowser.sentinelHexcode {
+                expandToBrowser(deleteCount: deleteCount)
+            } else {
+                insertFromPicker(scope: scope, charsToDelete: deleteCount, isPillPick: false, keepOpen: keepOpen)
+            }
 
         case .closePickerRestoringTrigger(let char):
             viewModel.reset()
@@ -777,7 +828,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // returns stale coordinates if we ask now.
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            guard !self.viewModel.results.isEmpty else {
+            // A sticky session keeps consuming keys, so a no-match query must
+            // stay visible (the "No emoji" empty state) rather than hiding —
+            // a hidden window over a live session would eat keys invisibly.
+            guard !self.viewModel.results.isEmpty || self.inStickySession else {
                 self.pickerWindow.hide()
                 return
             }
@@ -907,7 +961,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
     }
 
-    private func pickFromBrowser() {
+    private func pickFromBrowser(keepOpen: Bool = false) {
         let emoji = viewModel.browser?.selectedEmoji
         let delete = browserDeleteCount
         // Copy instead of typing only when there's nowhere to type (e.g. the
@@ -915,7 +969,16 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // here — the global hotkey is an explicit action, so a pick types into
         // the focused field even in excluded apps.
         let copy = !(captureContext?.focusedFieldIsEditable ?? true)
-        collapseBrowser()
+        if keepOpen {
+            // Shift-pick: the grid stays up. Nothing selected (e.g. a
+            // no-match search) → keep the pending delete span intact for a
+            // later real pick. Otherwise the first pick consumes the typed
+            // `:query`; later ones have nothing left to erase.
+            guard emoji != nil else { return }
+            browserDeleteCount = 0
+        } else {
+            collapseBrowser()
+        }
         guard let emoji else { return }
         let glyph = emoji.tonedGlyph
         if copy {
@@ -989,6 +1052,20 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     }
 
     private func insert(query: String, mode: InsertMode, scope: CaptureScope, openLen: Int, closeLen: Int) {
+        if case .fromPicker = mode {
+            // Closing colon was consumed; `:query` (or `::query`) is in the
+            // focused app. `openLen` = chars of the typed open delimiter to
+            // erase (`:foo`=1). An empty query in the picker path means the
+            // pick came from the bare-`:` favorites pill.
+            insertFromPicker(
+                scope: scope,
+                charsToDelete: query.count + openLen,
+                isPillPick: query.isEmpty,
+                keepOpen: false
+            )
+            return
+        }
+
         defer {
             stateMachine.reset()
             viewModel.reset()
@@ -1000,29 +1077,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         switch mode {
         case .fromPicker:
-            // Closing colon was consumed; `:query` (or `::query`) is in the
-            // focused app. User explicitly picked a row, including special
-            // rows (🎁 ???, 🎲).
-            guard let scored = viewModel.topResult else { return }
-            DebugRecorder.record(.insert, "fromPicker", ["scope": "\(scope)"])
-            // `openLen` = chars of the typed open delimiter to erase (`:foo`=1).
-            let charsToDelete = query.count + openLen
-            // The Browse sentinel is intercepted in `apply` before `insert`.
-            if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
-                return
-            }
-            if EasterEggTracker.eggsEnabled, scored.emoji.hexcode == FuzzyMatcher.k02Hex {
-                guard let pick = database.all.randomElement() else { return }
-                TextInserter.replace(charactersToDelete: charsToDelete, with: pick.tonedGlyph)
-                EasterEggTracker.record(.k02)
-                return  // random rolls shouldn't bias future search
-            }
-            TextInserter.replace(charactersToDelete: charsToDelete, with: scored.emoji.tonedGlyph)
-            recordUsage(emoji: scored.emoji)
-            // An empty query in the picker path means the pick came from the
-            // bare-`:` favorites pill — the Quick Access feature in action.
-            if query.isEmpty { TelemetryStore.recordQuickAccess() }
-            SeasonalGates.fire(for: scored.emoji)
+            // Handled above; kept for switch exhaustiveness.
+            break
 
         case .exactMatch:
             // Typed text is `:query:` (or `::query:`). Delete only if
@@ -1067,6 +1123,46 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 return
             }
         }
+    }
+
+    /// Insert the selected picker row (Return / Tab / click / digit pick),
+    /// erasing `charsToDelete` typed chars first. `keepOpen` leaves the
+    /// picker and the sticky session up after a plain emoji (or random-row)
+    /// insert; easter eggs always end the session — they repurpose the
+    /// screen. The state machine has already transitioned (sticky or idle);
+    /// the close path here resets it either way.
+    private func insertFromPicker(scope: CaptureScope, charsToDelete: Int, isPillPick: Bool, keepOpen: Bool) {
+        var sessionContinues = false
+        defer {
+            // Any text-modifying action drops the pending emoticon undo.
+            pendingEmoticonUndo = nil
+            if !sessionContinues {
+                stateMachine.reset()
+                viewModel.reset()
+                pickerWindow.hide()
+                clearCaptureState()
+            }
+        }
+
+        guard let scored = viewModel.topResult else { return }
+        DebugRecorder.record(.insert, "fromPicker", ["scope": "\(scope)", "keepOpen": "\(keepOpen)"])
+        // The Browse sentinel is intercepted in `apply` before this runs.
+        if triggerEasterEgg(hexcode: scored.emoji.hexcode, deleteCount: charsToDelete) {
+            return
+        }
+        if EasterEggTracker.eggsEnabled, scored.emoji.hexcode == FuzzyMatcher.k02Hex {
+            guard let pick = database.all.randomElement() else { return }
+            TextInserter.replace(charactersToDelete: charsToDelete, with: pick.tonedGlyph)
+            EasterEggTracker.record(.k02)
+            sessionContinues = keepOpen
+            return  // random rolls shouldn't bias future search
+        }
+        TextInserter.replace(charactersToDelete: charsToDelete, with: scored.emoji.tonedGlyph)
+        recordUsage(emoji: scored.emoji)
+        // A pill pick is the Quick Access feature in action.
+        if isPillPick { TelemetryStore.recordQuickAccess() }
+        SeasonalGates.fire(for: scored.emoji)
+        sessionContinues = keepOpen
     }
 
     /// Returns true if `hexcode` matched (and the text was already deleted).
