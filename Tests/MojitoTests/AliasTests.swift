@@ -29,9 +29,14 @@ struct AliasStoreTests {
         #expect(store.add(alias: "   ", hexcode: "2705") == .invalid)
         #expect(store.add(alias: "a b", hexcode: "2705") == .invalid)   // whitespace
         #expect(store.add(alias: "a:b", hexcode: "2705") == .invalid)   // colon
+        #expect(store.add(alias: "foo.bar", hexcode: "2705") == .invalid)  // dot ends capture
+        #expect(store.add(alias: "a/b", hexcode: "2705") == .invalid)   // slash ends capture
+        #expect(store.add(alias: "wave👋", hexcode: "2705") == .invalid)  // emoji not typable in a name
         #expect(store.add(alias: String(repeating: "x", count: 41), hexcode: "2705") == .invalid)
         #expect(store.add(alias: "ok", hexcode: "") == .invalid)        // no target
         #expect(store.aliases.isEmpty)
+        // Sanity: the name-char set the trigger *does* capture is accepted.
+        #expect(store.add(alias: "a-b_c+1", hexcode: "2705") == .added)
     }
 
     @Test func repointingUpdatesInPlace() {
@@ -137,6 +142,16 @@ struct AliasIndexTests {
         // surfaces the symbol even though it's not in the emoji corpus.
         let result = build([CustomAlias(alias: "apple", hexcode: "SYM_cmd")])
         #expect(rank("apple", result).first == "SYM_cmd")
+    }
+
+    @Test func symbolAliasTargetsAreTracked() {
+        // The promoted-symbol set drives combined-corpus dedup (the aliased
+        // symbol is dropped from the appended sweep so it isn't scored twice).
+        let symbol = build([CustomAlias(alias: "apple", hexcode: "SYM_cmd")])
+        #expect(symbol.aliasedSymbolHexcodes == ["SYM_cmd"])
+        // Emoji-target aliases promote nothing.
+        let emoji = build([CustomAlias(alias: "check", hexcode: "E_CHECK")])
+        #expect(emoji.aliasedSymbolHexcodes.isEmpty)
     }
 
     private func rank(_ query: String, _ result: EmojiDatabase.IndexResult, usage: [String: Int] = [:]) -> [String] {

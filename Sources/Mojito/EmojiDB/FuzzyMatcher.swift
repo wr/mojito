@@ -144,9 +144,19 @@ struct FuzzyMatcher {
 
         let pool: [IndexedEmoji]
         switch corpus {
-        case .emojiOnly:        pool = database.indexed
-        case .emojiAndSymbols:  pool = database.indexed + SymbolsCorpus.entries
-        case .symbolsOnly:      pool = SymbolsCorpus.entries
+        case .emojiOnly:
+            pool = database.indexed
+        case .emojiAndSymbols:
+            // A symbol an alias targets already lives in `database.indexed`, so
+            // drop it from the appended sweep — otherwise it's scored (and
+            // rendered) twice, colliding on hexcode in the picker's ForEach.
+            let promoted = database.aliasedSymbolHexcodes
+            let symbols = promoted.isEmpty
+                ? SymbolsCorpus.entries
+                : SymbolsCorpus.entries.filter { !promoted.contains($0.emoji.hexcode) }
+            pool = database.indexed + symbols
+        case .symbolsOnly:
+            pool = SymbolsCorpus.entries
         }
 
         let trimmed = rankedResults(

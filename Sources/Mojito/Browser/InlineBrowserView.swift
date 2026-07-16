@@ -142,15 +142,9 @@ struct InlineBrowserView: View {
                 } else {
                     LazyVGrid(columns: columns, spacing: Self.rowSpacing) {
                         if browser.isSearching {
-                            // Key by hexcode, not the positional offset: the
-                            // sectioned branch identifies cells by a 0-based
-                            // integer index, and a search list keyed by 0-based
-                            // offsets collides with it — SwiftUI then reuses the
-                            // library cells (the most-used row) for the first
-                            // search render instead of rebuilding with the
-                            // result glyphs. A hexcode id keeps the two identity
-                            // spaces disjoint so the transition always refreshes.
-                            ForEach(Array(browser.current.enumerated()), id: \.element.hexcode) { index, emoji in
+                            // Positional index is the identity here — it's what
+                            // `scrollTo` (reset-to-top, keyboard nav) addresses.
+                            ForEach(Array(browser.current.enumerated()), id: \.offset) { index, emoji in
                                 cell(emoji, index: index)
                             }
                         } else {
@@ -168,6 +162,11 @@ struct InlineBrowserView: View {
                     .padding(.horizontal, 8)
                     .padding(.top, 2)
                     .padding(.bottom, 8)
+                    // Search and library both index cells from 0; give the two
+                    // modes distinct grid identity so the library→search switch
+                    // rebuilds instead of reusing the most-used row's cells for
+                    // the first search render (the "garbage first search" bug).
+                    .id(browser.isSearching)
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) { categoryBar }

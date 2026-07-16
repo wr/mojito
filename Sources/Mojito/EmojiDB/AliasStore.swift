@@ -83,15 +83,20 @@ final class AliasStore: ObservableObject {
     // MARK: - Validation
 
     /// Canonical form for an alias, or `nil` if it can't be a usable shortcode.
-    /// Rejected: empty, over `maxLength`, or containing whitespace or a colon —
-    /// whitespace/`:` end the capture, so such an alias could never be typed in
-    /// full.
+    /// Rejected: empty, over `maxLength`, or containing any character the trigger
+    /// can't capture as part of a name — whitespace, `:`, `.`, `/`, emoji, etc.
+    /// all end capture, so such an alias could never be typed in full.
     static func normalize(_ raw: String) -> String? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !trimmed.isEmpty, trimmed.count <= maxLength else { return nil }
-        guard !trimmed.contains(":") else { return nil }
-        guard trimmed.rangeOfCharacter(from: .whitespacesAndNewlines) == nil else { return nil }
+        // Mirror KeyMonitor.isNameChar: letters, numbers, and _ - + ' are the
+        // only characters the capture state machine keeps in the query body.
+        guard trimmed.allSatisfy(isNameChar) else { return nil }
         return trimmed
+    }
+
+    private static func isNameChar(_ c: Character) -> Bool {
+        c.isLetter || c.isNumber || c == "_" || c == "-" || c == "+" || c == "'"
     }
 
     /// Drop invalid or duplicate entries from a decoded blob (hand-edits, older

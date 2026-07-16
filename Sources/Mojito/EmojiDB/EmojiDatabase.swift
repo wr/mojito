@@ -34,6 +34,10 @@ final class EmojiDatabase: ObservableObject {
     private(set) var indexed: [IndexedEmoji] = []
     private(set) var byShortcode: [String: Emoji] = [:]
     private(set) var byHexcode: [String: Emoji] = [:]
+    /// Symbols (`SYM_…`) promoted into `indexed` because a custom alias points
+    /// at them. The combined-corpus search excludes these from the appended
+    /// symbol sweep so an aliased symbol isn't scored (and rendered) twice.
+    private(set) var aliasedSymbolHexcodes: Set<String> = []
 
     /// Resolved once at load and reused when custom aliases change, so a re-merge
     /// doesn't re-scan `Locale.preferredLanguages`.
@@ -145,6 +149,7 @@ final class EmojiDatabase: ObservableObject {
         self.byShortcode = result.byShortcode
         self.byHexcode = result.byHexcode
         self.indexed = result.indexed
+        self.aliasedSymbolHexcodes = result.aliasedSymbolHexcodes
         objectWillChange.send()
     }
 
@@ -152,6 +157,8 @@ final class EmojiDatabase: ObservableObject {
         let byShortcode: [String: Emoji]
         let byHexcode: [String: Emoji]
         let indexed: [IndexedEmoji]
+        /// `SYM_…` hexcodes appended to `indexed` because an alias targets them.
+        let aliasedSymbolHexcodes: Set<String>
     }
 
     /// Pure corpus → index build. Custom aliases are layered on last: an alias
@@ -237,6 +244,7 @@ final class EmojiDatabase: ObservableObject {
         // when the Symbols feature is off. Touching `SymbolsDatabase.byHexcode`
         // kicks off a slow CoreText sweep, so only reach for it when a symbol
         // alias actually exists.
+        var aliasedSymbolHexcodes: Set<String> = []
         let symbolAliases = aliases.filter { $0.hexcode.hasPrefix("SYM_") && byHex[$0.hexcode] == nil }
         if !symbolAliases.isEmpty {
             var order: [String] = []
@@ -248,6 +256,7 @@ final class EmojiDatabase: ObservableObject {
             for hex in order {
                 guard let symbol = SymbolsDatabase.byHexcode[hex] else { continue }
                 byHex[hex] = symbol
+                aliasedSymbolHexcodes.insert(hex)
                 var haystacks: [EmojiHaystack] = []
                 haystacks.reserveCapacity(bySymHex[hex]?.count ?? 0)
                 for alias in bySymHex[hex] ?? [] {
@@ -258,7 +267,12 @@ final class EmojiDatabase: ObservableObject {
             }
         }
 
-        return IndexResult(byShortcode: index, byHexcode: byHex, indexed: indexedBuf)
+        return IndexResult(
+            byShortcode: index,
+            byHexcode: byHex,
+            indexed: indexedBuf,
+            aliasedSymbolHexcodes: aliasedSymbolHexcodes
+        )
     }
 
     func exact(_ shortcode: String) -> Emoji? {

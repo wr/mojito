@@ -100,6 +100,20 @@ struct FuzzyMatcherTests {
         #expect(leaked.isEmpty)
     }
 
+    @Test func emojiAndSymbolsHasNoDuplicateHexcodes() {
+        // A symbol targeted by an alias lives in both the indexed corpus and
+        // the appended sweep; the combined search must surface it only once.
+        // (Invariant holds regardless of which aliases the shared store has.)
+        let db = EmojiDatabase.shared
+        for q in ["cmd", "a", "star", "arrow", "note", "play"] {
+            let hexes = FuzzyMatcher.search(
+                query: q, in: db, usage: [:],
+                corpus: .emojiAndSymbols, useFrequencyBoost: false, limit: 240
+            ).map { $0.emoji.hexcode }
+            #expect(Set(hexes).count == hexes.count, "duplicate hexcode for query \(q)")
+        }
+    }
+
     @Test func emojiAndSymbolsCorpusSpansBoth() {
         // The combined corpus should surface emoji for an emoji query and
         // symbols for a symbol query.
