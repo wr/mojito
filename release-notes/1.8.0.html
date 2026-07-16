@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>Mojito 1.8.0</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+  font: -apple-system-body, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 16px 18px;
+  color: #1d1d1f;
+  background: transparent;
+}
+h1 { font-size: 17px; margin: 0 0 8px; }
+h2 { font-size: 15px; margin: 16px 0 6px; }
+h3 { font-size: 13px; margin: 12px 0 4px; }
+p { margin: 6px 0; }
+ul { margin: 6px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+a { color: #0a7aff; }
+@media (prefers-color-scheme: dark) {
+  body { color: #f5f5f7; }
+  code { background: rgba(255, 255, 255, 0.12); }
+  a { color: #4aa3ff; }
+}
+</style>
+</head>
+<body>
+<h2>New</h2>
+<ul>
+<li><strong>Insert several emoji in one go:</strong> hold Shift when picking — Shift+Return, Shift+Tab, or Shift+click — and the picker stays open for the next one. Type to search again, plain Return to insert and close. Works in the shortcode list and the full browser grid. (<a href="https://github.com/wr/mojito/pull/163">#163</a>)</li>
+<li><strong>Custom aliases:</strong> map your own <code>:word:</code> to any emoji or symbol in Settings ▸ Aliases — they work alongside the built-in shortcodes. (<a href="https://github.com/wr/mojito/pull/161">#161</a>)</li>
+</ul>
+<h2>Fixed</h2>
+<ul>
+<li>Per-site exclusions now match subdomains of plain URL patterns (<code>example.com</code> covers <code>app.example.com</code>). (<a href="https://github.com/wr/mojito/pull/160">#160</a>)</li>
+<li>Per-site exclusions now work in Arc, whose tab URL isn't exposed the usual way. (<a href="https://github.com/wr/mojito/pull/159">#159</a>)</li>
+<li>Shortcut recording in Settings ends cleanly when the window loses focus. (<a href="https://github.com/wr/mojito/pull/162">#162</a>)</li>
+<li>Pickers can no longer be covered by an app's own pop-up windows. (<a href="https://github.com/wr/mojito/pull/155">#155</a>)</li>
+</ul>
+</body>
+</html>
