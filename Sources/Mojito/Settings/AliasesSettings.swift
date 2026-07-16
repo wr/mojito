@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Settings ▸ Aliases. Lets the user add their own `:word:` → emoji or symbol
-/// mappings on top of the baked corpus (W-453). Editing writes through
+/// mappings on top of the baked corpus. Editing writes through
 /// `AliasStore`, which re-merges the emoji index live.
 struct AliasesSettingsView: View {
     @StateObject private var store = AliasStore.shared

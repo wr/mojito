@@ -2,7 +2,7 @@ import Testing
 import Foundation
 @testable import Mojito
 
-/// Custom shortcut (alias) storage + validation (W-453).
+/// Custom shortcut (alias) storage + validation.
 @MainActor
 struct AliasStoreTests {
     private func makeStore() -> AliasStore {
@@ -78,7 +78,7 @@ struct AliasStoreTests {
     }
 }
 
-/// Merging aliases into the emoji index + ranking (W-453). Uses the pure
+/// Merging aliases into the emoji index + ranking. Uses the pure
 /// builders so it needs no bundle or shared singleton.
 struct AliasIndexTests {
     private static let check = Emoji(hexcode: "E_CHECK", character: "✅", label: "white check mark",
