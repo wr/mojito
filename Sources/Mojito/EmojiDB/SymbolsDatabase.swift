@@ -292,5 +292,12 @@ enum SymbolsDatabase {
         .init(character: "™",  shortcodes: ["tm", "trademark"]),
         .init(character: "§",  shortcodes: ["section"]),
         .init(character: "¶",  shortcodes: ["pilcrow"]),
+
+        //  Apple logo (U+F8FF). A private-use codepoint only Apple's system
+        // fonts draw — renders here and in any Apple app, but pastes as tofu on
+        // Windows/Android/most web fonts. It's why the programmatic sweep skips
+        // it (PUA is filtered out); curated entries bypass that render gate, so
+        // it's opt-in and the portability trade-off is the user's to make.
+        .init(character: "\u{F8FF}", shortcodes: ["apple", "apple_logo"]),
     ]
 }

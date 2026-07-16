@@ -20,7 +20,7 @@ struct SettingsRoot: View {
         var symbol: String {
             switch self {
             case .general:    return "gearshape"
-            case .aliases:    return "arrow.left.arrow.right"
+            case .aliases:    return "square.on.square"
             case .exclusions: return "xmark.octagon"
             case .easterEggs: return "sparkles"
             case .privacy:    return "lock.shield"
