@@ -88,8 +88,30 @@ struct FuzzyMatcherTests {
     }
 
     @Test func emojiOnlyCorpusExcludesSymbols() {
-        let results = search("cmd", corpus: .emojiOnly)
-        #expect(!results.contains { $0.emoji.character == "⌘" })
+        // The swept symbol corpus stays out of .emojiOnly. A symbol the user
+        // has explicitly aliased becomes a permanent indexed row, so it's the
+        // one legitimate exception — assert no *un-aliased* swept symbol leaks.
+        let aliasedSymbolHexes = Set(
+            AliasStore.shared.aliases.map(\.hexcode).filter { $0.hasPrefix("SYM_") }
+        )
+        let leaked = search("cmd", corpus: .emojiOnly).filter {
+            $0.emoji.hexcode.hasPrefix("SYM_") && !aliasedSymbolHexes.contains($0.emoji.hexcode)
+        }
+        #expect(leaked.isEmpty)
+    }
+
+    @Test func emojiAndSymbolsHasNoDuplicateHexcodes() {
+        // A symbol targeted by an alias lives in both the indexed corpus and
+        // the appended sweep; the combined search must surface it only once.
+        // (Invariant holds regardless of which aliases the shared store has.)
+        let db = EmojiDatabase.shared
+        for q in ["cmd", "a", "star", "arrow", "note", "play"] {
+            let hexes = FuzzyMatcher.search(
+                query: q, in: db, usage: [:],
+                corpus: .emojiAndSymbols, useFrequencyBoost: false, limit: 240
+            ).map { $0.emoji.hexcode }
+            #expect(Set(hexes).count == hexes.count, "duplicate hexcode for query \(q)")
+        }
     }
 
     @Test func emojiAndSymbolsCorpusSpansBoth() {

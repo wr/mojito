@@ -10,8 +10,15 @@ struct EmojiDatabaseTests {
         let db = EmojiDatabase.shared
         // emojibase ships ~1.9k entries; guard against an empty/failed load.
         #expect(db.all.count > 1000)
-        // Exactly one indexed entry per emoji.
-        #expect(db.indexed.count == db.all.count)
+        // One indexed row per emoji, plus one per distinct symbol a custom
+        // alias points at — aliasing a symbol adds it as a first-class row
+        // (emoji aliases only augment their target's existing row).
+        let aliasedSymbolRows = Set(
+            AliasStore.shared.aliases
+                .map(\.hexcode)
+                .filter { $0.hasPrefix("SYM_") && SymbolsDatabase.byHexcode[$0] != nil }
+        ).count
+        #expect(db.indexed.count == db.all.count + aliasedSymbolRows)
     }
 
     @Test func exactLookupResolvesKnownShortcode() {

@@ -27,6 +27,11 @@ enum PrefsKey {
     static let allowedBundleIDs      = "mojito.allowBundleIDs"       // [String]
     static let allowedURLPatterns    = "mojito.allowURLPatterns"     // [String]
     static let usageCounts           = "mojito.usageCounts"          // [String: Int]  (hexcode → count)
+    /// User-defined shortcodes that resolve to an emoji. JSON-encoded
+    /// `[CustomAlias]` (alias string → hexcode). Additive on top of the baked
+    /// emoji corpus; an alias wins over a built-in shortcode with the same
+    /// spelling. Managed in Settings ▸ Shortcuts.
+    static let customAliases         = "mojito.customAliases"        // Data (JSON [CustomAlias])
     /// The 8 Quick Access slots surfaced on `:<trigger>` and managed in
     /// Settings ▸ General. An 8-element `[String]` where `""` is an auto
     /// (most-used) slot and any other value is a pinned emoji hexcode.
