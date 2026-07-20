@@ -199,6 +199,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
         }
 
+        FocusedElementCache.shared.onSeedInstalled = { [weak self] in
+            MainActor.assumeIsolated {
+                self?.reconcileCaptureAfterSeed()
+            }
+        }
+
         prefsObserver = NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
             object: UserDefaults.standard,
@@ -297,6 +303,27 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             cancelCapture()
         }
         // Nil current element = transient focus-transition state; wait for the next callback.
+    }
+
+    /// Focus can move *within* an app during the post-switch seed window —
+    /// the AX observer isn't registered yet, so no callback fires, and the
+    /// seed then publishes the moved-to element silently. Compare it against
+    /// the capture snapshot and cancel on a positive mismatch, so a pick
+    /// can't delete from a field the user never typed the query into.
+    /// Unlike `handleFocusChanged` this must not treat "can't tell" (nil on
+    /// either side) as a change, and must not touch the emoticon-undo window:
+    /// a landing seed is not a user action.
+    private func reconcileCaptureAfterSeed() {
+        switch stateMachine.state {
+        case .capturing, .stickyPicking, .browsing:
+            break
+        default:
+            return
+        }
+        guard let snapshot = captureFocusSnapshot,
+              let current = FocusedElementCache.shared.element,
+              !CFEqual(snapshot, current) else { return }
+        cancelCapture()
     }
 
     private func cancelCapture() {

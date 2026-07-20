@@ -30,6 +30,12 @@ final class FocusedElementCache {
     /// Fires on every focus change. Engine cancels in-flight captures.
     var onFocusChange: (() -> Void)?
 
+    /// Fires when a background seed publishes its element. NOT a focus
+    /// event — but focus may have moved while the observer wasn't yet
+    /// registered, so Engine reconciles any in-flight capture against the
+    /// freshly seeded element (and only cancels on a positive mismatch).
+    var onSeedInstalled: (() -> Void)?
+
     private var observer: AXObserver?
     private var observedPID: pid_t?
     private var workspaceObserver: NSObjectProtocol?
@@ -143,6 +149,9 @@ final class FocusedElementCache {
         guard refreshGeneration.withLock({ $0 }) == generation else { return }
         var newObserver: AXObserver?
         if AXObserverCreate(pid, callback, &newObserver) == .success, let obs = newObserver {
+            // Re-check after create (local, but a bump can land any time):
+            // the registration below is the blocking IPC worth skipping.
+            guard refreshGeneration.withLock({ $0 }) == generation else { return }
             // Best-effort — fails for system apps / non-AX apps; the seeded
             // value still serves. Synchronous IPC, hence off-main.
             AXObserverAddNotification(
@@ -178,6 +187,7 @@ final class FocusedElementCache {
             self.observer = observer
             self.observedPID = pid
         }
+        onSeedInstalled?()
     }
 
     private func teardownObserver() {
