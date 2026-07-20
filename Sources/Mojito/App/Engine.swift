@@ -507,8 +507,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 "hasURL": "\(context.url != nil)",
             ])
             // Snapshot now so the deferred picker show and any focus-change
-            // notifications can detect movement out from under us.
-            captureFocusSnapshot = FocusedElementCache.shared.element
+            // notifications can detect movement out from under us. From the
+            // context, not the cache — the cache is nil while a post-switch
+            // seed is in flight, and a nil snapshot cancels the capture on
+            // the next AX callback.
+            captureFocusSnapshot = context.focusedElement
             captureFocusPID = FocusedElementCache.shared.focusedPID
         }
 
@@ -938,7 +941,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             deleteCount = 0
         }
         captureContext = context
-        captureFocusSnapshot = FocusedElementCache.shared.element
+        // From the context, not the cache — see the capture-open snapshot.
+        // Nil is reserved for a genuine no-focus context (e.g. the Finder),
+        // which the browser deliberately tolerates.
+        captureFocusSnapshot = context.focusedElement
         captureFocusPID = FocusedElementCache.shared.focusedPID
         expandToBrowser(deleteCount: deleteCount)
     }

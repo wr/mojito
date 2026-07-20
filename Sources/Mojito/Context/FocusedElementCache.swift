@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import os
 
 /// AX-focused element cache. `AXUIElementCopyAttributeValue(system, …)`
 /// is a synchronous cross-process IPC that can stall hundreds of ms on
@@ -34,8 +35,12 @@ final class FocusedElementCache {
     private var workspaceObserver: NSObjectProtocol?
 
     /// Invalidates in-flight background seeds when a newer activation
-    /// supersedes them.
-    private var refreshGeneration = 0
+    /// supersedes them. Lock-protected (not main-actor state) so `seed` can
+    /// check staleness from the background queue and skip its blocking IPC
+    /// instead of running a full round-trip only to be discarded — under a
+    /// sustained activation storm those dead seeds would otherwise queue up
+    /// serially and delay the one that matters.
+    private let refreshGeneration = OSAllocatedUnfairLock(initialState: 0)
 
     /// Coalesces activation bursts (banner appears → app reactivates within
     /// ~100ms) into one seed round-trip.
@@ -77,7 +82,10 @@ final class FocusedElementCache {
     /// seed off the main thread.
     private func refreshActiveApp() {
         teardownObserver()
-        refreshGeneration += 1
+        let generation = refreshGeneration.withLock { value in
+            value += 1
+            return value
+        }
         pendingSeed?.cancel()
 
         guard let app = NSWorkspace.shared.frontmostApplication else {
@@ -92,7 +100,6 @@ final class FocusedElementCache {
         DebugRecorder.record(.focus, "app", ["bundleID": app.bundleIdentifier ?? "—"])
         onFocusChange?()
 
-        let generation = refreshGeneration
         let work = DispatchWorkItem { [weak self] in
             Self.seedQueue.async { self?.seed(pid: pid, generation: generation) }
         }
@@ -101,8 +108,12 @@ final class FocusedElementCache {
     }
 
     /// Runs on `seedQueue`. Both AX calls here block on the target app's
-    /// reply, which is the whole reason they're off the main thread.
+    /// reply, which is the whole reason they're off the main thread. A seed
+    /// superseded by a newer activation bails before each round-trip — its
+    /// result would be discarded anyway, and dead seeds draining serially
+    /// would delay the live one.
     private nonisolated func seed(pid: pid_t, generation: Int) {
+        guard refreshGeneration.withLock({ $0 }) == generation else { return }
         let axApp = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(axApp, Self.seedTimeout)
 
@@ -129,6 +140,7 @@ final class FocusedElementCache {
         }
         let refcon = Unmanaged.passUnretained(self).toOpaque()
 
+        guard refreshGeneration.withLock({ $0 }) == generation else { return }
         var newObserver: AXObserver?
         if AXObserverCreate(pid, callback, &newObserver) == .success, let obs = newObserver {
             // Best-effort — fails for system apps / non-AX apps; the seeded
@@ -150,8 +162,12 @@ final class FocusedElementCache {
     }
 
     /// Publishes a finished seed, unless a newer activation made it stale.
+    /// Deliberately does NOT fire `onFocusChange`: focus hasn't moved — this
+    /// is the same focus the activation-time fire announced, just resolved.
+    /// A synthetic fire here would cancel a capture the user started during
+    /// the seed window (its snapshot is nil) and clear a fresh emoticon undo.
     private func install(seeded: AXUIElement?, observer: AXObserver?, pid: pid_t, generation: Int) {
-        guard generation == refreshGeneration else { return }
+        guard generation == refreshGeneration.withLock({ $0 }) else { return }
         element = seeded
         if let observer {
             CFRunLoopAddSource(
@@ -162,7 +178,6 @@ final class FocusedElementCache {
             self.observer = observer
             self.observedPID = pid
         }
-        onFocusChange?()
     }
 
     private func teardownObserver() {

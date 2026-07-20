@@ -12,6 +12,12 @@ struct ActiveContext {
     /// trigger stays inert (nothing to autocomplete into) and emoji picks are
     /// copied to the clipboard instead of synthesized as keystrokes.
     let focusedFieldIsEditable: Bool
+    /// The focused AX element the field checks above were answered from —
+    /// cache when warm, fresh system-wide query otherwise. Capture snapshots
+    /// must use this, not the cache directly: right after an app switch the
+    /// cache is intentionally nil while its background seed is in flight, and
+    /// a nil snapshot would read as "opened with no focused field".
+    let focusedElement: AXUIElement?
 }
 
 @MainActor
@@ -21,21 +27,25 @@ enum AppContextDetector {
         let bundleID = app?.bundleIdentifier
         let pid = app?.processIdentifier
         let url = BrowserURL.detect(bundleID: bundleID, pid: pid)
+        // Resolve once and reuse — each fallback resolution is a synchronous
+        // cross-process AX call.
+        let focused = resolveFocusedElement()
         return ActiveContext(
             bundleID: bundleID,
             processID: pid,
             url: url,
-            focusedFieldIsSecure: focusedFieldIsSecure(),
-            focusedFieldIsEditable: focusedFieldIsEditable()
+            focusedFieldIsSecure: focusedFieldIsSecure(focused),
+            focusedFieldIsEditable: focusedFieldIsEditable(focused),
+            focusedElement: focused
         )
     }
 
     /// True if AXSecureTextField, OR if AX is too broken to tell.
     /// False positives just mean the picker doesn't open in odd contexts;
     /// false negatives leak password fragments. Easy tradeoff.
-    private static func focusedFieldIsSecure() -> Bool {
+    private static func focusedFieldIsSecure(_ focused: AXUIElement?) -> Bool {
         // No focused element = mid-transition; allow capture rather than block.
-        guard let focused = resolveFocusedElement() else { return false }
+        guard let focused else { return false }
         guard let role = copyString(focused, kAXRoleAttribute) else { return true }
         // String literal because `kAXSecureTextFieldRole` isn't reliably
         // bridged across SDK versions. Electron/web password inputs that
@@ -63,8 +73,8 @@ enum AppContextDetector {
     /// `true` (the browser hotkey is explicit, and synthetic keystrokes land in
     /// fields AX can't fully describe); only no focused element at all, or a
     /// positively non-text control, reads as false.
-    private static func focusedFieldIsEditable() -> Bool {
-        guard let focused = resolveFocusedElement() else { return false }
+    private static func focusedFieldIsEditable(_ focused: AXUIElement?) -> Bool {
+        guard let focused else { return false }
         // Role first: a positively non-text element (e.g. a read-only label
         // that still exposes a selection range) has nowhere to type.
         if let role = copyString(focused, kAXRoleAttribute) {
