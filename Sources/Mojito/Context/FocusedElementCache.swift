@@ -123,22 +123,11 @@ final class FocusedElementCache {
         let axApp = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(axApp, Self.seedTimeout)
 
-        var ref: AnyObject?
-        let status = AXUIElementCopyAttributeValue(
-            axApp,
-            kAXFocusedUIElementAttribute as CFString,
-            &ref
-        )
-        var seeded: AXUIElement?
-        if status == .success, let ref, CFGetTypeID(ref) == AXUIElementGetTypeID() {
-            seeded = (ref as! AXUIElement)
-        }
-
         // C function pointer — no captures allowed, route via refcon.
         let callback: AXObserverCallback = { _, focusedElement, _, refcon in
             guard let refcon else { return }
             let cache = Unmanaged<FocusedElementCache>.fromOpaque(refcon).takeUnretainedValue()
-            // Source is on the main run loop (added below), so we're on main.
+            // Source is on the main run loop (added in install()), so we're on main.
             MainActor.assumeIsolated {
                 cache.element = focusedElement
                 cache.onFocusChange?()
@@ -146,7 +135,12 @@ final class FocusedElementCache {
         }
         let refcon = Unmanaged.passUnretained(self).toOpaque()
 
-        guard refreshGeneration.withLock({ $0 }) == generation else { return }
+        // Register BEFORE reading the focused element. A move after the read
+        // but before registration would be missed entirely — no callback, and
+        // install() would publish the stale element as truth. Registered
+        // first, a move during/after the read fires a notification that
+        // queues on the observer's mach port and drains once install() adds
+        // the source to the main run loop, correcting the cache.
         var newObserver: AXObserver?
         if AXObserverCreate(pid, callback, &newObserver) == .success, let obs = newObserver {
             // Re-check after create (local, but a bump can land any time):
@@ -162,6 +156,18 @@ final class FocusedElementCache {
             )
         }
         let observer = newObserver
+
+        guard refreshGeneration.withLock({ $0 }) == generation else { return }
+        var ref: AnyObject?
+        let status = AXUIElementCopyAttributeValue(
+            axApp,
+            kAXFocusedUIElementAttribute as CFString,
+            &ref
+        )
+        var seeded: AXUIElement?
+        if status == .success, let ref, CFGetTypeID(ref) == AXUIElementGetTypeID() {
+            seeded = (ref as! AXUIElement)
+        }
 
         DispatchQueue.main.async {
             MainActor.assumeIsolated {
