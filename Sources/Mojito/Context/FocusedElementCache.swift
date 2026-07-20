@@ -6,6 +6,13 @@ import ApplicationServices
 /// hung / busy apps (Electron under load). Doing that on every `:` and
 /// picker show produced visible lag; this converts to a pointer read.
 ///
+/// The seed query and observer registration are themselves synchronous IPC
+/// into the newly-activated app, so they run on a background queue — the
+/// main thread also services the keystroke event tap, and a focus-flap storm
+/// (notification banners, menu-bar overlay apps) blocking it there stalled
+/// typing system-wide (W-547). Until the seed lands, `element` is nil and
+/// callers fall back to a fresh fetch.
+///
 /// Falls back gracefully: if observer creation fails (no AX permission,
 /// non-introspectable app), `element` returns nil and callers fetch fresh.
 @MainActor
@@ -25,6 +32,24 @@ final class FocusedElementCache {
     private var observer: AXObserver?
     private var observedPID: pid_t?
     private var workspaceObserver: NSObjectProtocol?
+
+    /// Invalidates in-flight background seeds when a newer activation
+    /// supersedes them.
+    private var refreshGeneration = 0
+
+    /// Coalesces activation bursts (banner appears → app reactivates within
+    /// ~100ms) into one seed round-trip.
+    private var pendingSeed: DispatchWorkItem?
+    private static let seedDebounce: TimeInterval = 0.1
+
+    /// Serial so a hung app's seed can't overlap the next one; each call is
+    /// bounded by `seedTimeout` below.
+    private static let seedQueue = DispatchQueue(label: "mojito.ax.focusSeed", qos: .userInitiated)
+
+    /// Per-element AX timeout for the seed round-trips. Tighter than the
+    /// process-wide 0.5s: a stale seed is discarded by the generation check
+    /// anyway, so waiting long for a slow app buys nothing.
+    private static let seedTimeout: Float = 0.25
 
     private init() {
         refreshActiveApp()
@@ -47,8 +72,13 @@ final class FocusedElementCache {
         // dropping our AXObserver reference releases the run loop source.
     }
 
+    /// Synchronous part of an app switch: drop the stale element immediately
+    /// (a cross-app pointer must never be served) and schedule the IPC-heavy
+    /// seed off the main thread.
     private func refreshActiveApp() {
         teardownObserver()
+        refreshGeneration += 1
+        pendingSeed?.cancel()
 
         guard let app = NSWorkspace.shared.frontmostApplication else {
             element = nil
@@ -57,23 +87,35 @@ final class FocusedElementCache {
             return
         }
         let pid = app.processIdentifier
-        let axApp = AXUIElementCreateApplication(pid)
+        element = nil
+        focusedPID = pid
+        DebugRecorder.record(.focus, "app", ["bundleID": app.bundleIdentifier ?? "—"])
+        onFocusChange?()
 
-        // Seed so the first call after an app switch isn't a miss.
+        let generation = refreshGeneration
+        let work = DispatchWorkItem { [weak self] in
+            Self.seedQueue.async { self?.seed(pid: pid, generation: generation) }
+        }
+        pendingSeed = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.seedDebounce, execute: work)
+    }
+
+    /// Runs on `seedQueue`. Both AX calls here block on the target app's
+    /// reply, which is the whole reason they're off the main thread.
+    private nonisolated func seed(pid: pid_t, generation: Int) {
+        let axApp = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(axApp, Self.seedTimeout)
+
         var ref: AnyObject?
         let status = AXUIElementCopyAttributeValue(
             axApp,
             kAXFocusedUIElementAttribute as CFString,
             &ref
         )
+        var seeded: AXUIElement?
         if status == .success, let ref, CFGetTypeID(ref) == AXUIElementGetTypeID() {
-            element = (ref as! AXUIElement)
-        } else {
-            element = nil
+            seeded = (ref as! AXUIElement)
         }
-        focusedPID = pid
-        DebugRecorder.record(.focus, "app", ["bundleID": app.bundleIdentifier ?? "—"])
-        onFocusChange?()
 
         // C function pointer — no captures allowed, route via refcon.
         let callback: AXObserverCallback = { _, focusedElement, _, refcon in
@@ -88,30 +130,45 @@ final class FocusedElementCache {
         let refcon = Unmanaged.passUnretained(self).toOpaque()
 
         var newObserver: AXObserver?
-        guard AXObserverCreate(pid, callback, &newObserver) == .success, let obs = newObserver else {
-            return
+        if AXObserverCreate(pid, callback, &newObserver) == .success, let obs = newObserver {
+            // Best-effort — fails for system apps / non-AX apps; the seeded
+            // value still serves. Synchronous IPC, hence off-main.
+            AXObserverAddNotification(
+                obs,
+                axApp,
+                kAXFocusedUIElementChangedNotification as CFString,
+                refcon
+            )
         }
-        // Best-effort — fails for system apps / non-AX apps; the seeded
-        // value still serves.
-        AXObserverAddNotification(
-            obs,
-            axApp,
-            kAXFocusedUIElementChangedNotification as CFString,
-            refcon
-        )
-        CFRunLoopAddSource(
-            CFRunLoopGetCurrent(),
-            AXObserverGetRunLoopSource(obs),
-            .commonModes
-        )
-        self.observer = obs
-        self.observedPID = pid
+        let observer = newObserver
+
+        DispatchQueue.main.async {
+            MainActor.assumeIsolated {
+                self.install(seeded: seeded, observer: observer, pid: pid, generation: generation)
+            }
+        }
+    }
+
+    /// Publishes a finished seed, unless a newer activation made it stale.
+    private func install(seeded: AXUIElement?, observer: AXObserver?, pid: pid_t, generation: Int) {
+        guard generation == refreshGeneration else { return }
+        element = seeded
+        if let observer {
+            CFRunLoopAddSource(
+                CFRunLoopGetMain(),
+                AXObserverGetRunLoopSource(observer),
+                .commonModes
+            )
+            self.observer = observer
+            self.observedPID = pid
+        }
+        onFocusChange?()
     }
 
     private func teardownObserver() {
         if let obs = observer {
             CFRunLoopRemoveSource(
-                CFRunLoopGetCurrent(),
+                CFRunLoopGetMain(),
                 AXObserverGetRunLoopSource(obs),
                 .commonModes
             )
