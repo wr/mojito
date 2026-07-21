@@ -37,7 +37,7 @@
 
 <main class="guide-main">
 <section class="prose">
-  <p class="guide-crumb"><a href="/">Mojito</a> / Guides</p>
+  <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type emoji on a Mac</h1>
   <p class="guide-sub">Five ways, from the menu nobody uses to shortcodes that work in every app. All of them on a stock Mac except the last one, which needs a small free download.</p>
 
@@ -105,7 +105,7 @@
     <p>Each platform draws its own set, so details differ, and a very new emoji can take a while to show up on other systems. The character you send is standard Unicode either way.</p>
   </div>
 
-  <p class="guide-more">More guides: <a href="/emoji-shortcuts-mac/">Emoji shortcuts on Mac</a> · <a href="/emoji-shortcodes/">Emoji shortcode cheat sheet</a> · <a href="/mac-emoji-picker/">A better Mac emoji picker</a></p>
+  <p class="guide-more">More guides: <a href="/emoji-shortcuts-mac/">Emoji shortcuts on Mac</a> · <a href="/emoji-shortcodes/">Emoji shortcode cheat sheet</a> · <a href="/mac-emoji-picker/">A better Mac emoji picker</a> · <a href="/guides/">All guides</a></p>
 </section>
 </main>
 
@@ -123,16 +123,27 @@
 
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "HowTo",
-  "name": "How to type emoji on a Mac",
-  "step": [
-    { "@type": "HowToStep", "name": "Use the keyboard shortcut", "text": "Click into any text field and press Control+Command+Space to open the macOS emoji picker, then search and press Return." },
-    { "@type": "HowToStep", "name": "Set up the Globe key", "text": "In System Settings → Keyboard, set 'Press 🌐 key to' to Show Emoji & Symbols, then tap the fn key in any text field." },
-    { "@type": "HowToStep", "name": "Use the Edit menu", "text": "In any app, choose Edit → Emoji & Symbols." },
-    { "@type": "HowToStep", "name": "Add text replacements", "text": "In System Settings → Keyboard → Text Replacements, map a phrase like 'brb' to an emoji." },
-    { "@type": "HowToStep", "name": "Type shortcodes anywhere", "text": "Install Mojito (free, open source) and type :tada in any app, then press Return to insert 🎉." }
-  ]
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Mojito",
+   "item": "https://mojito.wells.ee/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Guides",
+   "item": "https://mojito.wells.ee/guides/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 3,
+   "name": "How to type emoji on a Mac"
+  }
+ ]
 }
 </script>
 </body>

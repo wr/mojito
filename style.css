@@ -1953,3 +1953,15 @@ code { unicode-bidi: isolate; }
    the cheat-sheet tables and screenshots want the room. */
 .guide-main { max-width: 800px; }
 .guide-main .prose { max-width: 680px; }
+
+/* /guides/ hub directory list */
+.guide-index {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+.guide-index li {
+  margin: 0 0 10px;
+  color: var(--text-soft);
+}
+.guide-index a { font-weight: 500; }

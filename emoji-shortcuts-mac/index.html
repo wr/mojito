@@ -37,7 +37,7 @@
 
 <main class="guide-main">
 <section class="prose">
-  <p class="guide-crumb"><a href="/">Mojito</a> / Guides</p>
+  <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">Emoji shortcuts on Mac</h1>
   <p class="guide-sub">macOS has more emoji shortcuts than most people know about. Here's every one of them, from the built-in picker to typing <code>:tada:</code> and getting 🎉 in any app.</p>
 
@@ -84,7 +84,7 @@
     <p>Mojito can take over that shortcut (and the Globe key) so it opens a searchable emoji browser instead of the macOS panel. It's an option in Settings → General.</p>
   </div>
 
-  <p class="guide-more">More guides: <a href="/how-to-type-emoji-on-mac/">How to type emoji on a Mac</a> · <a href="/emoji-shortcodes/">Emoji shortcode cheat sheet</a> · <a href="/mac-emoji-picker/">A better Mac emoji picker</a></p>
+  <p class="guide-more">More guides: <a href="/how-to-type-emoji-on-mac/">How to type emoji on a Mac</a> · <a href="/emoji-shortcodes/">Emoji shortcode cheat sheet</a> · <a href="/mac-emoji-picker/">A better Mac emoji picker</a> · <a href="/guides/">All guides</a></p>
 </section>
 </main>
 
@@ -102,25 +102,27 @@
 
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What's the fastest way to type emoji on a Mac?",
-      "acceptedAnswer": { "@type": "Answer", "text": "For an emoji you use constantly, a macOS text replacement is instant. For everything else, an inline shortcode picker like Mojito is faster than the built-in ⌃⌘Space panel because your hands never leave the keyboard." }
-    },
-    {
-      "@type": "Question",
-      "name": "Is there an emoji keyboard shortcut on Mac without any setup?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes — Control+Command+Space opens the built-in emoji picker on every Mac with no setup." }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I change what ⌃⌘Space opens?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Mojito, a free open-source menu-bar app, can take over ⌃⌘Space and the Globe key so they open a searchable emoji browser instead of the macOS panel." }
-    }
-  ]
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Mojito",
+   "item": "https://mojito.wells.ee/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Guides",
+   "item": "https://mojito.wells.ee/guides/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 3,
+   "name": "Emoji shortcuts on Mac"
+  }
+ ]
 }
 </script>
 </body>

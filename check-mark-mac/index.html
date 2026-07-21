@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How to type a check mark on a Mac (✓)</title>
+<meta name="description" content="There's no Option-key shortcut for ✓ on a Mac. Option+V types √ instead, a square root sign. Here's how to actually get a check mark.">
+<link rel="canonical" href="https://mojito.wells.ee/check-mark-mac/">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://mojito.wells.ee/check-mark-mac/">
+<meta property="og:title" content="How to type a check mark on a Mac (✓)">
+<meta property="og:description" content="There's no Option-key shortcut for ✓ on a Mac. Option+V types √ instead, a square root sign. Here's how to actually get a check mark.">
+<meta property="og:image" content="https://mojito.wells.ee/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to type a check mark on a Mac (✓)">
+<meta name="twitter:description" content="There's no Option-key shortcut for ✓ on a Mac. Option+V types √ instead, a square root sign. Here's how to actually get a check mark.">
+<meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="stylesheet" href="/style.css?v=74">
+</head>
+<body>
+
+<nav class="topbar">
+  <a class="brand" href="/" aria-label="Mojito">
+    <img src="/app-icon.png" alt="" width="28" height="28">
+    <span>Mojito</span>
+  </a>
+  <div class="nav-links">
+    <a href="https://github.com/wr/mojito">GitHub</a>
+    <a class="nav-cta" href="https://github.com/wr/mojito/releases/latest/download/Mojito.dmg">
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v7.69l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 0 1 1.06-1.06l2.72 2.72V2.25A.75.75 0 0 1 8 1.5Zm-5.25 11a.75.75 0 0 1 .75.75v.25a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-.25a.75.75 0 0 1 1.5 0v.25A2 2 0 0 1 12 15.5H4a2 2 0 0 1-2-2v-.25a.75.75 0 0 1 .75-.75Z"/></svg>
+      <span>Download for macOS</span>
+    </a>
+  </div>
+</nav>
+
+<main class="guide-main">
+<section class="prose">
+  <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
+  <h1 class="guide-title">How to type a check mark on a Mac (✓)</h1>
+  <p class="guide-sub">There isn't a keyboard shortcut for this one, and the one you've seen floating around is wrong.</p>
+
+  <h2>How do I type a check mark on a Mac?</h2>
+  <p>There's no Option-key combination that types ✓ on a Mac — unlike °, ©, or ™, it doesn't sit on the US keyboard layout at all. The shortcut you may have seen suggested, <kbd>Option</kbd> + <kbd>V</kbd>, actually types √, the square-root sign. It looks close enough to fool a skim, but it's a math symbol, not a check mark. To get an actual ✓, use the character picker, a text replacement, or Mojito.</p>
+
+  <h2>Why Option+V is a trap</h2>
+  <p>√ and ✓ share a similar upward-tick shape and get confused constantly in "how to" lists online — including some that should know better. If you've pasted √ into a checklist and wondered why it looks slightly off, that's why. The real fix isn't a different modifier key; it's a different method entirely, since ✓ was never mapped to the US Option layout.</p>
+
+  <h2>Getting an actual check mark</h2>
+  <p><kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>Space</kbd> opens the system character picker. Search "check" and you'll get several: ✓ (check mark), ✔ (heavy check mark), ☑ (ballot box with check), and the ✅ emoji. Double-click any to insert it at your cursor.</p>
+  <p>For something you type instead of hunt for, set up a text replacement in <strong>System Settings → Keyboard → Text Replacements</strong> — assign a trigger like <code>chk</code> to expand to ✓ everywhere on the Mac.</p>
+
+  <table class="code-table">
+    <thead><tr><th scope="col">Symbol</th><th scope="col">How to get it</th><th scope="col">Mojito shortcode</th></tr></thead>
+    <tbody>
+      <tr><td>✓</td><td>Character picker, search "check"</td><td><code>::checkmark</code></td></tr>
+      <tr><td>✗</td><td>Character picker, search "cross"</td><td><code>::xmark</code></td></tr>
+      <tr><td>✅</td><td>Emoji picker</td><td><code>:white_check_mark:</code></td></tr>
+      <tr><td>❌</td><td>Emoji picker</td><td><code>:x:</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>There is a real Option-key method — it just needs setup</h2>
+  <p>macOS ships a keyboard layout called <strong>Unicode Hex Input</strong> that lets you type any Unicode character by its code point. Add it in <strong>System Settings → Keyboard → Input Sources → Add Input Source</strong>, search "Unicode Hex Input," then switch to it from the input menu in the menu bar. With it active, hold <kbd>Option</kbd> and type <code>2713</code> — the Unicode code point for ✓ — to insert the check mark directly. It's more setup than a single keystroke, and you have to switch input sources to use it, but it's a genuine shortcut where Option+V is not.</p>
+
+  <h2>Faster with Mojito</h2>
+  <p><a href="/">Mojito</a> skips the picker for this one too. Type <code>::checkmark</code> anywhere and it autocompletes to ✓ at your cursor — <code>::xmark</code> gets you ✗ for the opposite. If you want the colorful emoji versions instead, Mojito's emoji mode handles those shortcodes directly: <code>:white_check_mark:</code> for ✅, <code>:x:</code> for ❌.</p>
+
+  <figure class="guide-figure">
+    <picture>
+      <source srcset="/screenshot-symbols-check.avif" type="image/avif">
+      <img src="/screenshot-symbols-check.png" alt="Mojito suggesting ::checkmark for a real ✓ while typing ::check in TextEdit on macOS" width="1296" height="976" loading="lazy" decoding="async">
+    </picture>
+    <figcaption>A real check mark — not Option-V’s square root.</figcaption>
+  </figure>
+
+  <div class="guide-cta">
+    <a class="nav-cta" href="https://github.com/wr/mojito/releases/latest/download/Mojito.dmg">
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v7.69l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 0 1 1.06-1.06l2.72 2.72V2.25A.75.75 0 0 1 8 1.5Zm-5.25 11a.75.75 0 0 1 .75.75v.25a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-.25a.75.75 0 0 1 1.5 0v.25A2 2 0 0 1 12 15.5H4a2 2 0 0 1-2-2v-.25a.75.75 0 0 1 .75-.75Z"/></svg>
+      <span>Download Mojito for macOS</span>
+    </a>
+    <span class="guide-cta-note">Free &amp; open source · macOS 14 or later · Apple Silicon and Intel</span>
+  </div>
+
+  <h2>Fair questions</h2>
+  <div class="faq-item">
+    <h3>Is Option+V a check mark?</h3>
+    <p>No. It types √, the square-root sign. It's a common mix-up online because the two symbols look similar at small sizes, but they're unrelated characters with different Unicode code points.</p>
+  </div>
+  <div class="faq-item">
+    <h3>✓ vs ✔ vs ✅ — which should I use?</h3>
+    <p>✓ is a plain, light-weight check — good for body text and lists where you don't want it to shout. ✔ is bolder, closer to a rubber-stamp look. ✅ is a full-color emoji, best for chat apps and places where emoji already fit the tone; it reads as heavier and more casual than the other two.</p>
+  </div>
+  <div class="faq-item">
+    <h3>How do I make a checkbox in Notes or Reminders?</h3>
+    <p>That's list formatting, not a typed character. In Notes, click the checklist button in the toolbar (or <kbd>⇧</kbd> + <kbd>⌘</kbd> + <kbd>L</kbd>). Reminders makes every list item a checkbox automatically — there's nothing to type.</p>
+  </div>
+  <div class="faq-item">
+    <h3>What's the HTML entity for a check mark?</h3>
+    <p><code>&amp;check;</code> or the numeric <code>&amp;#10003;</code> renders ✓. For the heavier ✔, use <code>&amp;#10004;</code> — there's no named entity for that one.</p>
+  </div>
+
+  <p class="guide-more">More guides: <a href="/em-dash-mac/">How to type an em dash on a Mac</a> · <a href="/degree-symbol-mac/">How to type the degree symbol on a Mac</a> · <a href="/how-to-type-emoji-on-mac/">How to type emoji on a Mac</a> · <a href="/guides/">All guides</a></p>
+</section>
+</main>
+
+<footer>
+  <div class="footer-pill">
+    <div class="footer-text-links">
+      <a href="/">Home</a>
+      <a href="/stats">Stats</a>
+      <a href="https://github.com/wr/mojito">GitHub</a>
+      <a href="mailto:mojito@wells.ee">Contact</a>
+    </div>
+  </div>
+  <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
+</footer>
+
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Mojito",
+   "item": "https://mojito.wells.ee/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Guides",
+   "item": "https://mojito.wells.ee/guides/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 3,
+   "name": "How to type a check mark on a Mac (✓)"
+  }
+ ]
+}
+</script>
+</body>
+</html>

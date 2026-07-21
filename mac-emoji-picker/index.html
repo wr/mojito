@@ -37,7 +37,7 @@
 
 <main class="guide-main">
 <section class="prose">
-  <p class="guide-crumb"><a href="/">Mojito</a> / Guides</p>
+  <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">Looking for a better Mac emoji picker?</h1>
   <p class="guide-sub">The built-in panel works. It's just slow: open, search, click, find your place again. If you type emoji more than a few times a day, an inline picker saves the round trip every single time.</p>
 
@@ -87,7 +87,7 @@
     <p>Nothing. It's AGPL open source with no paid tier. If it earns a spot in your menu bar, <a href="https://buymeacoffee.com/wellsriley">a coffee</a> is appreciated.</p>
   </div>
 
-  <p class="guide-more">More guides: <a href="/emoji-shortcuts-mac/">Emoji shortcuts on Mac</a> · <a href="/how-to-type-emoji-on-mac/">How to type emoji on a Mac</a> · <a href="/emoji-shortcodes/">Emoji shortcode cheat sheet</a></p>
+  <p class="guide-more">More guides: <a href="/emoji-shortcuts-mac/">Emoji shortcuts on Mac</a> · <a href="/how-to-type-emoji-on-mac/">How to type emoji on a Mac</a> · <a href="/emoji-shortcodes/">Emoji shortcode cheat sheet</a> · <a href="/guides/">All guides</a></p>
 </section>
 </main>
 
@@ -105,25 +105,27 @@
 
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Why does Mojito need accessibility permission?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Accessibility is the macOS API for seeing keystrokes and inserting text into other apps, which inline autocomplete requires. Matching runs locally, keystrokes are never transmitted or stored, and password fields are ignored. The source code is public." }
-    },
-    {
-      "@type": "Question",
-      "name": "Does Mojito work in the browser and terminal?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Yes — it works anywhere macOS lets you type, including browsers, web apps, and terminal shells." }
-    },
-    {
-      "@type": "Question",
-      "name": "What does Mojito cost?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Nothing. Mojito is free, open-source software (AGPL) with no trial and no paid tier." }
-    }
-  ]
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Mojito",
+   "item": "https://mojito.wells.ee/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Guides",
+   "item": "https://mojito.wells.ee/guides/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 3,
+   "name": "A better Mac emoji picker"
+  }
+ ]
 }
 </script>
 </body>
