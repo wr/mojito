@@ -4132,9 +4132,10 @@
   // 3=Mastodon, 4=Reminders.
   // `prefilled`: text already in the textarea when the slide arrives (not typed).
   // `symbol`: type the `::` trigger and search the symbol table instead.
-  // `gif`: type the `:::` trigger — pops the GIF panel and sends the pick
-  //   as an iMessage bubble (so it only targets app 1). No `before` prose,
-  //   which also keeps the scene out of the i18n tables.
+  // `gif`: type the `:::` trigger — pops the GIF panel, sends the typed text
+  //   as a message, then the pick as a GIF bubble (so it only targets app 1).
+  // GIF and symbol scenes sit early in the cycle so a fresh visitor sees all
+  // three trigger modes without waiting out the whole loop.
   function buildScenes() {
     const docTemplate = tr('demo.scene.doc',
       'Design Review — {date}\n\nPicker should fade in on first show. Team agreed.\n\nTo-do:\n- Add fade-in flag');
@@ -4144,12 +4145,12 @@
         prefilled: docTemplate.replace('{date}', localizedDocDate(_now)),
         before: tr('demo.scene.deadline', '\n- Hit deadline '), query: 'fire', after: '',
       },
-      { app: 1, before: tr('demo.scene.soon', 'see you soon '),               query: 'wave',   after: '' },
-      { app: 2, before: 'git commit -m "fix the ',                            query: 'bug',    after: '"' },
+      { app: 1, before: tr('demo.scene.party', 'so ready for tonight '),      query: 'party',  gif: true },
+      { app: 2, before: 'echo "coverage ',                                    query: 'approx', after: ' 94%"', symbol: true },
       { app: 3, before: tr('demo.scene.shipped', 'Just shipped a new app '),  query: 'rocket', after: '' },
       { app: 4, before: tr('demo.scene.pickup', 'Pick up '),                  query: 'gift',   after: tr('demo.scene.formom', ' for mom') },
-      { app: 2, before: 'echo "coverage ',                                    query: 'approx', after: ' 94%"', symbol: true },
-      { app: 1, before: '',                                                   query: 'party',  gif: true },
+      { app: 1, before: tr('demo.scene.soon', 'see you soon '),               query: 'wave',   after: '' },
+      { app: 2, before: 'git commit -m "fix the ',                            query: 'bug',    after: '"' },
     ];
   }
   let scenes = buildScenes();
@@ -4182,7 +4183,8 @@
 
     if (scene.gif) {
       // Panel is up (handleInput opened it as the query chars landed).
-      // Browse the grid like a human would, then send the first result.
+      // Browse the grid like a human would, then send the typed message
+      // followed by the picked GIF — text bubble first, GIF as the chaser.
       await wait(650);
       if (token !== autoplayToken) return false;
       gifIndex = 1; updateGifSelection();
@@ -4191,7 +4193,15 @@
       gifIndex = 0; updateGifSelection();
       await wait(480);
       if (token !== autoplayToken) return false;
-      commitGif();
+      const pick = gifThumbs[gifIndex];
+      hideGifPanel();
+      input.value = prefilled + scene.before; // the ::: query is consumed by the pick
+      await wait(180);
+      if (token !== autoplayToken) return false;
+      sendIMessage();
+      await wait(460);
+      if (token !== autoplayToken) return false;
+      if (pick) sendGifBubble(pick.dataset.src || pick.src);
       await wait(1500);
       return true;
     }

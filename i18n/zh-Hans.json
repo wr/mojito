@@ -39,6 +39,7 @@
   "demo.scene.doc": "设计评审 — {date}\n\n选择器应在首次显示时淡入。团队已确认。\n\n待办：\n- 添加淡入标志",
   "demo.scene.deadline": "\n- 赶上截止日期 ",
   "demo.scene.soon": "回头见 ",
+  "demo.scene.party": "今晚太期待了 ",
   "demo.scene.shipped": "刚发布了一款新应用 ",
   "demo.scene.pickup": "去买 ",
   "demo.scene.formom": " 给妈妈",

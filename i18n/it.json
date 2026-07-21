@@ -39,6 +39,7 @@
   "demo.scene.doc": "Revisione del design — {date}\n\nIl selettore dovrebbe comparire in dissolvenza alla prima apertura. Il team è d'accordo.\n\nDa fare:\n- Aggiungere l'opzione di dissolvenza",
   "demo.scene.deadline": "\n- Rispettare la scadenza ",
   "demo.scene.soon": "a presto ",
+  "demo.scene.party": "non vedo l'ora di stasera ",
   "demo.scene.shipped": "Ho appena lanciato una nuova app ",
   "demo.scene.pickup": "Vai a prendere ",
   "demo.scene.formom": " per la mamma",

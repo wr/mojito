@@ -39,6 +39,7 @@
   "demo.scene.doc": "Revue de design — {date}\n\nLe sélecteur devrait apparaître en fondu au premier affichage. L'équipe est d'accord.\n\nÀ faire :\n- Ajouter l'option de fondu",
   "demo.scene.deadline": "\n- Tenir le délai ",
   "demo.scene.soon": "à bientôt ",
+  "demo.scene.party": "trop hâte pour ce soir ",
   "demo.scene.shipped": "Je viens de lancer une nouvelle app ",
   "demo.scene.pickup": "Aller chercher ",
   "demo.scene.formom": " pour maman",

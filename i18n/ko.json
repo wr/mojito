@@ -39,6 +39,7 @@
   "demo.scene.doc": "디자인 리뷰 — {date}\n\n피커는 처음 표시될 때 페이드인되어야 함. 팀 합의 완료.\n\n할 일:\n- 페이드인 플래그 추가",
   "demo.scene.deadline": "\n- 마감 지키기 ",
   "demo.scene.soon": "곧 봐요 ",
+  "demo.scene.party": "오늘 밤 너무 기대돼 ",
   "demo.scene.shipped": "방금 새 앱을 출시했어요 ",
   "demo.scene.pickup": "사 오기 ",
   "demo.scene.formom": " 엄마 드릴 거",

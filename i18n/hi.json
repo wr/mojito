@@ -39,6 +39,7 @@
   "demo.scene.doc": "डिज़ाइन समीक्षा — {date}\n\nपहली बार दिखने पर पिकर को फ़ेड-इन होना चाहिए। टीम सहमत है।\n\nकरने योग्य:\n- फ़ेड-इन फ़्लैग जोड़ें",
   "demo.scene.deadline": "\n- समय-सीमा पूरी की ",
   "demo.scene.soon": "जल्दी मिलते हैं ",
+  "demo.scene.party": "आज रात के लिए बिल्कुल तैयार ",
   "demo.scene.shipped": "अभी-अभी एक नया ऐप लॉन्च किया ",
   "demo.scene.pickup": "ले आना ",
   "demo.scene.formom": " माँ के लिए",
