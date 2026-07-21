@@ -9,7 +9,13 @@ Requires macOS 14 or later.
 
 ## Install
 
-Download the latest DMG from the Releases page and move Mojito to Applications. The app walks through granting Accessibility and Input Monitoring access on first launch. Updates arrive automatically — when one is ready, the menu-bar icon shows a badge.
+Download the latest DMG from the Releases page and move Mojito to Applications, or install with Homebrew:
+
+```bash
+brew install --cask wr/tap/mojito
+```
+
+The app walks through granting Accessibility and Input Monitoring access on first launch. Updates arrive automatically — when one is ready, the menu-bar icon shows a badge.
 
 ## How it works
 
