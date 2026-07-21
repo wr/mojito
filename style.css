@@ -1918,6 +1918,20 @@ code { unicode-bidi: isolate; }
   color: var(--text-soft);
 }
 
+.guide-figure { margin: 0 0 30px; }
+.guide-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.guide-figure figcaption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
 /* Small guides row under the footer pill (index + guide pages). */
 .footer-guides {
   display: flex;
