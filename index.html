@@ -39,7 +39,7 @@
 <link rel="alternate" hreflang="he" href="https://mojito.wells.ee/?lang=he">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="style.css?v=73">
+<link rel="stylesheet" href="style.css?v=74">
 <script src="i18n.js?v=4"></script>
 </head>
 <body>
@@ -468,9 +468,29 @@ Changes not staged for commit:
       <a href="mailto:mojito@wells.ee" data-i18n="footer.contact">Contact</a>
     </div>
   </div>
+  <ul class="footer-guides" aria-label="Guides">
+    <li><a href="/emoji-shortcuts-mac/">Emoji shortcuts on Mac</a></li>
+    <li><a href="/how-to-type-emoji-on-mac/">How to type emoji on a Mac</a></li>
+    <li><a href="/emoji-shortcodes/">Shortcode cheat sheet</a></li>
+    <li><a href="/mac-emoji-picker/">A better emoji picker</a></li>
+    <li><a href="/guides/">All guides →</a></li>
+  </ul>
   <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
 </footer>
 
 <script src="picker.js?v=53" defer></script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "Mojito",
+ "operatingSystem": "macOS 14 or later",
+ "applicationCategory": "UtilitiesApplication",
+ "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+ "downloadUrl": "https://github.com/wr/mojito/releases/latest/download/Mojito.dmg",
+ "url": "https://mojito.wells.ee/",
+ "sameAs": ["https://github.com/wr/mojito"]
+}
+</script>
 </body>
 </html>
