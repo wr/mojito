@@ -1,0 +1,9 @@
+{
+  "name": "mojito-download",
+  "main": "src/index.js",
+  "compatibility_date": "2025-01-01",
+  "workers_dev": false,
+  "routes": [
+    { "pattern": "mojito.wells.ee/download*", "zone_name": "wells.ee" }
+  ]
+}
