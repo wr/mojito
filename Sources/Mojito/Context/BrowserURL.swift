@@ -31,27 +31,20 @@ enum BrowserURL {
         // vendor, exposes AXURL fine) and because the first call triggers a
         // one-time Automation permission prompt we don't want to inflict on
         // browsers the AX path already handles.
-        if appleScriptURLBundleIDs.contains(bundleID),
-           let url = appleScriptURL(bundleID: bundleID) {
-            return url
+        //
+        // Crucially the AppleScript is NOT run here: `detect` is called from
+        // inside the CGEventTap callback (see `Engine.process`), and a
+        // synchronous Apple Event round-trip to a busy Arc blows past the tap
+        // timeout, so macOS disables the tap and drops the keystroke — every
+        // word+space stalled Arc's command bar (W-555). Instead we serve Arc's
+        // URL from an async cache refreshed off the main thread, the same way
+        // `FocusedElementCache` moved slow AX IPC off the tap thread (W-547).
+        // Bounded staleness (≈ one focus-change / keystroke) is fine for
+        // per-site exclusion matching.
+        if BrowserURLCache.appleScriptBundleIDs.contains(bundleID) {
+            return BrowserURLCache.shared.url(forBundleID: bundleID, pid: pid)
         }
         return nil
-    }
-
-    private static let appleScriptURLBundleIDs: Set<String> = [
-        "company.thebrowser.Browser",   // Arc
-    ]
-
-    /// `URL of active tab of front window` via AppleScript. Returns nil on any
-    /// failure — no window, denied Automation permission, or a non-URL value —
-    /// so callers fall through to "no URL" exactly as if AX had come up empty.
-    private static func appleScriptURL(bundleID: String) -> URL? {
-        let source = "tell application id \"\(bundleID)\" to return URL of active tab of front window"
-        guard let script = NSAppleScript(source: source) else { return nil }
-        var error: NSDictionary?
-        let result = script.executeAndReturnError(&error)
-        guard error == nil, let raw = result.stringValue else { return nil }
-        return normalizedURL(from: raw)
     }
 
     private static func isBrowser(bundleID: String) -> Bool {
@@ -179,10 +172,104 @@ enum BrowserURL {
         return result == .success ? ref : nil
     }
 
-    private static func normalizedURL(from raw: String) -> URL? {
+    nonisolated fileprivate static func normalizedURL(from raw: String) -> URL? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return nil }
         if trimmed.contains("://") { return URL(string: trimmed) }
         return URL(string: "https://" + trimmed)
+    }
+}
+
+/// Async cache for browsers whose tab URL is only readable via AppleScript
+/// (Arc). The AppleScript round-trip must never run on the main thread: it is
+/// reached from `BrowserURL.detect`, which the engine calls synchronously
+/// inside the CGEventTap callback, and a slow reply trips the tap timeout and
+/// drops the keystroke (W-555). So the Apple Event runs on a background serial
+/// queue, and `url(forBundleID:pid:)` returns the last resolved value
+/// immediately while kicking off a refresh for next time.
+///
+/// Same shape as `FocusedElementCache`: slow cross-process IPC off-main, a
+/// synchronous cheap read on the hot path, staleness bounded by refreshing on
+/// app activation and after every read. The value is only ever served for the
+/// pid it was resolved from, so a stale URL can't bleed across an app switch.
+@MainActor
+final class BrowserURLCache {
+    static let shared = BrowserURLCache()
+
+    static let appleScriptBundleIDs: Set<String> = [
+        "company.thebrowser.Browser",   // Arc
+    ]
+
+    /// Last resolved URL and the pid + bundleID it belongs to. `nil` url is a
+    /// real answer (no window / denied Automation / non-URL value) and is
+    /// cached as such so we don't refetch it every keystroke.
+    private var cachedURL: URL?
+    private var cachedPID: pid_t?
+    private var haveResult = false
+
+    /// One refresh in flight at a time — coalesces the burst of reads a single
+    /// word+terminator produces into one Apple Event.
+    private var refreshing = false
+
+    /// AppleScript off the main thread. Serial so a hung Arc can't overlap
+    /// round-trips, and its one-time Automation prompt blocks this queue, not
+    /// the main run loop.
+    private static let queue = DispatchQueue(label: "mojito.browserURL.applescript", qos: .userInitiated)
+
+    private init() {
+        // Prefetch on activation so switching to Arc and immediately typing has
+        // a warm URL rather than a first-keystroke miss.
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            MainActor.assumeIsolated {
+                guard let app = NSWorkspace.shared.frontmostApplication,
+                      let bundleID = app.bundleIdentifier,
+                      BrowserURLCache.appleScriptBundleIDs.contains(bundleID) else { return }
+                BrowserURLCache.shared.refresh(bundleID: bundleID, pid: app.processIdentifier)
+            }
+        }
+    }
+
+    /// Cheap synchronous read for the hot path. Returns the cached URL only if
+    /// it belongs to this pid, and always schedules a refresh so the next read
+    /// reflects any navigation. A pid mismatch (or no result yet) reads as nil
+    /// — exclusions treat that as "no URL", same as the AX paths coming up
+    /// empty; the refresh fills it in for the following keystroke.
+    func url(forBundleID bundleID: String, pid: pid_t) -> URL? {
+        let value = (haveResult && cachedPID == pid) ? cachedURL : nil
+        refresh(bundleID: bundleID, pid: pid)
+        return value
+    }
+
+    private func refresh(bundleID: String, pid: pid_t) {
+        guard !refreshing else { return }
+        refreshing = true
+        Self.queue.async {
+            let url = Self.appleScriptURL(bundleID: bundleID)
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    self.cachedURL = url
+                    self.cachedPID = pid
+                    self.haveResult = true
+                    self.refreshing = false
+                }
+            }
+        }
+    }
+
+    /// `URL of active tab of front window` via AppleScript. Returns nil on any
+    /// failure — no window, denied Automation permission, or a non-URL value —
+    /// so callers fall through to "no URL" exactly as if AX had come up empty.
+    /// `nonisolated` so it runs on `queue`, off the main thread.
+    private nonisolated static func appleScriptURL(bundleID: String) -> URL? {
+        let source = "tell application id \"\(bundleID)\" to return URL of active tab of front window"
+        guard let script = NSAppleScript(source: source) else { return nil }
+        var error: NSDictionary?
+        let result = script.executeAndReturnError(&error)
+        guard error == nil, let raw = result.stringValue else { return nil }
+        return BrowserURL.normalizedURL(from: raw)
     }
 }
