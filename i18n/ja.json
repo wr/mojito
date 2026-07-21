@@ -39,6 +39,7 @@
   "demo.scene.doc": "デザインレビュー — {date}\n\nピッカーは初回表示時にフェードインさせること。チーム合意済み。\n\nやること:\n- フェードインフラグを追加",
   "demo.scene.deadline": "\n- 締め切りに間に合わせる ",
   "demo.scene.soon": "またね ",
+  "demo.scene.party": "今夜が楽しみすぎる ",
   "demo.scene.shipped": "新しいアプリをリリースしたよ ",
   "demo.scene.pickup": "買ってくる ",
   "demo.scene.formom": " ママのために",

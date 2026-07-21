@@ -39,6 +39,7 @@
   "demo.scene.doc": "Design-Review — {date}\n\nDie Auswahl soll beim ersten Anzeigen einblenden. Team ist einverstanden.\n\nTo-do:\n- Einblend-Flag hinzufügen",
   "demo.scene.deadline": "\n- Deadline eingehalten ",
   "demo.scene.soon": "bis bald ",
+  "demo.scene.party": "heute Abend wird gefeiert ",
   "demo.scene.shipped": "Gerade eine neue App veröffentlicht ",
   "demo.scene.pickup": "Hol ",
   "demo.scene.formom": " für Mama",

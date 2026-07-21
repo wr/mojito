@@ -39,6 +39,7 @@
   "demo.scene.doc": "Revisión de diseño — {date}\n\nEl selector debería aparecer con un fundido la primera vez. El equipo está de acuerdo.\n\nPendientes:\n- Agregar la opción de fundido",
   "demo.scene.deadline": "\n- Cumplir la fecha límite ",
   "demo.scene.soon": "nos vemos pronto ",
+  "demo.scene.party": "qué ganas de esta noche ",
   "demo.scene.shipped": "Acabo de lanzar una nueva app ",
   "demo.scene.pickup": "Pasar a comprar ",
   "demo.scene.formom": " para mamá",

@@ -48,6 +48,7 @@
   "demo.scene.doc": "Design Review — {date}\n\nPicker should fade in on first show. Team agreed.\n\nTo-do:\n- Add fade-in flag",
   "demo.scene.deadline": "\n- Hit deadline ",
   "demo.scene.soon": "see you soon ",
+  "demo.scene.party": "so ready for tonight ",
   "demo.scene.shipped": "Just shipped a new app ",
   "demo.scene.pickup": "Pick up ",
   "demo.scene.formom": " for mom",
