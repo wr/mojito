@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css?v=74">
+<link rel="stylesheet" href="/style.css?v=75">
 </head>
 <body>
 
@@ -41,6 +41,15 @@
   <h1 class="guide-title">How to type ⌘, ⌥, ⇧ and other Mac key symbols</h1>
   <p class="guide-sub">Handy for writing documentation, shortcut lists, or tutorials that need the real glyphs. None of them have a typing shortcut — here's what each one means, and the fastest way to get it on the page.</p>
 
+  <div class="key-answer" role="img" aria-label="Typing ::cmd in Mojito inserts the command glyph — there is no built-in keystroke for it">
+    <span class="key-chord" aria-hidden="true">
+      <code class="key-type">::cmd</code>
+    </span>
+    <span class="key-eq" aria-hidden="true">→</span>
+    <span class="key-result" aria-hidden="true">⌘</span>
+    <p class="key-note" aria-hidden="true">No built-in keystroke types ⌘ — this is Mojito's shortcode. The stock routes are copy-paste and Unicode Hex Input, below.</p>
+  </div>
+
   <h2>How do I type the command symbol on a Mac?</h2>
   <p>There's no keyboard shortcut for ⌘ — macOS never assigned one. The fastest routes are copying it from a reference table like the one below, enabling Unicode Hex Input and holding Option while typing <code>2318</code>, or typing <code>::cmd</code> in Mojito. All three land the actual character, U+2318.</p>
 
@@ -48,16 +57,16 @@
   <table class="code-table">
     <thead><tr><th scope="col">Glyph</th><th scope="col">Key it represents</th><th scope="col">Unicode</th><th scope="col">Mojito shortcode</th></tr></thead>
     <tbody>
-      <tr><td>⌘</td><td>Command</td><td>2318</td><td><code>::cmd</code></td></tr>
-      <tr><td>⌥</td><td>Option</td><td>2325</td><td><code>::option</code></td></tr>
-      <tr><td>⇧</td><td>Shift</td><td>21E7</td><td><code>::shift</code></td></tr>
-      <tr><td>⌃</td><td>Control</td><td>2303</td><td><code>::control</code></td></tr>
-      <tr><td>⇥</td><td>Tab</td><td>21E5</td><td><code>::tab</code></td></tr>
-      <tr><td>⎋</td><td>Escape</td><td>238B</td><td><code>::escape</code></td></tr>
-      <tr><td>⏎</td><td>Return</td><td>23CE</td><td><code>::return</code></td></tr>
-      <tr><td>⌫</td><td>Delete</td><td>232B</td><td><code>::delete</code></td></tr>
-      <tr><td>⇪</td><td>Caps Lock</td><td>21EA</td><td><code>::capslock</code></td></tr>
-      <tr><td>⏏</td><td>Eject</td><td>23CF</td><td><code>::eject</code></td></tr>
+      <tr><td>⌘</td><td>Command</td><td><code>U+2318</code></td><td><code>::cmd</code></td></tr>
+      <tr><td>⌥</td><td>Option</td><td><code>U+2325</code></td><td><code>::option</code></td></tr>
+      <tr><td>⇧</td><td>Shift</td><td><code>U+21E7</code></td><td><code>::shift</code></td></tr>
+      <tr><td>⌃</td><td>Control</td><td><code>U+2303</code></td><td><code>::control</code></td></tr>
+      <tr><td>⇥</td><td>Tab</td><td><code>U+21E5</code></td><td><code>::tab</code></td></tr>
+      <tr><td>⎋</td><td>Escape</td><td><code>U+238B</code></td><td><code>::escape</code></td></tr>
+      <tr><td>⏎</td><td>Return</td><td><code>U+23CE</code></td><td><code>::return</code></td></tr>
+      <tr><td>⌫</td><td>Delete</td><td><code>U+232B</code></td><td><code>::delete</code></td></tr>
+      <tr><td>⇪</td><td>Caps Lock</td><td><code>U+21EA</code></td><td><code>::capslock</code></td></tr>
+      <tr><td>⏏</td><td>Eject</td><td><code>U+23CF</code></td><td><code>::eject</code></td></tr>
     </tbody>
   </table>
   <p>Copy any glyph straight out of the table above if you just need it once.</p>
@@ -87,7 +96,7 @@
     <span class="guide-cta-note">Free &amp; open source · macOS 14 or later · Apple Silicon and Intel</span>
   </div>
 
-  <h2>Fair questions</h2>
+  <h2>Where these glyphs come from</h2>
   <div class="faq-item">
     <h3>What does ⌥ mean on a Mac keyboard?</h3>
     <p>It represents the Option key, sometimes labeled "alt" on the physical key itself (both print on most Mac keyboards). In documentation and menus, ⌥ and "Option" refer to the same key.</p>

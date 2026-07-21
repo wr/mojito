@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css?v=74">
+<link rel="stylesheet" href="/style.css?v=75">
 </head>
 <body>
 
@@ -46,8 +46,18 @@
       <source srcset="/screenshot-terminal.avif" type="image/avif">
       <img src="/screenshot-terminal.png" alt="Mojito's emoji autocomplete open in macOS Terminal while typing a git commit message, suggesting :bug: and other shortcodes" width="876" height="639" loading="lazy" decoding="async">
     </picture>
-    <figcaption>Shortcode autocomplete working in Terminal — no panel, no mouse.</figcaption>
+    <figcaption>Shortcode autocomplete working in Terminal, hands on the keyboard.</figcaption>
   </figure>
+
+  <table class="code-table compare-table">
+    <thead><tr><th scope="col">Shortcut</th><th scope="col">What it opens</th><th scope="col">Setup</th></tr></thead>
+    <tbody>
+      <tr><td>⌃⌘Space</td><td>The system emoji panel</td><td>None</td></tr>
+      <tr><td>🌐 Globe key</td><td>Same panel, one tap</td><td>One setting</td></tr>
+      <tr><td>Text replacement</td><td>Your own mappings, like <code>omw</code> → 🏃</td><td>Per emoji</td></tr>
+      <tr><td><code>:shortcode:</code></td><td>Inline autocomplete at the cursor</td><td>Install Mojito</td></tr>
+    </tbody>
+  </table>
 
   <h2>⌃⌘Space — the built-in emoji picker</h2>
   <p>Press <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Space</kbd> in any text field and macOS opens its emoji picker next to your cursor. Type to search, click or press Return to insert. This is the shortcut Apple wants you to memorize, and it works everywhere.</p>

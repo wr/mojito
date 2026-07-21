@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css?v=74">
+<link rel="stylesheet" href="/style.css?v=75">
 </head>
 <body>
 
@@ -42,17 +42,20 @@
   <p class="guide-sub">We make one of these apps — Mojito. So every claim below is something you can verify yourself, and the app we don't make comes first.</p>
 
   <h2>How the options compare</h2>
-  <table class="code-table">
+  <div class="table-scroll">
+  <table class="code-table compare-table">
     <thead>
-      <tr><th scope="col">App</th><th scope="col">Price</th><th scope="col">Open source</th><th scope="col">Inline or panel</th><th scope="col">Symbols beyond emoji</th><th scope="col">GIF search</th></tr>
+      <tr><th scope="col">App</th><th scope="col">Price</th><th scope="col">Open source</th><th scope="col">Picker style</th><th scope="col">Symbols</th><th scope="col">GIF search</th></tr>
     </thead>
     <tbody>
-      <tr><td>Built-in (macOS)</td><td>Free</td><td>No</td><td>Panel</td><td>No</td><td>No</td></tr>
-      <tr><td>Rocket</td><td>Free, $10 Pro upgrade</td><td>No</td><td>Inline</td><td>No</td><td>Pro adds GIF/image storage, not search</td></tr>
-      <tr><td>Raycast</td><td>Free, Pro from $8/mo</td><td>No</td><td>Panel (inside Raycast)</td><td>Yes</td><td>No</td></tr>
-      <tr><td>Mojito</td><td>Free</td><td>Yes (AGPL)</td><td>Inline</td><td>Yes (<code>::</code>)</td><td>Yes (<code>:::</code>, Giphy)</td></tr>
+      <tr><td>Built-in (macOS)</td><td>Free</td><td><span class="mark-no">—</span></td><td>Panel</td><td><span class="mark-no">—</span></td><td><span class="mark-no">—</span></td></tr>
+      <tr><td>Rocket</td><td>Free · $10 Pro</td><td><span class="mark-no">—</span></td><td>Inline</td><td><span class="mark-no">—</span></td><td><span class="mark-no">—</span>*</td></tr>
+      <tr><td>Raycast</td><td>Free · Pro $8/mo</td><td><span class="mark-no">—</span></td><td>Panel, in Raycast</td><td><span class="mark-yes">✓</span></td><td><span class="mark-no">—</span></td></tr>
+      <tr><td>Mojito</td><td>Free</td><td><span class="mark-yes">✓</span> AGPL</td><td>Inline</td><td><span class="mark-yes">✓</span> <code>::</code></td><td><span class="mark-yes">✓</span> <code>:::</code></td></tr>
     </tbody>
   </table>
+  </div>
+  <p class="table-note">* Rocket Pro stores GIFs and images you've saved; it doesn't search Giphy.</p>
 
   <h2>The built-in picker</h2>
   <p>macOS's own emoji panel (Control+Command+Space or the Globe key) is free, works in every app, and needs nothing installed. If you type emoji occasionally, it's probably enough. Its limits: no shortcodes, no symbol search beyond emoji, and no GIF support at all.</p>
