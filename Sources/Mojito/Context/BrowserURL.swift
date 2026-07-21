@@ -197,7 +197,12 @@ enum BrowserURL {
 /// can't bleed across an app switch.
 @MainActor
 final class BrowserURLCache {
-    static let shared = BrowserURLCache()
+    static let shared = BrowserURLCache(
+        observeActivations: true,
+        minRefreshInterval: 1.0,
+        now: { Date() },
+        resolver: { BrowserURLCache.appleScriptURL(bundleID: $0) }
+    )
 
     static let appleScriptBundleIDs: Set<String> = [
         "company.thebrowser.Browser",   // Arc
@@ -219,11 +224,29 @@ final class BrowserURLCache {
     /// Throttles opportunistic per-read refreshes; app-activation refreshes
     /// bypass it (`force`) since a switch is infrequent and changes the pid.
     private var lastRefreshAt: Date?
-    private static let minRefreshInterval: TimeInterval = 1.0
+    private let minRefreshInterval: TimeInterval
 
-    private init() {
+    /// Seams. Production wires the real `NSAppleScript` resolver and wall clock;
+    /// tests inject a stub resolver + controllable clock so the deferral,
+    /// single-flight, throttle, and pid-guard are checkable without AppleScript
+    /// or a real app switch (`observeActivations: false`).
+    private let now: () -> Date
+    private let resolver: (String) -> URL?
+
+    init(
+        observeActivations: Bool,
+        minRefreshInterval: TimeInterval,
+        now: @escaping () -> Date,
+        resolver: @escaping (String) -> URL?
+    ) {
+        self.minRefreshInterval = minRefreshInterval
+        self.now = now
+        self.resolver = resolver
+        guard observeActivations else { return }
         // Prefetch on activation so switching to Arc and immediately typing has
-        // a warm URL rather than a first-keystroke miss.
+        // a warm URL rather than a first-keystroke miss. The closure refers to
+        // `.shared` rather than capturing `self`, so it doesn't retain the
+        // singleton (which lives for the app's lifetime anyway).
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification,
             object: nil,
@@ -260,17 +283,17 @@ final class BrowserURLCache {
     private func scheduleRefresh(bundleID: String, pid: pid_t, force: Bool) {
         guard !refreshing else { return }
         if !force, haveResult, let last = lastRefreshAt,
-           Date().timeIntervalSince(last) < Self.minRefreshInterval {
+           now().timeIntervalSince(last) < minRefreshInterval {
             return
         }
         refreshing = true
         DispatchQueue.main.async { [weak self] in
             MainActor.assumeIsolated {
                 guard let self else { return }
-                self.cachedURL = Self.appleScriptURL(bundleID: bundleID)
+                self.cachedURL = self.resolver(bundleID)
                 self.cachedPID = pid
                 self.haveResult = true
-                self.lastRefreshAt = Date()
+                self.lastRefreshAt = self.now()
                 self.refreshing = false
             }
         }
