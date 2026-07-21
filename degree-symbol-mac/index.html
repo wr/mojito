@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css?v=74">
+<link rel="stylesheet" href="/style.css?v=75">
 </head>
 <body>
 
@@ -39,7 +39,17 @@
 <section class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type the degree symbol on a Mac (°)</h1>
-  <p class="guide-sub">One shortcut, one gotcha: two other keys produce something that looks like ° but isn't.</p>
+  <p class="guide-sub">The shortcut is Shift-Option-8. The catch: two neighboring keys produce lookalikes that read fine to a human and break in a spreadsheet.</p>
+
+  <div class="key-answer" role="img" aria-label="Shift + Option + 8 types the degree sign">
+    <span class="key-chord" aria-hidden="true">
+      <kbd class="key-cap"><span>⇧</span><span class="kc-name">shift</span></kbd>
+      <kbd class="key-cap"><span>⌥</span><span class="kc-name">option</span></kbd>
+      <kbd class="key-cap">8</kbd>
+    </span>
+    <span class="key-eq" aria-hidden="true">→</span>
+    <span class="key-result" aria-hidden="true">°</span>
+  </div>
 
   <h2>How do I type the degree symbol on a Mac?</h2>
   <p>Press <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>8</kbd> and macOS types °. It works in any text field, any app, no setup required. For temperature, just follow it with the letter: <code>72°F</code>, <code>20°C</code>.</p>
@@ -48,11 +58,11 @@
   <p>Two nearby shortcuts produce characters that look almost identical to ° at normal reading size, and both are wrong. <kbd>Option</kbd> + <kbd>0</kbd> types º, the masculine ordinal indicator — the character Spanish uses in "1º" and "2º". <kbd>Option</kbd> + <kbd>K</kbd> types ˚, a standalone ring diacritic used in phonetic notation. Neither is Unicode's DEGREE SIGN (U+00B0). Autocomplete and muscle memory both nudge people toward Option+0 especially, since it's easier to hit than Shift+Option+8. It's a real problem if you're pasting temperatures into a spreadsheet or a script — the wrong character won't sort, search, or convert correctly even though it reads fine to a human eye.</p>
 
   <table class="code-table">
-    <thead><tr><th scope="col">Symbol</th><th scope="col">Keystroke</th><th scope="col">What it actually is</th></tr></thead>
+    <thead><tr><th scope="col">Symbol</th><th scope="col">Keystroke</th><th scope="col">Unicode</th><th scope="col">What it actually is</th></tr></thead>
     <tbody>
-      <tr><td>°</td><td><kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>8</kbd></td><td>Degree sign — the one you want</td></tr>
-      <tr><td>º</td><td><kbd>Option</kbd> + <kbd>0</kbd></td><td>Masculine ordinal indicator</td></tr>
-      <tr><td>˚</td><td><kbd>Option</kbd> + <kbd>K</kbd></td><td>Ring diacritic (combining/spacing)</td></tr>
+      <tr><td>°</td><td><kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>8</kbd></td><td><code>U+00B0</code></td><td>Degree sign — the one you want</td></tr>
+      <tr><td>º</td><td><kbd>Option</kbd> + <kbd>0</kbd></td><td><code>U+00BA</code></td><td>Masculine ordinal indicator</td></tr>
+      <tr><td>˚</td><td><kbd>Option</kbd> + <kbd>K</kbd></td><td><code>U+02DA</code></td><td>Ring diacritic</td></tr>
     </tbody>
   </table>
 
@@ -71,7 +81,7 @@
       <source srcset="/screenshot-symbols.avif" type="image/avif">
       <img src="/screenshot-symbols.png" alt="Typing ::deg in TextEdit on macOS with Mojito suggesting ::degree, which inserts the ° degree sign" width="1296" height="976" loading="lazy" decoding="async">
     </picture>
-    <figcaption>Type <code>::deg</code>, press Return, get ° — no chord to remember.</figcaption>
+    <figcaption>Type <code>::deg</code>, press Return, get °.</figcaption>
   </figure>
 
   <div class="guide-cta">
@@ -82,7 +92,7 @@
     <span class="guide-cta-note">Free &amp; open source · macOS 14 or later · Apple Silicon and Intel</span>
   </div>
 
-  <h2>Fair questions</h2>
+  <h2>More degree-sign questions</h2>
   <div class="faq-item">
     <h3>What's the difference between °, º and ˚?</h3>
     <p>° (U+00B0) is the degree sign, for temperature, angles, and coordinates. º (U+00BA) is the masculine ordinal indicator, used after numbers in Spanish and Portuguese. ˚ (U+02DA) is a ring diacritic, mostly seen combined with letters in phonetic transcription. They come from different Unicode blocks and aren't interchangeable, even though most fonts render them within a pixel or two of each other.</p>

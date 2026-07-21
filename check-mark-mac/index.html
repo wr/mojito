@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css?v=74">
+<link rel="stylesheet" href="/style.css?v=75">
 </head>
 <body>
 
@@ -41,6 +41,16 @@
   <h1 class="guide-title">How to type a check mark on a Mac (✓)</h1>
   <p class="guide-sub">There isn't a keyboard shortcut for this one, and the one you've seen floating around is wrong.</p>
 
+  <div class="key-answer" role="img" aria-label="Option + V types the square root sign, not a check mark — a real check mark needs the character picker or a shortcode like ::checkmark">
+    <span class="key-chord" aria-hidden="true">
+      <kbd class="key-cap"><span>⌥</span><span class="kc-name">option</span></kbd>
+      <kbd class="key-cap">V</kbd>
+    </span>
+    <span class="key-eq" aria-hidden="true">→</span>
+    <span class="key-result" aria-hidden="true">√</span>
+    <p class="key-note" aria-hidden="true">…which is a square root, not a check mark. A real ✓ takes the character picker — or <code>::checkmark</code> in Mojito.</p>
+  </div>
+
   <h2>How do I type a check mark on a Mac?</h2>
   <p>There's no Option-key combination that types ✓ on a Mac — unlike °, ©, or ™, it doesn't sit on the US keyboard layout at all. The shortcut you may have seen suggested, <kbd>Option</kbd> + <kbd>V</kbd>, actually types √, the square-root sign. It looks close enough to fool a skim, but it's a math symbol, not a check mark. To get an actual ✓, use the character picker, a text replacement, or Mojito.</p>
 
@@ -51,15 +61,17 @@
   <p><kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>Space</kbd> opens the system character picker. Search "check" and you'll get several: ✓ (check mark), ✔ (heavy check mark), ☑ (ballot box with check), and the ✅ emoji. Double-click any to insert it at your cursor.</p>
   <p>For something you type instead of hunt for, set up a text replacement in <strong>System Settings → Keyboard → Text Replacements</strong> — assign a trigger like <code>chk</code> to expand to ✓ everywhere on the Mac.</p>
 
+  <div class="table-scroll">
   <table class="code-table">
-    <thead><tr><th scope="col">Symbol</th><th scope="col">How to get it</th><th scope="col">Mojito shortcode</th></tr></thead>
+    <thead><tr><th scope="col">Symbol</th><th scope="col">Unicode</th><th scope="col">How to get it</th><th scope="col">Mojito shortcode</th></tr></thead>
     <tbody>
-      <tr><td>✓</td><td>Character picker, search "check"</td><td><code>::checkmark</code></td></tr>
-      <tr><td>✗</td><td>Character picker, search "cross"</td><td><code>::xmark</code></td></tr>
-      <tr><td>✅</td><td>Emoji picker</td><td><code>:white_check_mark:</code></td></tr>
-      <tr><td>❌</td><td>Emoji picker</td><td><code>:x:</code></td></tr>
+      <tr><td>✓</td><td><code>U+2713</code></td><td>Character picker, search "check"</td><td><code>::checkmark</code></td></tr>
+      <tr><td>✗</td><td><code>U+2717</code></td><td>Character picker, search "cross"</td><td><code>::xmark</code></td></tr>
+      <tr><td>✅</td><td><code>U+2705</code></td><td>Emoji picker</td><td><code>:white_check_mark:</code></td></tr>
+      <tr><td>❌</td><td><code>U+274C</code></td><td>Emoji picker</td><td><code>:x:</code></td></tr>
     </tbody>
   </table>
+  </div>
 
   <h2>There is a real Option-key method — it just needs setup</h2>
   <p>macOS ships a keyboard layout called <strong>Unicode Hex Input</strong> that lets you type any Unicode character by its code point. Add it in <strong>System Settings → Keyboard → Input Sources → Add Input Source</strong>, search "Unicode Hex Input," then switch to it from the input menu in the menu bar. With it active, hold <kbd>Option</kbd> and type <code>2713</code> — the Unicode code point for ✓ — to insert the check mark directly. It's more setup than a single keystroke, and you have to switch input sources to use it, but it's a genuine shortcut where Option+V is not.</p>
@@ -83,7 +95,7 @@
     <span class="guide-cta-note">Free &amp; open source · macOS 14 or later · Apple Silicon and Intel</span>
   </div>
 
-  <h2>Fair questions</h2>
+  <h2>Check marks, checkboxes, and the mix-ups</h2>
   <div class="faq-item">
     <h3>Is Option+V a check mark?</h3>
     <p>No. It types √, the square-root sign. It's a common mix-up online because the two symbols look similar at small sizes, but they're unrelated characters with different Unicode code points.</p>

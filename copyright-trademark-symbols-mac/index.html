@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css?v=74">
+<link rel="stylesheet" href="/style.css?v=75">
 </head>
 <body>
 
@@ -39,19 +39,32 @@
 <section class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type ©, ™ and ® on a Mac</h1>
-  <p class="guide-sub">Three shortcuts, three legal marks that don't mean the same thing.</p>
+  <p class="guide-sub">All three sit on the Option layer, one key each. The marks carry different legal weight, which matters more than the typing.</p>
+
+  <div class="key-answer" role="img" aria-label="Option + G types the copyright sign">
+    <span class="key-chord" aria-hidden="true">
+      <kbd class="key-cap"><span>⌥</span><span class="kc-name">option</span></kbd>
+      <kbd class="key-cap">G</kbd>
+    </span>
+    <span class="key-eq" aria-hidden="true">→</span>
+    <span class="key-result" aria-hidden="true">©</span>
+  </div>
 
   <h2>How do I type the copyright symbol on a Mac?</h2>
   <p>Press <kbd>Option</kbd> + <kbd>G</kbd> for © (copyright). For the other two: <kbd>Option</kbd> + <kbd>2</kbd> gives ™ (trademark), and <kbd>Option</kbd> + <kbd>R</kbd> gives ® (registered trademark). All three work directly in any text field on a US keyboard layout — no picker needed.</p>
 
+  <div class="table-scroll">
   <table class="code-table">
-    <thead><tr><th scope="col">Symbol</th><th scope="col">Keystroke</th><th scope="col">Mojito shortcode</th></tr></thead>
+    <thead><tr><th scope="col">Symbol</th><th scope="col">Means</th><th scope="col">Keystroke</th><th scope="col">Mojito shortcode</th></tr></thead>
     <tbody>
-      <tr><td>©</td><td><kbd>Option</kbd> + <kbd>G</kbd></td><td><code>::copyright</code></td></tr>
-      <tr><td>™</td><td><kbd>Option</kbd> + <kbd>2</kbd></td><td><code>::trademark</code></td></tr>
-      <tr><td>®</td><td><kbd>Option</kbd> + <kbd>R</kbd></td><td><code>::registered</code></td></tr>
+      <tr><td>©</td><td>Copyright</td><td><kbd>Option</kbd> + <kbd>G</kbd></td><td><code>::copyright</code></td></tr>
+      <tr><td>™</td><td>Trademark claim</td><td><kbd>Option</kbd> + <kbd>2</kbd></td><td><code>::trademark</code></td></tr>
+      <tr><td>®</td><td>Registered trademark</td><td><kbd>Option</kbd> + <kbd>R</kbd></td><td><code>::registered</code></td></tr>
+      <tr><td>§</td><td>Section (statutes)</td><td><kbd>Option</kbd> + <kbd>6</kbd></td><td><code>::section</code></td></tr>
+      <tr><td>¶</td><td>Paragraph (briefs)</td><td><kbd>Option</kbd> + <kbd>7</kbd></td><td><code>::paragraph</code></td></tr>
     </tbody>
   </table>
+  </div>
 
   <p>One honest caveat: these are the US layout combinations. On some international keyboard layouts the same Option combos map to accented letters instead, so the shortcut can differ — if it doesn't produce the right symbol, the character picker below always works regardless of layout.</p>
 
@@ -60,7 +73,6 @@
 
   <h2>Other routes</h2>
   <p><kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>Space</kbd> opens the system character picker if you'd rather search than remember three separate shortcuts — type "copyright", "trademark", or "registered" and double-click the result. To confirm any of these five shortcuts on your own keyboard before you rely on them, open <strong>Keyboard Viewer</strong> (System Settings → Keyboard → Input Sources → Show Input Menu in menu bar, then "Show Keyboard Viewer") and hold Option to see every symbol light up on its key.</p>
-  <p>Two more worth knowing for legal or formal writing: § (section sign) is <kbd>Option</kbd> + <kbd>6</kbd>, and ¶ (pilcrow) is <kbd>Option</kbd> + <kbd>7</kbd>. § is standard in statute and code citations ("§ 230"); ¶ marks paragraph references in legal briefs and long documents.</p>
   <p>Building a web page instead of typing directly? The HTML entities are <code>&amp;copy;</code>, <code>&amp;trade;</code>, and <code>&amp;reg;</code> for ©, ™, and ® respectively — more reliable than a pasted character when you're not sure about the file's encoding.</p>
 
   <h2>Faster with Mojito</h2>
@@ -82,7 +94,7 @@
     <span class="guide-cta-note">Free &amp; open source · macOS 14 or later · Apple Silicon and Intel</span>
   </div>
 
-  <h2>Fair questions</h2>
+  <h2>What the marks actually mean</h2>
   <div class="faq-item">
     <h3>™ vs ® — which one do I want?</h3>
     <p>™ marks a claim to a trademark, registered or not — you can use it on a name or logo the moment you start using it in commerce. ® is reserved for marks actually registered with a trademark office (the USPTO, for a US registration); using ® on an unregistered mark can get you in real legal trouble. This isn't legal advice, just the general distinction — check with a trademark attorney for anything that actually matters.</p>

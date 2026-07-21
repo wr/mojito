@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css?v=74">
+<link rel="stylesheet" href="/style.css?v=75">
 </head>
 <body>
 
@@ -39,19 +39,31 @@
 <section class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type an em dash on a Mac (—)</h1>
-  <p class="guide-sub">Three dash-shaped characters, three different keystrokes, three different jobs.</p>
+  <p class="guide-sub">Shift-Option-Hyphen. Drop the Shift and you get the shorter en dash, which does a different job.</p>
+
+  <div class="key-answer" role="img" aria-label="Shift + Option + Hyphen types the em dash">
+    <span class="key-chord" aria-hidden="true">
+      <kbd class="key-cap"><span>⇧</span><span class="kc-name">shift</span></kbd>
+      <kbd class="key-cap"><span>⌥</span><span class="kc-name">option</span></kbd>
+      <kbd class="key-cap">-</kbd>
+    </span>
+    <span class="key-eq" aria-hidden="true">→</span>
+    <span class="key-result" aria-hidden="true">—</span>
+  </div>
 
   <h2>How do I type an em dash on a Mac?</h2>
   <p>Press <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>Hyphen</kbd> and macOS types — directly, in any app. The en dash is <kbd>Option</kbd> + <kbd>Hyphen</kbd> (–), one modifier fewer. The plain hyphen is just the key by itself (-). All three work anywhere you can type text.</p>
 
+  <div class="table-scroll">
   <table class="code-table">
-    <thead><tr><th scope="col">Symbol</th><th scope="col">Keystroke</th><th scope="col">Mojito shortcode</th></tr></thead>
+    <thead><tr><th scope="col">Symbol</th><th scope="col">Keystroke</th><th scope="col">Use it for</th><th scope="col">Mojito shortcode</th></tr></thead>
     <tbody>
-      <tr><td>—</td><td><kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>Hyphen</kbd></td><td><code>::emdash</code></td></tr>
-      <tr><td>–</td><td><kbd>Option</kbd> + <kbd>Hyphen</kbd></td><td><code>::endash</code></td></tr>
-      <tr><td>-</td><td><kbd>Hyphen</kbd></td><td>—</td></tr>
+      <tr><td>—</td><td><kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>Hyphen</kbd></td><td>A break in thought</td><td><code>::emdash</code></td></tr>
+      <tr><td>–</td><td><kbd>Option</kbd> + <kbd>Hyphen</kbd></td><td>Ranges: <code>Mon–Fri</code></td><td><code>::endash</code></td></tr>
+      <tr><td>-</td><td><kbd>Hyphen</kbd></td><td>Compounds: <code>well-known</code></td><td></td></tr>
     </tbody>
   </table>
+  </div>
 
   <h2>Which one you actually want</h2>
   <p>An em dash marks a break in thought or sets off a clause — like this one. An en dash is for ranges: <code>Mon–Fri</code>, <code>pages 9–14</code>, a score of <code>3–1</code>. A plain hyphen joins compound words: <code>well-known</code>, <code>co-worker</code>. Mixing them up isn't a crime, but a hyphen doing an em dash's job reads as a typo to anyone who's paying attention, and a hyphen standing in for a range (<code>Mon-Fri</code>) is one of the more common small errors in otherwise careful writing.</p>
@@ -63,10 +75,10 @@
 
   <p>Worth knowing: the em dash has picked up a reputation lately as a tell for AI-written text, since chat models lean on it hard. Feels a little unfair to a character that's been doing honest work in English prose for centuries.</p>
 
-  <p>One more wrinkle if you write in Markdown: three hyphens alone on a line (<code>---</code>) usually renders as a horizontal rule, not a dash of any kind. That's a Markdown convention handled by whatever renders the file, unrelated to macOS's keyboard shortcuts or Smart Dashes — worth knowing so you don't go hunting for a keyboard fix to a rendering behavior.</p>
+  <p>One more wrinkle if you write in Markdown: three hyphens alone on a line (<code>---</code>) usually renders as a horizontal rule, not a dash of any kind. That's a convention of whatever renders the file, unrelated to macOS's keyboard shortcuts or Smart Dashes.</p>
 
   <h2>Faster with Mojito</h2>
-  <p>If you don't want to remember which modifier goes with which dash, <a href="/">Mojito</a> turns both into shortcodes: type <code>::emdash</code> for — or <code>::endash</code> for –, anywhere you're typing. No menu, no memorizing which one has the Shift key.</p>
+  <p>If you don't want to remember which modifier goes with which dash, <a href="/">Mojito</a> turns both into shortcodes: type <code>::emdash</code> for — or <code>::endash</code> for –, anywhere you're typing.</p>
 
   <figure class="guide-figure">
     <picture>
@@ -84,7 +96,7 @@
     <span class="guide-cta-note">Free &amp; open source · macOS 14 or later · Apple Silicon and Intel</span>
   </div>
 
-  <h2>Fair questions</h2>
+  <h2>Dashes, in more detail</h2>
   <div class="faq-item">
     <h3>How do I stop my Mac converting -- into —?</h3>
     <p>Turn off Smart Dashes in <strong>Edit → Substitutions → Smart Dashes</strong> within the app, or system-wide in <strong>System Settings → Keyboard → Text Input → Edit</strong>. It only affects apps that use macOS's standard text system — it won't touch browsers or apps with their own text engines.</p>

@@ -17,7 +17,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og-image.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
-<link rel="stylesheet" href="/style.css?v=74">
+<link rel="stylesheet" href="/style.css?v=75">
 </head>
 <body>
 
@@ -47,12 +47,12 @@
   <h2>What inline autocomplete looks like</h2>
   <figure class="guide-figure">
     <picture>
-      <source srcset="/screenshot-imessage.avif" type="image/avif">
-      <img src="/screenshot-imessage.png" alt="Mojito's inline emoji picker in iMessage on macOS, anchored at the text cursor with :wave: as the top result" width="930" height="640" loading="lazy" decoding="async">
+      <source srcset="/screenshot-textedit.avif" type="image/avif">
+      <img src="/screenshot-textedit.png" alt="Mojito's inline emoji picker in TextEdit on macOS, anchored at the text cursor with :fire: as the top result" width="1256" height="1008" loading="lazy" decoding="async">
     </picture>
     <figcaption>The picker appears at your cursor, in the app you're already in.</figcaption>
   </figure>
-  <p><a href="/">Mojito</a> skips the panel. You keep typing — <code>see you soon :wav</code> — and a small autocomplete appears at your cursor with 👋 at the top. Return inserts it. The whole interaction happens inside the text you were already writing, which is why it feels fast: there's nothing to switch to and nothing to come back from.</p>
+  <p><a href="/">Mojito</a> skips the panel. You keep typing — <code>see you soon :wav</code> — and a small autocomplete appears at your cursor with 👋 at the top. Return inserts it. The whole interaction happens inside the text you were already writing, which is why it feels fast — you never leave the sentence.</p>
   <ul>
     <li><strong>Works everywhere</strong> — TextEdit, Mail, Notes, Terminal, browsers, Notion. It bows out of apps that already do shortcodes (Slack, Discord) so nothing double-fires.</li>
     <li><strong>Search by meaning</strong> — <code>:happy</code>, <code>:zen</code>, and <code>:celebrate</code> work, not just exact codes. Results re-rank by what you actually use.</li>
@@ -73,7 +73,7 @@
     <span class="guide-cta-note">Free &amp; open source · macOS 14 or later · Apple Silicon and Intel</span>
   </div>
 
-  <h2>Fair questions</h2>
+  <h2>Before you switch</h2>
   <div class="faq-item">
     <h3>Why does it need accessibility permission?</h3>
     <p>That's the macOS API for seeing keystrokes and inserting text in other apps — there's no way to do inline autocomplete without it. Matching runs locally, nothing you type is transmitted or stored, and password fields are ignored. The <a href="https://github.com/wr/mojito">source is public</a> if you'd rather verify than trust.</p>
