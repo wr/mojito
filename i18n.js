@@ -43,7 +43,7 @@
   ];
   var RTL = { ar: 1, fa: 1, he: 1 };
   var STORAGE_KEY = "mojito.lang";
-  var DICT_VERSION = "2"; // bump alongside i18n/*.json edits to bust caches
+  var DICT_VERSION = "3"; // bump alongside i18n/*.json edits to bust caches
 
   var byCode = {};
   LOCALES.forEach(function (l) { byCode[l.code.toLowerCase()] = l.code; });
