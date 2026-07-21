@@ -2,6 +2,11 @@
 
 Type emoji shortcodes anywhere on macOS. `:tada:` becomes 🎉 in any text field.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/demo-dark.gif">
+  <img src="docs/demo-light.gif" alt="Mojito's picker expanding emoji shortcodes in iMessage and Terminal">
+</picture>
+
 Requires macOS 14 or later.
 
 > [!TIP]
