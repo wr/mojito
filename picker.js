@@ -3534,6 +3534,35 @@
     ["flag_gbwls","🏴󠁧󠁢󠁷󠁬󠁳󠁿"]
   ];
 
+  // Symbol search (`::` trigger) — a demo-sized slice of the app's symbol
+  // corpus (Engine.swift reaches every glyph macOS can draw; this is just
+  // enough to make the `::` mode feel real).
+  const SYMBOLS = [
+    ["alpha","α"], ["beta","β"], ["gamma","γ"], ["delta","δ"], ["Delta","Δ"],
+    ["epsilon","ε"], ["theta","θ"], ["lambda","λ"], ["mu","μ"], ["pi","π"],
+    ["sigma","σ"], ["Sigma","Σ"], ["phi","φ"], ["omega","ω"], ["Omega","Ω"],
+    ["euro","€"], ["pound","£"], ["yen","¥"], ["cent","¢"], ["won","₩"],
+    ["rupee","₹"], ["bitcoin","₿"],
+    ["approx","≈"], ["notequal","≠"], ["lessequal","≤"], ["greaterequal","≥"],
+    ["plusminus","±"], ["times","×"], ["divide","÷"], ["infinity","∞"],
+    ["sqrt","√"], ["degree","°"], ["permille","‰"], ["integral","∫"],
+    ["partial","∂"], ["emptyset","∅"], ["therefore","∴"],
+    ["half","½"], ["third","⅓"], ["twothirds","⅔"], ["quarter","¼"],
+    ["threequarters","¾"], ["eighth","⅛"],
+    ["leftarrow","←"], ["rightarrow","→"], ["uparrow","↑"], ["downarrow","↓"],
+    ["leftrightarrow","↔"], ["updownarrow","↕"],
+    ["cmd","⌘"], ["command","⌘"], ["option","⌥"], ["shift","⇧"],
+    ["control","⌃"], ["capslock","⇪"], ["tab","⇥"], ["return","⏎"],
+    ["delete","⌫"], ["escape","⎋"], ["eject","⏏"],
+    ["copyright","©"], ["registered","®"], ["trademark","™"], ["section","§"],
+    ["paragraph","¶"], ["dagger","†"], ["doubledagger","‡"], ["bullet","•"],
+    ["middot","·"], ["ellipsis","…"], ["emdash","—"], ["endash","–"],
+    ["interrobang","‽"], ["numero","№"],
+    ["checkmark","✓"], ["xmark","✗"], ["star","★"], ["heart","♥"],
+    ["diamond","♦"], ["club","♣"], ["spade","♠"], ["note","♪"], ["notes","♫"],
+    ["flat","♭"], ["sharp","♯"], ["female","♀"], ["male","♂"]
+  ];
+
   const MAX_ROWS = 6;
 
   /* ---------- fuzzy matcher ---------- */
@@ -3559,10 +3588,11 @@
     return -Infinity;
   }
 
-  function search(query) {
+  function search(query, mode) {
     if (!query) return [];
     const results = [];
-    for (const [code, emoji] of DB) {
+    const table = mode === 'symbol' ? SYMBOLS : DB;
+    for (const [code, emoji] of table) {
       const s = score(query, code);
       if (s > -Infinity) results.push({ code, emoji, score: s });
     }
@@ -3653,6 +3683,7 @@
 
   let activeIndex = 0;
   let currentMatches = [];
+  let currentMode = 'emoji'; // 'emoji' | 'symbol' — how rows render (:code: vs ::code)
 
   function rowId(i) { return 'picker-row-' + i; }
 
@@ -3663,14 +3694,18 @@
     li.setAttribute('role', 'option');
     li.setAttribute('aria-selected', active ? 'true' : 'false');
     const idx = code.toLowerCase().indexOf(query.toLowerCase());
+    // Symbols render as `::code` (open trigger, no closing colon) to mirror
+    // how the mode is typed; emoji keep the classic `:code:` form.
+    const pre = currentMode === 'symbol' ? '::' : ':';
+    const post = currentMode === 'symbol' ? '' : ':';
     let codeHtml;
     if (idx === -1 || !query) {
-      codeHtml = `:${escapeHtml(code)}:`;
+      codeHtml = `${pre}${escapeHtml(code)}${post}`;
     } else {
       const a = code.slice(0, idx);
       const b = code.slice(idx, idx + query.length);
       const c = code.slice(idx + query.length);
-      codeHtml = `:${escapeHtml(a)}<span class="match">${escapeHtml(b)}</span>${escapeHtml(c)}:`;
+      codeHtml = `${pre}${escapeHtml(a)}<span class="match">${escapeHtml(b)}</span>${escapeHtml(c)}${post}`;
     }
     li.innerHTML =
       `<span class="px-emoji">${emoji}</span>` +
@@ -3740,6 +3775,107 @@
     updateActiveDescendant();
   }
 
+  /* ---------- GIF panel (`:::` trigger) ----------
+     The real app pops a Giphy-backed search panel; the demo shows a canned
+     set of four looping GIFs for any query and "sends" the pick as an
+     iMessage bubble. Thumbnails lazy-load on first open so the hero doesn't
+     pay ~200KB of GIF up front. */
+
+  const gifPanel = document.getElementById('gif-panel');
+  const gifQueryEl = document.getElementById('gif-query');
+  const gifThumbs = gifPanel ? Array.from(gifPanel.querySelectorAll('.gif-thumb')) : [];
+  let gifIndex = 0;
+  let gifLoaded = false;
+
+  function gifPanelVisible() {
+    return !!gifPanel && gifPanel.classList.contains('show');
+  }
+
+  function positionGifPanel() {
+    // Center the panel over the compose field, clamped to the hero card.
+    // Same scale normalization dance as positionPicker (mobile breakpoints
+    // scale .picker-anchor, so rects are in post-transform px).
+    const anchor = gifPanel.parentElement;
+    if (!anchor) return;
+    const inputRect = input.getBoundingClientRect();
+    const anchorRect = anchor.getBoundingClientRect();
+    const scaleX = (anchor.offsetWidth && anchorRect.width / anchor.offsetWidth) || 1;
+    const scaleY = (anchor.offsetHeight && anchorRect.height / anchor.offsetHeight) || 1;
+    const panelW = gifPanel.offsetWidth || 252;
+    const panelH = gifPanel.offsetHeight || 300;
+    const anchorW = anchor.offsetWidth || anchorRect.width;
+    const inputCX = (inputRect.left + inputRect.width / 2 - anchorRect.left) / scaleX;
+    const inputTop = (inputRect.top - anchorRect.top) / scaleY;
+    const left = Math.max(8, Math.min(inputCX - panelW / 2, anchorW - panelW - 8));
+    const top = Math.max(8, inputTop - panelH - 8);
+    gifPanel.style.left = `${left}px`;
+    gifPanel.style.top = `${top}px`;
+  }
+
+  function updateGifSelection() {
+    gifThumbs.forEach((t, i) => {
+      t.classList.toggle('active', i === gifIndex);
+      t.setAttribute('aria-selected', i === gifIndex ? 'true' : 'false');
+    });
+  }
+
+  function showGifPanel(query) {
+    if (!gifPanel) return;
+    if (!gifLoaded) {
+      gifLoaded = true;
+      gifThumbs.forEach((t) => { if (t.dataset.src) t.src = t.dataset.src; });
+    }
+    if (gifQueryEl) gifQueryEl.textContent = query;
+    if (!gifPanelVisible()) { gifIndex = 0; updateGifSelection(); }
+    positionGifPanel();
+    void gifPanel.offsetWidth;
+    gifPanel.classList.add('show');
+    gifPanel.setAttribute('aria-hidden', 'false');
+  }
+
+  function hideGifPanel() {
+    if (!gifPanel || !gifPanelVisible()) return;
+    gifPanel.classList.remove('show');
+    gifPanel.setAttribute('aria-hidden', 'true');
+    gifIndex = 0;
+  }
+
+  // "Send" the picked GIF as an iMessage bubble and consume the `:::query`.
+  function commitGif() {
+    const thumb = gifThumbs[gifIndex];
+    if (!thumb) return;
+    const value = input.value;
+    const caret = input.selectionStart ?? value.length;
+    const q = activeQuery(value, caret);
+    if (q && q.mode === 'gif') {
+      input.value = value.slice(0, q.trigStart) + value.slice(q.end + (q.exact ? 1 : 0));
+    }
+    hideGifPanel();
+    sendGifBubble(thumb.dataset.src || thumb.src);
+  }
+
+  function sendGifBubble(src) {
+    const imApp = apps[1];
+    if (!imApp) return;
+    const bubbles = imApp.querySelector('.bubbles');
+    if (!bubbles) return;
+    const sent = document.createElement('div');
+    sent.className = 'bubble sent bubble-gif is-new';
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    img.width = 128;
+    img.height = 128;
+    sent.appendChild(img);
+    bubbles.appendChild(sent);
+    setTimeout(() => sent.classList.remove('is-new'), 600);
+  }
+
+  gifThumbs.forEach((t, i) => {
+    t.addEventListener('mouseenter', () => { gifIndex = i; updateGifSelection(); });
+    t.addEventListener('mousedown', (e) => { e.preventDefault(); gifIndex = i; commitGif(); });
+  });
+
   /* ---------- input → picker pipeline ---------- */
 
   function activeQuery(value, caret) {
@@ -3766,7 +3902,15 @@
     // means the user is typing an emoticon, not a shortcode. `:flag-us:` is
     // still fine (hyphen is mid-query, not leading).
     if (query.startsWith('-')) return null;
-    return { start, end, query, exact };
+    // Count the colon run ending at `start` to pick the mode, mirroring the
+    // app's default triggers: `:` emoji, `::` symbols, `:::` GIF search.
+    let trig = 1;
+    while (trig < 3 && start - trig >= 0 && value[start - trig] === ':') trig++;
+    if (start - trig >= 0 && value[start - trig] === ':') return null; // 4+ colons: not a trigger
+    const mode = trig === 3 ? 'gif' : trig === 2 ? 'symbol' : 'emoji';
+    // trigStart = index of the first colon of the trigger — replacements
+    // consume the whole trigger, not just the colon nearest the query.
+    return { start, end, query, exact, mode, trigStart: start - (trig - 1) };
   }
 
   function handleInput() {
@@ -3774,13 +3918,23 @@
     const focused = document.activeElement === input;
     const caret = focused ? (input.selectionStart ?? value.length) : value.length;
     const q = activeQuery(value, caret);
-    if (!q || !q.query) { hidePicker(); return; }
+    if (!q || !q.query) { hidePicker(); hideGifPanel(); return; }
 
-    const matches = search(q.query);
+    if (q.mode === 'gif') {
+      hidePicker();
+      // The GIF flow only makes sense where an image can land — the iMessage
+      // mock. Elsewhere `:::` just stays quiet, like an app with GIFs off.
+      if (input.dataset.app === 'imessage') showGifPanel(q.query);
+      else hideGifPanel();
+      return;
+    }
+    hideGifPanel();
+
+    const matches = search(q.query, q.mode);
     if (matches.length === 0) { hidePicker(); return; }
 
     if (q.exact && matches[0].code.toLowerCase() === q.query.toLowerCase()) {
-      const before = value.slice(0, q.start);
+      const before = value.slice(0, q.trigStart);
       const after = value.slice(q.end + 1);
       input.value = before + matches[0].emoji + after;
       const newCaret = (before + matches[0].emoji).length;
@@ -3790,6 +3944,7 @@
     }
 
     currentMatches = matches;
+    currentMode = q.mode;
     activeIndex = Math.min(activeIndex, matches.length - 1);
     if (activeIndex < 0) activeIndex = 0;
     positionPicker(q);
@@ -3804,7 +3959,7 @@
     const q = activeQuery(value, caret);
     if (!q) { hidePicker(); return; }
     const emoji = currentMatches[activeIndex].emoji;
-    const before = value.slice(0, q.start);
+    const before = value.slice(0, q.trigStart);
     const after = value.slice(q.end + (q.exact ? 1 : 0));
     input.value = before + emoji + after;
     const newCaret = (before + emoji).length;
@@ -3826,6 +3981,26 @@
   document.addEventListener('keydown', (e) => {
     if (!isDemoInput(e.target)) return;
     input = e.target;
+    if (gifPanelVisible()) {
+      // 2×2 grid: left/right step, up/down jump a row.
+      const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 2, ArrowUp: -2 }[e.key];
+      if (step !== undefined) {
+        e.preventDefault();
+        gifIndex = (gifIndex + step + gifThumbs.length) % gifThumbs.length;
+        updateGifSelection();
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        commitGif();
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        hideGifPanel();
+        return;
+      }
+    }
     if (e.key === 'ArrowDown' && currentMatches.length) {
       e.preventDefault();
       activeIndex = (activeIndex + 1) % currentMatches.length;
@@ -3861,11 +4036,13 @@
       stopAutoplay();
       input.value = '';
       hidePicker();
+      hideGifPanel();
     } else if (input !== prevInput) {
       // Moving focus between demo inputs drops any picker rendered for the
       // previous input — otherwise the new input's aria-activedescendant
       // would reference rows describing the old input's query.
       hidePicker();
+      hideGifPanel();
     }
     // Each app's textarea may use a different font (terminal is monospace).
     cachedFont = '';
@@ -3950,9 +4127,14 @@
     if (imMetaTimeEl) imMetaTimeEl.textContent = `${tr('demo.imessage.today', 'Today')} · ${localizedTime(_now)}`;
   }
 
-  // Each scene targets one app and uses a UNIQUE emoji (no repeats across the cycle).
-  // App indices: 0=TextEdit, 1=iMessage, 2=Terminal, 3=Mastodon, 4=Reminders.
+  // Each scene targets one app and uses a UNIQUE emoji/symbol (no repeats
+  // across the cycle). App indices: 0=TextEdit, 1=iMessage, 2=Terminal,
+  // 3=Mastodon, 4=Reminders.
   // `prefilled`: text already in the textarea when the slide arrives (not typed).
+  // `symbol`: type the `::` trigger and search the symbol table instead.
+  // `gif`: type the `:::` trigger — pops the GIF panel and sends the pick
+  //   as an iMessage bubble (so it only targets app 1). No `before` prose,
+  //   which also keeps the scene out of the i18n tables.
   function buildScenes() {
     const docTemplate = tr('demo.scene.doc',
       'Design Review — {date}\n\nPicker should fade in on first show. Team agreed.\n\nTo-do:\n- Add fade-in flag');
@@ -3966,6 +4148,8 @@
       { app: 2, before: 'git commit -m "fix the ',                            query: 'bug',    after: '"' },
       { app: 3, before: tr('demo.scene.shipped', 'Just shipped a new app '),  query: 'rocket', after: '' },
       { app: 4, before: tr('demo.scene.pickup', 'Pick up '),                  query: 'gift',   after: tr('demo.scene.formom', ' for mom') },
+      { app: 2, before: 'echo "coverage ',                                    query: 'approx', after: ' 94%"', symbol: true },
+      { app: 1, before: '',                                                   query: 'party',  gif: true },
     ];
   }
   let scenes = buildScenes();
@@ -3992,8 +4176,25 @@
     let typed = await typeChars(prefilled, scene.before, 52, token);
     if (typed === null) return false;
 
-    typed = await typeChars(typed, ':' + scene.query, 72, token);
+    const trig = scene.gif ? ':::' : scene.symbol ? '::' : ':';
+    typed = await typeChars(typed, trig + scene.query, 72, token);
     if (typed === null) return false;
+
+    if (scene.gif) {
+      // Panel is up (handleInput opened it as the query chars landed).
+      // Browse the grid like a human would, then send the first result.
+      await wait(650);
+      if (token !== autoplayToken) return false;
+      gifIndex = 1; updateGifSelection();
+      await wait(420);
+      if (token !== autoplayToken) return false;
+      gifIndex = 0; updateGifSelection();
+      await wait(480);
+      if (token !== autoplayToken) return false;
+      commitGif();
+      await wait(1500);
+      return true;
+    }
 
     await wait(360);
     if (token !== autoplayToken) return false;
@@ -4052,6 +4253,7 @@
     while (token === autoplayToken && autoplay) {
       const scene = scenes[i++ % scenes.length];
       hidePicker();
+      hideGifPanel();
       // iMessage: clear any previously-sent bubbles before sliding in.
       if (scene.app === 1) resetIMessage();
       setActiveApp(scene.app);
@@ -4061,7 +4263,8 @@
       const ok = await typeScene(scene, token);
       if (!ok) return;
       // iMessage: actually "send" the message after the scene completes.
-      if (scene.app === 1) {
+      // (GIF scenes already sent their bubble inside typeScene.)
+      if (scene.app === 1 && !scene.gif) {
         await wait(280);
         if (token !== autoplayToken) return;
         sendIMessage();
@@ -4101,6 +4304,7 @@
       const q = activeQuery(value, caret);
       if (q) positionPicker(q);
     }
+    if (gifPanelVisible()) positionGifPanel();
   });
 
   function startDemo() {

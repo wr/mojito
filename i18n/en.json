@@ -8,7 +8,7 @@
   "nav.download": "Download for macOS",
 
   "hero.title": "Autocomplete <code>:emoji:</code> everywhere.",
-  "hero.sub": "Type <code>:</code> to search for any emoji or symbol in seconds.",
+  "hero.sub": "Type <code>:</code> to search any emoji, symbol, or GIF in seconds.",
 
   "demo.folderLabel": "Website",
   "demo.achievement.lead": "Your first easter egg!",
@@ -54,6 +54,7 @@
   "demo.fallback": "Don't forget the :tada",
 
   "picker.aria.suggestions": "Emoji suggestions",
+  "picker.aria.gifs": "GIF results",
   "picker.select": "select",
   "picker.insert": "insert",
   "picker.dismiss": "dismiss",
