@@ -2068,12 +2068,67 @@ code { unicode-bidi: isolate; }
 .code-table tbody td:first-child { border-radius: 8px 0 0 8px; }
 .code-table tbody td:last-child { border-radius: 0 8px 8px 0; }
 
-/* Comparison tables: first column is a name, not a glyph. */
-.compare-table td:first-child {
-  width: auto;
+/* App-comparison table: features run down the side, apps across the top,
+   and the Mojito column is called out. Standalone styling — deliberately
+   not the shared .code-table zebra/radius rules — so the symbol tables on
+   other guide pages are untouched. */
+.compare-table {
+  --mojito-ring: color-mix(in srgb, var(--accent) 26%, transparent);
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 6px 0 18px;
   font-size: 14px;
+}
+.compare-table th,
+.compare-table td {
+  padding: 11px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table tbody tr:last-child th,
+.compare-table tbody tr:last-child td { border-bottom: none; }
+/* Column headers = app names. */
+.compare-table thead th {
   font-weight: 600;
+  color: var(--text);
+  vertical-align: bottom;
+}
+.compare-table thead th img {
+  vertical-align: -4px;
+  margin-right: 6px;
+}
+/* Row headers = feature names: quiet uppercase label, pinned as the table
+   scrolls sideways on narrow screens. */
+.compare-table tbody th,
+.compare-table .corner {
+  position: sticky;
+  left: 0;
+  background: var(--bg);
+}
+.compare-table tbody th {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
   white-space: nowrap;
+}
+/* Mojito column: tinted panel with an accent ring, rounded top and bottom. */
+.compare-table .is-mojito {
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  border-left: 1px solid var(--mojito-ring);
+  border-right: 1px solid var(--mojito-ring);
+}
+.compare-table thead th.is-mojito {
+  color: var(--accent-hover);
+  border-top: 1px solid var(--mojito-ring);
+  border-bottom-color: var(--mojito-ring);
+  border-radius: 10px 10px 0 0;
+}
+.compare-table tbody tr:last-child .is-mojito {
+  border-bottom: 1px solid var(--mojito-ring);
+  border-radius: 0 0 10px 10px;
 }
 .mark-yes { color: var(--accent-hover); font-weight: 600; }
 .mark-no { color: var(--text-soft); }
@@ -2088,7 +2143,8 @@ code { unicode-bidi: isolate; }
   overflow-x: auto;
   margin: 6px 0 18px;
 }
-.table-scroll .code-table { margin: 0; min-width: 540px; }
+.table-scroll .code-table,
+.table-scroll .compare-table { margin: 0; min-width: 540px; }
 
 /* /guides/ hub: glyph cards instead of a flat link list. The glyph
    is the guide's own subject — °, ⌘, π — doing the wayfinding. */
