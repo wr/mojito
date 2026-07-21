@@ -1250,6 +1250,92 @@ code {
 
 .hint { display: inline-flex; align-items: center; gap: 5px; }
 
+/* GIF search panel (`:::`) — same menu material as the picker, but a 2×2
+   thumbnail grid instead of rows. Positioned by positionGifPanel() over the
+   iMessage compose field. */
+.gif-panel {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  width: 252px;
+  background: var(--menu-bg);
+  backdrop-filter: saturate(180%) blur(30px);
+  -webkit-backdrop-filter: saturate(180%) blur(30px);
+  border: 0.5px solid var(--menu-border);
+  border-radius: 12px;
+  box-shadow: var(--menu-shadow);
+  padding-top: 8px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.gif-panel.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.gif-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px 7px;
+}
+
+.gif-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+}
+
+.gif-query {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gif-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  padding: 0 8px;
+}
+
+.gif-thumb {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 7px;
+  cursor: pointer;
+  /* Empty until picker.js lazy-fills data-src — keep a quiet placeholder. */
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.gif-thumb.active { box-shadow: 0 0 0 2.5px var(--accent); }
+
+.gif-panel .picker-divider { margin-top: 8px; }
+
+/* GIF message bubble — the image is the bubble, no grey backing. */
+.bubble.bubble-gif { padding: 0; background: none; }
+.bubble.bubble-gif img {
+  display: block;
+  width: 128px;
+  height: 128px;
+  border-radius: 18px;
+}
+
 kbd {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 11px;
@@ -1613,6 +1699,11 @@ footer {
   .picker-footer { color: rgba(255, 255, 255, 0.55); }
   kbd { background: rgba(255, 255, 255, 0.12); color: #fff; }
 
+  /* GIF panel on the dark menu material */
+  .gif-badge { background: rgba(255, 255, 255, 0.92); color: #000; }
+  .gif-query { color: rgba(255, 255, 255, 0.55); }
+  .gif-thumb { background: rgba(255, 255, 255, 0.10); }
+
   .demo-input::selection { background: rgba(46, 184, 103, 0.35); }
 }
 
@@ -1714,6 +1805,7 @@ code { unicode-bidi: isolate; }
    to the body, not the whole app, so the title bar still flips. */
 [dir="rtl"] .term-body { direction: ltr; }
 [dir="rtl"] .picker { direction: ltr; }
+[dir="rtl"] .gif-panel { direction: ltr; }
 
 /* iMessage: mirror the bubble tail corner + move the waveform button and its
    input padding to the other side. */

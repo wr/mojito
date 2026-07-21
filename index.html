@@ -39,8 +39,8 @@
 <link rel="alternate" hreflang="he" href="https://mojito.wells.ee/?lang=he">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="style.css?v=72">
-<script src="i18n.js?v=2"></script>
+<link rel="stylesheet" href="style.css?v=73">
+<script src="i18n.js?v=3"></script>
 </head>
 <body>
 
@@ -62,7 +62,7 @@
 <section class="hero" aria-label="Live demo" data-i18n-attr="aria-label:demo.aria.liveDemo">
   <header class="hero-header">
     <h1 data-i18n-html="hero.title">Autocomplete <code>:emoji:</code> everywhere.</h1>
-    <p class="hero-sub" data-i18n-html="hero.sub">Type <code>:</code> to search for any emoji or symbol in seconds.</p>
+    <p class="hero-sub" data-i18n-html="hero.sub">Type <code>:</code> to search any emoji, symbol, or GIF in seconds.</p>
   </header>
   <div class="hero-card">
 
@@ -350,6 +350,29 @@ Changes not staged for commit:
           <span class="hint"><kbd>⎋</kbd> <span data-i18n="picker.dismiss">dismiss</span></span>
         </div>
       </div>
+
+      <!-- GIF search panel (`:::` trigger). Canned results for the demo —
+           the real app searches Giphy live. Thumbnails carry data-src and are
+           swapped in by picker.js on first open so the hero doesn't pay the
+           GIF bytes up front. -->
+      <div class="gif-panel" id="gif-panel" aria-hidden="true">
+        <div class="gif-panel-header">
+          <span class="gif-badge" aria-hidden="true">GIF</span>
+          <span class="gif-query" id="gif-query"></span>
+        </div>
+        <div class="gif-grid" role="listbox" aria-label="GIF results" data-i18n-attr="aria-label:picker.aria.gifs">
+          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/party-confetti.gif" alt="confetti" width="128" height="128">
+          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/party-balloons.gif" alt="balloons" width="128" height="128">
+          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/party-sparkles.gif" alt="sparkles" width="128" height="128">
+          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/party-disco.gif" alt="disco ball" width="128" height="128">
+        </div>
+        <div class="picker-divider"></div>
+        <div class="picker-footer">
+          <span class="hint"><kbd>←→</kbd> <span data-i18n="picker.select">select</span></span>
+          <span class="hint"><kbd>↵</kbd> <span data-i18n="picker.insert">insert</span></span>
+          <span class="hint"><kbd>⎋</kbd> <span data-i18n="picker.dismiss">dismiss</span></span>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -448,6 +471,6 @@ Changes not staged for commit:
   <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
 </footer>
 
-<script src="picker.js?v=51" defer></script>
+<script src="picker.js?v=52" defer></script>
 </body>
 </html>
