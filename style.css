@@ -1948,3 +1948,8 @@ code { unicode-bidi: isolate; }
   text-decoration: none;
 }
 .footer-guides a:hover { color: var(--text); }
+
+/* Guides read better a notch wider than the home-page prose column —
+   the cheat-sheet tables and screenshots want the room. */
+.guide-main { max-width: 800px; }
+.guide-main .prose { max-width: 680px; }
