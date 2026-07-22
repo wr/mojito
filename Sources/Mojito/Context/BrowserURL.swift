@@ -30,14 +30,7 @@ enum BrowserURL {
         }
 
         let app = AXUIElementCreateApplication(pid)
-        // This DFS walk runs on the tap thread (main); each node is a synchronous
-        // AX round-trip into the browser. Two bounds keep a hung/slow browser from
-        // stalling the tap past its ~1s limit and dropping the keystroke (W-557):
-        // every element queried is pinned to `walkAXTimeout` (a per-object setting
-        // — a timeout on `app` does NOT propagate to its descendants), and the
-        // whole walk is capped by `walkDeadline` so a tree of individually-fast-
-        // but-collectively-slow nodes still can't run long. A frozen app fails the
-        // first query and aborts immediately.
+        // Per-object timeout + total deadline: either bound alone can be beaten (one slow node vs. many fast ones).
         let deadline = Date().addingTimeInterval(Self.walkBudget)
 
         // Most browsers expose the page URL as an `AXURL` attribute somewhere
@@ -197,11 +190,7 @@ enum BrowserURL {
     }
 }
 
-/// Outcome of one URL resolve. `resolved(nil)` is a real "no URL" answer (no
-/// window / non-URL value) and is cached as such; `unavailable` means the resolve
-/// couldn't complete (hung Arc killed at the budget, or spawn failure) and the
-/// last good value must be KEPT — publishing nil there would transiently drop a
-/// valid excluded-site URL and let a denylisted page through (W-557).
+/// `.unavailable` means the resolve timed out — callers must keep the last good value, not overwrite it with nil.
 enum BrowserURLResolution: Sendable {
     case resolved(URL?)
     case unavailable
@@ -356,22 +345,13 @@ final class BrowserURLCache {
         }
     }
 
-    /// `URL of active tab of front window` via an `osascript` subprocess. Shelling
-    /// out (rather than in-process `NSAppleScript`) lets this run off the main
-    /// thread and, crucially, be *killed* if Arc is unresponsive — `NSAppleScript`
-    /// offers no such escape hatch. TCC attributes the Apple Event to Mojito (the
-    /// responsible process), so the one-time Automation grant is the same as
-    /// before. Output goes to a temp file, not a `Pipe`: a `Pipe`'s 64 KB buffer
-    /// can fill and block `osascript`'s write so it never exits, manufacturing a
-    /// timeout on an otherwise-responsive resolve. Returns `.resolved` on a clean
-    /// exit (URL or nil), `.unavailable` on spawn failure or the hung-Arc kill so
-    /// the caller keeps the last good value. Runs on `resolveQueue`, off main.
+    // osascript subprocess so it can be killed; temp file instead of Pipe to avoid the 64 KB buffer deadlock.
     private nonisolated static func osascriptURL(bundleID: String) -> BrowserURLResolution {
         let outURL = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent("mojito-arcurl-\(UUID().uuidString)")
         FileManager.default.createFile(atPath: outURL.path, contents: nil)
-        guard let outHandle = try? FileHandle(forWritingTo: outURL) else { return .unavailable }
         defer { try? FileManager.default.removeItem(at: outURL) }
+        guard let outHandle = try? FileHandle(forWritingTo: outURL) else { return .unavailable }
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")

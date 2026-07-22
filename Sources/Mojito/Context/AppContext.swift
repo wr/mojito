@@ -21,21 +21,7 @@ struct ActiveContext {
 
 @MainActor
 enum AppContextDetector {
-    /// Builds the context for a trigger keystroke. Runs inside the CGEventTap
-    /// callback, which is on the main thread (see `KeyMonitor` / `Engine`) — so
-    /// it must do **no synchronous cross-process IPC**. A hung/beach-balling
-    /// frontmost app would otherwise block those AX/AppleScript round-trips past
-    /// the ~1s tap timeout, macOS disables the tap, and the keystroke is dropped
-    /// (W-547 Safari lag, W-555 Arc, generalized in W-557).
-    ///
-    /// Everything here is a cache read:
-    /// - focused element + its secure/editable classification come from
-    ///   `FocusedElementCache`, which computes them **off the main thread** on
-    ///   focus change. Until that lands the field info is "unknown", and unknown
-    ///   **fails closed** — treat as secure (don't capture) — so a slow classify
-    ///   can never leak password keystrokes into the picker.
-    /// - the browser URL comes from `BrowserURL.detect`, which is itself
-    ///   non-blocking for Arc (async cache) and bounded for other browsers.
+    // Tap callback: all reads must be cache-hits — no synchronous cross-process IPC; a hung app stalls past the ~1s timeout and macOS drops the keystroke.
     static func current() -> ActiveContext {
         let app = NSWorkspace.shared.frontmostApplication
         let bundleID = app?.bundleIdentifier

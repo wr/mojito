@@ -77,21 +77,17 @@ tests don't catch anyway.
 host app without firing up the menubar / single-instance / event-tap
 machinery.
 
-### End-to-end (live) — the hung-app typing harness
+### End-to-end (live) — the Arc typing harness
 
 The CGEventTap path *is* testable end-to-end, just not as a unit test. Launch a
 Debug build with `MOJITO_E2E_LOG=1` and `DebugRecorder` mirrors its activity log
 into the unified log (subsystem `ee.wells.Mojito`, category `e2e`); a harness
-then drives a real app and asserts on it. `scripts/e2e/hung-app-typing-regression.sh`
-does exactly that for the keystroke-drop class of bug (W-547 / W-555 / W-557):
-it `SIGSTOP`s the frontmost app (Arc, plus TextEdit as a non-browser control),
-types into it, then `SIGCONT`s, asserting zero `keyMonitor tapLost reason=timeout`.
-Freezing the app is what makes it deterministic — a build that does *any*
-blocking cross-process IPC on the tap thread (AppleScript URL read, AX field
-queries) drops keystrokes every time; a correct build never does. Needs Arc
+then drives a real app and asserts on it. `scripts/e2e/arc-typing-regression.sh`
+does exactly that for the Arc keystroke-drop class of bug (W-555): it types into
+fresh Arc tabs and asserts zero `keyMonitor tapLost reason=timeout`. Needs Arc
 installed + `Mojito Dev.app` granted Accessibility/Input Monitoring; see
 `scripts/e2e/README.md`. The env flag is a no-op without the var, so production
-never logs. Extendable to other regressions via the same `e2e` log stream.
+never logs. Reusable for other Arc regressions via the same `e2e` log stream.
 
 ### Things that have bitten us repeatedly
 

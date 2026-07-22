@@ -27,16 +27,7 @@ final class FocusedElementCache {
         didSet { haveFieldInfo = false }
     }
 
-    /// Cached "is this field secure / editable" answers for `element`, so the
-    /// tap-path context builder (`AppContextDetector.current`) does **zero** AX
-    /// attribute IPC — deriving them is several synchronous cross-process
-    /// round-trips, and doing that on the tap thread against a hung app trips the
-    /// event-tap timeout and drops keystrokes (W-557). They're computed **off the
-    /// main thread** alongside the element (seed + focus-change reclassify), so
-    /// `current()` only reads them. `haveFieldInfo` is false until the classify
-    /// lands; `current()` treats that as "secure, not editable" (fail closed), so
-    /// an unclassified field never begins capture. Reset to unknown whenever
-    /// `element` changes (see `element.didSet`).
+    // Cached per focus to skip repeated AX IPC on the tap thread; reset on any element change (see element.didSet).
     private(set) var focusedIsSecure = false
     private(set) var focusedIsEditable = false
     private(set) var haveFieldInfo = false
