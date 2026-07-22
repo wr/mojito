@@ -22,16 +22,7 @@ struct ActiveContext {
 
 @MainActor
 enum AppContextDetector {
-    /// Every AX query below is a synchronous cross-process call made from inside
-    /// the CGEventTap callback, which runs on the main thread (see `KeyMonitor` /
-    /// `Engine`). A hung or beach-balling frontmost app makes those calls block;
-    /// with the process-wide 0.5s messaging timeout, a handful of them in a row
-    /// can blow past the ~1s tap timeout — macOS then disables the tap and drops
-    /// the keystroke (W-547 for Safari lag, W-555 for Arc, generalized in W-557).
-    /// So the tap-path queries are pinned to a much tighter per-element timeout:
-    /// a stale/partial context just means the picker briefly declines to open,
-    /// never a dropped keystroke. Real local AX answers in single-digit ms, so
-    /// this only bites a genuinely unresponsive app — exactly when we must bail.
+    // Tight bound: a slow/hung app's AX calls block this main-thread tap callback past macOS's ~1s timeout, dropping keystrokes.
     static let tapAXTimeout: Float = 0.1
 
     /// Pins `element` to the tight tap-path timeout so a query against a hung app
@@ -50,11 +41,7 @@ enum AppContextDetector {
         // cross-process AX call.
         let focused = resolveFocusedElement()
 
-        // Classify the field (secure? editable?) at most once per focus. Those
-        // are several synchronous AX round-trips; doing them on every keystroke
-        // against a hung app stacked up enough main-thread block to trip the tap
-        // timeout even with per-call bounds (W-557). The cache is invalidated
-        // whenever focus moves (see FocusedElementCache.element.didSet).
+        // Cached per focus to avoid repeated AX IPC on the tap thread; invalidated on any focus change.
         let cache = FocusedElementCache.shared
         let secure: Bool
         let editable: Bool

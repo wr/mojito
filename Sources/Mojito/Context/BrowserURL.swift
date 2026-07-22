@@ -30,10 +30,7 @@ enum BrowserURL {
         }
 
         let app = AXUIElementCreateApplication(pid)
-        // This DFS walk runs on the tap thread (main); each node is a synchronous
-        // AX round-trip into the browser. Pin a tight timeout so a hung browser
-        // can't stall the tap past its ~1s limit and drop the keystroke (W-557).
-        // A frozen app fails the first `focusedWindow` query and aborts fast.
+        // Tight timeout: a hung browser can't stall the tap past its ~1s limit via this AX walk.
         AXUIElementSetMessagingTimeout(app, AppContextDetector.tapAXTimeout)
 
         // Most browsers expose the page URL as an `AXURL` attribute somewhere
