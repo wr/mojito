@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import os
 
 /// Categories that surface in the debug report. Keep the set small —
 /// bug categories tend to cluster, and a tight enum makes the report
@@ -42,6 +43,20 @@ enum DebugRecorder {
     private static var buffer: [DebugEvent] = []
     private static var focusBuffer: [DebugEvent] = []
 
+    /// E2E introspection. The in-app report is UI-only, so when the app is
+    /// launched with `MOJITO_E2E_LOG=1` every recorded event is also emitted to
+    /// the unified log (subsystem `ee.wells.Mojito`, category `e2e`) where an
+    /// external harness can read the activity stream headlessly — e.g. asserting
+    /// zero `keyMonitor tapLost reason=timeout` while driving a browser
+    /// (`scripts/e2e/`). Off by default: production never constructs the logger,
+    /// so there's no cost or behavior change. Recorded values are already
+    /// anonymized (ASCII-clamped, no user text), so logging them `%{public}` —
+    /// required to read them back with `log show` — leaks nothing.
+    private static let e2eLog: Logger? =
+        ProcessInfo.processInfo.environment["MOJITO_E2E_LOG"] == "1"
+            ? Logger(subsystem: "ee.wells.Mojito", category: "e2e")
+            : nil
+
     static func record(
         _ category: DebugCategory,
         _ kind: String,
@@ -72,6 +87,15 @@ enum DebugRecorder {
             if buffer.count > capacity {
                 buffer.removeFirst(buffer.count - capacity)
             }
+        }
+
+        if let e2eLog {
+            let meta = event.metadata
+                .sorted { $0.key < $1.key }
+                .map { "\($0.key)=\($0.value)" }
+                .joined(separator: " ")
+            // Machine-readable shape for the harness: "category kind k=v k=v".
+            e2eLog.log("\(event.category.rawValue, privacy: .public) \(event.kind, privacy: .public) \(meta, privacy: .public)")
         }
     }
 

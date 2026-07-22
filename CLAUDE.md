@@ -77,6 +77,18 @@ tests don't catch anyway.
 host app without firing up the menubar / single-instance / event-tap
 machinery.
 
+### End-to-end (live) — the Arc typing harness
+
+The CGEventTap path *is* testable end-to-end, just not as a unit test. Launch a
+Debug build with `MOJITO_E2E_LOG=1` and `DebugRecorder` mirrors its activity log
+into the unified log (subsystem `ee.wells.Mojito`, category `e2e`); a harness
+then drives a real app and asserts on it. `scripts/e2e/arc-typing-regression.sh`
+does exactly that for the Arc keystroke-drop class of bug (W-555): it types into
+fresh Arc tabs and asserts zero `keyMonitor tapLost reason=timeout`. Needs Arc
+installed + `Mojito Dev.app` granted Accessibility/Input Monitoring; see
+`scripts/e2e/README.md`. The env flag is a no-op without the var, so production
+never logs. Reusable for other Arc regressions via the same `e2e` log stream.
+
 ### Things that have bitten us repeatedly
 
 - **You MUST run `xcodegen generate` after**: adding/removing/renaming a `.swift` file, changing `project.yml`, or touching anything under `Resources/` that's referenced by the build phase. `xcodebuild` will appear to succeed against a stale project without picking up new files.
