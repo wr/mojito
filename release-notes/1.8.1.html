@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>Mojito 1.8.1</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+  font: -apple-system-body, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 16px 18px;
+  color: #1d1d1f;
+  background: transparent;
+}
+h1 { font-size: 17px; margin: 0 0 8px; }
+h2 { font-size: 15px; margin: 16px 0 6px; }
+h3 { font-size: 13px; margin: 12px 0 4px; }
+p { margin: 6px 0; }
+ul { margin: 6px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+a { color: #0a7aff; }
+@media (prefers-color-scheme: dark) {
+  body { color: #f5f5f7; }
+  code { background: rgba(255, 255, 255, 0.12); }
+  a { color: #4aa3ff; }
+}
+</style>
+</head>
+<body>
+<h2>New</h2>
+<ul>
+<li><strong>Install with Homebrew:</strong> <code>brew install --cask wr/tap/mojito</code>. (<a href="https://github.com/wr/mojito/pull/167">#167</a>)</li>
+</ul>
+<h2>Fixed</h2>
+<ul>
+<li>Keystrokes are no longer dropped when the frontmost app hangs or is slow to respond — most visible in Arc. (<a href="https://github.com/wr/mojito/pull/175">#175</a>, <a href="https://github.com/wr/mojito/pull/177">#177</a>)</li>
+<li>Trimmed a rare hitch on the first <code>:</code> trigger by keeping accessibility work off the keystroke path. (<a href="https://github.com/wr/mojito/pull/165">#165</a>)</li>
+</ul>
+</body>
+</html>
