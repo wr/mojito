@@ -5,6 +5,15 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.8.1
+
+## New
+- **Install with Homebrew:** `brew install --cask wr/tap/mojito`. ([#167](https://github.com/wr/mojito/pull/167))
+
+## Fixed
+- Keystrokes are no longer dropped when the frontmost app hangs or is slow to respond — most visible in Arc. ([#175](https://github.com/wr/mojito/pull/175), [#177](https://github.com/wr/mojito/pull/177))
+- Trimmed a rare hitch on the first `:` trigger by keeping accessibility work off the keystroke path. ([#165](https://github.com/wr/mojito/pull/165))
+
 ## v1.8.0
 
 ## New
