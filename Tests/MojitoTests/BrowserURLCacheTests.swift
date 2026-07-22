@@ -18,18 +18,32 @@ struct BrowserURLCacheTests {
     private static let arc = "company.thebrowser.Browser"
 
     /// Records how the injected resolver was called — count, argument, and the
-    /// thread — so tests can assert the AppleScript work is deferred to a later
-    /// main-thread turn rather than run inline on the hot path.
-    private final class ResolverSpy {
-        var calls = 0
-        var lastBundleID: String?
-        var ranOnMainThread = false
-        var stub: URL?
+    /// thread — so tests can assert the AppleScript work is deferred *off* the
+    /// caller's (tap) thread rather than run inline on the hot path. The resolver
+    /// runs on a background queue now, so the state is lock-guarded and the type
+    /// is `@unchecked Sendable`.
+    private final class ResolverSpy: @unchecked Sendable {
+        private let lock = NSLock()
+        private var _calls = 0
+        private var _lastBundleID: String?
+        private var _ranOnMainThread = false
+        private var _stub: URL?
+
+        var calls: Int { lock.withLock { _calls } }
+        var lastBundleID: String? { lock.withLock { _lastBundleID } }
+        var ranOnMainThread: Bool { lock.withLock { _ranOnMainThread } }
+        var stub: URL? {
+            get { lock.withLock { _stub } }
+            set { lock.withLock { _stub = newValue } }
+        }
+
         func resolve(_ bundleID: String) -> URL? {
-            calls += 1
-            lastBundleID = bundleID
-            ranOnMainThread = Thread.isMainThread
-            return stub
+            lock.withLock {
+                _calls += 1
+                _lastBundleID = bundleID
+                _ranOnMainThread = Thread.isMainThread
+                return _stub
+            }
         }
     }
 
@@ -72,10 +86,10 @@ struct BrowserURLCacheTests {
 
         try await drain()
 
-        // It runs on a later turn, on the main thread (where NSAppleScript is
-        // supported), exactly once.
+        // It runs on a later turn, OFF the main/tap thread (so a hung Arc can't
+        // stall the tap or the UI), exactly once.
         #expect(spy.calls == 1)
-        #expect(spy.ranOnMainThread)
+        #expect(!spy.ranOnMainThread)
         #expect(spy.lastBundleID == Self.arc)
     }
 

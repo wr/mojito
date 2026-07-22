@@ -22,6 +22,25 @@ struct ActiveContext {
 
 @MainActor
 enum AppContextDetector {
+    /// Every AX query below is a synchronous cross-process call made from inside
+    /// the CGEventTap callback, which runs on the main thread (see `KeyMonitor` /
+    /// `Engine`). A hung or beach-balling frontmost app makes those calls block;
+    /// with the process-wide 0.5s messaging timeout, a handful of them in a row
+    /// can blow past the ~1s tap timeout — macOS then disables the tap and drops
+    /// the keystroke (W-547 for Safari lag, W-555 for Arc, generalized in W-557).
+    /// So the tap-path queries are pinned to a much tighter per-element timeout:
+    /// a stale/partial context just means the picker briefly declines to open,
+    /// never a dropped keystroke. Real local AX answers in single-digit ms, so
+    /// this only bites a genuinely unresponsive app — exactly when we must bail.
+    static let tapAXTimeout: Float = 0.1
+
+    /// Pins `element` to the tight tap-path timeout so a query against a hung app
+    /// can't stall the tap callback. Best-effort; a failure just leaves the
+    /// process-wide default in place.
+    private static func boundToTapTimeout(_ element: AXUIElement) {
+        AXUIElementSetMessagingTimeout(element, tapAXTimeout)
+    }
+
     static func current() -> ActiveContext {
         let app = NSWorkspace.shared.frontmostApplication
         let bundleID = app?.bundleIdentifier
@@ -30,6 +49,9 @@ enum AppContextDetector {
         // Resolve once and reuse — each fallback resolution is a synchronous
         // cross-process AX call.
         let focused = resolveFocusedElement()
+        // Bound the follow-up secure/editable attribute reads: they hit the
+        // element's owning (possibly hung) app on the tap thread.
+        if let focused { boundToTapTimeout(focused) }
         return ActiveContext(
             bundleID: bundleID,
             processID: pid,
@@ -101,6 +123,7 @@ enum AppContextDetector {
     private static func resolveFocusedElement() -> AXUIElement? {
         if let cached = FocusedElementCache.shared.element { return cached }
         let system = AXUIElementCreateSystemWide()
+        boundToTapTimeout(system)
         var ref: AnyObject?
         guard AXUIElementCopyAttributeValue(system, kAXFocusedUIElementAttribute as CFString, &ref) == .success,
               let element = ref,

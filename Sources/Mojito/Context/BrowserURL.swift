@@ -30,6 +30,11 @@ enum BrowserURL {
         }
 
         let app = AXUIElementCreateApplication(pid)
+        // This DFS walk runs on the tap thread (main); each node is a synchronous
+        // AX round-trip into the browser. Pin a tight timeout so a hung browser
+        // can't stall the tap past its ~1s limit and drop the keystroke (W-557).
+        // A frozen app fails the first `focusedWindow` query and aborts fast.
+        AXUIElementSetMessagingTimeout(app, AppContextDetector.tapAXTimeout)
 
         // Most browsers expose the page URL as an `AXURL` attribute somewhere
         // under the focused window — Safari/WebKit on the `AXWebArea`, Chrome
@@ -169,7 +174,7 @@ enum BrowserURL {
         return result == .success ? ref : nil
     }
 
-    fileprivate static func normalizedURL(from raw: String) -> URL? {
+    nonisolated fileprivate static func normalizedURL(from raw: String) -> URL? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return nil }
         if trimmed.contains("://") { return URL(string: trimmed) }
@@ -180,29 +185,40 @@ enum BrowserURL {
 /// URL cache for browsers whose tab URL is only readable via AppleScript (Arc).
 /// `BrowserURL.detect` is called synchronously inside the CGEventTap callback,
 /// so it can't run the AppleScript there — a slow Apple Event trips the tap
-/// timeout and drops the keystroke (W-555). But `NSAppleScript` is documented
-/// main-thread-only (Cocoa Thread Safety Summary), so it can't just be shoved
-/// onto a background queue either.
+/// timeout and drops the keystroke (W-555).
 ///
 /// Resolution: the hot-path read (`url(forBundleID:pid:)`) never does IPC — it
-/// returns the last resolved value and schedules a refresh. The refresh runs
-/// the AppleScript on the main thread, where it's supported, but via
-/// `DispatchQueue.main.async` so it lands on its own run-loop turn rather than
-/// inside the tap callback. A throttle keeps refreshes to at most one per
-/// second, so the brief main-thread block can't recur per keystroke the way the
-/// old synchronous call did. Same spirit as `FocusedElementCache` moving slow
-/// IPC out of the tap path (W-547). Bounded staleness (≈ one keystroke, or one
-/// navigation until the next read/refresh) is acceptable for per-site exclusion
-/// matching; the value is only served for the pid it was resolved from, so it
-/// can't bleed across an app switch.
+/// returns the last resolved value and schedules a refresh. The refresh runs the
+/// AppleScript **off the main thread** on `resolveQueue`, via an `osascript`
+/// subprocess (which sidesteps `NSAppleScript`'s main-thread requirement) with a
+/// hard wall-clock bound. That matters for a genuinely hung Arc: the earlier
+/// W-555 design ran `NSAppleScript` on the main thread, so a frozen Arc would
+/// wedge Mojito's *entire* main thread — UI and event tap — until the Apple
+/// Event timed out (up to ~2 min), turning "one browser hung" into "Mojito
+/// hung" and dropping keystrokes the whole time (W-557). Off-thread + bounded,
+/// a hung Arc only stalls this one worker, which is killed after `resolveBudget`;
+/// the tap thread never blocks. Same spirit as `FocusedElementCache` (W-547).
+/// A throttle keeps refreshes to at most one per second. Bounded staleness (≈
+/// one keystroke, or one navigation until the next read/refresh) is fine for
+/// per-site exclusion matching; the value is served only for the pid it was
+/// resolved from, so it can't bleed across an app switch.
 @MainActor
 final class BrowserURLCache {
     static let shared = BrowserURLCache(
         observeActivations: true,
         minRefreshInterval: 1.0,
         now: { Date() },
-        resolver: { BrowserURLCache.appleScriptURL(bundleID: $0) }
+        resolver: { BrowserURLCache.osascriptURL(bundleID: $0) }
     )
+
+    /// Off-main worker for the (potentially slow / hung) AppleScript resolve.
+    private static let resolveQueue = DispatchQueue(
+        label: "mojito.browserURL.resolve", qos: .userInitiated
+    )
+
+    /// Hard cap on a single resolve. A responsive Arc answers in tens of ms; a
+    /// hung one is killed at this bound and reported as "no URL".
+    private static let resolveBudget: DispatchTimeInterval = .milliseconds(800)
 
     static let appleScriptBundleIDs: Set<String> = [
         "company.thebrowser.Browser",   // Arc
@@ -226,18 +242,19 @@ final class BrowserURLCache {
     private var lastRefreshAt: Date?
     private let minRefreshInterval: TimeInterval
 
-    /// Seams. Production wires the real `NSAppleScript` resolver and wall clock;
+    /// Seams. Production wires the real `osascript` resolver and wall clock;
     /// tests inject a stub resolver + controllable clock so the deferral,
     /// single-flight, throttle, and pid-guard are checkable without AppleScript
-    /// or a real app switch (`observeActivations: false`).
+    /// or a real app switch (`observeActivations: false`). The resolver runs off
+    /// the main thread, so it must be `@Sendable`.
     private let now: () -> Date
-    private let resolver: (String) -> URL?
+    private let resolver: @Sendable (String) -> URL?
 
     init(
         observeActivations: Bool,
         minRefreshInterval: TimeInterval,
         now: @escaping () -> Date,
-        resolver: @escaping (String) -> URL?
+        resolver: @escaping @Sendable (String) -> URL?
     ) {
         self.minRefreshInterval = minRefreshInterval
         self.now = now
@@ -275,11 +292,11 @@ final class BrowserURLCache {
         return value
     }
 
-    /// Resolves the URL on a *later* main-run-loop turn. `NSAppleScript` must
-    /// run on the main thread, but never inside the tap callback that calls
-    /// `detect` — `DispatchQueue.main.async` gives it its own turn, and the
-    /// throttle keeps it rare enough that the brief main-thread block can't
-    /// stall typing the way the per-keystroke synchronous call did.
+    /// Resolves the URL on a background worker, then publishes on the main actor.
+    /// The resolve never runs inside the tap callback that calls `detect` — and,
+    /// unlike the earlier main-thread version, never on the main thread at all —
+    /// so even a hung Arc can't stall the tap or the UI. Single-flight (`refreshing`)
+    /// plus the throttle keep at most one worker in flight per second.
     private func scheduleRefresh(bundleID: String, pid: pid_t, force: Bool) {
         guard !refreshing else { return }
         if !force, haveResult, let last = lastRefreshAt,
@@ -287,28 +304,53 @@ final class BrowserURLCache {
             return
         }
         refreshing = true
-        DispatchQueue.main.async { [weak self] in
-            MainActor.assumeIsolated {
-                guard let self else { return }
-                self.cachedURL = self.resolver(bundleID)
-                self.cachedPID = pid
-                self.haveResult = true
-                self.lastRefreshAt = self.now()
-                self.refreshing = false
+        let resolve = resolver
+        Self.resolveQueue.async { [weak self] in
+            let url = resolve(bundleID)
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    self.cachedURL = url
+                    self.cachedPID = pid
+                    self.haveResult = true
+                    self.lastRefreshAt = self.now()
+                    self.refreshing = false
+                }
             }
         }
     }
 
-    /// `URL of active tab of front window` via AppleScript. Returns nil on any
-    /// failure — no window, denied Automation permission, or a non-URL value —
-    /// so callers fall through to "no URL" exactly as if AX had come up empty.
-    /// Called only from `scheduleRefresh`'s main-thread block.
-    private static func appleScriptURL(bundleID: String) -> URL? {
-        let source = "tell application id \"\(bundleID)\" to return URL of active tab of front window"
-        guard let script = NSAppleScript(source: source) else { return nil }
-        var error: NSDictionary?
-        let result = script.executeAndReturnError(&error)
-        guard error == nil, let raw = result.stringValue else { return nil }
+    /// `URL of active tab of front window` via an `osascript` subprocess. Shelling
+    /// out (rather than in-process `NSAppleScript`) lets this run off the main
+    /// thread and, crucially, be *killed* if Arc is unresponsive — `NSAppleScript`
+    /// offers no such escape hatch. TCC attributes the Apple Event to Mojito (the
+    /// responsible process), so the one-time Automation grant is the same as
+    /// before. Returns nil on any failure — no window, denied Automation, a
+    /// non-URL value, or the hung-Arc timeout — so callers fall through to "no
+    /// URL" exactly as if AX had come up empty. Runs on `resolveQueue`, off main.
+    private nonisolated static func osascriptURL(bundleID: String) -> URL? {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = [
+            "-e",
+            "tell application id \"\(bundleID)\" to return URL of active tab of front window",
+        ]
+        let out = Pipe()
+        process.standardOutput = out
+        process.standardError = FileHandle.nullDevice
+        let done = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in done.signal() }
+        do { try process.run() } catch { return nil }
+
+        // Bound the wait: a hung Arc must not wedge this worker indefinitely.
+        if done.wait(timeout: .now() + resolveBudget) == .timedOut {
+            process.terminate()
+            return nil
+        }
+        guard let data = try? out.fileHandleForReading.readToEnd(),
+              let raw = String(data: data, encoding: .utf8)?
+                  .trimmingCharacters(in: .whitespacesAndNewlines),
+              !raw.isEmpty else { return nil }
         return BrowserURL.normalizedURL(from: raw)
     }
 }
