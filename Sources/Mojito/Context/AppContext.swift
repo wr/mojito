@@ -12,52 +12,47 @@ struct ActiveContext {
     /// trigger stays inert (nothing to autocomplete into) and emoji picks are
     /// copied to the clipboard instead of synthesized as keystrokes.
     let focusedFieldIsEditable: Bool
-    /// The focused AX element the field checks above were answered from —
-    /// cache when warm, fresh system-wide query otherwise. Capture snapshots
-    /// must use this, not the cache directly: right after an app switch the
-    /// cache is intentionally nil while its background seed is in flight, and
-    /// a nil snapshot would read as "opened with no focused field".
+    /// The focused AX element the field checks above were answered from.
+    /// Capture snapshots must use this, not the cache directly: right after an
+    /// app switch the cache is intentionally nil while its background seed is in
+    /// flight, and a nil snapshot would read as "opened with no focused field".
     let focusedElement: AXUIElement?
 }
 
 @MainActor
 enum AppContextDetector {
-    // Tight bound: a slow/hung app's AX calls block this main-thread tap callback past macOS's ~1s timeout, dropping keystrokes.
-    static let tapAXTimeout: Float = 0.1
-
-    /// Pins `element` to the tight tap-path timeout so a query against a hung app
-    /// can't stall the tap callback. Best-effort; a failure just leaves the
-    /// process-wide default in place.
-    private static func boundToTapTimeout(_ element: AXUIElement) {
-        AXUIElementSetMessagingTimeout(element, tapAXTimeout)
-    }
-
+    /// Builds the context for a trigger keystroke. Runs inside the CGEventTap
+    /// callback, which is on the main thread (see `KeyMonitor` / `Engine`) — so
+    /// it must do **no synchronous cross-process IPC**. A hung/beach-balling
+    /// frontmost app would otherwise block those AX/AppleScript round-trips past
+    /// the ~1s tap timeout, macOS disables the tap, and the keystroke is dropped
+    /// (W-547 Safari lag, W-555 Arc, generalized in W-557).
+    ///
+    /// Everything here is a cache read:
+    /// - focused element + its secure/editable classification come from
+    ///   `FocusedElementCache`, which computes them **off the main thread** on
+    ///   focus change. Until that lands the field info is "unknown", and unknown
+    ///   **fails closed** — treat as secure (don't capture) — so a slow classify
+    ///   can never leak password keystrokes into the picker.
+    /// - the browser URL comes from `BrowserURL.detect`, which is itself
+    ///   non-blocking for Arc (async cache) and bounded for other browsers.
     static func current() -> ActiveContext {
         let app = NSWorkspace.shared.frontmostApplication
         let bundleID = app?.bundleIdentifier
         let pid = app?.processIdentifier
         let url = BrowserURL.detect(bundleID: bundleID, pid: pid)
-        // Resolve once and reuse — each fallback resolution is a synchronous
-        // cross-process AX call.
-        let focused = resolveFocusedElement()
 
-        // Cached per focus to avoid repeated AX IPC on the tap thread; invalidated on any focus change.
         let cache = FocusedElementCache.shared
         let secure: Bool
         let editable: Bool
         if cache.haveFieldInfo {
-            secure = cache.focusedIsSecure          // warm: no IPC on the tap thread
+            secure = cache.focusedIsSecure
             editable = cache.focusedIsEditable
-        } else if let focused {
-            boundToTapTimeout(focused)              // first read for this focus: bounded IPC, then cache
-            secure = focusedFieldIsSecure(focused)
-            editable = focusedFieldIsEditable(focused)
-            cache.cacheFieldInfo(secure: secure, editable: editable)
         } else {
-            // No focused element = mid-transition; allow capture, matching the
-            // prior nil-element behavior. Not cached — reclassify once focus
-            // resolves.
-            secure = false
+            // Classification not resolved yet (mid app-switch / mid focus-move).
+            // Fail closed: never begin capture on an unclassified field — it
+            // might be a password field the off-thread classify hasn't reached.
+            secure = true
             editable = false
         }
         return ActiveContext(
@@ -66,16 +61,22 @@ enum AppContextDetector {
             url: url,
             focusedFieldIsSecure: secure,
             focusedFieldIsEditable: editable,
-            focusedElement: focused
+            focusedElement: cache.element
         )
     }
 
-    /// True if AXSecureTextField, OR if AX is too broken to tell.
-    /// False positives just mean the picker doesn't open in odd contexts;
-    /// false negatives leak password fragments. Easy tradeoff.
-    private static func focusedFieldIsSecure(_ focused: AXUIElement?) -> Bool {
-        // No focused element = mid-transition; allow capture rather than block.
-        guard let focused else { return false }
+    /// Classifies a focused element as (secure, editable). `nonisolated` so
+    /// `FocusedElementCache` can run it on its background seed queue — these are
+    /// synchronous cross-process AX calls and must never run on the tap thread.
+    /// The caller pins a messaging timeout on `element` first.
+    nonisolated static func classify(_ element: AXUIElement) -> (secure: Bool, editable: Bool) {
+        (secure: isSecure(element), editable: isEditable(element))
+    }
+
+    /// True if AXSecureTextField, OR if AX is too broken to tell (fail closed —
+    /// a false positive just declines the picker; a false negative leaks
+    /// password fragments).
+    private nonisolated static func isSecure(_ focused: AXUIElement) -> Bool {
         guard let role = copyString(focused, kAXRoleAttribute) else { return true }
         // String literal because `kAXSecureTextFieldRole` isn't reliably
         // bridged across SDK versions. Electron/web password inputs that
@@ -84,7 +85,7 @@ enum AppContextDetector {
     }
 
     /// Text inputs whose value isn't reported as settable still count.
-    private static let editableRoles: Set<String> = [
+    private nonisolated static let editableRoles: Set<String> = [
         "AXTextField", "AXTextArea", "AXComboBox", "AXSearchField", "AXSecureTextField",
     ]
 
@@ -92,7 +93,7 @@ enum AppContextDetector {
     /// Anything *not* listed (web areas, plain groups, unknown roles) leans
     /// toward editable: minimal browsers often hand back the web-view container
     /// instead of the focused field, and synthetic keystrokes still land there.
-    private static let nonTextRoles: Set<String> = [
+    private nonisolated static let nonTextRoles: Set<String> = [
         "AXButton", "AXStaticText", "AXImage", "AXMenuItem", "AXMenuButton",
         "AXCheckBox", "AXRadioButton", "AXPopUpButton", "AXSlider", "AXLink",
         "AXList", "AXTable", "AXOutline", "AXScrollArea", "AXRow", "AXCell",
@@ -101,10 +102,9 @@ enum AppContextDetector {
 
     /// True when the focused element can accept typed text. Biased toward
     /// `true` (the browser hotkey is explicit, and synthetic keystrokes land in
-    /// fields AX can't fully describe); only no focused element at all, or a
-    /// positively non-text control, reads as false.
-    private static func focusedFieldIsEditable(_ focused: AXUIElement?) -> Bool {
-        guard let focused else { return false }
+    /// fields AX can't fully describe); only a positively non-text control reads
+    /// as false.
+    private nonisolated static func isEditable(_ focused: AXUIElement) -> Bool {
         // Role first: a positively non-text element (e.g. a read-only label
         // that still exposes a selection range) has nowhere to type.
         if let role = copyString(focused, kAXRoleAttribute) {
@@ -126,20 +126,7 @@ enum AppContextDetector {
         return true
     }
 
-    /// The focused element from the cache, falling back to a synchronous
-    /// system-wide query. `nil` only when nothing is focused.
-    private static func resolveFocusedElement() -> AXUIElement? {
-        if let cached = FocusedElementCache.shared.element { return cached }
-        let system = AXUIElementCreateSystemWide()
-        boundToTapTimeout(system)
-        var ref: AnyObject?
-        guard AXUIElementCopyAttributeValue(system, kAXFocusedUIElementAttribute as CFString, &ref) == .success,
-              let element = ref,
-              CFGetTypeID(element) == AXUIElementGetTypeID() else { return nil }
-        return (element as! AXUIElement)
-    }
-
-    private static func copyString(_ element: AXUIElement, _ attribute: String) -> String? {
+    private nonisolated static func copyString(_ element: AXUIElement, _ attribute: String) -> String? {
         var ref: AnyObject?
         guard AXUIElementCopyAttributeValue(element, attribute as CFString, &ref) == .success else { return nil }
         return ref as? String

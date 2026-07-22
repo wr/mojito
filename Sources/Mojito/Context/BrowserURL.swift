@@ -30,21 +30,35 @@ enum BrowserURL {
         }
 
         let app = AXUIElementCreateApplication(pid)
-        // Tight timeout: a hung browser can't stall the tap past its ~1s limit via this AX walk.
-        AXUIElementSetMessagingTimeout(app, AppContextDetector.tapAXTimeout)
+        // This DFS walk runs on the tap thread (main); each node is a synchronous
+        // AX round-trip into the browser. Two bounds keep a hung/slow browser from
+        // stalling the tap past its ~1s limit and dropping the keystroke (W-557):
+        // every element queried is pinned to `walkAXTimeout` (a per-object setting
+        // — a timeout on `app` does NOT propagate to its descendants), and the
+        // whole walk is capped by `walkDeadline` so a tree of individually-fast-
+        // but-collectively-slow nodes still can't run long. A frozen app fails the
+        // first query and aborts immediately.
+        let deadline = Date().addingTimeInterval(Self.walkBudget)
 
         // Most browsers expose the page URL as an `AXURL` attribute somewhere
         // under the focused window — Safari/WebKit on the `AXWebArea`, Chrome
         // and other Chromium browsers on a top-level `AXGroup`. Walking the
         // tree DFS for the first element that carries `AXURL` finds the
         // outermost page URL before any nested iframe.
-        if let url = focusedURL(in: app) { return url }
+        if let url = focusedURL(in: app, deadline: deadline) { return url }
 
-        if let raw = focusedAddressBarValue(in: app), let url = normalizedURL(from: raw) {
+        if let raw = focusedAddressBarValue(in: app, deadline: deadline),
+           let url = normalizedURL(from: raw) {
             return url
         }
         return nil
     }
+
+    /// Per-object AX timeout for every node touched in the walk, and a total
+    /// wall-clock cap for the whole walk. Both are needed: the per-object timeout
+    /// bounds a single hung node, the deadline bounds a deep tree of slow ones.
+    private static let walkAXTimeout: Float = 0.1
+    private static let walkBudget: TimeInterval = 0.25
 
     private static func isBrowser(bundleID: String) -> Bool {
         knownBrowserBundleIDs.contains(bundleID)
@@ -102,9 +116,9 @@ enum BrowserURL {
         "org.torproject.torbrowser",                // Tor Browser
     ]
 
-    private static func focusedURL(in app: AXUIElement) -> URL? {
+    private static func focusedURL(in app: AXUIElement, deadline: Date) -> URL? {
         guard let window = focusedWindow(in: app) else { return nil }
-        guard let element = findElement(under: window, depth: 10, match: { el in
+        guard let element = findElement(under: window, depth: 10, deadline: deadline, match: { el in
             copyAttribute(el, attribute: "AXURL") != nil
         }) else { return nil }
         guard let value = copyAttribute(element, attribute: "AXURL") else { return nil }
@@ -113,23 +127,21 @@ enum BrowserURL {
         return nil
     }
 
-    private static func focusedAddressBarValue(in app: AXUIElement) -> String? {
+    private static func focusedAddressBarValue(in app: AXUIElement, deadline: Date) -> String? {
         guard let window = focusedWindow(in: app) else { return nil }
-        guard let toolbar = findElement(role: "AXToolbar", under: window, depth: 10) else { return nil }
-        guard let field = findAddressField(under: toolbar) else { return nil }
+        guard let toolbar = findElement(role: "AXToolbar", under: window, depth: 10, deadline: deadline) else { return nil }
+        guard let field = findAddressField(under: toolbar, deadline: deadline) else { return nil }
         return copyAttribute(field, attribute: kAXValueAttribute as String) as? String
     }
 
     private static func focusedWindow(in app: AXUIElement) -> AXUIElement? {
-        var ref: AnyObject?
-        let result = AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute as CFString, &ref)
-        guard result == .success, let window = ref,
+        guard let window = copyAttribute(app, attribute: kAXFocusedWindowAttribute as String),
               CFGetTypeID(window) == AXUIElementGetTypeID() else { return nil }
         return (window as! AXUIElement)
     }
 
-    private static func findAddressField(under element: AXUIElement) -> AXUIElement? {
-        return findElement(under: element, depth: 4) { candidate in
+    private static func findAddressField(under element: AXUIElement, deadline: Date) -> AXUIElement? {
+        return findElement(under: element, depth: 4, deadline: deadline) { candidate in
             guard let role = copyAttribute(candidate, attribute: kAXRoleAttribute as String) as? String,
                   role == "AXTextField" else { return false }
             let desc = copyAttribute(candidate, attribute: kAXDescriptionAttribute as String) as? String ?? ""
@@ -141,8 +153,8 @@ enum BrowserURL {
 
     // MARK: - AX traversal helpers
 
-    private static func findElement(role: String, under element: AXUIElement, depth: Int) -> AXUIElement? {
-        findElement(under: element, depth: depth) { candidate in
+    private static func findElement(role: String, under element: AXUIElement, depth: Int, deadline: Date) -> AXUIElement? {
+        findElement(under: element, depth: depth, deadline: deadline) { candidate in
             (copyAttribute(candidate, attribute: kAXRoleAttribute as String) as? String) == role
         }
     }
@@ -150,15 +162,17 @@ enum BrowserURL {
     private static func findElement(
         under element: AXUIElement,
         depth: Int,
+        deadline: Date,
         match: (AXUIElement) -> Bool
     ) -> AXUIElement? {
         if depth < 0 { return nil }
+        if Date() >= deadline { return nil }               // total-walk cap
         if match(element) { return element }
         guard let children = copyAttribute(element, attribute: kAXChildrenAttribute as String) as? [AXUIElement] else {
             return nil
         }
         for child in children {
-            if let hit = findElement(under: child, depth: depth - 1, match: match) {
+            if let hit = findElement(under: child, depth: depth - 1, deadline: deadline, match: match) {
                 return hit
             }
         }
@@ -166,6 +180,10 @@ enum BrowserURL {
     }
 
     private static func copyAttribute(_ element: AXUIElement, attribute: String) -> AnyObject? {
+        // Pin THIS object's timeout — an AXUIElementSetMessagingTimeout only
+        // applies to the object it's set on, so every node in the walk must set
+        // its own or it inherits the looser process-wide default (W-557).
+        AXUIElementSetMessagingTimeout(element, walkAXTimeout)
         var ref: AnyObject?
         let result = AXUIElementCopyAttributeValue(element, attribute as CFString, &ref)
         return result == .success ? ref : nil
@@ -177,6 +195,16 @@ enum BrowserURL {
         if trimmed.contains("://") { return URL(string: trimmed) }
         return URL(string: "https://" + trimmed)
     }
+}
+
+/// Outcome of one URL resolve. `resolved(nil)` is a real "no URL" answer (no
+/// window / non-URL value) and is cached as such; `unavailable` means the resolve
+/// couldn't complete (hung Arc killed at the budget, or spawn failure) and the
+/// last good value must be KEPT — publishing nil there would transiently drop a
+/// valid excluded-site URL and let a denylisted page through (W-557).
+enum BrowserURLResolution: Sendable {
+    case resolved(URL?)
+    case unavailable
 }
 
 /// URL cache for browsers whose tab URL is only readable via AppleScript (Arc).
@@ -207,6 +235,8 @@ final class BrowserURLCache {
         now: { Date() },
         resolver: { BrowserURLCache.osascriptURL(bundleID: $0) }
     )
+
+    typealias Resolver = @Sendable (String) -> BrowserURLResolution
 
     /// Off-main worker for the (potentially slow / hung) AppleScript resolve.
     private static let resolveQueue = DispatchQueue(
@@ -245,13 +275,13 @@ final class BrowserURLCache {
     /// or a real app switch (`observeActivations: false`). The resolver runs off
     /// the main thread, so it must be `@Sendable`.
     private let now: () -> Date
-    private let resolver: @Sendable (String) -> URL?
+    private let resolver: Resolver
 
     init(
         observeActivations: Bool,
         minRefreshInterval: TimeInterval,
         now: @escaping () -> Date,
-        resolver: @escaping @Sendable (String) -> URL?
+        resolver: @escaping Resolver
     ) {
         self.minRefreshInterval = minRefreshInterval
         self.now = now
@@ -303,13 +333,22 @@ final class BrowserURLCache {
         refreshing = true
         let resolve = resolver
         Self.resolveQueue.async { [weak self] in
-            let url = resolve(bundleID)
+            let outcome = resolve(bundleID)
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
                     guard let self else { return }
-                    self.cachedURL = url
-                    self.cachedPID = pid
-                    self.haveResult = true
+                    switch outcome {
+                    case .resolved(let url):
+                        self.cachedURL = url
+                        self.cachedPID = pid
+                        self.haveResult = true
+                    case .unavailable:
+                        // Keep the last good value: a transient stall must not
+                        // erase a cached excluded-site URL. The pid guard in
+                        // `url(...)` still prevents serving it across an app
+                        // switch (a different pid reads as "no URL").
+                        break
+                    }
                     self.lastRefreshAt = self.now()
                     self.refreshing = false
                 }
@@ -322,32 +361,40 @@ final class BrowserURLCache {
     /// thread and, crucially, be *killed* if Arc is unresponsive — `NSAppleScript`
     /// offers no such escape hatch. TCC attributes the Apple Event to Mojito (the
     /// responsible process), so the one-time Automation grant is the same as
-    /// before. Returns nil on any failure — no window, denied Automation, a
-    /// non-URL value, or the hung-Arc timeout — so callers fall through to "no
-    /// URL" exactly as if AX had come up empty. Runs on `resolveQueue`, off main.
-    private nonisolated static func osascriptURL(bundleID: String) -> URL? {
+    /// before. Output goes to a temp file, not a `Pipe`: a `Pipe`'s 64 KB buffer
+    /// can fill and block `osascript`'s write so it never exits, manufacturing a
+    /// timeout on an otherwise-responsive resolve. Returns `.resolved` on a clean
+    /// exit (URL or nil), `.unavailable` on spawn failure or the hung-Arc kill so
+    /// the caller keeps the last good value. Runs on `resolveQueue`, off main.
+    private nonisolated static func osascriptURL(bundleID: String) -> BrowserURLResolution {
+        let outURL = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("mojito-arcurl-\(UUID().uuidString)")
+        FileManager.default.createFile(atPath: outURL.path, contents: nil)
+        guard let outHandle = try? FileHandle(forWritingTo: outURL) else { return .unavailable }
+        defer { try? FileManager.default.removeItem(at: outURL) }
+
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         process.arguments = [
             "-e",
             "tell application id \"\(bundleID)\" to return URL of active tab of front window",
         ]
-        let out = Pipe()
-        process.standardOutput = out
+        process.standardOutput = outHandle
         process.standardError = FileHandle.nullDevice
         let done = DispatchSemaphore(value: 0)
         process.terminationHandler = { _ in done.signal() }
-        do { try process.run() } catch { return nil }
+        do { try process.run() } catch { try? outHandle.close(); return .unavailable }
 
         // Bound the wait: a hung Arc must not wedge this worker indefinitely.
         if done.wait(timeout: .now() + resolveBudget) == .timedOut {
             process.terminate()
-            return nil
+            try? outHandle.close()
+            return .unavailable                     // keep the last good value
         }
-        guard let data = try? out.fileHandleForReading.readToEnd(),
-              let raw = String(data: data, encoding: .utf8)?
-                  .trimmingCharacters(in: .whitespacesAndNewlines),
-              !raw.isEmpty else { return nil }
-        return BrowserURL.normalizedURL(from: raw)
+        try? outHandle.close()
+        // Clean exit: read the file. A non-URL / empty output is a real "no URL".
+        let raw = ((try? String(contentsOf: outURL, encoding: .utf8)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return .resolved(raw.isEmpty ? nil : BrowserURL.normalizedURL(from: raw))
     }
 }

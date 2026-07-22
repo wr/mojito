@@ -65,6 +65,7 @@ case "$CYCLES" in ''|*[!0-9]*) echo "--cycles must be a positive integer" >&2; e
 
 CGTYPE=""
 PRIOR_ENV=""; HAD_PRIOR_ENV=0
+TE_LAUNCHED=0                              # 1 only if WE started TextEdit
 say()  { printf '\033[1m> %s\033[0m\n' "$*"; }
 fail() { printf '\033[31mFAIL: %s\033[0m\n' "$*" >&2; }
 ok()   { printf '\033[32mOK: %s\033[0m\n' "$*"; }
@@ -75,7 +76,8 @@ thaw_all() {
 cleanup() {
   thaw_all                                  # never leave a target frozen
   [ -n "$CGTYPE" ] && rm -f "$CGTYPE"
-  osascript -e 'tell application "TextEdit" to quit saving no' >/dev/null 2>&1
+  # Only quit TextEdit if this run launched it — never discard a user's docs.
+  [ "$TE_LAUNCHED" -eq 1 ] && osascript -e 'tell application "TextEdit" to quit saving no' >/dev/null 2>&1
   if [ "$HAD_PRIOR_ENV" -eq 1 ]; then
     launchctl setenv MOJITO_E2E_LOG "$PRIOR_ENV" 2>/dev/null
   else
@@ -86,6 +88,11 @@ cleanup() {
 trap cleanup EXIT
 
 drive() { "$CGTYPE" "$@" || { fail "cgtype failed: $*"; exit 2; }; }
+
+# Name of the frontmost app process, for verifying activation actually took.
+frontmost_name() {
+  osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null
+}
 
 # ---- preflight -------------------------------------------------------------
 say "Preflight"
@@ -159,7 +166,14 @@ run_target() {
   local t0; t0="$(date -v-2S '+%Y-%m-%d %H:%M:%S')"
   local i
   for i in $(seq 1 "$CYCLES"); do
-    eval "$activate" >/dev/null 2>&1; sleep 0.4
+    osascript -e "$activate" >/dev/null 2>&1; sleep 0.4
+    # Verify the target is actually frontmost BEFORE freezing — otherwise the
+    # phrase would go to some other app and a clean log would be a false pass.
+    local fm; fm="$(frontmost_name)"
+    if [ "$fm" != "$name" ]; then
+      fail "$name is not frontmost (got '${fm:-none}') — activation failed; inconclusive."
+      exit 2
+    fi
     drive hotkey command l                       # focus a text field (URL bar / doc)
     sleep 0.2
     for p in $(pgrep -x "$name"); do kill -STOP "$p"; done   # freeze: no IPC answers
@@ -182,11 +196,18 @@ if [ "$TAP_TIMEOUTS" -gt 0 ]; then fail "Arc: $TAP_TIMEOUTS dropped-keystroke ti
 else ok "Arc: no tap timeouts across $CYCLES frozen-typing cycles."; fi
 
 # TextEdit — non-browser control; isolates the AX-query path (no URL read).
-open -a TextEdit; sleep 1
-osascript -e 'tell application "TextEdit" to make new document' >/dev/null 2>&1; sleep 0.5
-run_target TextEdit 'tell application "TextEdit" to activate'
-if [ "$TAP_TIMEOUTS" -gt 0 ]; then fail "TextEdit: $TAP_TIMEOUTS dropped-keystroke timeout(s)."; FAILED=1
-else ok "TextEdit: no tap timeouts across $CYCLES frozen-typing cycles."; fi
+# Only run it if TextEdit isn't already open — freezing/quitting a TextEdit that
+# holds the user's unsaved documents would risk their work.
+if pgrep -x TextEdit >/dev/null; then
+  say "TextEdit already running — skipping the non-browser control (won't touch your open documents)."
+else
+  TE_LAUNCHED=1
+  open -a TextEdit; sleep 1
+  osascript -e 'tell application "TextEdit" to make new document' >/dev/null 2>&1; sleep 0.5
+  run_target TextEdit 'tell application "TextEdit" to activate'
+  if [ "$TAP_TIMEOUTS" -gt 0 ]; then fail "TextEdit: $TAP_TIMEOUTS dropped-keystroke timeout(s)."; FAILED=1
+  else ok "TextEdit: no tap timeouts across $CYCLES frozen-typing cycles."; fi
+fi
 
 # ---- verdict ---------------------------------------------------------------
 if [ "$FAILED" -eq 0 ]; then

@@ -27,18 +27,44 @@ final class FocusedElementCache {
         didSet { haveFieldInfo = false }
     }
 
+    /// Cached "is this field secure / editable" answers for `element`, so the
+    /// tap-path context builder (`AppContextDetector.current`) does **zero** AX
+    /// attribute IPC — deriving them is several synchronous cross-process
+    /// round-trips, and doing that on the tap thread against a hung app trips the
+    /// event-tap timeout and drops keystrokes (W-557). They're computed **off the
+    /// main thread** alongside the element (seed + focus-change reclassify), so
+    /// `current()` only reads them. `haveFieldInfo` is false until the classify
+    /// lands; `current()` treats that as "secure, not editable" (fail closed), so
+    /// an unclassified field never begins capture. Reset to unknown whenever
+    /// `element` changes (see `element.didSet`).
     private(set) var focusedIsSecure = false
     private(set) var focusedIsEditable = false
-    // Cached per focus to skip repeated AX IPC on the tap thread; reset whenever element changes.
     private(set) var haveFieldInfo = false
 
-    /// Records the field-classification result for the current `element`, so
-    /// subsequent reads for the same focus skip the IPC. Caller (`current()`)
-    /// computes these under a tight timeout the one time per focus.
-    func cacheFieldInfo(secure: Bool, editable: Bool) {
+    /// Publishes an off-thread classification for the *current* `element`. Guard
+    /// with a `CFEqual` element check at the call site so a classify that lands
+    /// after focus moved on can't attach stale info to the new focus.
+    private func publishFieldInfo(secure: Bool, editable: Bool) {
         focusedIsSecure = secure
         focusedIsEditable = editable
         haveFieldInfo = true
+    }
+
+    /// Classifies `element` on the seed queue (off the tap thread) and publishes
+    /// the result iff focus hasn't moved on. Used for within-app focus moves; the
+    /// initial app-switch classify rides the seed round-trip in `seed`.
+    private nonisolated func reclassify(_ element: AXUIElement) {
+        Self.seedQueue.async {
+            AXUIElementSetMessagingTimeout(element, Self.seedTimeout)
+            let info = AppContextDetector.classify(element)
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    let cache = FocusedElementCache.shared
+                    guard let current = cache.element, CFEqual(current, element) else { return }
+                    cache.publishFieldInfo(secure: info.secure, editable: info.editable)
+                }
+            }
+        }
     }
 
     /// Engine uses this to detect cross-app focus changes during the
@@ -147,8 +173,9 @@ final class FocusedElementCache {
             let cache = Unmanaged<FocusedElementCache>.fromOpaque(refcon).takeUnretainedValue()
             // Source is on the main run loop (added in install()), so we're on main.
             MainActor.assumeIsolated {
-                cache.element = focusedElement
+                cache.element = focusedElement          // didSet clears field info → fail closed
                 cache.onFocusChange?()
+                cache.reclassify(focusedElement)        // recompute secure/editable off-thread
             }
         }
         let refcon = Unmanaged.passUnretained(self).toOpaque()
@@ -187,9 +214,20 @@ final class FocusedElementCache {
             seeded = (ref as! AXUIElement)
         }
 
+        // Classify while we're already off the main thread and holding the app's
+        // tight timeout, so `current()` (on the tap thread) reads it for free.
+        var fieldInfo: (secure: Bool, editable: Bool)?
+        if let seeded {
+            AXUIElementSetMessagingTimeout(seeded, Self.seedTimeout)
+            fieldInfo = AppContextDetector.classify(seeded)
+        }
+
         DispatchQueue.main.async {
             MainActor.assumeIsolated {
-                self.install(seeded: seeded, observer: observer, pid: pid, generation: generation)
+                self.install(
+                    seeded: seeded, fieldInfo: fieldInfo,
+                    observer: observer, pid: pid, generation: generation
+                )
             }
         }
     }
@@ -199,9 +237,18 @@ final class FocusedElementCache {
     /// is the same focus the activation-time fire announced, just resolved.
     /// A synthetic fire here would cancel a capture the user started during
     /// the seed window (its snapshot is nil) and clear a fresh emoticon undo.
-    private func install(seeded: AXUIElement?, observer: AXObserver?, pid: pid_t, generation: Int) {
+    private func install(
+        seeded: AXUIElement?,
+        fieldInfo: (secure: Bool, editable: Bool)?,
+        observer: AXObserver?,
+        pid: pid_t,
+        generation: Int
+    ) {
         guard generation == refreshGeneration.withLock({ $0 }) else { return }
-        element = seeded
+        element = seeded                                  // didSet clears field info
+        if let fieldInfo {                                // then publish this seed's classification
+            publishFieldInfo(secure: fieldInfo.secure, editable: fieldInfo.editable)
+        }
         if let observer {
             CFRunLoopAddSource(
                 CFRunLoopGetMain(),

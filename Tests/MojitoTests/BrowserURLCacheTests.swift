@@ -2,47 +2,44 @@ import Foundation
 import Testing
 @testable import Mojito
 
-/// Guards the W-555 fix: reading Arc's tab URL must never do blocking IPC on the
-/// caller's thread (that thread is the CGEventTap callback, and a synchronous
-/// AppleScript there tripped the tap timeout and dropped keystrokes). These
-/// pin the concurrency contract — deferred resolve, single-flight, throttle,
-/// pid-guard — with a stub resolver and a controllable clock, so no live Arc,
-/// AppleScript, or app switch is needed.
+/// Guards the W-555/W-557 fix: reading Arc's tab URL must never do blocking IPC on
+/// the caller's thread (that thread is the CGEventTap callback, and a synchronous
+/// AppleScript there tripped the tap timeout and dropped keystrokes). These pin the
+/// concurrency contract — deferred resolve, off-main, single-flight, throttle,
+/// pid-guard, and keep-last-value-on-timeout — with a stub resolver and a
+/// controllable clock, so no live Arc, AppleScript, or app switch is needed.
 ///
-/// The end-to-end "keys don't drop while typing in Arc" behavior is timing- and
-/// Arc-dependent and can't be asserted deterministically; this instead nails the
-/// property that *causes* the drop when violated.
+/// Serialized because they share the process-wide `BrowserURLCache.resolveQueue`
+/// and assert on timing of the off-main hop; parallel execution could interleave.
 @MainActor
+@Suite(.serialized)
 struct BrowserURLCacheTests {
 
     private static let arc = "company.thebrowser.Browser"
 
     /// Records how the injected resolver was called — count, argument, and the
     /// thread — so tests can assert the AppleScript work is deferred *off* the
-    /// caller's (tap) thread rather than run inline on the hot path. The resolver
-    /// runs on a background queue now, so the state is lock-guarded and the type
-    /// is `@unchecked Sendable`.
+    /// caller's (tap) thread. The resolver runs on a background queue, so the
+    /// state is lock-guarded and the type is `@unchecked Sendable`.
     private final class ResolverSpy: @unchecked Sendable {
         private let lock = NSLock()
         private var _calls = 0
         private var _lastBundleID: String?
         private var _ranOnMainThread = false
-        private var _stub: URL?
+        private var _outcome: BrowserURLResolution = .resolved(nil)
 
         var calls: Int { lock.withLock { _calls } }
         var lastBundleID: String? { lock.withLock { _lastBundleID } }
         var ranOnMainThread: Bool { lock.withLock { _ranOnMainThread } }
-        var stub: URL? {
-            get { lock.withLock { _stub } }
-            set { lock.withLock { _stub = newValue } }
-        }
+        func setOutcome(_ o: BrowserURLResolution) { lock.withLock { _outcome = o } }
+        func setStub(_ url: URL?) { lock.withLock { _outcome = .resolved(url) } }
 
-        func resolve(_ bundleID: String) -> URL? {
+        func resolve(_ bundleID: String) -> BrowserURLResolution {
             lock.withLock {
                 _calls += 1
                 _lastBundleID = bundleID
                 _ranOnMainThread = Thread.isMainThread
-                return _stub
+                return _outcome
             }
         }
     }
@@ -65,15 +62,25 @@ struct BrowserURLCacheTests {
         )
     }
 
-    /// Let the main queue drain the `DispatchQueue.main.async` refresh block.
-    private func drain() async throws {
-        try await Task.sleep(nanoseconds: 30_000_000)
+    /// Poll the main actor until `cond` holds or a generous timeout — replaces a
+    /// fixed sleep so a loaded CI can't flake the deferred-resolve assertions.
+    @discardableResult
+    private func settle(
+        timeout: TimeInterval = 2,
+        until cond: () -> Bool
+    ) async throws -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while !cond() {
+            if Date() >= deadline { return false }
+            try await Task.sleep(nanoseconds: 5_000_000)
+        }
+        return true
     }
 
     // MARK: - The core contract
 
     @Test func hotPathReturnsNilWhenColdAndDefersTheResolve() async throws {
-        let spy = ResolverSpy(); spy.stub = URL(string: "https://example.com")
+        let spy = ResolverSpy(); spy.setStub(URL(string: "https://example.com"))
         let cache = makeCache(spy: spy, clock: Clock(Date()))
 
         let value = cache.url(forBundleID: Self.arc, pid: 42)
@@ -84,31 +91,29 @@ struct BrowserURLCacheTests {
         #expect(value == nil)
         #expect(spy.calls == 0)
 
-        try await drain()
+        #expect(try await settle { spy.calls == 1 })
 
-        // It runs on a later turn, OFF the main/tap thread (so a hung Arc can't
-        // stall the tap or the UI), exactly once.
-        #expect(spy.calls == 1)
+        // It ran OFF the main/tap thread (so a hung Arc can't stall the tap or UI).
         #expect(!spy.ranOnMainThread)
         #expect(spy.lastBundleID == Self.arc)
     }
 
     @Test func servesCachedValueForSamePidAfterRefresh() async throws {
-        let spy = ResolverSpy(); spy.stub = URL(string: "https://example.com")
+        let spy = ResolverSpy(); spy.setStub(URL(string: "https://example.com"))
         let cache = makeCache(spy: spy, clock: Clock(Date()))
 
         _ = cache.url(forBundleID: Self.arc, pid: 42)
-        try await drain()
+        #expect(try await settle { cache.url(forBundleID: Self.arc, pid: 42) != nil })
 
         #expect(cache.url(forBundleID: Self.arc, pid: 42) == URL(string: "https://example.com"))
     }
 
     @Test func doesNotServeValueAcrossPidChange() async throws {
-        let spy = ResolverSpy(); spy.stub = URL(string: "https://example.com")
+        let spy = ResolverSpy(); spy.setStub(URL(string: "https://example.com"))
         let cache = makeCache(spy: spy, clock: Clock(Date()))
 
         _ = cache.url(forBundleID: Self.arc, pid: 42)
-        try await drain()
+        #expect(try await settle { spy.calls == 1 })
 
         // A different pid means a different app instance — the URL resolved for
         // pid 42 must not leak to pid 99.
@@ -116,39 +121,38 @@ struct BrowserURLCacheTests {
     }
 
     @Test func burstOfReadsCollapsesToOneResolve() async throws {
-        let spy = ResolverSpy(); spy.stub = URL(string: "https://example.com")
+        let spy = ResolverSpy(); spy.setStub(URL(string: "https://example.com"))
         let cache = makeCache(spy: spy, clock: Clock(Date()))
 
         // A word+terminator produces several reads back-to-back; single-flight
         // must collapse them to one AppleScript.
         for _ in 0..<5 { _ = cache.url(forBundleID: Self.arc, pid: 42) }
-        try await drain()
-
+        #expect(try await settle { spy.calls >= 1 })
+        // Give any erroneously-scheduled extra resolves a chance to show up.
+        try await Task.sleep(nanoseconds: 30_000_000)
         #expect(spy.calls == 1)
     }
 
     @Test func throttleSkipsRefreshWithinIntervalThenAllowsAfter() async throws {
-        let spy = ResolverSpy(); spy.stub = URL(string: "https://a.example")
+        let spy = ResolverSpy(); spy.setStub(URL(string: "https://a.example"))
         let clock = Clock(Date(timeIntervalSince1970: 10_000))
         let cache = makeCache(spy: spy, clock: clock, minRefreshInterval: 1.0)
 
         _ = cache.url(forBundleID: Self.arc, pid: 42)
-        try await drain()
-        #expect(spy.calls == 1)
+        #expect(try await settle { spy.calls == 1 })
 
         // Within the throttle window: read again, no new resolve, still serving A.
         clock.now += 0.5
-        spy.stub = URL(string: "https://b.example")
+        spy.setStub(URL(string: "https://b.example"))
         #expect(cache.url(forBundleID: Self.arc, pid: 42) == URL(string: "https://a.example"))
-        try await drain()
+        try await Task.sleep(nanoseconds: 20_000_000)
         #expect(spy.calls == 1)
 
         // Past the window: the next read refreshes and picks up B.
         clock.now += 0.6
         _ = cache.url(forBundleID: Self.arc, pid: 42)
-        try await drain()
-        #expect(spy.calls == 2)
-        #expect(cache.url(forBundleID: Self.arc, pid: 42) == URL(string: "https://b.example"))
+        #expect(try await settle { spy.calls == 2 })
+        #expect(try await settle { cache.url(forBundleID: Self.arc, pid: 42) == URL(string: "https://b.example") })
     }
 
     @Test func hotPathReturnsPromptlyEvenIfResolverWouldBlock() async throws {
@@ -158,7 +162,7 @@ struct BrowserURLCacheTests {
             observeActivations: false,
             minRefreshInterval: 0,
             now: { Date() },
-            resolver: { _ in Thread.sleep(forTimeInterval: 0.2); return URL(string: "https://slow.example") }
+            resolver: { _ in Thread.sleep(forTimeInterval: 0.2); return .resolved(URL(string: "https://slow.example")) }
         )
 
         let start = Date()
@@ -167,7 +171,24 @@ struct BrowserURLCacheTests {
 
         // The read itself did no blocking work — well under the resolver's 200ms.
         #expect(elapsed < 0.05)
-        try await drain()
+    }
+
+    @Test func unavailableResolveKeepsLastGoodValue() async throws {
+        // A resolve that times out against a hung Arc returns `.unavailable`; it
+        // must NOT erase a previously-cached URL (that would transiently drop a
+        // denylisted-site URL and let an excluded page through).
+        let spy = ResolverSpy(); spy.setStub(URL(string: "https://kept.example"))
+        let cache = makeCache(spy: spy, clock: Clock(Date()), minRefreshInterval: 0)
+
+        _ = cache.url(forBundleID: Self.arc, pid: 42)
+        #expect(try await settle { cache.url(forBundleID: Self.arc, pid: 42) == URL(string: "https://kept.example") })
+
+        // Next refresh comes back unavailable (hung); the cached value survives.
+        spy.setOutcome(.unavailable)
+        _ = cache.url(forBundleID: Self.arc, pid: 42)   // schedules a refresh
+        #expect(try await settle { spy.calls == 2 })
+        try await Task.sleep(nanoseconds: 20_000_000)   // let the publish land
+        #expect(cache.url(forBundleID: Self.arc, pid: 42) == URL(string: "https://kept.example"))
     }
 
     @Test func arcIsGatedIntoTheAppleScriptPath() {
