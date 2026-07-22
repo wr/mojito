@@ -82,6 +82,22 @@ if [[ -z "$SU_PUBKEY" || "$SU_PUBKEY" == "<null>" ]]; then
     exit 1
 fi
 
+# Refuse to release without a changelog entry for this version. The
+# `## v$VERSION` section in CHANGELOG.md is the single source of truth for the
+# GitHub release body and the Sparkle notes (re-extracted below). This is
+# checked here — before the ~4-minute build + notarize — so a missing entry
+# fails in seconds instead of after all the expensive, irreversible work.
+CHANGELOG_CHECK=$(awk -v header="## v$VERSION" '
+    $0 == header { capture = 1; next }
+    capture && /^## v[0-9]/ { exit }
+    capture { print }
+' "$REPO_ROOT/CHANGELOG.md")
+if [[ -z "$CHANGELOG_CHECK" ]]; then
+    echo "error: no '## v$VERSION' section found in CHANGELOG.md." >&2
+    echo "       Add a '## v$VERSION' entry before releasing." >&2
+    exit 1
+fi
+
 BUILD_DIR="$REPO_ROOT/build/release"
 APP_NAME="Mojito"
 APP_PATH="$BUILD_DIR/Build/Products/Release/$APP_NAME.app"
