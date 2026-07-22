@@ -20,8 +20,33 @@ import os
 final class FocusedElementCache {
     static let shared = FocusedElementCache()
 
-    /// Nil during transitions / when AX is unusable.
-    private(set) var element: AXUIElement?
+    /// Nil during transitions / when AX is unusable. Any reassignment (app
+    /// switch, seed install, within-app focus move) invalidates the cached
+    /// field info below — it described the *previous* focus.
+    private(set) var element: AXUIElement? {
+        didSet { haveFieldInfo = false }
+    }
+
+    /// Cached "is this field secure / editable" answers for `element`, so the
+    /// tap-path context builder (`AppContextDetector.current`) does the AX
+    /// attribute IPC at most once per focus rather than on every keystroke.
+    /// Deriving them is several synchronous cross-process round-trips; doing that
+    /// per word+terminator against a hung app stacked up enough main-thread block
+    /// to trip the event-tap timeout and drop keystrokes even with per-call
+    /// timeouts (W-557). Populated lazily by `current()` (which owns the AX role
+    /// checks); reset to "unknown" whenever `element` changes.
+    private(set) var focusedIsSecure = false
+    private(set) var focusedIsEditable = false
+    private(set) var haveFieldInfo = false
+
+    /// Records the field-classification result for the current `element`, so
+    /// subsequent reads for the same focus skip the IPC. Caller (`current()`)
+    /// computes these under a tight timeout the one time per focus.
+    func cacheFieldInfo(secure: Bool, editable: Bool) {
+        focusedIsSecure = secure
+        focusedIsEditable = editable
+        haveFieldInfo = true
+    }
 
     /// Engine uses this to detect cross-app focus changes during the
     /// deferred picker-show window.

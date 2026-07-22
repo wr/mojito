@@ -49,15 +49,36 @@ enum AppContextDetector {
         // Resolve once and reuse — each fallback resolution is a synchronous
         // cross-process AX call.
         let focused = resolveFocusedElement()
-        // Bound the follow-up secure/editable attribute reads: they hit the
-        // element's owning (possibly hung) app on the tap thread.
-        if let focused { boundToTapTimeout(focused) }
+
+        // Classify the field (secure? editable?) at most once per focus. Those
+        // are several synchronous AX round-trips; doing them on every keystroke
+        // against a hung app stacked up enough main-thread block to trip the tap
+        // timeout even with per-call bounds (W-557). The cache is invalidated
+        // whenever focus moves (see FocusedElementCache.element.didSet).
+        let cache = FocusedElementCache.shared
+        let secure: Bool
+        let editable: Bool
+        if cache.haveFieldInfo {
+            secure = cache.focusedIsSecure          // warm: no IPC on the tap thread
+            editable = cache.focusedIsEditable
+        } else if let focused {
+            boundToTapTimeout(focused)              // first read for this focus: bounded IPC, then cache
+            secure = focusedFieldIsSecure(focused)
+            editable = focusedFieldIsEditable(focused)
+            cache.cacheFieldInfo(secure: secure, editable: editable)
+        } else {
+            // No focused element = mid-transition; allow capture, matching the
+            // prior nil-element behavior. Not cached — reclassify once focus
+            // resolves.
+            secure = false
+            editable = false
+        }
         return ActiveContext(
             bundleID: bundleID,
             processID: pid,
             url: url,
-            focusedFieldIsSecure: focusedFieldIsSecure(focused),
-            focusedFieldIsEditable: focusedFieldIsEditable(focused),
+            focusedFieldIsSecure: secure,
+            focusedFieldIsEditable: editable,
             focusedElement: focused
         )
     }
