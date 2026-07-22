@@ -30,7 +30,14 @@ enum BrowserURL {
         }
 
         let app = AXUIElementCreateApplication(pid)
-        // Per-object timeout + total deadline: either bound alone can be beaten (one slow node vs. many fast ones).
+        // This DFS walk runs on the tap thread (main); each node is a synchronous
+        // AX round-trip into the browser. Two bounds keep a hung/slow browser from
+        // stalling the tap past its ~1s limit and dropping the keystroke (W-557):
+        // every element queried is pinned to `walkAXTimeout` (a per-object setting
+        // — a timeout on `app` does NOT propagate to its descendants), and the
+        // whole walk is capped by `walkDeadline` so a tree of individually-fast-
+        // but-collectively-slow nodes still can't run long. A frozen app fails the
+        // first query and aborts immediately.
         let deadline = Date().addingTimeInterval(Self.walkBudget)
 
         // Most browsers expose the page URL as an `AXURL` attribute somewhere
@@ -110,10 +117,12 @@ enum BrowserURL {
     ]
 
     private static func focusedURL(in app: AXUIElement, deadline: Date) -> URL? {
+        if Date() >= deadline { return nil }
         guard let window = focusedWindow(in: app) else { return nil }
         guard let element = findElement(under: window, depth: 10, deadline: deadline, match: { el in
             copyAttribute(el, attribute: "AXURL") != nil
         }) else { return nil }
+        if Date() >= deadline { return nil }
         guard let value = copyAttribute(element, attribute: "AXURL") else { return nil }
         if let url = value as? URL { return url }
         if let str = value as? String { return URL(string: str) }
@@ -121,9 +130,11 @@ enum BrowserURL {
     }
 
     private static func focusedAddressBarValue(in app: AXUIElement, deadline: Date) -> String? {
+        if Date() >= deadline { return nil }
         guard let window = focusedWindow(in: app) else { return nil }
         guard let toolbar = findElement(role: "AXToolbar", under: window, depth: 10, deadline: deadline) else { return nil }
         guard let field = findAddressField(under: toolbar, deadline: deadline) else { return nil }
+        if Date() >= deadline { return nil }
         return copyAttribute(field, attribute: kAXValueAttribute as String) as? String
     }
 
@@ -190,7 +201,11 @@ enum BrowserURL {
     }
 }
 
-/// `.unavailable` means the resolve timed out — callers must keep the last good value, not overwrite it with nil.
+/// Outcome of one URL resolve. `resolved(nil)` is a real "no URL" answer (no
+/// window / non-URL value) and is cached as such; `unavailable` means the resolve
+/// couldn't complete (hung Arc killed at the budget, or spawn failure) and the
+/// last good value must be KEPT — publishing nil there would transiently drop a
+/// valid excluded-site URL and let a denylisted page through (W-557).
 enum BrowserURLResolution: Sendable {
     case resolved(URL?)
     case unavailable
@@ -345,11 +360,22 @@ final class BrowserURLCache {
         }
     }
 
-    // osascript subprocess so it can be killed; temp file instead of Pipe to avoid the 64 KB buffer deadlock.
+    /// `URL of active tab of front window` via an `osascript` subprocess. Shelling
+    /// out (rather than in-process `NSAppleScript`) lets this run off the main
+    /// thread and, crucially, be *killed* if Arc is unresponsive — `NSAppleScript`
+    /// offers no such escape hatch. TCC attributes the Apple Event to Mojito (the
+    /// responsible process), so the one-time Automation grant is the same as
+    /// before. Output goes to a temp file, not a `Pipe`: a `Pipe`'s 64 KB buffer
+    /// can fill and block `osascript`'s write so it never exits, manufacturing a
+    /// timeout on an otherwise-responsive resolve. Returns `.resolved` on a clean
+    /// exit (URL or nil), `.unavailable` on spawn failure or the hung-Arc kill so
+    /// the caller keeps the last good value. Runs on `resolveQueue`, off main.
     private nonisolated static func osascriptURL(bundleID: String) -> BrowserURLResolution {
         let outURL = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent("mojito-arcurl-\(UUID().uuidString)")
         FileManager.default.createFile(atPath: outURL.path, contents: nil)
+        // Install the cleanup BEFORE the FileHandle guard so a failed open can't
+        // leak the temp file.
         defer { try? FileManager.default.removeItem(at: outURL) }
         guard let outHandle = try? FileHandle(forWritingTo: outURL) else { return .unavailable }
 
@@ -372,7 +398,13 @@ final class BrowserURLCache {
             return .unavailable                     // keep the last good value
         }
         try? outHandle.close()
-        // Clean exit: read the file. A non-URL / empty output is a real "no URL".
+        // A nonzero exit is an AppleScript/TCC/window error (e.g. "no active tab"
+        // when the front window is a transient Little-Arc preview), NOT a
+        // confirmed "no URL". Treat it as unavailable so a valid cached
+        // excluded-site URL survives a transient error rather than being cleared
+        // (which would let a denylisted page through). Only a clean exit with
+        // empty output is a real `resolved(nil)`.
+        guard process.terminationStatus == 0 else { return .unavailable }
         let raw = ((try? String(contentsOf: outURL, encoding: .utf8)) ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return .resolved(raw.isEmpty ? nil : BrowserURL.normalizedURL(from: raw))

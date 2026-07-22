@@ -176,7 +176,17 @@ run_target() {
     fi
     drive hotkey command l                       # focus a text field (URL bar / doc)
     sleep 0.2
+    local tpid; tpid="$(pgrep -x "$name" | head -1)"
+    [ -n "$tpid" ] || { fail "$name is not running — can't freeze it; inconclusive."; exit 2; }
     for p in $(pgrep -x "$name"); do kill -STOP "$p"; done   # freeze: no IPC answers
+    # PROVE it actually froze — a failed STOP would leave the target responsive
+    # and a clean log would be a false pass. `T` = stopped.
+    local st; st="$(ps -o state= -p "$tpid" 2>/dev/null | tr -d ' ')"
+    case "$st" in
+      T*) ;;
+      *)  for p in $(pgrep -x "$name"); do kill -CONT "$p" 2>/dev/null; done
+          fail "$name did not freeze (state '${st:-gone}') — inconclusive."; exit 2 ;;
+    esac
     drive type "$PHRASE "                          # each word+space fires detect()
     sleep "$FREEZE_SECS"                           # hold: a blocking tap path times out here
     for p in $(pgrep -x "$name"); do kill -CONT "$p"; done   # thaw

@@ -24,10 +24,28 @@ final class FocusedElementCache {
     /// switch, seed install, within-app focus move) invalidates the cached
     /// field info below — it described the *previous* focus.
     private(set) var element: AXUIElement? {
-        didSet { haveFieldInfo = false }
+        didSet {
+            haveFieldInfo = false
+            _ = fieldGeneration.withLock { $0 += 1 }   // cancel in-flight reclassifies
+        }
     }
 
-    // Cached per focus to skip repeated AX IPC on the tap thread; reset on any element change (see element.didSet).
+    /// Bumped on every `element` change so a queued off-thread reclassify can bail
+    /// before its (up to `seedTimeout`) AX round-trips instead of piling up a
+    /// serial backlog under a focus storm. Lock-protected so `reclassify` can read
+    /// it from the seed queue.
+    private let fieldGeneration = OSAllocatedUnfairLock(initialState: 0)
+
+    /// Cached "is this field secure / editable" answers for `element`, so the
+    /// tap-path context builder (`AppContextDetector.current`) does **zero** AX
+    /// attribute IPC — deriving them is several synchronous cross-process
+    /// round-trips, and doing that on the tap thread against a hung app trips the
+    /// event-tap timeout and drops keystrokes (W-557). They're computed **off the
+    /// main thread** alongside the element (seed + focus-change reclassify), so
+    /// `current()` only reads them. `haveFieldInfo` is false until the classify
+    /// lands; `current()` treats that as "secure, not editable" (fail closed), so
+    /// an unclassified field never begins capture. Reset to unknown whenever
+    /// `element` changes (see `element.didSet`).
     private(set) var focusedIsSecure = false
     private(set) var focusedIsEditable = false
     private(set) var haveFieldInfo = false
@@ -44,8 +62,21 @@ final class FocusedElementCache {
     /// Classifies `element` on the seed queue (off the tap thread) and publishes
     /// the result iff focus hasn't moved on. Used for within-app focus moves; the
     /// initial app-switch classify rides the seed round-trip in `seed`.
+    ///
+    /// Note the inherent limit of non-blocking focus tracking: between a focus
+    /// move and this landing, `current()` fails closed (haveFieldInfo is cleared
+    /// by `element.didSet`), so it can't leak. But if the app's AX observer never
+    /// registered (`seed` best-effort), within-app focus moves aren't seen at all
+    /// and a stale-but-authoritative classification can persist until the next app
+    /// activation re-seeds. Fully closing that needs synchronous re-verification —
+    /// exactly the tap-blocking IPC this whole change removes — so for AX-opaque
+    /// apps the app/URL exclusion list remains the backstop for password contexts
+    /// (same as the secure-field detection has always relied on).
     private nonisolated func reclassify(_ element: AXUIElement) {
+        let generation = fieldGeneration.withLock { $0 }
         Self.seedQueue.async {
+            // Focus already moved on again → skip the round-trips entirely.
+            guard self.fieldGeneration.withLock({ $0 }) == generation else { return }
             AXUIElementSetMessagingTimeout(element, Self.seedTimeout)
             let info = AppContextDetector.classify(element)
             DispatchQueue.main.async {

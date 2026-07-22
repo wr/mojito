@@ -176,18 +176,27 @@ struct BrowserURLCacheTests {
     @Test func unavailableResolveKeepsLastGoodValue() async throws {
         // A resolve that times out against a hung Arc returns `.unavailable`; it
         // must NOT erase a previously-cached URL (that would transiently drop a
-        // denylisted-site URL and let an excluded page through).
+        // denylisted-site URL and let an excluded page through). Clock-driven
+        // throttling keeps the reads deterministic — no spurious reschedules.
         let spy = ResolverSpy(); spy.setStub(URL(string: "https://kept.example"))
-        let cache = makeCache(spy: spy, clock: Clock(Date()), minRefreshInterval: 0)
+        let clock = Clock(Date(timeIntervalSince1970: 5_000))
+        let cache = makeCache(spy: spy, clock: clock, minRefreshInterval: 1.0)
 
+        // Warm: the first read resolves and caches "kept". Reads within the 1s
+        // window are throttled, so `spy.calls` stays 1.
         _ = cache.url(forBundleID: Self.arc, pid: 42)
+        #expect(try await settle { spy.calls == 1 })
         #expect(try await settle { cache.url(forBundleID: Self.arc, pid: 42) == URL(string: "https://kept.example") })
 
-        // Next refresh comes back unavailable (hung); the cached value survives.
+        // Past the window, the next resolve comes back unavailable (hung/killed).
+        clock.now += 1.1
         spy.setOutcome(.unavailable)
-        _ = cache.url(forBundleID: Self.arc, pid: 42)   // schedules a refresh
+        _ = cache.url(forBundleID: Self.arc, pid: 42)   // schedules refresh #2 (.unavailable)
         #expect(try await settle { spy.calls == 2 })
-        try await Task.sleep(nanoseconds: 20_000_000)   // let the publish land
+        try await Task.sleep(nanoseconds: 30_000_000)   // let the publish land
+
+        // The cached value survived. This read is within the new throttle window
+        // (lastRefreshAt advanced), so it doesn't reschedule and can't flake.
         #expect(cache.url(forBundleID: Self.arc, pid: 42) == URL(string: "https://kept.example"))
     }
 
