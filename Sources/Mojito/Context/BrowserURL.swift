@@ -30,19 +30,28 @@ enum BrowserURL {
         }
 
         let app = AXUIElementCreateApplication(pid)
+        // Two bounds: per-object timeout (does not propagate to descendants) + total deadline (caps a deep tree of fast-but-numerous nodes).
+        let deadline = Date().addingTimeInterval(Self.walkBudget)
 
         // Most browsers expose the page URL as an `AXURL` attribute somewhere
         // under the focused window — Safari/WebKit on the `AXWebArea`, Chrome
         // and other Chromium browsers on a top-level `AXGroup`. Walking the
         // tree DFS for the first element that carries `AXURL` finds the
         // outermost page URL before any nested iframe.
-        if let url = focusedURL(in: app) { return url }
+        if let url = focusedURL(in: app, deadline: deadline) { return url }
 
-        if let raw = focusedAddressBarValue(in: app), let url = normalizedURL(from: raw) {
+        if let raw = focusedAddressBarValue(in: app, deadline: deadline),
+           let url = normalizedURL(from: raw) {
             return url
         }
         return nil
     }
+
+    /// Per-object AX timeout for every node touched in the walk, and a total
+    /// wall-clock cap for the whole walk. Both are needed: the per-object timeout
+    /// bounds a single hung node, the deadline bounds a deep tree of slow ones.
+    private static let walkAXTimeout: Float = 0.1
+    private static let walkBudget: TimeInterval = 0.25
 
     private static func isBrowser(bundleID: String) -> Bool {
         knownBrowserBundleIDs.contains(bundleID)
@@ -100,34 +109,36 @@ enum BrowserURL {
         "org.torproject.torbrowser",                // Tor Browser
     ]
 
-    private static func focusedURL(in app: AXUIElement) -> URL? {
+    private static func focusedURL(in app: AXUIElement, deadline: Date) -> URL? {
+        if Date() >= deadline { return nil }
         guard let window = focusedWindow(in: app) else { return nil }
-        guard let element = findElement(under: window, depth: 10, match: { el in
+        guard let element = findElement(under: window, depth: 10, deadline: deadline, match: { el in
             copyAttribute(el, attribute: "AXURL") != nil
         }) else { return nil }
+        if Date() >= deadline { return nil }
         guard let value = copyAttribute(element, attribute: "AXURL") else { return nil }
         if let url = value as? URL { return url }
         if let str = value as? String { return URL(string: str) }
         return nil
     }
 
-    private static func focusedAddressBarValue(in app: AXUIElement) -> String? {
+    private static func focusedAddressBarValue(in app: AXUIElement, deadline: Date) -> String? {
+        if Date() >= deadline { return nil }
         guard let window = focusedWindow(in: app) else { return nil }
-        guard let toolbar = findElement(role: "AXToolbar", under: window, depth: 10) else { return nil }
-        guard let field = findAddressField(under: toolbar) else { return nil }
+        guard let toolbar = findElement(role: "AXToolbar", under: window, depth: 10, deadline: deadline) else { return nil }
+        guard let field = findAddressField(under: toolbar, deadline: deadline) else { return nil }
+        if Date() >= deadline { return nil }
         return copyAttribute(field, attribute: kAXValueAttribute as String) as? String
     }
 
     private static func focusedWindow(in app: AXUIElement) -> AXUIElement? {
-        var ref: AnyObject?
-        let result = AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute as CFString, &ref)
-        guard result == .success, let window = ref,
+        guard let window = copyAttribute(app, attribute: kAXFocusedWindowAttribute as String),
               CFGetTypeID(window) == AXUIElementGetTypeID() else { return nil }
         return (window as! AXUIElement)
     }
 
-    private static func findAddressField(under element: AXUIElement) -> AXUIElement? {
-        return findElement(under: element, depth: 4) { candidate in
+    private static func findAddressField(under element: AXUIElement, deadline: Date) -> AXUIElement? {
+        return findElement(under: element, depth: 4, deadline: deadline) { candidate in
             guard let role = copyAttribute(candidate, attribute: kAXRoleAttribute as String) as? String,
                   role == "AXTextField" else { return false }
             let desc = copyAttribute(candidate, attribute: kAXDescriptionAttribute as String) as? String ?? ""
@@ -139,8 +150,8 @@ enum BrowserURL {
 
     // MARK: - AX traversal helpers
 
-    private static func findElement(role: String, under element: AXUIElement, depth: Int) -> AXUIElement? {
-        findElement(under: element, depth: depth) { candidate in
+    private static func findElement(role: String, under element: AXUIElement, depth: Int, deadline: Date) -> AXUIElement? {
+        findElement(under: element, depth: depth, deadline: deadline) { candidate in
             (copyAttribute(candidate, attribute: kAXRoleAttribute as String) as? String) == role
         }
     }
@@ -148,15 +159,17 @@ enum BrowserURL {
     private static func findElement(
         under element: AXUIElement,
         depth: Int,
+        deadline: Date,
         match: (AXUIElement) -> Bool
     ) -> AXUIElement? {
         if depth < 0 { return nil }
+        if Date() >= deadline { return nil }               // total-walk cap
         if match(element) { return element }
         guard let children = copyAttribute(element, attribute: kAXChildrenAttribute as String) as? [AXUIElement] else {
             return nil
         }
         for child in children {
-            if let hit = findElement(under: child, depth: depth - 1, match: match) {
+            if let hit = findElement(under: child, depth: depth - 1, deadline: deadline, match: match) {
                 return hit
             }
         }
@@ -164,12 +177,16 @@ enum BrowserURL {
     }
 
     private static func copyAttribute(_ element: AXUIElement, attribute: String) -> AnyObject? {
+        // Pin THIS object's timeout — an AXUIElementSetMessagingTimeout only
+        // applies to the object it's set on, so every node in the walk must set
+        // its own or it inherits the looser process-wide default (W-557).
+        AXUIElementSetMessagingTimeout(element, walkAXTimeout)
         var ref: AnyObject?
         let result = AXUIElementCopyAttributeValue(element, attribute as CFString, &ref)
         return result == .success ? ref : nil
     }
 
-    fileprivate static func normalizedURL(from raw: String) -> URL? {
+    nonisolated fileprivate static func normalizedURL(from raw: String) -> URL? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return nil }
         if trimmed.contains("://") { return URL(string: trimmed) }
@@ -177,32 +194,51 @@ enum BrowserURL {
     }
 }
 
+/// `.unavailable` means the resolve timed out — callers must keep the last good value, not overwrite it with nil.
+enum BrowserURLResolution: Sendable {
+    case resolved(URL?)
+    case unavailable
+}
+
 /// URL cache for browsers whose tab URL is only readable via AppleScript (Arc).
 /// `BrowserURL.detect` is called synchronously inside the CGEventTap callback,
 /// so it can't run the AppleScript there — a slow Apple Event trips the tap
-/// timeout and drops the keystroke (W-555). But `NSAppleScript` is documented
-/// main-thread-only (Cocoa Thread Safety Summary), so it can't just be shoved
-/// onto a background queue either.
+/// timeout and drops the keystroke (W-555).
 ///
 /// Resolution: the hot-path read (`url(forBundleID:pid:)`) never does IPC — it
-/// returns the last resolved value and schedules a refresh. The refresh runs
-/// the AppleScript on the main thread, where it's supported, but via
-/// `DispatchQueue.main.async` so it lands on its own run-loop turn rather than
-/// inside the tap callback. A throttle keeps refreshes to at most one per
-/// second, so the brief main-thread block can't recur per keystroke the way the
-/// old synchronous call did. Same spirit as `FocusedElementCache` moving slow
-/// IPC out of the tap path (W-547). Bounded staleness (≈ one keystroke, or one
-/// navigation until the next read/refresh) is acceptable for per-site exclusion
-/// matching; the value is only served for the pid it was resolved from, so it
-/// can't bleed across an app switch.
+/// returns the last resolved value and schedules a refresh. The refresh runs the
+/// AppleScript **off the main thread** on `resolveQueue`, via an `osascript`
+/// subprocess (which sidesteps `NSAppleScript`'s main-thread requirement) with a
+/// hard wall-clock bound. That matters for a genuinely hung Arc: the earlier
+/// W-555 design ran `NSAppleScript` on the main thread, so a frozen Arc would
+/// wedge Mojito's *entire* main thread — UI and event tap — until the Apple
+/// Event timed out (up to ~2 min), turning "one browser hung" into "Mojito
+/// hung" and dropping keystrokes the whole time (W-557). Off-thread + bounded,
+/// a hung Arc only stalls this one worker, which is killed after `resolveBudget`;
+/// the tap thread never blocks. Same spirit as `FocusedElementCache` (W-547).
+/// A throttle keeps refreshes to at most one per second. Bounded staleness (≈
+/// one keystroke, or one navigation until the next read/refresh) is fine for
+/// per-site exclusion matching; the value is served only for the pid it was
+/// resolved from, so it can't bleed across an app switch.
 @MainActor
 final class BrowserURLCache {
     static let shared = BrowserURLCache(
         observeActivations: true,
         minRefreshInterval: 1.0,
         now: { Date() },
-        resolver: { BrowserURLCache.appleScriptURL(bundleID: $0) }
+        resolver: { BrowserURLCache.osascriptURL(bundleID: $0) }
     )
+
+    typealias Resolver = @Sendable (String) -> BrowserURLResolution
+
+    /// Off-main worker for the (potentially slow / hung) AppleScript resolve.
+    private static let resolveQueue = DispatchQueue(
+        label: "mojito.browserURL.resolve", qos: .userInitiated
+    )
+
+    /// Hard cap on a single resolve. A responsive Arc answers in tens of ms; a
+    /// hung one is killed at this bound and reported as "no URL".
+    private static let resolveBudget: DispatchTimeInterval = .milliseconds(800)
 
     static let appleScriptBundleIDs: Set<String> = [
         "company.thebrowser.Browser",   // Arc
@@ -226,18 +262,19 @@ final class BrowserURLCache {
     private var lastRefreshAt: Date?
     private let minRefreshInterval: TimeInterval
 
-    /// Seams. Production wires the real `NSAppleScript` resolver and wall clock;
+    /// Seams. Production wires the real `osascript` resolver and wall clock;
     /// tests inject a stub resolver + controllable clock so the deferral,
     /// single-flight, throttle, and pid-guard are checkable without AppleScript
-    /// or a real app switch (`observeActivations: false`).
+    /// or a real app switch (`observeActivations: false`). The resolver runs off
+    /// the main thread, so it must be `@Sendable`.
     private let now: () -> Date
-    private let resolver: (String) -> URL?
+    private let resolver: Resolver
 
     init(
         observeActivations: Bool,
         minRefreshInterval: TimeInterval,
         now: @escaping () -> Date,
-        resolver: @escaping (String) -> URL?
+        resolver: @escaping Resolver
     ) {
         self.minRefreshInterval = minRefreshInterval
         self.now = now
@@ -275,11 +312,11 @@ final class BrowserURLCache {
         return value
     }
 
-    /// Resolves the URL on a *later* main-run-loop turn. `NSAppleScript` must
-    /// run on the main thread, but never inside the tap callback that calls
-    /// `detect` — `DispatchQueue.main.async` gives it its own turn, and the
-    /// throttle keeps it rare enough that the brief main-thread block can't
-    /// stall typing the way the per-keystroke synchronous call did.
+    /// Resolves the URL on a background worker, then publishes on the main actor.
+    /// The resolve never runs inside the tap callback that calls `detect` — and,
+    /// unlike the earlier main-thread version, never on the main thread at all —
+    /// so even a hung Arc can't stall the tap or the UI. Single-flight (`refreshing`)
+    /// plus the throttle keep at most one worker in flight per second.
     private func scheduleRefresh(bundleID: String, pid: pid_t, force: Bool) {
         guard !refreshing else { return }
         if !force, haveResult, let last = lastRefreshAt,
@@ -287,28 +324,69 @@ final class BrowserURLCache {
             return
         }
         refreshing = true
-        DispatchQueue.main.async { [weak self] in
-            MainActor.assumeIsolated {
-                guard let self else { return }
-                self.cachedURL = self.resolver(bundleID)
-                self.cachedPID = pid
-                self.haveResult = true
-                self.lastRefreshAt = self.now()
-                self.refreshing = false
+        let resolve = resolver
+        Self.resolveQueue.async { [weak self] in
+            let outcome = resolve(bundleID)
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    switch outcome {
+                    case .resolved(let url):
+                        self.cachedURL = url
+                        self.cachedPID = pid
+                        self.haveResult = true
+                    case .unavailable:
+                        // Keep the last good value: a transient stall must not
+                        // erase a cached excluded-site URL. The pid guard in
+                        // `url(...)` still prevents serving it across an app
+                        // switch (a different pid reads as "no URL").
+                        break
+                    }
+                    self.lastRefreshAt = self.now()
+                    self.refreshing = false
+                }
             }
         }
     }
 
-    /// `URL of active tab of front window` via AppleScript. Returns nil on any
-    /// failure — no window, denied Automation permission, or a non-URL value —
-    /// so callers fall through to "no URL" exactly as if AX had come up empty.
-    /// Called only from `scheduleRefresh`'s main-thread block.
-    private static func appleScriptURL(bundleID: String) -> URL? {
-        let source = "tell application id \"\(bundleID)\" to return URL of active tab of front window"
-        guard let script = NSAppleScript(source: source) else { return nil }
-        var error: NSDictionary?
-        let result = script.executeAndReturnError(&error)
-        guard error == nil, let raw = result.stringValue else { return nil }
-        return BrowserURL.normalizedURL(from: raw)
+    // osascript subprocess: runs off main, killable if Arc hangs. Temp file instead of Pipe avoids the 64 KB buffer deadlock.
+    private nonisolated static func osascriptURL(bundleID: String) -> BrowserURLResolution {
+        let outURL = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("mojito-arcurl-\(UUID().uuidString)")
+        FileManager.default.createFile(atPath: outURL.path, contents: nil)
+        // Install the cleanup BEFORE the FileHandle guard so a failed open can't
+        // leak the temp file.
+        defer { try? FileManager.default.removeItem(at: outURL) }
+        guard let outHandle = try? FileHandle(forWritingTo: outURL) else { return .unavailable }
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = [
+            "-e",
+            "tell application id \"\(bundleID)\" to return URL of active tab of front window",
+        ]
+        process.standardOutput = outHandle
+        process.standardError = FileHandle.nullDevice
+        let done = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in done.signal() }
+        do { try process.run() } catch { try? outHandle.close(); return .unavailable }
+
+        // Bound the wait: a hung Arc must not wedge this worker indefinitely.
+        if done.wait(timeout: .now() + resolveBudget) == .timedOut {
+            process.terminate()
+            try? outHandle.close()
+            return .unavailable                     // keep the last good value
+        }
+        try? outHandle.close()
+        // A nonzero exit is an AppleScript/TCC/window error (e.g. "no active tab"
+        // when the front window is a transient Little-Arc preview), NOT a
+        // confirmed "no URL". Treat it as unavailable so a valid cached
+        // excluded-site URL survives a transient error rather than being cleared
+        // (which would let a denylisted page through). Only a clean exit with
+        // empty output is a real `resolved(nil)`.
+        guard process.terminationStatus == 0 else { return .unavailable }
+        let raw = ((try? String(contentsOf: outURL, encoding: .utf8)) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return .resolved(raw.isEmpty ? nil : BrowserURL.normalizedURL(from: raw))
     }
 }

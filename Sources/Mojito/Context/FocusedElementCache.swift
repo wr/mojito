@@ -20,8 +20,53 @@ import os
 final class FocusedElementCache {
     static let shared = FocusedElementCache()
 
-    /// Nil during transitions / when AX is unusable.
-    private(set) var element: AXUIElement?
+    /// Nil during transitions / when AX is unusable. Any reassignment (app
+    /// switch, seed install, within-app focus move) invalidates the cached
+    /// field info below — it described the *previous* focus.
+    private(set) var element: AXUIElement? {
+        didSet {
+            haveFieldInfo = false
+            _ = fieldGeneration.withLock { $0 += 1 }   // cancel in-flight reclassifies
+        }
+    }
+
+    /// Bumped on every `element` change so a queued off-thread reclassify can bail
+    /// before its (up to `seedTimeout`) AX round-trips instead of piling up a
+    /// serial backlog under a focus storm. Lock-protected so `reclassify` can read
+    /// it from the seed queue.
+    private let fieldGeneration = OSAllocatedUnfairLock(initialState: 0)
+
+    // Cached per focus to skip AX IPC on the tap thread; reset on element change (see element.didSet), fail-closed until set.
+    private(set) var focusedIsSecure = false
+    private(set) var focusedIsEditable = false
+    private(set) var haveFieldInfo = false
+
+    /// Publishes an off-thread classification for the *current* `element`. Guard
+    /// with a `CFEqual` element check at the call site so a classify that lands
+    /// after focus moved on can't attach stale info to the new focus.
+    private func publishFieldInfo(secure: Bool, editable: Bool) {
+        focusedIsSecure = secure
+        focusedIsEditable = editable
+        haveFieldInfo = true
+    }
+
+    // Classifies off-thread; publishes iff focus hasn't moved. AX-opaque apps that miss within-app moves rely on the exclusion list as backstop.
+    private nonisolated func reclassify(_ element: AXUIElement) {
+        let generation = fieldGeneration.withLock { $0 }
+        Self.seedQueue.async {
+            // Focus already moved on again → skip the round-trips entirely.
+            guard self.fieldGeneration.withLock({ $0 }) == generation else { return }
+            AXUIElementSetMessagingTimeout(element, Self.seedTimeout)
+            let info = AppContextDetector.classify(element)
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    let cache = FocusedElementCache.shared
+                    guard let current = cache.element, CFEqual(current, element) else { return }
+                    cache.publishFieldInfo(secure: info.secure, editable: info.editable)
+                }
+            }
+        }
+    }
 
     /// Engine uses this to detect cross-app focus changes during the
     /// deferred picker-show window.
@@ -129,8 +174,9 @@ final class FocusedElementCache {
             let cache = Unmanaged<FocusedElementCache>.fromOpaque(refcon).takeUnretainedValue()
             // Source is on the main run loop (added in install()), so we're on main.
             MainActor.assumeIsolated {
-                cache.element = focusedElement
+                cache.element = focusedElement          // didSet clears field info → fail closed
                 cache.onFocusChange?()
+                cache.reclassify(focusedElement)        // recompute secure/editable off-thread
             }
         }
         let refcon = Unmanaged.passUnretained(self).toOpaque()
@@ -169,9 +215,20 @@ final class FocusedElementCache {
             seeded = (ref as! AXUIElement)
         }
 
+        // Classify while we're already off the main thread and holding the app's
+        // tight timeout, so `current()` (on the tap thread) reads it for free.
+        var fieldInfo: (secure: Bool, editable: Bool)?
+        if let seeded {
+            AXUIElementSetMessagingTimeout(seeded, Self.seedTimeout)
+            fieldInfo = AppContextDetector.classify(seeded)
+        }
+
         DispatchQueue.main.async {
             MainActor.assumeIsolated {
-                self.install(seeded: seeded, observer: observer, pid: pid, generation: generation)
+                self.install(
+                    seeded: seeded, fieldInfo: fieldInfo,
+                    observer: observer, pid: pid, generation: generation
+                )
             }
         }
     }
@@ -181,9 +238,18 @@ final class FocusedElementCache {
     /// is the same focus the activation-time fire announced, just resolved.
     /// A synthetic fire here would cancel a capture the user started during
     /// the seed window (its snapshot is nil) and clear a fresh emoticon undo.
-    private func install(seeded: AXUIElement?, observer: AXObserver?, pid: pid_t, generation: Int) {
+    private func install(
+        seeded: AXUIElement?,
+        fieldInfo: (secure: Bool, editable: Bool)?,
+        observer: AXObserver?,
+        pid: pid_t,
+        generation: Int
+    ) {
         guard generation == refreshGeneration.withLock({ $0 }) else { return }
-        element = seeded
+        element = seeded                                  // didSet clears field info
+        if let fieldInfo {                                // then publish this seed's classification
+            publishFieldInfo(secure: fieldInfo.secure, editable: fieldInfo.editable)
+        }
         if let observer {
             CFRunLoopAddSource(
                 CFRunLoopGetMain(),
