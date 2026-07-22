@@ -65,6 +65,7 @@
 		5EBE8D89D81DB7FF6AF09968 /* TadaSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3E46F6B55025038F101A4A /* TadaSound.swift */; };
 		62417E7F0AA71DEF9928E2B9 /* SynthRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 212C94A63FBCB28A41CA1A1A /* SynthRenderer.swift */; };
 		63C4CA064E4D7B82A160275D /* PanelPositioner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C7C809FB011043F44297508 /* PanelPositioner.swift */; };
+		64D188B1FE9F71925A3FD279 /* BrowserURLCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D63BC4F9673FBBC43A3699 /* BrowserURLCacheTests.swift */; };
 		6607717F2E4D11B5563F8184 /* Shortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC79E6EAFAF655E0E63E78DC /* Shortcuts.swift */; };
 		67560B8C0EC9028ED9659937 /* EmojiRain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BF5C449E03B6F883693B87 /* EmojiRain.swift */; };
 		67B986DB09F844C3688F3A31 /* v03.bin in Resources */ = {isa = PBXBuildFile; fileRef = 2C4CF18CE5AC46767EFCA557 /* v03.bin */; };
@@ -327,6 +328,7 @@
 		C31E41F813A67872400E4942 /* AnimatedGifView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGifView.swift; sourceTree = "<group>"; };
 		C3B79AAA76C55A5B4FB087A6 /* EmojiBrowserViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBrowserViewModel.swift; sourceTree = "<group>"; };
 		C410F8B7AF8493C098EA2AF1 /* ConfettiRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiRain.swift; sourceTree = "<group>"; };
+		C4D63BC4F9673FBBC43A3699 /* BrowserURLCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserURLCacheTests.swift; sourceTree = "<group>"; };
 		C7CD240E9450366313F15198 /* PrivacyPermissionsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPermissionsSettings.swift; sourceTree = "<group>"; };
 		C876AD00FBA92A6CA56ABD95 /* s07.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s07.bin; sourceTree = "<group>"; };
 		CAD51C35233BDBC98AE0418B /* TelemetryConsent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryConsent.swift; sourceTree = "<group>"; };
@@ -392,6 +394,7 @@
 			children = (
 				71409240C4105D980C71E264 /* AliasTests.swift */,
 				F36FC6BE9A109EAEE6A18CE1 /* AmbientEmoticonTableTests.swift */,
+				C4D63BC4F9673FBBC43A3699 /* BrowserURLCacheTests.swift */,
 				6C69999E4AC7F8B8C054B395 /* DebugReportTests.swift */,
 				B3042E363CC429F15721773F /* EasterEggOrderingTests.swift */,
 				A1B842CBBD6C7466F9BA2786 /* EmojiDatabaseTests.swift */,
@@ -1054,6 +1057,7 @@
 			files = (
 				8D768748EE3F9F440F3F94EA /* AliasTests.swift in Sources */,
 				EFCA5419E2CE5D16F2DE7DB3 /* AmbientEmoticonTableTests.swift in Sources */,
+				64D188B1FE9F71925A3FD279 /* BrowserURLCacheTests.swift in Sources */,
 				B878C3CC891907E89DE33158 /* DebugReportTests.swift in Sources */,
 				B33ABD1825CC5908D3DE7030 /* EasterEggOrderingTests.swift in Sources */,
 				DD501615C4A6623E5BA03369 /* EmojiDatabaseTests.swift in Sources */,
