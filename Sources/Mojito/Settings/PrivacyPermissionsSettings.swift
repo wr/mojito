@@ -102,7 +102,7 @@ struct PrivacyDetailsRows: View {
             detail: "No ads, tracking, or subscriptions."
         ) {
             Button("Donate") {
-                NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsriley")!)
+                NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsworkshop")!)
             }
         }
         privacyRow(

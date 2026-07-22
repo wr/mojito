@@ -10,7 +10,7 @@ Type emoji shortcodes anywhere on macOS. `:tada:` becomes 🎉 in any text field
 Requires macOS 14 or later.
 
 > [!TIP]
-> Did you find my work useful? [Your support](https://buymeacoffee.com/wellsriley) helps fund future projects. Thank you!
+> Did you find my work useful? [Your support](https://buymeacoffee.com/wellsworkshop) helps fund future projects. Thank you!
 
 ## Install
 

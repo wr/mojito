@@ -103,7 +103,7 @@ struct AboutSettingsView: View {
                 Spacer()
 
                 Button("Donate") {
-                    NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsriley")!)
+                    NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsworkshop")!)
                 }
                 .buttonStyle(.borderedProminent)
             }
