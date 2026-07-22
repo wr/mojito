@@ -49,9 +49,15 @@ enum DebugRecorder {
     /// external harness can read the activity stream headlessly — e.g. asserting
     /// zero `keyMonitor tapLost reason=timeout` while driving a browser
     /// (`scripts/e2e/`). Off by default: production never constructs the logger,
-    /// so there's no cost or behavior change. Recorded values are already
-    /// anonymized (ASCII-clamped, no user text), so logging them `%{public}` —
-    /// required to read them back with `log show` — leaks nothing.
+    /// so there's no cost or behavior change.
+    ///
+    /// The message is logged `%{public}` (required to read it back with `log
+    /// show`). That is only safe because every current `record` call site passes
+    /// non-sensitive metadata — enum-y kinds and bundle IDs. The `clamp` below
+    /// caps length and strips non-ASCII, which bounds accidental spillage but is
+    /// NOT anonymization: a future call site that put user text in metadata would
+    /// disclose (a truncated prefix of) it here. Keep metadata non-sensitive, or
+    /// redact per-field, rather than relying on the clamp.
     private static let e2eLog: Logger? =
         ProcessInfo.processInfo.environment["MOJITO_E2E_LOG"] == "1"
             ? Logger(subsystem: "ee.wells.Mojito", category: "e2e")

@@ -16,31 +16,47 @@ disable the tap by timeout and **drop keystrokes** (W-555).
 
 With `MOJITO_E2E_LOG=1`, `DebugRecorder` mirrors its activity log into the unified
 log (subsystem `ee.wells.Mojito`, category `e2e`) — see
-`Sources/Mojito/Debug/DebugRecorder.swift`. The harness reads that stream and
-counts tap timeouts. That event *is* the dropped-keystroke bug; the flag is a
-no-op (the logger isn't even constructed) without the env var, so production is
-untouched.
+`Sources/Mojito/Debug/DebugRecorder.swift`. The harness reads that log over the
+run's time window (`log show`, not a streamed pipe — no attach race) and counts
+tap timeouts. That event *is* the dropped-keystroke bug; the flag is a no-op (the
+logger isn't even constructed) without the env var, so production is untouched.
+
+## Guardrails against a false green
+
+A test harness that passes while testing nothing is worse than none, so:
+
+- **Builds from this worktree by default** (`--no-build` / `--app` to override).
+  A regressed-but-unrebuilt binary can't sneak a stale green through.
+- **Probes first.** Before the stress cycles it types a `:` trigger and requires
+  an `engine colon` event to appear — positive proof that synthetic HID
+  keystrokes actually reach Mojito's tap. No probe hit → **inconclusive** (exit 2),
+  never a pass. (Merely activating Arc emits a focus event, so "saw Arc" is not
+  proof anything was typed.)
+- **Fails hard on driver errors** — `cgtype` exits non-zero if it can't post an
+  event, and every drive step is checked; a bad `--cycles` is rejected up front.
 
 ## Requirements (the harness checks, but can't grant)
 
 - **Arc installed.**
-- **A Mojito Dev build** (`xcodebuild -scheme Mojito -configuration Debug`),
-  with Accessibility **and** Input Monitoring granted to `Mojito Dev.app`. Grants
-  persist across rebuilds because the "Mojito Dev" signing identity is stable.
+- **The dev toolchain + a working Debug build** — `xcodebuild`/`swiftc`, and the
+  gitignored bits (Giphy key, per CLAUDE.md) in place so the build succeeds.
+- **Accessibility + Input Monitoring granted to `Mojito Dev.app`.** Grants persist
+  across rebuilds because the "Mojito Dev" signing identity is stable.
 - **Accessibility for the driving terminal** — `cgtype` posts HID CGEvents, which
   needs the invoking process permitted.
 
 ## Run
 
 ```bash
-scripts/e2e/arc-typing-regression.sh                 # 5 cycles, default phrase
+scripts/e2e/arc-typing-regression.sh                 # build, 5 cycles, default phrase
 scripts/e2e/arc-typing-regression.sh --cycles 10
+scripts/e2e/arc-typing-regression.sh --no-build      # reuse the last build
 scripts/e2e/arc-typing-regression.sh --app "/Applications/Mojito Dev.app"
 ```
 
 Exit: `0` healthy, `1` timeouts observed (bug), `2` inconclusive/precondition
-(e.g. Arc missing, or no e2e activity captured — which is reported, never a false
-pass).
+(Arc missing, build failed, or the probe never reached the tap — all reported,
+never a false pass).
 
 ## Gotchas baked in (learned the hard way)
 
