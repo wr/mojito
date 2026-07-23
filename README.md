@@ -32,7 +32,12 @@ Mojito is the fastest way to type emoji, symbols, and GIFs on your Mac, using yo
 
 All shortcuts are customizable. You can also add custom aliases (like `:fart:` → 💨). Emoticons like :) become 🙂, and arrows like -> become →. Any app or website can be excluded.
 
-<img width="300" alt="Untitled" src="https://github.com/user-attachments/assets/b3081ac5-9c65-40cf-8b5e-ee40a3fdd377" />
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/quickaccess-dark.gif">
+    <img src="docs/quickaccess-light.gif" width="300" alt="Quick access">
+  </picture>
+</p>
 
 With Quick Access, your favorite and most-used emoji are a keystroke away.
 
