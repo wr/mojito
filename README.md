@@ -35,7 +35,7 @@ All shortcuts are customizable. You can also add custom aliases (like `:fart:` â
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/quickaccess-dark.gif">
-    <img src="docs/quickaccess-light.gif" width="300" alt="Quick access">
+    <img src="docs/quickaccess-light.gif" width="360" alt="Quick access">
   </picture>
 </p>
 
