@@ -5,12 +5,11 @@
 </p>
 
 <p align="center">
-  <a href="#what-is-it">What is it?</a> ·
-  <a href="#install">Install</a> ·
-  <a href="#how-it-works">How it works</a> ·
-  <a href="#privacy">Privacy</a> ·
-  <a href="#translations">Translations</a> ·
-  <a href="LICENSE">AGPL-3.0</a>
+  <a href="#what-is-it">What is it?</a> ⬪
+  <a href="#install">Install</a> ⬪
+  <a href="#how-it-works">How it works</a> ⬪
+  <a href="#donate">Donate</a> ⬪
+  <a href="#privacy">Privacy</a>
 </p>
 
 <p align="center">
@@ -35,7 +34,7 @@ All shortcuts are customizable. You can also add custom aliases (like `:fart:` �
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/quickaccess-dark.gif">
-    <img src="docs/quickaccess-light.gif" width="360" alt="Quick access">
+    <img src="docs/quickaccess-light.gif" width="400" alt="Quick access">
   </picture>
 </p>
 
@@ -44,7 +43,7 @@ With Quick Access, your favorite and most-used emoji are a keystroke away.
 
 ## Install
 
-Download the latest DMG from the [Releases](releases) page and move Mojito to Applications, or install with Homebrew:
+[Download the latest DMG](/releases/latest) from the Releases page and move Mojito to Applications, or install with Homebrew:
 
 ```bash
 brew install --cask wr/tap/mojito
