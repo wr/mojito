@@ -1,19 +1,50 @@
-# Mojito
+<h1 align="center"><img width="50" alt="Mojito icon" align="center" src="https://github.com/user-attachments/assets/cbcd17f9-17f3-4afc-a24a-c48d4c4fdb95" /> Mojito</h1>
 
-Type emoji shortcodes anywhere on macOS. `:tada:` becomes 🎉 in any text field.
+<p align="center">
+  <strong>Type <code>:emoji:</code> <code>::symbol::</code> and <code>:::gif:::</code> shortcodes anywhere on macOS.</strong>
+</p>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/demo-dark.gif">
-  <img src="docs/demo-light.gif" alt="Mojito's picker expanding emoji shortcodes in iMessage and Terminal">
-</picture>
+<p align="center">
+  <a href="#what-is-it">What is it?</a> ·
+  <a href="#install">Install</a> ·
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#privacy">Privacy</a> ·
+  <a href="#translations">Translations</a> ·
+  <a href="LICENSE">AGPL-3.0</a>
+</p>
 
-Requires macOS 14 or later.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/demo-dark.gif">
+    <img src="docs/demo-light.gif" width="100%" alt="Mojito's picker expanding emoji shortcodes in iMessage and Terminal">
+  </picture>
+</p>
 
-<a href="https://www.buymeacoffee.com/wellsworkshop"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=%E2%98%95&slug=wellsworkshop&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff" /></a>
+<p align="center">
+  <sub>`:tada:` becomes 🎉 in any text field.</sub>
+</p>
+
+---
+
+## What is it?
+
+Mojito is the fastest way to type emoji, symbols, and GIFs on your Mac, using your muscle memory from apps like Slack, Discord, and Linear. Use shortcodes like `:this:` for emoji, `::this::` for symbols, and `:::this:::` for GIF search... without ever taking your hands off the keyboard.
+
+All shortcuts are customizable. You can also add custom aliases (like `:fart:` → 💨). Emoticons like :) become 🙂, and arrows like -> become →. Any app or website can be excluded.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/quickaccess-dark.gif">
+    <img src="docs/quickaccess-light.gif" width="360" alt="Quick access">
+  </picture>
+</p>
+
+With Quick Access, your favorite and most-used emoji are a keystroke away.
+
 
 ## Install
 
-Download the latest DMG from the Releases page and move Mojito to Applications, or install with Homebrew:
+Download the latest DMG from the [Releases](releases) page and move Mojito to Applications, or install with Homebrew:
 
 ```bash
 brew install --cask wr/tap/mojito
@@ -60,6 +91,11 @@ scripts/run-locale.sh fr   # or de, ja, ar, zh-Hans, etc.
 ## Credits
 
 emojibase, Sparkle, KeyboardShortcuts, GIPHY, and a Swift port of fzy.
+
+## Donate
+
+While Mojito is free and open source, donations are deeply appreciated, and make ongoing development and support possible.
+[Donate now](https://www.buymeacoffee.com/wellsworkshop)
 
 ## License
 
