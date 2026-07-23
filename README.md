@@ -43,7 +43,7 @@ With Quick Access, your favorite and most-used emoji are a keystroke away.
 
 ## Install
 
-[Download the latest DMG](/releases/latest) from the Releases page and move Mojito to Applications, or install with Homebrew:
+[Download the latest DMG](https://github.com/wr/mojito/releases/latest) from the Releases page and move Mojito to Applications, or install with Homebrew:
 
 ```bash
 brew install --cask wr/tap/mojito
