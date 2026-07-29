@@ -6,6 +6,12 @@ Combines emojibase compact dataset with iamcal (Slack-style) and emojibase
 shortcodes into a single JSON optimized for fuzzy lookup. Output goes to
 Resources/Emoji/emoji.json.
 
+Semantic keywords come from two places: emojibase's own `tags` (literal, CLDR-
+derived) and Emoogle's keyword set (MIT), which adds everyday-concept
+associations CLDR deliberately omits — `deploy` on 🚀, `ghosting` on 👻,
+`urgent` on 🚨. Both land in the same `t` array; the Swift side scores them as
+penalized non-typable haystacks.
+
 Run this whenever you want to refresh the dataset:
     python3 scripts/build_emoji_db.py
 
@@ -21,16 +27,21 @@ Security:
 import hashlib
 import json
 import os
+import re
 import sys
 import urllib.request
 
 BASE = "https://raw.githubusercontent.com/milesj/emojibase/master/packages/data"
 EN_REPO = f"{BASE}/en"
+EMOOGLE = "https://raw.githubusercontent.com/xitanggg/emoogle-emoji-search-engine/main/data"
 SOURCES = {
     "compact":   f"{EN_REPO}/compact.raw.json",
     "iamcal":    f"{EN_REPO}/shortcodes/iamcal.raw.json",
     "emojibase": f"{EN_REPO}/shortcodes/emojibase.raw.json",
     "github":    f"{EN_REPO}/shortcodes/github.raw.json",
+    # Keyed by emoji character rather than hexcode, and inconsistent about the
+    # FE0F variation selector — `emoogle_keywords()` normalizes both.
+    "emoogle":   f"{EMOOGLE}/emoogle-emoji-keywords.json",
 }
 
 # Locales with localized shortcode coverage. `cldr-native` preserves
@@ -60,6 +71,10 @@ EXPECTED_SHA256 = {
     "iamcal":    "c8181b1dabee299b7991739dd634a943c36a67f278995e7b1e48dc7f69b7d073",
     "emojibase": "5ea367e3866688e733a990bb099c36ffdee43e08ba1c03d48001b6fecf746fbe",
     "github":    "279d7669438a0f810db53aa62a12dbd40285270ea0598222575e9540781e3dfb",
+    # Emoogle (MIT). Keyword strings only — reviewed for unsafe unicode; the
+    # set is plain ASCII plus a handful of accented letters and curly quotes,
+    # which `normalize_keyword` folds or drops.
+    "emoogle":   "7a13ba1537583b0fc29f270a80f713a28c34d76fe4492c5da85ccbb25cd040b9",
     # Locale shortcode digests — Unicode-3.0 licensed, all data ultimately
     # sourced from Unicode CLDR. To bump: run `--print-shas`, review the
     # cached files, paste new digests here.
@@ -132,6 +147,53 @@ def fetch(name: str, url: str) -> object:
     return json.loads(raw)
 
 
+VARIATION_SELECTOR_16 = "️"
+
+# Typographic characters Emoogle uses that have a plain-ASCII equivalent a user
+# can actually type. Anything else outside the name-char set is a separator.
+KEYWORD_TRANSLITERATIONS = str.maketrans({"’": "'", "‐": "-", "“": "", "”": ""})
+# Mirrors `KeyMonitor.isNameChar` — the only characters a `:query:` can contain.
+KEYWORD_SEPARATORS = re.compile(r"[^a-z0-9_+'-]+")
+# Beyond this a keyword is a sentence, not something anyone types between
+# colons. Cuts Emoogle's 261 `flag: …` country names and the long official
+# emoji names, which our shortcodes and label already cover.
+KEYWORD_MAX_WORDS = 3
+
+
+def emoji_key(character: str) -> str:
+    """Match key for cross-dataset emoji lookup. Emojibase and Emoogle disagree
+    on whether FE0F is present (⚓ vs ⚓️), so it's dropped from both sides."""
+    return character.replace(VARIATION_SELECTOR_16, "")
+
+
+def normalize_keyword(word: str) -> str:
+    """Fold a semantic keyword into a form the trigger can actually capture, or
+    "" if it can't be one. Space isn't a name char, so `:ship it:` is untypable —
+    multi-word keywords become `ship_it`, which fzy also rewards with the
+    after-underscore word bonus."""
+    folded = word.lower().translate(KEYWORD_TRANSLITERATIONS)
+    parts = [p for p in KEYWORD_SEPARATORS.split(folded) if p]
+    if not parts or len(parts) > KEYWORD_MAX_WORDS:
+        return ""
+    joined = "_".join(parts).strip("_-'")
+    return joined if len(joined) > 1 else ""
+
+
+def emoogle_keywords(source: dict, character: str, existing: list[str]) -> list[str]:
+    """Emoogle keywords for `character` that aren't already covered, in Emoogle's
+    own relevance order. `existing` is every term already searchable on this
+    emoji (shortcodes, label, emojibase tags) in raw form."""
+    have = {normalize_keyword(term) for term in existing}
+    out: list[str] = []
+    for word in source.get(emoji_key(character), []):
+        key = normalize_keyword(word)
+        if not key or key in have:
+            continue
+        have.add(key)
+        out.append(key)
+    return out
+
+
 def normalize_shortcodes(value) -> list[str]:
     if value is None:
         return []
@@ -154,8 +216,10 @@ def main() -> int:
     iamcal = sources["iamcal"]
     emojibase = sources["emojibase"]
     github = sources["github"]
+    emoogle = {emoji_key(char): words for char, words in sources["emoogle"].items()}
 
     out = []
+    emoogle_added = 0
     for entry in compact:
         hexcode = entry["hexcode"]
 
@@ -194,12 +258,23 @@ def main() -> int:
             if loc_list:
                 loc_codes[locale] = loc_list
 
+        tags = list(entry.get("tags", []))
+        semantic = emoogle_keywords(
+            emoogle,
+            entry["unicode"],
+            existing=shortcodes + [entry["label"]] + tags,
+        )
+        emoogle_added += len(semantic)
+
         item = {
             "h": hexcode,
             "e": entry["unicode"],
             "n": entry["label"],
             "s": shortcodes,
-            "t": entry.get("tags", []),
+            # emojibase's literal keywords first, then Emoogle's concept
+            # keywords — order is cosmetic (the Swift scorer ranks by fzy
+            # score, not position) but keeps diffs readable.
+            "t": tags + semantic,
             "g": entry.get("group", -1),
             "o": entry.get("order", 0),
             # True if the emoji has skin-tone variants in emojibase. The Swift
@@ -222,6 +297,7 @@ def main() -> int:
 
     size = os.path.getsize(OUT)
     print(f"Wrote {len(out)} emoji to {OUT} ({size/1024:.1f} KB)")
+    print(f"  {emoogle_added} Emoogle keywords merged (net of duplicates)")
     return 0
 
 

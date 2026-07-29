@@ -89,7 +89,7 @@ scripts/run-locale.sh fr   # or de, ja, ar, zh-Hans, etc.
 
 ## Credits
 
-emojibase, Sparkle, KeyboardShortcuts, GIPHY, and a Swift port of fzy.
+emojibase, [Emoogle](https://github.com/xitanggg/emoogle-emoji-search-engine), Sparkle, KeyboardShortcuts, GIPHY, and a Swift port of fzy.
 
 ## Donate
 

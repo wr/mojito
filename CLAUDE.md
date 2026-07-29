@@ -133,7 +133,11 @@ TextInserter (synthetic CGEvents) — or one of the easter-egg effects under Sou
 
 ### Emoji search
 
-`EmojiDatabase.indexed` is an array of `IndexedEmoji`, each carrying a real `Emoji` plus precomputed `EmojiHaystack` entries (lowercased `[Character]` arrays for every shortcode + label). This is built once at DB load. `FuzzyMatcher.search` iterates `database.indexed` and runs `FzyScorer.score(needle:haystack:)` — a Swift port of John Hawthorn's fzy scoring algorithm. Critically, the search loop **never allocates strings**, which keeps per-keystroke cost in the microseconds.
+`EmojiDatabase.indexed` is an array of `IndexedEmoji`, each carrying a real `Emoji` plus precomputed `EmojiHaystack` entries (lowercased `[Character]` arrays for every shortcode + label). This is built once at DB load. `FuzzyMatcher.search` iterates `database.indexed` and runs `FzyScorer.score(needle:haystack:)` — a Swift port of John Hawthorn's fzy scoring algorithm. Critically, the search loop **never allocates strings**.
+
+Cost scales with total haystack count (~23.5k for the English corpus: shortcodes + labels + tags). Measured ~1 ms per keystroke on an M-series Mac for a 2+ char query, single-threaded on the main thread. Adding preferred locales or another keyword source moves that number roughly linearly — benchmark before growing the corpus again.
+
+Semantic keywords in `t` come from two upstreams, merged by `build_emoji_db.py`: emojibase's literal CLDR tags, and Emoogle's concept keywords (MIT) which cover associations CLDR omits (`deploy` on 🚀, `ghosting` on 👻). Emoogle keys are emoji characters with inconsistent FE0F, and its phrases contain spaces and punctuation that `:query:` can't capture — `emoji_key()` and `normalize_keyword()` handle both. Emojibase's own tags are deliberately **not** run through `normalize_keyword` (it would eat the keycap digit tags `0`–`9` and `-1`).
 
 Special "pinned" rows are appended after the fzy results when the lowercased query hashes to an entry in `EggIndex.prefix` (which already covers 3+ char prefixes of every registered easter-egg trigger). The pinned hexcode is the opaque id (`k01`, `k02`, …) returned by `EggIndex`, so `Engine.insert` and `PickerView` route on that id without ever string-matching the keyword. Symbols (★ ⌘ ⌥ etc.) live in `SymbolsDatabase.indexed()` and get prepended to the corpus only when `PrefsKey.symbolsEnabled` is true.
 

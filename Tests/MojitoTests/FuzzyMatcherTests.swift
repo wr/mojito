@@ -134,6 +134,17 @@ struct FuzzyMatcherTests {
         #expect(search("happy").contains { $0.emoji.hexcode == "1F600" })
     }
 
+    @Test(arguments: [
+        ("deploy", "1F680"),     // 🚀 — concept, not in any shortcode or CLDR tag
+        ("ghosting", "1F47B"),   // 👻
+        ("urgent", "1F6A8"),     // 🚨
+    ])
+    func emoogleConceptKeywordSurfacesEmoji(query: String, hexcode: String) {
+        // Emoogle's keyword merge is what makes these reachable at all — none
+        // of them appear in the emoji's shortcodes, label, or emojibase tags.
+        #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
+    }
+
     @Test func relevantTagMatchOutranksLooseSubsequence() throws {
         // ":happ" — 😀 matches the exact tag "happy"; ♿️ matches "happ" only as
         // a scattered subsequence of its "handicapped" shortcode (h‑a‑..‑p‑p).
