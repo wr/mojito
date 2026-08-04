@@ -117,6 +117,31 @@ if [[ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]]; then
     git -C "$REPO_ROOT" status --short >&2
     exit 1
 fi
+# The bump is pushed to `origin` but the release is cut against $GITHUB_REPO.
+# If those are different repos every other guard still passes, and then
+# `--target` fails because origin's new SHA doesn't exist in $GITHUB_REPO.
+ORIGIN_URL=$(git -C "$REPO_ROOT" remote get-url origin)
+if [[ "$ORIGIN_URL" != *"$GITHUB_REPO"* ]]; then
+    echo "error: origin ($ORIGIN_URL) is not GITHUB_REPO ($GITHUB_REPO)." >&2
+    exit 1
+fi
+
+# Stop a re-run of an already-released version *before* it pushes anything.
+# The bump is unconditional, so without this a retry burns a build number and
+# lands a public "Release vX.Y.Z" commit, only to die at `gh release create`.
+if git -C "$REPO_ROOT" ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null 2>&1; then
+    echo "error: tag v$VERSION already exists on origin." >&2
+    echo "       Releasing the same version twice isn't supported — bump it." >&2
+    exit 1
+fi
+# Separate check: a partly-failed `gh release create` can leave a draft behind
+# without ever creating the tag, which the check above wouldn't catch.
+if gh release view "v$VERSION" --repo "$GITHUB_REPO" >/dev/null 2>&1; then
+    echo "error: release v$VERSION already exists on $GITHUB_REPO." >&2
+    echo "       Delete it (gh release delete v$VERSION) or bump the version." >&2
+    exit 1
+fi
+
 # Checked now so the push at the end can't fail after the release is public.
 git -C "$REPO_ROOT" fetch --quiet origin "$RELEASE_BRANCH"
 AHEAD=$(git -C "$REPO_ROOT" rev-list --count "origin/$RELEASE_BRANCH..HEAD")
