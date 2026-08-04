@@ -35,6 +35,16 @@ a { color: #0a7aff; }
 </style>
 </head>
 <body>
+<h2>v1.9.0</h2>
+<h2>New</h2>
+<ul>
+<li><strong>Search by what you mean, not just what it's called:</strong> <code>:deploy:</code> finds 🚀, <code>:ghosting:</code> finds 👻, <code>:urgent:</code> finds 🚨. Around 8,300 everyday-concept keywords were added on top of the official emoji names. (<a href="https://github.com/wr/mojito/pull/183">#183</a>)</li>
+<li><strong>Inflected words work too:</strong> <code>:ghosted:</code>, <code>:deployed:</code>, <code>:launching:</code>, and <code>:parties:</code> now find what you'd expect. (<a href="https://github.com/wr/mojito/pull/185">#185</a>)</li>
+</ul>
+<h2>Fixed</h2>
+<ul>
+<li>A query with no real match now shows nothing instead of an unrelated emoji. <code>:yeet:</code> used to return 🐞, because those four letters happen to appear scattered through "lady beetle". (<a href="https://github.com/wr/mojito/pull/183">#183</a>)</li>
+</ul>
 <h2>v1.8.1</h2>
 <h2>New</h2>
 <ul>
