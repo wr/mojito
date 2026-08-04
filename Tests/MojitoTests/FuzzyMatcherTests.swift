@@ -209,11 +209,17 @@ struct FuzzyMatcherTests {
         // "smil" only prefixes "smile", so the exact term wins despite the tie
         // in neither being longer by much.
         ("smiled", ["smile", "smil"]),
-        // "skie" is longer than both, but only prefixes "skier" — the exact
-        // terms have to outrank it or ":skies" returns ⛷️.
-        ("skies", ["sky", "ski", "skie"]),
         // "movi" prefixes "movie_camera"; "movie" is exact.
         ("movies", ["movie", "movi"]),
+        // "ski" and "sky" are both exact, so match rank and length tie and the
+        // suffix decides: "skies" is sky + s (skis is the plural of ski), while
+        // "skied" is ski + ed.
+        ("skies", ["sky", "ski", "skie"]),
+        ("skied", ["ski", "sky", "skie"]),
+        // …but where only the constructed form is exact, it still wins.
+        ("parties", ["party", "parti"]),
+        ("bodies", ["body"]),
+        ("copies", ["copy"]),
     ])
     func stemsAreOrderedByHowSolidlyTheyExist(query: String, expected: [String]) {
         let stems = FuzzyMatcher.acceptedStems(
