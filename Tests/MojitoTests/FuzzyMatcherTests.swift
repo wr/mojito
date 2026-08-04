@@ -203,14 +203,19 @@ struct FuzzyMatcherTests {
     }
 
     @Test(arguments: [
+        // Both exact terms — the longer one keeps more of the query.
         ("hoped", ["hope", "hop"]),
         ("bared", ["bare", "bar"]),
+        // "smil" only prefixes "smile", so the exact term wins despite the tie
+        // in neither being longer by much.
         ("smiled", ["smile", "smil"]),
+        // "skie" is longer than both, but only prefixes "skier" — the exact
+        // terms have to outrank it or ":skies" returns ⛷️.
+        ("skies", ["sky", "ski", "skie"]),
+        // "movi" prefixes "movie_camera"; "movie" is exact.
+        ("movies", ["movie", "movi"]),
     ])
-    func longerStemIsTriedFirstWhenBothAreRealTerms(query: String, expected: [String]) {
-        // Trimming `-ed` off "hoped" leaves "hop", a corpus term in its own
-        // right — so the is-it-a-real-term gate can't reject it, and the
-        // candidate retaining more of what was typed has to win on order.
+    func stemsAreOrderedByHowSolidlyTheyExist(query: String, expected: [String]) {
         let stems = FuzzyMatcher.acceptedStems(
             for: Array(query), in: EmojiDatabase.shared.indexed
         ).map { String($0) }
