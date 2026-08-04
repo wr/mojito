@@ -201,7 +201,7 @@ struct FuzzyMatcher {
         // `movies` → `movy` finds 🎑 (m‑o‑v‑y inside "moon_viewing_ceremony")
         // and shadows `movie` → 🎥 behind it.
         if trimmed.isEmpty {
-            for stem in QueryStemmer.stems(of: needle) where isCorpusTerm(stem, in: pool) {
+            for stem in acceptedStems(for: needle, in: pool) {
                 trimmed = rankedResults(
                     needle: stem,
                     pool: pool,
@@ -266,6 +266,28 @@ struct FuzzyMatcher {
         var output = real
         output.insert(specialRow, at: insertAt)
         return output
+    }
+
+    /// Stem candidates worth searching, best first.
+    ///
+    /// Keeps only spellings that exist here, then prefers the one retaining
+    /// most of what the user typed. Both matter, and for different reasons:
+    /// without the corpus check `movies` → `movy` matches 🎑 by accident and
+    /// shadows `movie`; without the length preference `hoping` → `hop` is a
+    /// real term that shadows `hope`, and `caring` → `car` shadows `care`.
+    ///
+    /// Ties keep the stemmer's own order, which is why this sorts on a
+    /// (length, position) key rather than calling the non-stable `sort`.
+    static func acceptedStems(for needle: [Character], in pool: [IndexedEmoji]) -> [[Character]] {
+        QueryStemmer.stems(of: needle)
+            .enumerated()
+            .filter { isCorpusTerm($0.element, in: pool) }
+            .sorted { lhs, rhs in
+                lhs.element.count != rhs.element.count
+                    ? lhs.element.count > rhs.element.count
+                    : lhs.offset < rhs.offset
+            }
+            .map(\.element)
     }
 
     /// Whether `stem` starts some haystack in `pool` — i.e. whether it's a real

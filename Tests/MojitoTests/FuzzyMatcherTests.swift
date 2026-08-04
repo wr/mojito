@@ -202,6 +202,31 @@ struct FuzzyMatcherTests {
         }
     }
 
+    @Test(arguments: [
+        ("hoped", ["hope", "hop"]),
+        ("bared", ["bare", "bar"]),
+        ("smiled", ["smile", "smil"]),
+    ])
+    func longerStemIsTriedFirstWhenBothAreRealTerms(query: String, expected: [String]) {
+        // Trimming `-ed` off "hoped" leaves "hop", a corpus term in its own
+        // right — so the is-it-a-real-term gate can't reject it, and the
+        // candidate retaining more of what was typed has to win on order.
+        let stems = FuzzyMatcher.acceptedStems(
+            for: Array(query), in: EmojiDatabase.shared.indexed
+        ).map { String($0) }
+        #expect(stems == expected)
+    }
+
+    @Test func longerStemChangesWhatSurfaces() throws {
+        // End-to-end: ":hoped" must reach 🤞 (tagged "hope") rather than the
+        // rabbits that "hop" would have returned.
+        let results = search("hoped", limit: 12).map(\.emoji.hexcode)
+        let hope = try #require(results.firstIndex(of: "1F91E"))   // 🤞
+        if let rabbit = results.firstIndex(of: "1F430") {          // 🐰
+            #expect(hope < rabbit)
+        }
+    }
+
     @Test func stemsThatAreNotWordsYieldNothing() {
         // "untied" offers unty → unti → untie. None is a term in the corpus
         // (there's no untie emoji), so every candidate is rejected and the
