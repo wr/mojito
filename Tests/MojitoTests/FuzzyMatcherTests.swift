@@ -188,6 +188,27 @@ struct FuzzyMatcherTests {
         #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
     }
 
+    @Test func inventedStemDoesNotShadowTheRealOne() throws {
+        // "movies" offers movy → movi → movie. `movy` isn't a word, but it
+        // fuzzy-matches 🎑 (m‑o‑v‑y inside "moon_viewing_ceremony") well enough
+        // to clear the floor — so without the is-it-a-real-term gate it wins
+        // the race and 🎥 never surfaces.
+        let results = search("movies", limit: 12).map(\.emoji.hexcode)
+        let camera = try #require(results.firstIndex(of: "1F3A5"))  // 🎥 movie_camera
+        // 🎑 may still show up as a weak match on the accepted stem — it just
+        // can't be the reason the better stem was never tried.
+        if let moon = results.firstIndex(of: "1F391") {             // 🎑
+            #expect(camera < moon)
+        }
+    }
+
+    @Test func stemsThatAreNotWordsYieldNothing() {
+        // "untied" offers unty → unti → untie. None is a term in the corpus
+        // (there's no untie emoji), so every candidate is rejected and the
+        // picker stays empty rather than showing 📍 via a loose `unty` match.
+        #expect(realResults(search("untied")).isEmpty)
+    }
+
     @Test func stemmingOnlyRunsWhenTheQueryFoundNothing() {
         // ":cats" matches 🐱 directly (shortcode "cats"), so the `-s` stem must
         // not run and reshuffle the ranking.

@@ -194,8 +194,14 @@ struct FuzzyMatcher {
         // longer than its haystack, so `:ghosted:` can't reach the `ghost`
         // keyword until the suffix comes off. Gated on empty so a query that
         // already works keeps its exact ranking and pays nothing.
+        //
+        // A candidate has to be a real term in the corpus before it's searched.
+        // Stemming guesses several spellings and can't know which is a word, so
+        // without the check the first guess wins on any fuzzy hit at all —
+        // `movies` → `movy` finds 🎑 (m‑o‑v‑y inside "moon_viewing_ceremony")
+        // and shadows `movie` → 🎥 behind it.
         if trimmed.isEmpty {
-            for stem in QueryStemmer.stems(of: needle) {
+            for stem in QueryStemmer.stems(of: needle) where isCorpusTerm(stem, in: pool) {
                 trimmed = rankedResults(
                     needle: stem,
                     pool: pool,
@@ -260,6 +266,18 @@ struct FuzzyMatcher {
         var output = real
         output.insert(specialRow, at: insertAt)
         return output
+    }
+
+    /// Whether `stem` starts some haystack in `pool` — i.e. whether it's a real
+    /// term here rather than a spelling the stemmer invented. Plain character
+    /// compares, no DP, so it's far cheaper than the fzy pass it gates.
+    static func isCorpusTerm(_ stem: [Character], in pool: [IndexedEmoji]) -> Bool {
+        for indexed in pool {
+            for haystack in indexed.haystacks where haystack.chars.starts(with: stem) {
+                return true
+            }
+        }
+        return false
     }
 
     /// The scoring core: rank a haystack pool against `needle` and return the
