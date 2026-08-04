@@ -156,7 +156,7 @@ struct FuzzyMatcherTests {
         #expect(happyIdx < wheelchairIdx)
     }
 
-    @Test(arguments: ["yeet", "lfg", "cursed"])
+    @Test(arguments: ["yeet", "lfg", "qwrtz"])
     func queryWithNoRealMatchReturnsNothing(query: String) {
         // Across ~23k haystacks something always matches as a scattered
         // subsequence — 🐞 for "yeet", 🥬 for "lfg". None of these words is in
@@ -174,6 +174,27 @@ struct FuzzyMatcherTests {
         // it to separate junk perfectly would break these, which users hit far
         // more often than they hit junk-only queries.
         #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
+    }
+
+    @Test(arguments: [
+        ("ghosted", "1F47B"),    // 👻 — the keyword is "ghosting"/"ghost"
+        ("deployed", "1F680"),   // 🚀
+        ("cursed", "1F92C"),     // 🤬 — via "curse"
+        ("launching", "1F680"),  // 🚀
+    ])
+    func inflectedQueryReachesItsKeyword(query: String, hexcode: String) {
+        // fzy rejects a needle longer than its haystack, so these are
+        // unreachable until the suffix comes off.
+        #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
+    }
+
+    @Test func stemmingOnlyRunsWhenTheQueryFoundNothing() {
+        // ":cats" matches 🐱 directly (shortcode "cats"), so the `-s` stem must
+        // not run and reshuffle the ranking.
+        let direct = search("cats", limit: 12).map(\.emoji.hexcode)
+        let bare = search("cat", limit: 12).map(\.emoji.hexcode)
+        #expect(!direct.isEmpty)
+        #expect(direct != bare)
     }
 
     @Test func floorSpares2CharQueries() {
