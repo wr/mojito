@@ -181,7 +181,7 @@ struct FuzzyMatcher {
             pool = SymbolsCorpus.entries
         }
 
-        let trimmed = rankedResults(
+        var trimmed = rankedResults(
             needle: needle,
             pool: pool,
             usage: usage,
@@ -189,6 +189,24 @@ struct FuzzyMatcher {
             scanTags: scanTags,
             limit: limit
         )
+
+        // Only when the query as typed found nothing: fzy rejects a needle
+        // longer than its haystack, so `:ghosted:` can't reach the `ghost`
+        // keyword until the suffix comes off. Gated on empty so a query that
+        // already works keeps its exact ranking and pays nothing.
+        if trimmed.isEmpty {
+            for stem in QueryStemmer.stems(of: needle) {
+                trimmed = rankedResults(
+                    needle: stem,
+                    pool: pool,
+                    usage: usage,
+                    useFrequencyBoost: useFrequencyBoost,
+                    scanTags: stem.count >= tagMinNeedle,
+                    limit: limit
+                )
+                if !trimmed.isEmpty { break }
+            }
+        }
 
         let lowercased = query.lowercased()
 
