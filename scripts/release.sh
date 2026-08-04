@@ -106,7 +106,7 @@ fi
 # The version bump is committed and tagged further down, so the tree has to be
 # clean going in — otherwise that commit sweeps up whatever else is lying
 # around, and the tag stops describing the released source.
-RELEASE_BRANCH="wells/release-script-tag-fix"
+RELEASE_BRANCH="main"
 CURRENT_BRANCH=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)
 if [[ "$CURRENT_BRANCH" != "$RELEASE_BRANCH" ]]; then
     echo "error: on branch '$CURRENT_BRANCH', expected '$RELEASE_BRANCH'." >&2
