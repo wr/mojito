@@ -20,8 +20,13 @@
 #   2. Wraps Mojito.app in a DMG with create-dmg.
 #   3. Submits the DMG to Apple notarytool, waits, staples.
 #   4. Signs the DMG with Sparkle's EdDSA key, captures the signature.
-#   5. Creates a GitHub Release with the DMG attached (via gh CLI).
-#   6. Updates appcast.xml on the gh-pages branch with the new entry.
+#   5. Commits the version bump to main and pushes it.
+#   6. Creates a GitHub Release with the DMG attached (via gh CLI), tagged at
+#      that commit — so the tag describes the source the DMG was built from.
+#   7. Updates appcast.xml on the gh-pages branch with the new entry.
+#
+# Must be run from a clean `main` that's in sync with origin; it refuses
+# otherwise, since step 5 would otherwise commit unrelated work.
 #
 # Things you must do before this works:
 #   - Apple Developer Program membership ($99/yr).
@@ -95,6 +100,55 @@ CHANGELOG_CHECK=$(awk -v header="## v$VERSION" '
 if [[ -z "$CHANGELOG_CHECK" ]]; then
     echo "error: no '## v$VERSION' section found in CHANGELOG.md." >&2
     echo "       Add a '## v$VERSION' entry before releasing." >&2
+    exit 1
+fi
+
+# The version bump is committed and tagged further down, so the tree has to be
+# clean going in — otherwise that commit sweeps up whatever else is lying
+# around, and the tag stops describing the released source.
+RELEASE_BRANCH="main"
+CURRENT_BRANCH=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)
+if [[ "$CURRENT_BRANCH" != "$RELEASE_BRANCH" ]]; then
+    echo "error: on branch '$CURRENT_BRANCH', expected '$RELEASE_BRANCH'." >&2
+    exit 1
+fi
+if [[ -n "$(git -C "$REPO_ROOT" status --porcelain)" ]]; then
+    echo "error: working tree is dirty. Commit or stash first:" >&2
+    git -C "$REPO_ROOT" status --short >&2
+    exit 1
+fi
+# The bump is pushed to `origin` but the release is cut against $GITHUB_REPO.
+# If those are different repos every other guard still passes, and then
+# `--target` fails because origin's new SHA doesn't exist in $GITHUB_REPO.
+ORIGIN_URL=$(git -C "$REPO_ROOT" remote get-url origin)
+if [[ "$ORIGIN_URL" != *"$GITHUB_REPO"* ]]; then
+    echo "error: origin ($ORIGIN_URL) is not GITHUB_REPO ($GITHUB_REPO)." >&2
+    exit 1
+fi
+
+# Stop a re-run of an already-released version *before* it pushes anything.
+# The bump is unconditional, so without this a retry burns a build number and
+# lands a public "Release vX.Y.Z" commit, only to die at `gh release create`.
+if git -C "$REPO_ROOT" ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null 2>&1; then
+    echo "error: tag v$VERSION already exists on origin." >&2
+    echo "       Releasing the same version twice isn't supported — bump it." >&2
+    exit 1
+fi
+# Separate check: a partly-failed `gh release create` can leave a draft behind
+# without ever creating the tag, which the check above wouldn't catch.
+if gh release view "v$VERSION" --repo "$GITHUB_REPO" >/dev/null 2>&1; then
+    echo "error: release v$VERSION already exists on $GITHUB_REPO." >&2
+    echo "       Delete it (gh release delete v$VERSION) or bump the version." >&2
+    exit 1
+fi
+
+# Checked now so the push at the end can't fail after the release is public.
+git -C "$REPO_ROOT" fetch --quiet origin "$RELEASE_BRANCH"
+AHEAD=$(git -C "$REPO_ROOT" rev-list --count "origin/$RELEASE_BRANCH..HEAD")
+BEHIND=$(git -C "$REPO_ROOT" rev-list --count "HEAD..origin/$RELEASE_BRANCH")
+if [[ "$AHEAD" != "0" || "$BEHIND" != "0" ]]; then
+    echo "error: $RELEASE_BRANCH is out of sync with origin" \
+         "($AHEAD ahead, $BEHIND behind). Pull/push first." >&2
     exit 1
 fi
 
@@ -244,6 +298,15 @@ if [[ ! -s "$CHANGELOG_FRAGMENT" ]]; then
     exit 1
 fi
 
+# Land the version bump before tagging, so `v$VERSION` points at source that
+# actually carries $VERSION. Deliberately after the build/notarize/sign steps:
+# those are the ones that fail, and a failed run should leave no commit behind.
+echo "→ Committing version bump"
+git -C "$REPO_ROOT" add project.yml "$APP_NAME.xcodeproj/project.pbxproj"
+git -C "$REPO_ROOT" commit -q -m "Release v$VERSION"
+git -C "$REPO_ROOT" push --quiet origin "$RELEASE_BRANCH"
+RELEASE_SHA=$(git -C "$REPO_ROOT" rev-parse HEAD)
+
 echo "→ Creating GitHub Release"
 RELEASE_NOTES_FILE=$(mktemp)
 {
@@ -254,6 +317,7 @@ RELEASE_NOTES_FILE=$(mktemp)
 
 gh release create "v$VERSION" "$DMG_PATH" \
     --repo "$GITHUB_REPO" \
+    --target "$RELEASE_SHA" \
     --title "v$VERSION" \
     --notes-file "$RELEASE_NOTES_FILE"
 
