@@ -181,7 +181,7 @@ struct FuzzyMatcher {
             pool = SymbolsCorpus.entries
         }
 
-        let trimmed = rankedResults(
+        var trimmed = rankedResults(
             needle: needle,
             pool: pool,
             usage: usage,
@@ -189,6 +189,30 @@ struct FuzzyMatcher {
             scanTags: scanTags,
             limit: limit
         )
+
+        // Only when the query as typed found nothing: fzy rejects a needle
+        // longer than its haystack, so `:ghosted:` can't reach the `ghost`
+        // keyword until the suffix comes off. Gated on empty so a query that
+        // already works keeps its exact ranking and pays nothing.
+        //
+        // A candidate has to be a real term in the corpus before it's searched.
+        // Stemming guesses several spellings and can't know which is a word, so
+        // without the check the first guess wins on any fuzzy hit at all —
+        // `movies` → `movy` finds 🎑 (m‑o‑v‑y inside "moon_viewing_ceremony")
+        // and shadows `movie` → 🎥 behind it.
+        if trimmed.isEmpty {
+            for stem in acceptedStems(for: needle, in: pool) {
+                trimmed = rankedResults(
+                    needle: stem,
+                    pool: pool,
+                    usage: usage,
+                    useFrequencyBoost: useFrequencyBoost,
+                    scanTags: stem.count >= tagMinNeedle,
+                    limit: limit
+                )
+                if !trimmed.isEmpty { break }
+            }
+        }
 
         let lowercased = query.lowercased()
 
@@ -242,6 +266,57 @@ struct FuzzyMatcher {
         var output = real
         output.insert(specialRow, at: insertAt)
         return output
+    }
+
+    /// How well a stem candidate exists in the corpus.
+    enum StemMatch: Int, Comparable {
+        case none = 0       // invented spelling — `movy`
+        case prefix = 1     // only the start of some longer term — `skie` in `skier`
+        case exact = 2      // a term in its own right — `sky`
+
+        static func < (lhs: StemMatch, rhs: StemMatch) -> Bool { lhs.rawValue < rhs.rawValue }
+    }
+
+    /// Stem candidates worth searching, best first.
+    ///
+    /// The stemmer guesses several spellings and can't know which is a word, so
+    /// the corpus decides. Ranked by how solidly a candidate exists here, then
+    /// by how much of the typed query it keeps:
+    ///
+    /// - `movies` → `movy` is invented (it only matches 🎑 by accident, via
+    ///   m‑o‑v‑y inside "moon_viewing_ceremony") and is dropped outright.
+    /// - `skies` → `skie` isn't a word, but it *prefixes* `skier`, so it can't
+    ///   be dropped — it just has to lose to the exact terms `sky` and `ski`.
+    /// - `hoped` → both `hope` and `hop` are exact terms, so the longer one
+    ///   wins; same for `bared` → `bare` over `bar`.
+    ///
+    /// Ties keep the stemmer's own order, hence sorting on an explicit
+    /// (match, length, position) key rather than the non-stable `sort`.
+    static func acceptedStems(for needle: [Character], in pool: [IndexedEmoji]) -> [[Character]] {
+        QueryStemmer.stems(of: needle)
+            .enumerated()
+            .map { (offset: $0.offset, stem: $0.element, match: stemMatch($0.element, in: pool)) }
+            .filter { $0.match > .none }
+            .sorted { lhs, rhs in
+                if lhs.match != rhs.match { return lhs.match > rhs.match }
+                if lhs.stem.count != rhs.stem.count { return lhs.stem.count > rhs.stem.count }
+                return lhs.offset < rhs.offset
+            }
+            .map(\.stem)
+    }
+
+    /// Whether `stem` is a haystack in `pool`, merely starts one, or neither.
+    /// Plain character compares, no DP, so it costs far less than the fzy pass
+    /// it gates.
+    static func stemMatch(_ stem: [Character], in pool: [IndexedEmoji]) -> StemMatch {
+        var best = StemMatch.none
+        for indexed in pool {
+            for haystack in indexed.haystacks where haystack.chars.starts(with: stem) {
+                if haystack.chars.count == stem.count { return .exact }
+                best = .prefix
+            }
+        }
+        return best
     }
 
     /// The scoring core: rank a haystack pool against `needle` and return the

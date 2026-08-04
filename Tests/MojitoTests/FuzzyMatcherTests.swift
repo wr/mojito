@@ -156,7 +156,7 @@ struct FuzzyMatcherTests {
         #expect(happyIdx < wheelchairIdx)
     }
 
-    @Test(arguments: ["yeet", "lfg", "cursed"])
+    @Test(arguments: ["yeet", "lfg", "qwrtz"])
     func queryWithNoRealMatchReturnsNothing(query: String) {
         // Across ~23k haystacks something always matches as a scattered
         // subsequence — 🐞 for "yeet", 🥬 for "lfg". None of these words is in
@@ -174,6 +174,84 @@ struct FuzzyMatcherTests {
         // it to separate junk perfectly would break these, which users hit far
         // more often than they hit junk-only queries.
         #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
+    }
+
+    @Test(arguments: [
+        ("ghosted", "1F47B"),    // 👻 — the keyword is "ghosting"/"ghost"
+        ("deployed", "1F680"),   // 🚀
+        ("cursed", "1F92C"),     // 🤬 — via "curse"
+        ("launching", "1F680"),  // 🚀
+    ])
+    func inflectedQueryReachesItsKeyword(query: String, hexcode: String) {
+        // fzy rejects a needle longer than its haystack, so these are
+        // unreachable until the suffix comes off.
+        #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
+    }
+
+    @Test func inventedStemDoesNotShadowTheRealOne() throws {
+        // "movies" offers movy → movi → movie. `movy` isn't a word, but it
+        // fuzzy-matches 🎑 (m‑o‑v‑y inside "moon_viewing_ceremony") well enough
+        // to clear the floor — so without the is-it-a-real-term gate it wins
+        // the race and 🎥 never surfaces.
+        let results = search("movies", limit: 12).map(\.emoji.hexcode)
+        let camera = try #require(results.firstIndex(of: "1F3A5"))  // 🎥 movie_camera
+        // 🎑 may still show up as a weak match on the accepted stem — it just
+        // can't be the reason the better stem was never tried.
+        if let moon = results.firstIndex(of: "1F391") {             // 🎑
+            #expect(camera < moon)
+        }
+    }
+
+    @Test(arguments: [
+        // Both exact terms — the longer one keeps more of the query.
+        ("hoped", ["hope", "hop"]),
+        ("bared", ["bare", "bar"]),
+        // "smil" only prefixes "smile", so the exact term wins despite the tie
+        // in neither being longer by much.
+        ("smiled", ["smile", "smil"]),
+        // "movi" prefixes "movie_camera"; "movie" is exact.
+        ("movies", ["movie", "movi"]),
+        // "ski" and "sky" are both exact, so match rank and length tie and the
+        // suffix decides: "skies" is sky + s (skis is the plural of ski), while
+        // "skied" is ski + ed.
+        ("skies", ["sky", "ski", "skie"]),
+        ("skied", ["ski", "sky", "skie"]),
+        // …but where only the constructed form is exact, it still wins.
+        ("parties", ["party", "parti"]),
+        ("bodies", ["body"]),
+        ("copies", ["copy"]),
+    ])
+    func stemsAreOrderedByHowSolidlyTheyExist(query: String, expected: [String]) {
+        let stems = FuzzyMatcher.acceptedStems(
+            for: Array(query), in: EmojiDatabase.shared.indexed
+        ).map { String($0) }
+        #expect(stems == expected)
+    }
+
+    @Test func longerStemChangesWhatSurfaces() throws {
+        // End-to-end: ":hoped" must reach 🤞 (tagged "hope") rather than the
+        // rabbits that "hop" would have returned.
+        let results = search("hoped", limit: 12).map(\.emoji.hexcode)
+        let hope = try #require(results.firstIndex(of: "1F91E"))   // 🤞
+        if let rabbit = results.firstIndex(of: "1F430") {          // 🐰
+            #expect(hope < rabbit)
+        }
+    }
+
+    @Test func stemsThatAreNotWordsYieldNothing() {
+        // "untied" offers unty → unti → untie. None is a term in the corpus
+        // (there's no untie emoji), so every candidate is rejected and the
+        // picker stays empty rather than showing 📍 via a loose `unty` match.
+        #expect(realResults(search("untied")).isEmpty)
+    }
+
+    @Test func stemmingOnlyRunsWhenTheQueryFoundNothing() {
+        // ":cats" matches 🐱 directly (shortcode "cats"), so the `-s` stem must
+        // not run and reshuffle the ranking.
+        let direct = search("cats", limit: 12).map(\.emoji.hexcode)
+        let bare = search("cat", limit: 12).map(\.emoji.hexcode)
+        #expect(!direct.isEmpty)
+        #expect(direct != bare)
     }
 
     @Test func floorSpares2CharQueries() {
