@@ -182,8 +182,14 @@ def normalize_keyword(word: str) -> str:
 def emoogle_keywords(source: dict, character: str, existing: list[str]) -> list[str]:
     """Emoogle keywords for `character` that aren't already covered, in Emoogle's
     own relevance order. `existing` is every term already searchable on this
-    emoji (shortcodes, label, emojibase tags) in raw form."""
-    have = {normalize_keyword(term) for term in existing}
+    emoji (shortcodes, label, emojibase tags) in raw form.
+
+    Dedup compares against the *raw* existing spellings, because that's what
+    actually ships — emojibase tags are emitted unnormalized (see
+    `normalize_keyword`'s caveat about keycap digits). Normalizing both sides
+    would let an untypable tag like `12:00` suppress Emoogle's typable `12_00`,
+    leaving the concept unreachable from a `:query:` in either form."""
+    have = {term.lower() for term in existing}
     out: list[str] = []
     for word in source.get(emoji_key(character), []):
         key = normalize_keyword(word)

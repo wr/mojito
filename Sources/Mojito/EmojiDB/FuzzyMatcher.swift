@@ -276,10 +276,10 @@ struct FuzzyMatcher {
             var bestScore: Double = -.infinity
             var bestDisplay: String?
             var bestIsTag = false
-            var bestIsAlias = false
+            var bestUnbonused: Double = -.infinity
             var prefixBestScore: Double = -.infinity
             var prefixBestDisplay: String?
-            var prefixBestIsAlias = false
+            var prefixBestUnbonused: Double = -.infinity
             for haystack in indexed.haystacks {
                 if haystack.isTag && !scanTags { continue }
                 guard let base = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
@@ -296,13 +296,13 @@ struct FuzzyMatcher {
                     if raw > prefixBestScore {
                         prefixBestScore = raw
                         prefixBestDisplay = haystack.display
-                        prefixBestIsAlias = haystack.isAlias
+                        prefixBestUnbonused = base
                     }
                 } else if raw > bestScore {
                     bestScore = raw
                     bestDisplay = haystack.display
                     bestIsTag = haystack.isTag
-                    bestIsAlias = haystack.isAlias
+                    bestUnbonused = base
                 }
             }
 
@@ -312,26 +312,27 @@ struct FuzzyMatcher {
             let display: String
             let baseScore: Double
             let matchedIsTag: Bool
-            let matchedIsAlias: Bool
+            let unbonusedScore: Double
             if let prefixBestDisplay {
                 display = prefixBestDisplay
                 baseScore = prefixBestScore
                 matchedIsTag = false
-                matchedIsAlias = prefixBestIsAlias
+                unbonusedScore = prefixBestUnbonused
             } else if let bestDisplay {
                 display = bestDisplay
                 baseScore = bestScore
                 matchedIsTag = bestIsTag
-                matchedIsAlias = bestIsAlias
+                unbonusedScore = bestUnbonused
             } else {
                 continue
             }
 
-            // An explicit alias is stated intent, so it bypasses the floor —
-            // and its +6.0 bonus would make the comparison meaningless anyway.
-            // Checked before the frequency boost, so a heavily-used emoji can't
-            // drag an unrelated subsequence match back above the line.
-            if !matchedIsAlias, baseScore < floor { continue }
+            // Measured on the raw fzy score: the alias bonus is a ranking lift,
+            // not a relevance override, so an alias term still has to actually
+            // resemble the query. Otherwise defining any alias would restore the
+            // junk subsequence matches the floor exists to remove. Checked
+            // before the frequency boost too, so usage can't rescue junk either.
+            if unbonusedScore < floor { continue }
 
             var finalScore = baseScore
             if useFrequencyBoost, let count = usage[indexed.emoji.hexcode], count > 0 {

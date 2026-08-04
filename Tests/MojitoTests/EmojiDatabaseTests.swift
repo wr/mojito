@@ -86,4 +86,15 @@ struct EmojiDatabaseTests {
         #expect(rocket.tags.contains("to_the_moon"))
         #expect(!rocket.tags.contains { $0.contains(" ") })
     }
+
+    /// An emojibase tag that ships in an untypable spelling must not suppress
+    /// Emoogle's typable one. 🕛 carries the raw CLDR tag `12:00` — a colon ends
+    /// capture, so it's unreachable — and Emoogle's `12_00` is the only form a
+    /// `:query:` can express. Deduping the two on their normalized key dropped
+    /// 471 keywords this way.
+    @Test func untypableTagDoesNotSuppressItsTypableForm() throws {
+        let twelve = try #require(EmojiDatabase.shared.byHexcode["1F55B"])
+        #expect(twelve.tags.contains("12_00"))
+        #expect(twelve.tags.contains("twelve_o'clock"))
+    }
 }
