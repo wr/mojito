@@ -134,6 +134,17 @@ struct FuzzyMatcherTests {
         #expect(search("happy").contains { $0.emoji.hexcode == "1F600" })
     }
 
+    @Test(arguments: [
+        ("deploy", "1F680"),     // 🚀 — concept, not in any shortcode or CLDR tag
+        ("ghosting", "1F47B"),   // 👻
+        ("urgent", "1F6A8"),     // 🚨
+    ])
+    func emoogleConceptKeywordSurfacesEmoji(query: String, hexcode: String) {
+        // Emoogle's keyword merge is what makes these reachable at all — none
+        // of them appear in the emoji's shortcodes, label, or emojibase tags.
+        #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
+    }
+
     @Test func relevantTagMatchOutranksLooseSubsequence() throws {
         // ":happ" — 😀 matches the exact tag "happy"; ♿️ matches "happ" only as
         // a scattered subsequence of its "handicapped" shortcode (h‑a‑..‑p‑p).
@@ -143,6 +154,32 @@ struct FuzzyMatcherTests {
         let happyIdx = try #require(results.firstIndex { $0.emoji.hexcode == "1F600" })
         let wheelchairIdx = try #require(results.firstIndex { $0.emoji.hexcode == "267F" })
         #expect(happyIdx < wheelchairIdx)
+    }
+
+    @Test(arguments: ["yeet", "lfg", "cursed"])
+    func queryWithNoRealMatchReturnsNothing(query: String) {
+        // Across ~23k haystacks something always matches as a scattered
+        // subsequence — 🐞 for "yeet", 🥬 for "lfg". None of these words is in
+        // the corpus, so an empty picker is the correct answer.
+        #expect(realResults(search(query)).isEmpty)
+    }
+
+    @Test(arguments: [
+        ("roket", "1F680"),   // 🚀 dropped 'c'
+        ("sml", "1F604"),     // 😄 dropped vowels
+        ("thnk", "1F914"),    // 🤔
+    ])
+    func floorKeepsTypoTolerance(query: String, hexcode: String) {
+        // The floor is set below the cost of a one-character typo. Tightening
+        // it to separate junk perfectly would break these, which users hit far
+        // more often than they hit junk-only queries.
+        #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
+    }
+
+    @Test func floorSpares2CharQueries() {
+        // Short needles score low by construction, so the floor is off below 3
+        // characters — the prefix tier carries them instead.
+        #expect(!search("wo").isEmpty)
     }
 
     @Test func tagMatchLabelsWithPrimaryShortcode() throws {

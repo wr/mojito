@@ -79,6 +79,28 @@ struct FuzzyMatcher {
     /// heavily-used built-in when the query is the alias term.
     static let aliasBonus = 6.0
 
+    /// Minimum fzy score per needle character for a match to be shown at all.
+    ///
+    /// Across ~23k haystacks *something* always matches as a scattered
+    /// subsequence, so without a floor `:yeet:` returns 🐞 (y‑e‑e‑t threaded
+    /// through "lady beetle") and `:lfg:` returns 🥬. An empty picker is the
+    /// honest answer there — the user keeps typing instead of reading junk.
+    ///
+    /// The value is a tolerance dial, not a clean separator: the two
+    /// populations overlap, because a one-character typo costs roughly what a
+    /// junk subsequence scores. Measured over the corpus, `roket` → 🚀 lands
+    /// at 0.78 and `sml` → 😄 at 0.62, while junk mostly sits below 0.60.
+    /// Anything above ~0.65 starts eating typos, which are far more common
+    /// than the junk-only queries the floor exists to catch — hence a
+    /// deliberately permissive cut that clears ~90% of the noise and keeps
+    /// every typo that was reachable at all.
+    private static let relevanceFloor = 0.60
+
+    /// Below this the floor is off. Short needles score low by construction
+    /// (fewer characters to earn consecutive bonuses) and are driven by the
+    /// prefix tier anyway.
+    private static let floorMinNeedle = 3
+
     private struct PinnedRow {
         let hexcode: String
         let character: String
@@ -246,12 +268,18 @@ struct FuzzyMatcher {
         var results: [Candidate] = []
         results.reserveCapacity(64)
 
+        let floor = needle.count >= floorMinNeedle
+            ? relevanceFloor * Double(needle.count)
+            : -Double.infinity
+
         for indexed in pool {
             var bestScore: Double = -.infinity
             var bestDisplay: String?
             var bestIsTag = false
+            var bestUnbonused: Double = -.infinity
             var prefixBestScore: Double = -.infinity
             var prefixBestDisplay: String?
+            var prefixBestUnbonused: Double = -.infinity
             for haystack in indexed.haystacks {
                 if haystack.isTag && !scanTags { continue }
                 guard let base = FzyScorer.score(needle: needle, haystack: haystack.chars) else { continue }
@@ -268,11 +296,13 @@ struct FuzzyMatcher {
                     if raw > prefixBestScore {
                         prefixBestScore = raw
                         prefixBestDisplay = haystack.display
+                        prefixBestUnbonused = base
                     }
                 } else if raw > bestScore {
                     bestScore = raw
                     bestDisplay = haystack.display
                     bestIsTag = haystack.isTag
+                    bestUnbonused = base
                 }
             }
 
@@ -282,17 +312,27 @@ struct FuzzyMatcher {
             let display: String
             let baseScore: Double
             let matchedIsTag: Bool
+            let unbonusedScore: Double
             if let prefixBestDisplay {
                 display = prefixBestDisplay
                 baseScore = prefixBestScore
                 matchedIsTag = false
+                unbonusedScore = prefixBestUnbonused
             } else if let bestDisplay {
                 display = bestDisplay
                 baseScore = bestScore
                 matchedIsTag = bestIsTag
+                unbonusedScore = bestUnbonused
             } else {
                 continue
             }
+
+            // Measured on the raw fzy score: the alias bonus is a ranking lift,
+            // not a relevance override, so an alias term still has to actually
+            // resemble the query. Otherwise defining any alias would restore the
+            // junk subsequence matches the floor exists to remove. Checked
+            // before the frequency boost too, so usage can't rescue junk either.
+            if unbonusedScore < floor { continue }
 
             var finalScore = baseScore
             if useFrequencyBoost, let count = usage[indexed.emoji.hexcode], count > 0 {

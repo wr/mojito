@@ -181,4 +181,15 @@ struct AliasIndexTests {
         let ranked = rank("check", result, usage: ["E_FLAG": 100])
         #expect(ranked.first == "E_CHECK")
     }
+
+    @Test func aliasDoesNotBypassTheRelevanceFloor() {
+        // The +6.0 alias bonus lifts ranking, not relevance: "cek" threads
+        // through "checkered_flag" as a scattered subsequence and scores under
+        // the floor, so defining the alias must not resurface it. Otherwise any
+        // alias would reopen the junk-match hole the floor closes.
+        let result = build([CustomAlias(alias: "checkered_flag", hexcode: "E_CHECK")])
+        #expect(!rank("cek", result).contains("E_CHECK"))
+        // The alias term itself still resolves.
+        #expect(rank("checkered_flag", result).first == "E_CHECK")
+    }
 }

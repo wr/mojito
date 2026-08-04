@@ -64,4 +64,37 @@ struct EmojiDatabaseTests {
         // Haystacks are pre-lowercased `[Character]` arrays — one per shortcode.
         #expect(entry.haystacks.contains { $0.chars == Array("smile") })
     }
+
+    /// Concept keywords merged from Emoogle by `build_emoji_db.py`. A rebuild
+    /// that silently drops the merge would still pass every other test here.
+    @Test(arguments: [
+        ("1F680", "deploy"),      // 🚀
+        ("1F680", "launch"),
+        ("1F47B", "ghosting"),    // 👻
+        ("1F6A8", "urgent"),      // 🚨
+    ])
+    func corpusCarriesSemanticKeywords(hexcode: String, keyword: String) throws {
+        let emoji = try #require(EmojiDatabase.shared.byHexcode[hexcode])
+        #expect(emoji.tags.contains(keyword))
+    }
+
+    /// Space isn't a name char, so a multi-word keyword is only reachable in its
+    /// underscore form. `build_emoji_db.py` folds Emoogle's phrases on the way
+    /// in; emojibase's own tags predate that and are left as-is.
+    @Test func mergedKeywordsAreTypable() throws {
+        let rocket = try #require(EmojiDatabase.shared.byHexcode["1F680"])
+        #expect(rocket.tags.contains("to_the_moon"))
+        #expect(!rocket.tags.contains { $0.contains(" ") })
+    }
+
+    /// An emojibase tag that ships in an untypable spelling must not suppress
+    /// Emoogle's typable one. 🕛 carries the raw CLDR tag `12:00` — a colon ends
+    /// capture, so it's unreachable — and Emoogle's `12_00` is the only form a
+    /// `:query:` can express. Deduping the two on their normalized key dropped
+    /// 471 keywords this way.
+    @Test func untypableTagDoesNotSuppressItsTypableForm() throws {
+        let twelve = try #require(EmojiDatabase.shared.byHexcode["1F55B"])
+        #expect(twelve.tags.contains("12_00"))
+        #expect(twelve.tags.contains("twelve_o'clock"))
+    }
 }
