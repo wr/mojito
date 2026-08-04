@@ -156,6 +156,32 @@ struct FuzzyMatcherTests {
         #expect(happyIdx < wheelchairIdx)
     }
 
+    @Test(arguments: ["yeet", "lfg", "cursed"])
+    func queryWithNoRealMatchReturnsNothing(query: String) {
+        // Across ~23k haystacks something always matches as a scattered
+        // subsequence — 🐞 for "yeet", 🥬 for "lfg". None of these words is in
+        // the corpus, so an empty picker is the correct answer.
+        #expect(realResults(search(query)).isEmpty)
+    }
+
+    @Test(arguments: [
+        ("roket", "1F680"),   // 🚀 dropped 'c'
+        ("sml", "1F604"),     // 😄 dropped vowels
+        ("thnk", "1F914"),    // 🤔
+    ])
+    func floorKeepsTypoTolerance(query: String, hexcode: String) {
+        // The floor is set below the cost of a one-character typo. Tightening
+        // it to separate junk perfectly would break these, which users hit far
+        // more often than they hit junk-only queries.
+        #expect(search(query, limit: 12).contains { $0.emoji.hexcode == hexcode })
+    }
+
+    @Test func floorSpares2CharQueries() {
+        // Short needles score low by construction, so the floor is off below 3
+        // characters — the prefix tier carries them instead.
+        #expect(!search("wo").isEmpty)
+    }
+
     @Test func tagMatchLabelsWithPrimaryShortcode() throws {
         // A row that matched via the "happy" tag must label itself with the
         // emoji's own primary shortcode (😀 → grinning), not the shared tag
