@@ -268,38 +268,55 @@ struct FuzzyMatcher {
         return output
     }
 
+    /// How well a stem candidate exists in the corpus.
+    enum StemMatch: Int, Comparable {
+        case none = 0       // invented spelling — `movy`
+        case prefix = 1     // only the start of some longer term — `skie` in `skier`
+        case exact = 2      // a term in its own right — `sky`
+
+        static func < (lhs: StemMatch, rhs: StemMatch) -> Bool { lhs.rawValue < rhs.rawValue }
+    }
+
     /// Stem candidates worth searching, best first.
     ///
-    /// Keeps only spellings that exist here, then prefers the one retaining
-    /// most of what the user typed. Both matter, and for different reasons:
-    /// without the corpus check `movies` → `movy` matches 🎑 by accident and
-    /// shadows `movie`; without the length preference `hoping` → `hop` is a
-    /// real term that shadows `hope`, and `caring` → `car` shadows `care`.
+    /// The stemmer guesses several spellings and can't know which is a word, so
+    /// the corpus decides. Ranked by how solidly a candidate exists here, then
+    /// by how much of the typed query it keeps:
     ///
-    /// Ties keep the stemmer's own order, which is why this sorts on a
-    /// (length, position) key rather than calling the non-stable `sort`.
+    /// - `movies` → `movy` is invented (it only matches 🎑 by accident, via
+    ///   m‑o‑v‑y inside "moon_viewing_ceremony") and is dropped outright.
+    /// - `skies` → `skie` isn't a word, but it *prefixes* `skier`, so it can't
+    ///   be dropped — it just has to lose to the exact terms `sky` and `ski`.
+    /// - `hoped` → both `hope` and `hop` are exact terms, so the longer one
+    ///   wins; same for `bared` → `bare` over `bar`.
+    ///
+    /// Ties keep the stemmer's own order, hence sorting on an explicit
+    /// (match, length, position) key rather than the non-stable `sort`.
     static func acceptedStems(for needle: [Character], in pool: [IndexedEmoji]) -> [[Character]] {
         QueryStemmer.stems(of: needle)
             .enumerated()
-            .filter { isCorpusTerm($0.element, in: pool) }
+            .map { (offset: $0.offset, stem: $0.element, match: stemMatch($0.element, in: pool)) }
+            .filter { $0.match > .none }
             .sorted { lhs, rhs in
-                lhs.element.count != rhs.element.count
-                    ? lhs.element.count > rhs.element.count
-                    : lhs.offset < rhs.offset
+                if lhs.match != rhs.match { return lhs.match > rhs.match }
+                if lhs.stem.count != rhs.stem.count { return lhs.stem.count > rhs.stem.count }
+                return lhs.offset < rhs.offset
             }
-            .map(\.element)
+            .map(\.stem)
     }
 
-    /// Whether `stem` starts some haystack in `pool` — i.e. whether it's a real
-    /// term here rather than a spelling the stemmer invented. Plain character
-    /// compares, no DP, so it's far cheaper than the fzy pass it gates.
-    static func isCorpusTerm(_ stem: [Character], in pool: [IndexedEmoji]) -> Bool {
+    /// Whether `stem` is a haystack in `pool`, merely starts one, or neither.
+    /// Plain character compares, no DP, so it costs far less than the fzy pass
+    /// it gates.
+    static func stemMatch(_ stem: [Character], in pool: [IndexedEmoji]) -> StemMatch {
+        var best = StemMatch.none
         for indexed in pool {
             for haystack in indexed.haystacks where haystack.chars.starts(with: stem) {
-                return true
+                if haystack.chars.count == stem.count { return .exact }
+                best = .prefix
             }
         }
-        return false
+        return best
     }
 
     /// The scoring core: rank a haystack pool against `needle` and return the
