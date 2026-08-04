@@ -57,17 +57,27 @@ enum QueryStemmer {
             if let shorter = undoubled(stem) { add(shorter) }
         }
 
-        // `parties` → `party`, `carried` → `carry`. Checked before the generic
-        // `-es` / `-ed` rules, which would leave the meaningless `parti`.
-        for suffix in ["ies", "ied"] where hasSuffix(Array(suffix)) {
+        /// `parties` → `party`. A constructed spelling, not a substring of what
+        /// was typed.
+        func restoreY() {
             add(Array(needle.dropLast(3)) + ["y"])
         }
+
+        // `-ies` is reliably the plural of a `-y` noun, so it outranks the
+        // generic trims: `skies` is sky + s, never ski + es (that's `skis`).
+        if hasSuffix(["i", "e", "s"]) { restoreY() }
 
         trim("ing", restoringE: true)
         trim("ed", restoringE: true)
         trim("es")
         // `press` is not `pres`.
         if !hasSuffix(["s", "s"]) { trim("s") }
+
+        // `-ied` carries no such guarantee — `carried` is carry + ied but
+        // `skied` is ski + ed — so it goes last and only wins when the plain
+        // trim didn't land on a real word. Callers rank corpus-exact candidates
+        // above prefix-only ones, so `carry` still beats `carri` from here.
+        if hasSuffix(["i", "e", "d"]) { restoreY() }
 
         return out
     }
