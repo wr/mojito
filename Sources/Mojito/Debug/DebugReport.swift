@@ -269,9 +269,13 @@ enum DebugReport {
             return (st == .success ? (ref as? String) : nil) ?? "—"
         }()
         var s = "## Now\n"
+        let cache = FocusedElementCache.shared
         s += "- frontmostBundleID: \(bundleID)\n"
         s += "- focusedRole: \(role)\n"
         s += "- focusedElementCached: \(element != nil)\n"
+        s += "- focusedHaveFieldInfo: \(cache.haveFieldInfo)\n"
+        s += "- focusedIsSecure: \(cache.focusedIsSecure)\n"
+        s += "- focusedClassifiedRole: \(cache.focusedRole ?? "—")\n"
         return s
     }
 

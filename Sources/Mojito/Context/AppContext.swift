@@ -12,6 +12,13 @@ struct ActiveContext {
     /// trigger stays inert (nothing to autocomplete into) and emoji picks are
     /// copied to the clipboard instead of synthesized as keystrokes.
     let focusedFieldIsEditable: Bool
+    /// Whether the cache had a resolved classification when this context was
+    /// built. False = the field checks fell back to their fail-closed defaults
+    /// (secure=true, editable=false) because the off-thread classify hadn't
+    /// published yet. Diagnostics only.
+    let focusedFieldHaveInfo: Bool
+    /// Raw AXRole the classification was read from, or nil. Diagnostics only.
+    let focusedRole: String?
     /// The focused AX element the field checks above were answered from.
     /// Capture snapshots must use this, not the cache directly: right after an
     /// app switch the cache is intentionally nil while its background seed is in
@@ -31,6 +38,8 @@ enum AppContextDetector {
         let cache = FocusedElementCache.shared
         let secure: Bool
         let editable: Bool
+        let haveInfo = cache.haveFieldInfo
+        let role = cache.focusedRole
         if cache.haveFieldInfo {
             secure = cache.focusedIsSecure
             editable = cache.focusedIsEditable
@@ -47,6 +56,8 @@ enum AppContextDetector {
             url: url,
             focusedFieldIsSecure: secure,
             focusedFieldIsEditable: editable,
+            focusedFieldHaveInfo: haveInfo,
+            focusedRole: role,
             focusedElement: cache.element
         )
     }
@@ -55,8 +66,8 @@ enum AppContextDetector {
     /// `FocusedElementCache` can run it on its background seed queue — these are
     /// synchronous cross-process AX calls and must never run on the tap thread.
     /// The caller pins a messaging timeout on `element` first.
-    nonisolated static func classify(_ element: AXUIElement) -> (secure: Bool, editable: Bool) {
-        (secure: isSecure(element), editable: isEditable(element))
+    nonisolated static func classify(_ element: AXUIElement) -> (secure: Bool, editable: Bool, role: String?) {
+        (secure: isSecure(element), editable: isEditable(element), role: copyString(element, kAXRoleAttribute))
     }
 
     /// True if AXSecureTextField, OR if AX is too broken to tell (fail closed —
