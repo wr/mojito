@@ -74,11 +74,18 @@ enum AppContextDetector {
     /// a false positive just declines the picker; a false negative leaks
     /// password fragments).
     private nonisolated static func isSecure(_ focused: AXUIElement) -> Bool {
+        // A missing role means AX is too broken to tell — fail closed.
         guard let role = copyString(focused, kAXRoleAttribute) else { return true }
-        // String literal because `kAXSecureTextFieldRole` isn't reliably
-        // bridged across SDK versions. Electron/web password inputs that
-        // masquerade as AXTextField rely on the app/URL exclusion list.
+        // "AXSecureTextField" is a *subrole*, not a role (there is no
+        // kAXSecureTextFieldRole). Native NSSecureTextField and Chromium/WebKit
+        // <input type=password> all report role AXTextField with this subrole,
+        // so matching the subrole is what actually catches password fields —
+        // across native, Electron, and web. Load-bearing now that we enable
+        // Electron/web AX trees (W-572): those fields used to be invisible and
+        // leaned on the exclusion list; the subrole check protects them
+        // directly. Role kept as a defensive OR at zero cost.
         return role == "AXSecureTextField"
+            || copyString(focused, kAXSubroleAttribute) == "AXSecureTextField"
     }
 
     /// Text inputs whose value isn't reported as settable still count.

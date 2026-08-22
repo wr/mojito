@@ -174,15 +174,6 @@ final class FocusedElementCache {
         let axApp = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(axApp, Self.seedTimeout)
 
-        // Chromium/Electron apps (Slack, VS Code, Discord…) gate their AX tree
-        // behind this attribute: until a client sets it, the app exposes no
-        // focused element, so the seed reads nil and every trigger fails closed
-        // as "unknown → secure" (W-572). Native apps don't implement the
-        // attribute and ignore the set. Chromium builds the tree lazily after
-        // the flip, so the immediate read below can still miss — the reseed
-        // fallback after this call catches that.
-        AXUIElementSetAttributeValue(axApp, "AXManualAccessibility" as CFString, kCFBooleanTrue)
-
         // C function pointer — no captures allowed, route via refcon.
         let callback: AXObserverCallback = { _, focusedElement, _, refcon in
             guard let refcon else { return }
@@ -228,6 +219,17 @@ final class FocusedElementCache {
         var seeded: AXUIElement?
         if status == .success, let ref, CFGetTypeID(ref) == AXUIElementGetTypeID() {
             seeded = (ref as! AXUIElement)
+        }
+
+        // Chromium/Electron apps (Slack, VS Code, Discord…) gate their AX tree
+        // behind AXManualAccessibility: until a client sets it the app exposes
+        // no focused element, so every trigger fails closed as "unknown →
+        // secure" (W-572). Only flip it when the read above came back empty —
+        // native apps hand back a focused element and never reach here, so we
+        // never touch them. Chromium builds the tree asynchronously; the
+        // observer registered above delivers the focus once it's ready.
+        if seeded == nil {
+            AXUIElementSetAttributeValue(axApp, "AXManualAccessibility" as CFString, kCFBooleanTrue)
         }
 
         // Classify while we're already off the main thread and holding the app's
