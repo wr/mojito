@@ -526,6 +526,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 DebugRecorder.record(.engine, "secureFieldBlocked", [
                     "haveInfo": "\(context.focusedFieldHaveInfo)",
                     "role": context.focusedRole ?? "nil",
+                    "elem": "\(context.focusedElement != nil)",
+                    "editable": "\(context.focusedFieldIsEditable)",
                 ])
                 stateMachine.reset()
                 return false
@@ -960,6 +962,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             DebugRecorder.record(.engine, "secureFieldBlocked", [
                 "haveInfo": "\(context.focusedFieldHaveInfo)",
                 "role": context.focusedRole ?? "nil",
+                "elem": "\(context.focusedElement != nil)",
+                "editable": "\(context.focusedFieldIsEditable)",
             ])
             return
         }

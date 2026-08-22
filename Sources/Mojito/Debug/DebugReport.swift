@@ -276,6 +276,7 @@ enum DebugReport {
         s += "- focusedHaveFieldInfo: \(cache.haveFieldInfo)\n"
         s += "- focusedIsSecure: \(cache.focusedIsSecure)\n"
         s += "- focusedClassifiedRole: \(cache.focusedRole ?? "—")\n"
+        s += "- focusedElementNil: \(cache.element == nil)\n"
         return s
     }
 

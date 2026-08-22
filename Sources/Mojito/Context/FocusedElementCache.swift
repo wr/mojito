@@ -174,6 +174,15 @@ final class FocusedElementCache {
         let axApp = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(axApp, Self.seedTimeout)
 
+        // Chromium/Electron apps (Slack, VS Code, Discord…) gate their AX tree
+        // behind this attribute: until a client sets it, the app exposes no
+        // focused element, so the seed reads nil and every trigger fails closed
+        // as "unknown → secure" (W-572). Native apps don't implement the
+        // attribute and ignore the set. Chromium builds the tree lazily after
+        // the flip, so the immediate read below can still miss — the reseed
+        // fallback after this call catches that.
+        AXUIElementSetAttributeValue(axApp, "AXManualAccessibility" as CFString, kCFBooleanTrue)
+
         // C function pointer — no captures allowed, route via refcon.
         let callback: AXObserverCallback = { _, focusedElement, _, refcon in
             guard let refcon else { return }
