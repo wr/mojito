@@ -523,7 +523,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         if stateMachine.captureJustOpened {
             let context = AppContextDetector.current()
             if context.focusedFieldIsSecure {
-                DebugRecorder.record(.engine, "secureFieldBlocked")
+                DebugRecorder.record(.engine, "secureFieldBlocked", [
+                    "haveInfo": "\(context.focusedFieldHaveInfo)",
+                    "role": context.focusedRole ?? "nil",
+                    "elem": "\(context.focusedElement != nil)",
+                    "editable": "\(context.focusedFieldIsEditable)",
+                ])
                 stateMachine.reset()
                 return false
             }
@@ -954,7 +959,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         guard isActive else { return }
         let context = AppContextDetector.current()
         if context.focusedFieldIsSecure {
-            DebugRecorder.record(.engine, "secureFieldBlocked")
+            DebugRecorder.record(.engine, "secureFieldBlocked", [
+                "haveInfo": "\(context.focusedFieldHaveInfo)",
+                "role": context.focusedRole ?? "nil",
+                "elem": "\(context.focusedElement != nil)",
+                "editable": "\(context.focusedFieldIsEditable)",
+            ])
             return
         }
         gifPickerWindow.hide()

@@ -26,6 +26,7 @@ final class FocusedElementCache {
     private(set) var element: AXUIElement? {
         didSet {
             haveFieldInfo = false
+            focusedRole = nil
             _ = fieldGeneration.withLock { $0 += 1 }   // cancel in-flight reclassifies
         }
     }
@@ -40,13 +41,18 @@ final class FocusedElementCache {
     private(set) var focusedIsSecure = false
     private(set) var focusedIsEditable = false
     private(set) var haveFieldInfo = false
+    /// Raw AXRole the classification was read from (nil if AX couldn't answer).
+    /// Diagnostics only — lets a debug line tell "field not classified yet"
+    /// apart from "classified as a real secure/opaque role".
+    private(set) var focusedRole: String?
 
     /// Publishes an off-thread classification for the *current* `element`. Guard
     /// with a `CFEqual` element check at the call site so a classify that lands
     /// after focus moved on can't attach stale info to the new focus.
-    private func publishFieldInfo(secure: Bool, editable: Bool) {
+    private func publishFieldInfo(secure: Bool, editable: Bool, role: String?) {
         focusedIsSecure = secure
         focusedIsEditable = editable
+        focusedRole = role
         haveFieldInfo = true
     }
 
@@ -62,7 +68,7 @@ final class FocusedElementCache {
                 MainActor.assumeIsolated {
                     let cache = FocusedElementCache.shared
                     guard let current = cache.element, CFEqual(current, element) else { return }
-                    cache.publishFieldInfo(secure: info.secure, editable: info.editable)
+                    cache.publishFieldInfo(secure: info.secure, editable: info.editable, role: info.role)
                 }
             }
         }
@@ -215,9 +221,20 @@ final class FocusedElementCache {
             seeded = (ref as! AXUIElement)
         }
 
+        // Chromium/Electron apps (Slack, VS Code, Discord…) gate their AX tree
+        // behind AXManualAccessibility: until a client sets it the app exposes
+        // no focused element, so every trigger fails closed as "unknown →
+        // secure" (W-572). Only flip it when the read above came back empty —
+        // native apps hand back a focused element and never reach here, so we
+        // never touch them. Chromium builds the tree asynchronously; the
+        // observer registered above delivers the focus once it's ready.
+        if seeded == nil {
+            AXUIElementSetAttributeValue(axApp, "AXManualAccessibility" as CFString, kCFBooleanTrue)
+        }
+
         // Classify while we're already off the main thread and holding the app's
         // tight timeout, so `current()` (on the tap thread) reads it for free.
-        var fieldInfo: (secure: Bool, editable: Bool)?
+        var fieldInfo: (secure: Bool, editable: Bool, role: String?)?
         if let seeded {
             AXUIElementSetMessagingTimeout(seeded, Self.seedTimeout)
             fieldInfo = AppContextDetector.classify(seeded)
@@ -240,7 +257,7 @@ final class FocusedElementCache {
     /// the seed window (its snapshot is nil) and clear a fresh emoticon undo.
     private func install(
         seeded: AXUIElement?,
-        fieldInfo: (secure: Bool, editable: Bool)?,
+        fieldInfo: (secure: Bool, editable: Bool, role: String?)?,
         observer: AXObserver?,
         pid: pid_t,
         generation: Int
@@ -248,7 +265,7 @@ final class FocusedElementCache {
         guard generation == refreshGeneration.withLock({ $0 }) else { return }
         element = seeded                                  // didSet clears field info
         if let fieldInfo {                                // then publish this seed's classification
-            publishFieldInfo(secure: fieldInfo.secure, editable: fieldInfo.editable)
+            publishFieldInfo(secure: fieldInfo.secure, editable: fieldInfo.editable, role: fieldInfo.role)
         }
         if let observer {
             CFRunLoopAddSource(
