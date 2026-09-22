@@ -69,6 +69,7 @@ final class FocusedElementCache {
                     let cache = FocusedElementCache.shared
                     guard let current = cache.element, CFEqual(current, element) else { return }
                     cache.publishFieldInfo(secure: info.secure, editable: info.editable, role: info.role)
+                    cache.onFieldInfoPublished?()
                 }
             }
         }
@@ -86,6 +87,9 @@ final class FocusedElementCache {
     /// registered, so Engine reconciles any in-flight capture against the
     /// freshly seeded element (and only cancels on a positive mismatch).
     var onSeedInstalled: (() -> Void)?
+
+    /// Fires when an in-app focus move's off-thread classification lands.
+    var onFieldInfoPublished: (() -> Void)?
 
     private var observer: AXObserver?
     private var observedPID: pid_t?
@@ -112,6 +116,20 @@ final class FocusedElementCache {
     /// process-wide 0.5s: a stale seed is discarded by the generation check
     /// anyway, so waiting long for a slow app buys nothing.
     private static let seedTimeout: Float = 0.25
+
+    /// Backoff for re-seeding while the seed comes back empty (~25s total). A
+    /// cold-launching app (Slack right after `open`) answers every AX call with
+    /// kAXErrorCannotComplete for its first seconds, so the first seed gets
+    /// neither a focused element nor an observer — and with no observer no
+    /// focus notification will ever correct it. Chromium also builds its tree
+    /// asynchronously after AXManualAccessibility is set and doesn't announce
+    /// the already-focused field once it's up. Either way only a re-read helps.
+    private static let seedRetryDelays: [TimeInterval] =
+        [0.25, 0.5, 1] + Array(repeating: 2, count: 12)
+
+    /// True from scheduling a seed until its install lands, so the trigger-time
+    /// backstop doesn't start a second retry chain alongside a live one.
+    private var seedInFlight = false
 
     private init() {
         refreshActiveApp()
@@ -148,6 +166,7 @@ final class FocusedElementCache {
         guard let app = NSWorkspace.shared.frontmostApplication else {
             element = nil
             focusedPID = nil
+            seedInFlight = false
             onFocusChange?()
             return
         }
@@ -157,11 +176,30 @@ final class FocusedElementCache {
         DebugRecorder.record(.focus, "app", ["bundleID": app.bundleIdentifier ?? "—"])
         onFocusChange?()
 
+        seedInFlight = true
         let work = DispatchWorkItem { [weak self] in
-            Self.seedQueue.async { self?.seed(pid: pid, generation: generation) }
+            Self.seedQueue.async {
+                self?.seed(pid: pid, generation: generation, attempt: 0, registerObserver: true)
+            }
         }
         pendingSeed = work
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.seedDebounce, execute: work)
+    }
+
+    /// Backstop for a trigger that failed closed because the cache is empty:
+    /// restarts the re-seed chain once the retries above have run out (an app
+    /// whose AX came up late). Too late for the keystroke that called it, but
+    /// the next trigger in the same field works. No IPC here — safe on the tap.
+    /// Runs as a retry (attempt 1), so an empty read can't clobber an element
+    /// the observer delivers meanwhile.
+    func reseedIfEmpty() {
+        guard element == nil, !seedInFlight, let pid = focusedPID else { return }
+        let generation = refreshGeneration.withLock { $0 }
+        let registerObserver = observer == nil
+        seedInFlight = true
+        Self.seedQueue.async {
+            self.seed(pid: pid, generation: generation, attempt: 1, registerObserver: registerObserver)
+        }
     }
 
     /// Runs on `seedQueue`. Both AX calls here block on the target app's
@@ -169,7 +207,7 @@ final class FocusedElementCache {
     /// superseded by a newer activation bails before each round-trip — its
     /// result would be discarded anyway, and dead seeds draining serially
     /// would delay the live one.
-    private nonisolated func seed(pid: pid_t, generation: Int) {
+    private nonisolated func seed(pid: pid_t, generation: Int, attempt: Int, registerObserver: Bool) {
         guard refreshGeneration.withLock({ $0 }) == generation else { return }
         let axApp = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(axApp, Self.seedTimeout)
@@ -194,20 +232,23 @@ final class FocusedElementCache {
         // queues on the observer's mach port and drains once install() adds
         // the source to the main run loop, correcting the cache.
         var newObserver: AXObserver?
-        if AXObserverCreate(pid, callback, &newObserver) == .success, let obs = newObserver {
+        var addStatus: AXError?
+        if registerObserver, AXObserverCreate(pid, callback, &newObserver) == .success, let obs = newObserver {
             // Re-check after create (local, but a bump can land any time):
             // the registration below is the blocking IPC worth skipping.
             guard refreshGeneration.withLock({ $0 }) == generation else { return }
             // Best-effort — fails for system apps / non-AX apps; the seeded
             // value still serves. Synchronous IPC, hence off-main.
-            AXObserverAddNotification(
+            addStatus = AXObserverAddNotification(
                 obs,
                 axApp,
                 kAXFocusedUIElementChangedNotification as CFString,
                 refcon
             )
         }
-        let observer = newObserver
+        // An observer whose registration failed never fires; drop it so the
+        // retry registers a fresh one.
+        let observer = addStatus == .success ? newObserver : nil
 
         guard refreshGeneration.withLock({ $0 }) == generation else { return }
         var ref: AnyObject?
@@ -226,8 +267,8 @@ final class FocusedElementCache {
         // no focused element, so every trigger fails closed as "unknown →
         // secure" (W-572). Only flip it when the read above came back empty —
         // native apps hand back a focused element and never reach here, so we
-        // never touch them. Chromium builds the tree asynchronously; the
-        // observer registered above delivers the focus once it's ready.
+        // never touch them. Chromium builds the tree asynchronously, so an
+        // empty seed is retried (see `seedRetryDelays`).
         if seeded == nil {
             AXUIElementSetAttributeValue(axApp, "AXManualAccessibility" as CFString, kCFBooleanTrue)
         }
@@ -240,11 +281,23 @@ final class FocusedElementCache {
             fieldInfo = AppContextDetector.classify(seeded)
         }
 
+        let diag = [
+            "attempt": "\(attempt)",
+            "copy": "\(status.rawValue)",
+            "add": addStatus.map { "\($0.rawValue)" } ?? "-",
+            "elem": "\(seeded != nil)",
+        ]
         DispatchQueue.main.async {
             MainActor.assumeIsolated {
+                guard generation == self.refreshGeneration.withLock({ $0 }) else { return }
+                // Empty retries would flood the small focus ring; log the
+                // first attempt and the one that lands.
+                if attempt == 0 || seeded != nil {
+                    DebugRecorder.record(.focus, "seed", diag)
+                }
                 self.install(
                     seeded: seeded, fieldInfo: fieldInfo,
-                    observer: observer, pid: pid, generation: generation
+                    observer: observer, pid: pid, attempt: attempt
                 )
             }
         }
@@ -260,14 +313,18 @@ final class FocusedElementCache {
         fieldInfo: (secure: Bool, editable: Bool, role: String?)?,
         observer: AXObserver?,
         pid: pid_t,
-        generation: Int
+        attempt: Int
     ) {
-        guard generation == refreshGeneration.withLock({ $0 }) else { return }
-        element = seeded                                  // didSet clears field info
-        if let fieldInfo {                                // then publish this seed's classification
-            publishFieldInfo(secure: fieldInfo.secure, editable: fieldInfo.editable, role: fieldInfo.role)
+        seedInFlight = false
+        // An empty retry must not clobber an element the observer delivered
+        // in the meantime.
+        if seeded != nil || attempt == 0 {
+            element = seeded                              // didSet clears field info
+            if let fieldInfo {                            // then publish this seed's classification
+                publishFieldInfo(secure: fieldInfo.secure, editable: fieldInfo.editable, role: fieldInfo.role)
+            }
         }
-        if let observer {
+        if let observer, self.observer == nil {
             CFRunLoopAddSource(
                 CFRunLoopGetMain(),
                 AXObserverGetRunLoopSource(observer),
@@ -276,7 +333,18 @@ final class FocusedElementCache {
             self.observer = observer
             self.observedPID = pid
         }
-        onSeedInstalled?()
+        if seeded != nil || attempt == 0 {
+            onSeedInstalled?()
+        }
+
+        if element == nil, attempt < Self.seedRetryDelays.count {
+            let generation = refreshGeneration.withLock { $0 }
+            let registerObserver = self.observer == nil
+            seedInFlight = true
+            Self.seedQueue.asyncAfter(deadline: .now() + Self.seedRetryDelays[attempt]) {
+                self.seed(pid: pid, generation: generation, attempt: attempt + 1, registerObserver: registerObserver)
+            }
+        }
     }
 
     private func teardownObserver() {
