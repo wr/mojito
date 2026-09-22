@@ -12,8 +12,19 @@ enum TextInserter {
 
     static func replace(charactersToDelete: Int, with string: String) {
         var posted = true
+        // When the typed text is the field's entire contents, backspacing it
+        // away empties the field for a moment. Some editors (Slack's composer)
+        // react to going empty asynchronously and wipe whatever was typed next,
+        // so select the text and type over it instead — the field never
+        // passes through empty. `<=` rather than `==`: on the exact-match path
+        // AX can read before the passed-through closing delimiter lands.
+        // Zero is excluded because some apps report it for "unknown".
+        let fieldLength = charactersToDelete > 0 ? focusedFieldLength() : nil
+        let selectOver = fieldLength.map { $0 > 0 && $0 <= charactersToDelete } ?? false
         for _ in 0..<charactersToDelete {
-            posted = postKey(virtualKey: 0x33, flags: []) && posted  // kVK_Delete
+            posted = selectOver
+                ? postKey(virtualKey: 0x7B, flags: .maskShift) && posted  // kVK_LeftArrow
+                : postKey(virtualKey: 0x33, flags: []) && posted  // kVK_Delete
         }
 
         if let downEvent = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: true),
@@ -36,7 +47,18 @@ enum TextInserter {
             "del": "\(charactersToDelete)",
             "len": "\(string.count)",
             "posted": "\(posted)",
+            "fieldLen": fieldLength.map { "\($0)" } ?? "nil",
+            "selectOver": "\(selectOver)",
         ])
+    }
+
+    /// Character count of the focused text field, or nil when AX can't say.
+    private static func focusedFieldLength() -> Int? {
+        guard let element = FocusedElementCache.shared.element else { return nil }
+        var value: AnyObject?
+        guard AXUIElementCopyAttributeValue(element, kAXNumberOfCharactersAttribute as CFString, &value) == .success
+        else { return nil }
+        return (value as? NSNumber)?.intValue
     }
 
     /// Easter-egg path: erase the typed `:keyword` without replacement.
