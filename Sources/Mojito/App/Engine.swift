@@ -44,6 +44,13 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var captureFocusSnapshot: AXUIElement?
     /// Fallback for when AX element identity can't be compared.
     private var captureFocusPID: pid_t?
+    /// The snapshot is Chromium's document (`AXWebArea`), not the field. After
+    /// a cold launch Chromium reports that container as focused until the first
+    /// keystroke lands, then announces the real text area — the same caret, not
+    /// the user leaving. The first in-app focus move is adopted, not cancelled.
+    private var captureSnapshotIsWebArea = false
+    /// An adopted field's off-thread secure check hasn't landed yet.
+    private var captureAwaitingFieldInfo = false
     /// True if the current capture's app/URL is in the exclusion list.
     /// Emoji-related actions get suppressed; GIF picker still fires.
     private var captureIsExcluded: Bool = false
@@ -205,6 +212,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             }
         }
 
+        FocusedElementCache.shared.onFieldInfoPublished = { [weak self] in
+            MainActor.assumeIsolated {
+                self?.checkAdoptedField()
+            }
+        }
+
         prefsObserver = NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
             object: UserDefaults.standard,
@@ -300,9 +313,26 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
         // CFEqual handles AX element equality across copies.
         if let current = cache.element, !CFEqual(snapshot, current) {
+            if captureSnapshotIsWebArea {
+                captureSnapshotIsWebArea = false
+                captureAwaitingFieldInfo = true
+                captureFocusSnapshot = current
+                return
+            }
             cancelCapture()
         }
         // Nil current element = transient focus-transition state; wait for the next callback.
+    }
+
+    /// Fail closed on an adopted field: the web-area snapshot passed the
+    /// secure check at capture open, but the field it resolved to hasn't.
+    private func checkAdoptedField() {
+        guard captureAwaitingFieldInfo else { return }
+        captureAwaitingFieldInfo = false
+        if FocusedElementCache.shared.focusedIsSecure {
+            DebugRecorder.record(.engine, "secureFieldBlocked", ["adopted": "true"])
+            cancelCapture()
+        }
     }
 
     /// Focus can move *within* an app during the post-switch seed window —
@@ -342,6 +372,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         captureContext = nil
         captureFocusSnapshot = nil
         captureFocusPID = nil
+        captureSnapshotIsWebArea = false
+        captureAwaitingFieldInfo = false
         captureIsExcluded = false
         browserDeleteCount = 0
     }
@@ -529,6 +561,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                     "elem": "\(context.focusedElement != nil)",
                     "editable": "\(context.focusedFieldIsEditable)",
                 ])
+                FocusedElementCache.shared.reseedIfEmpty()
                 stateMachine.reset()
                 return false
             }
@@ -545,6 +578,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // the next AX callback.
             captureFocusSnapshot = context.focusedElement
             captureFocusPID = FocusedElementCache.shared.focusedPID
+            captureSnapshotIsWebArea = context.focusedRole == "AXWebArea"
         }
 
         // Return/Tab during capture resolves to `.fromPicker`, which the
@@ -983,6 +1017,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // which the browser deliberately tolerates.
         captureFocusSnapshot = context.focusedElement
         captureFocusPID = FocusedElementCache.shared.focusedPID
+        captureSnapshotIsWebArea = context.focusedRole == "AXWebArea"
         expandToBrowser(deleteCount: deleteCount)
     }
 
