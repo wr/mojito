@@ -5,6 +5,12 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.9.1
+
+## Fixed
+- Mojito now triggers reliably in Slack and other Electron apps, including right after they launch. Before, shortcodes there worked only some of the time. ([#190](https://github.com/wr/mojito/pull/190), [#194](https://github.com/wr/mojito/pull/194))
+- An emoji inserted at the very start of an empty Slack message no longer flashes and disappears. ([#193](https://github.com/wr/mojito/pull/193))
+
 ## v1.9.0
 
 ## New
