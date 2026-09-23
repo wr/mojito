@@ -27,9 +27,6 @@ struct InlineBrowserView: View {
     @State private var tooltipSize: CGSize = .zero
     @State private var typedQuery = ""
     @FocusState private var searchFieldFocused: Bool
-    /// The caret only blinks once the search row is clicked (or text exists),
-    /// so it doesn't imply a focusable field before then.
-    @State private var searchClicked = false
 
     private static let scrollSpace = "browserScroll"
     private static let cellHeight: CGFloat = 40
@@ -97,7 +94,7 @@ struct InlineBrowserView: View {
                     .onChange(of: typedQuery) { _, value in browser.setQuery(value) }
             } else {
                 Text(browser.query).foregroundStyle(.primary)
-                caret  // fixed slot — shows on click, never shifts the placeholder
+                caret  // fixed slot — blinking never shifts the placeholder
                 if browser.query.isEmpty {
                     Text(String(localized: "Type to search emoji")).foregroundStyle(.tertiary)
                 }
@@ -109,19 +106,19 @@ struct InlineBrowserView: View {
         .frame(height: 36)
         .contentShape(Rectangle())
         .onTapGesture {
-            searchClicked = true
             if editableSearch { searchFieldFocused = true }
         }
     }
 
+    /// Blinks from the moment the browser opens: keystrokes are routed to the
+    /// query for as long as it's on screen, so the row is live before any click.
     private var caret: some View {
-        let visible = searchClicked || !browser.query.isEmpty
-        return TimelineView(.periodic(from: .now, by: 0.6)) { context in
+        TimelineView(.periodic(from: .now, by: 0.6)) { context in
             let on = Int(context.date.timeIntervalSince1970 / 0.6) % 2 == 0
             RoundedRectangle(cornerRadius: 1, style: .continuous)
                 .fill(Color.accentColor)
                 .frame(width: 2, height: 17)
-                .opacity(visible && on ? 1 : 0)
+                .opacity(on ? 1 : 0)
         }
         .frame(width: 2)
     }
