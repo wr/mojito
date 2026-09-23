@@ -1135,10 +1135,9 @@ struct TriggerStateMachine {
             state = .browsing(query: next)
             return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)
         case .backspace:
-            if q.isEmpty {
-                state = .idle
-                return TriggerOutput(action: .closeBrowser, consumesKey: true)
-            }
+            // Consumed but inert on an empty query: closing here would hand
+            // the rest of a held or repeated Backspace to the focused app.
+            if q.isEmpty { return .consume }
             let next = String(q.dropLast())
             state = .browsing(query: next)
             return TriggerOutput(action: .refreshBrowser(query: next), consumesKey: true)

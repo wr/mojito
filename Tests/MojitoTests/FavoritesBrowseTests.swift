@@ -195,12 +195,16 @@ struct TriggerStateMachineBrowseTests {
         #expect(sm.state == .idle)
     }
 
-    @Test func browsingBackspacePastEmptyCloses() {
+    @Test func browsingBackspacePastEmptyStaysOpen() {
         var sm = TriggerStateMachine()
-        sm.enterBrowsing(query: "")
-        let close = sm.handle(.backspace)
-        #expect(close.action == .closeBrowser)
-        #expect(sm.state == .idle)
+        sm.enterBrowsing(query: "a")
+        _ = sm.handle(.backspace)
+        for _ in 0..<3 {
+            let extra = sm.handle(.backspace)
+            #expect(extra.action == TriggerAction.none)
+            #expect(extra.consumesKey == true)
+        }
+        #expect(sm.state == .browsing(query: ""))
     }
 
     @Test func browsingEscapeCloses() {
