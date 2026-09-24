@@ -21,8 +21,17 @@ struct BrowserURLCacheTests {
     /// thread — so tests can assert the AppleScript work is deferred *off* the
     /// caller's (tap) thread. The resolver runs on a background queue, so the
     /// state is lock-guarded and the type is `@unchecked Sendable`.
+    ///
+    /// `gate`, when given, holds the resolver before it records the call, so a
+    /// test can assert "not called yet" without racing the worker thread, then
+    /// open the gate. A resolve that wrongly runs on the caller's thread stalls
+    /// on the gate until its timeout and is counted before the caller returns,
+    /// so the regression still fails.
     private final class ResolverSpy: @unchecked Sendable {
         private let lock = NSLock()
+        private let gate: DispatchSemaphore?
+
+        init(gate: DispatchSemaphore? = nil) { self.gate = gate }
         private var _calls = 0
         private var _lastBundleID: String?
         private var _ranOnMainThread = false
@@ -35,7 +44,8 @@ struct BrowserURLCacheTests {
         func setStub(_ url: URL?) { lock.withLock { _outcome = .resolved(url) } }
 
         func resolve(_ bundleID: String) -> BrowserURLResolution {
-            lock.withLock {
+            _ = gate?.wait(timeout: .now() + 1)
+            return lock.withLock {
                 _calls += 1
                 _lastBundleID = bundleID
                 _ranOnMainThread = Thread.isMainThread
@@ -80,17 +90,20 @@ struct BrowserURLCacheTests {
     // MARK: - The core contract
 
     @Test func hotPathReturnsNilWhenColdAndDefersTheResolve() async throws {
-        let spy = ResolverSpy(); spy.setStub(URL(string: "https://example.com"))
+        let gate = DispatchSemaphore(value: 0)
+        let spy = ResolverSpy(gate: gate); spy.setStub(URL(string: "https://example.com"))
         let cache = makeCache(spy: spy, clock: Clock(Date()))
 
         let value = cache.url(forBundleID: Self.arc, pid: 42)
 
         // Cold cache → nil, and — the crux — the resolver has NOT run yet.
         // If it ran synchronously here, that's the AppleScript back on the tap
-        // thread and the bug is reintroduced.
+        // thread and the bug is reintroduced. The gate keeps the (correctly
+        // deferred) worker from counting its call before this check.
         #expect(value == nil)
         #expect(spy.calls == 0)
 
+        gate.signal()
         #expect(try await settle { spy.calls == 1 })
 
         // It ran OFF the main/tap thread (so a hung Arc can't stall the tap or UI).
