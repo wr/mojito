@@ -96,10 +96,16 @@ struct InlineBrowserView: View {
                     .focused($searchFieldFocused)
                     .onChange(of: typedQuery) { _, value in browser.setQuery(value) }
             } else {
-                Text(browser.query).foregroundStyle(.primary)
-                caret  // fixed slot — shows on click, never shifts the placeholder
-                if browser.query.isEmpty {
-                    Text(String(localized: "Type to search emoji")).foregroundStyle(.tertiary)
+                // The placeholder sits under the caret, as in a native field,
+                // so the caret marks where typing starts.
+                ZStack(alignment: .leading) {
+                    if browser.query.isEmpty {
+                        Text(String(localized: "Type to search emoji")).foregroundStyle(.tertiary)
+                    }
+                    HStack(spacing: 0) {
+                        Text(browser.query).foregroundStyle(.primary)
+                        caret
+                    }
                 }
             }
             Spacer(minLength: 0)
