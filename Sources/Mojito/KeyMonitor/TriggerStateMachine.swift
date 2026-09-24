@@ -121,7 +121,7 @@ enum TriggerAction: Equatable {
     /// Enter / click in the browser — insert the selected emoji. `keepOpen`
     /// (Shift held) leaves the grid up for further picks.
     case pickBrowser(keepOpen: Bool)
-    /// Close the browser grid (esc, backspace past empty, click-away).
+    /// Close the browser grid (esc, click-away).
     case closeBrowser
     /// Grow the favorites pill into the full browser grid (↓/↑ on the pill).
     case expandBrowser
@@ -1181,11 +1181,11 @@ struct TriggerStateMachine {
             return stickyAppend(":", to: q)
         case .backspace:
             stickyPickJustFired = false
+            // Consumed but inert on an empty query: nothing of the session is
+            // in the field, and closing here would hand the rest of a held or
+            // repeated Backspace to the focused app.
+            if q.isEmpty { return .consume }
             let next = String(q.dropLast())
-            if next.isEmpty {
-                state = .idle
-                return TriggerOutput(action: .closePicker, consumesKey: true)
-            }
             state = .stickyPicking(query: next)
             return TriggerOutput(action: .refreshPicker(query: next, scope: captureScope), consumesKey: true)
         case .escape:

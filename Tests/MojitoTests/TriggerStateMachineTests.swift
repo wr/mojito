@@ -819,14 +819,23 @@ struct StickyPickingTests {
         #expect(out2.action == .refreshPicker(query: "fox", scope: .normal))
     }
 
-    @Test func backspacePastEmptyClosesSession() {
+    @Test func backspacePastEmptyStaysOpen() {
         var sm = stickyFoo()
         _ = sm.handle(.backspace)  // "fo"
         _ = sm.handle(.backspace)  // "f"
-        let out = sm.handle(.backspace)
-        #expect(out.action == .closePicker)
-        #expect(out.consumesKey == true)
-        #expect(sm.state == .idle)
+        let empty = sm.handle(.backspace)
+        #expect(empty.action == .refreshPicker(query: "", scope: .normal))
+        #expect(sm.state == .stickyPicking(query: ""))
+        // Held / repeated Backspace is swallowed, never reaching the field.
+        for _ in 0..<3 {
+            let extra = sm.handle(.backspace)
+            #expect(extra.action == TriggerAction.none)
+            #expect(extra.consumesKey == true)
+        }
+        #expect(sm.state == .stickyPicking(query: ""))
+        // Typing resumes the search from empty.
+        let typed = sm.handle(.nameChar("x"))
+        #expect(typed.action == .refreshPicker(query: "x", scope: .normal))
     }
 
     @Test func escapeClosesSessionAndConsumes() {
