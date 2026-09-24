@@ -142,6 +142,10 @@ final class PickerWindow {
             glass.cornerRadius = radius
         } else {
             chrome.layer?.cornerRadius = radius
+            (chrome as? NSVisualEffectView)?.applyRoundedMask(radius: radius)
+            // The shadow is traced from the window's alpha, which the mask
+            // just changed.
+            panel.invalidateShadow()
         }
     }
 
@@ -160,6 +164,7 @@ final class PickerWindow {
             effect.wantsLayer = true
             effect.layer?.cornerRadius = PickerLayout.cornerRadius
             effect.layer?.masksToBounds = true
+            effect.applyRoundedMask(radius: PickerLayout.cornerRadius)
             effect.translatesAutoresizingMaskIntoConstraints = false
             effect.addSubview(hosting)
             NSLayoutConstraint.activate([

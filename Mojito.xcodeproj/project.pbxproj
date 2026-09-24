@@ -15,6 +15,7 @@
 		0821677DEC58AC2FCE0C3BBF /* v02.bin in Resources */ = {isa = PBXBuildFile; fileRef = E5E4119DFCFBCC4A92FEEB1C /* v02.bin */; };
 		0874B00B5CC5119E985724C3 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F59A4077DA036DF99C272DC /* MenuBarController.swift */; };
 		08B90EAE6DAD0198A743979E /* Emoji in Resources */ = {isa = PBXBuildFile; fileRef = 70F2866D3BE0CC5D08CF9AD1 /* Emoji */; };
+		0A08522DE0E24AED5CEB6688 /* RoundedMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7046B2F9978D044A9746608B /* RoundedMask.swift */; };
 		0A4AAE2AE35D2C90AB9735B7 /* s02.bin in Resources */ = {isa = PBXBuildFile; fileRef = A3781043056BF9F399D00EDD /* s02.bin */; };
 		0D48DFE069D4D6C6F2E568B5 /* AnimationTicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162291D3BD8AF6CD22BE0378 /* AnimationTicker.swift */; };
 		0F5899AC76F676DCA0E3368D /* GifPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02399494F4CF5825B0401CD /* GifPickerView.swift */; };
@@ -266,6 +267,7 @@
 		6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientEmoticonTable.swift; sourceTree = "<group>"; };
 		6F4345DE634CD2EB2FE71120 /* AliasStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AliasStore.swift; sourceTree = "<group>"; };
 		702AC2870CD686AB17CC518E /* UpdaterCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterCoordinator.swift; sourceTree = "<group>"; };
+		7046B2F9978D044A9746608B /* RoundedMask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedMask.swift; sourceTree = "<group>"; };
 		70F2866D3BE0CC5D08CF9AD1 /* Emoji */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Emoji; path = Resources/Emoji; sourceTree = SOURCE_ROOT; };
 		71409240C4105D980C71E264 /* AliasTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AliasTests.swift; sourceTree = "<group>"; };
 		7161D8677669C3B6B7947ECF /* InlineBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineBrowserView.swift; sourceTree = "<group>"; };
@@ -739,6 +741,7 @@
 				74DB9192DF20F83CAD8A820C /* ImageBlob.swift */,
 				8C7C809FB011043F44297508 /* PanelPositioner.swift */,
 				2C66984ECCB4DB6B1A018452 /* PrefsKey.swift */,
+				7046B2F9978D044A9746608B /* RoundedMask.swift */,
 				212C94A63FBCB28A41CA1A1A /* SynthRenderer.swift */,
 				83366C0C02EF9F599EC2B65A /* VideoBlob.swift */,
 				FAE6DF2B5C89433B7CB3DB06 /* VisualEffect.swift */,
@@ -1017,6 +1020,7 @@
 				D4E80136FD448E4ACC27EC58 /* QuickAccessSettings.swift in Sources */,
 				1A80F47103BB59733D6292B7 /* QuickAccessStore.swift in Sources */,
 				FD15928FE17F78588821135E /* Rickroll.swift in Sources */,
+				0A08522DE0E24AED5CEB6688 /* RoundedMask.swift in Sources */,
 				41765C78ED90EB005C04E63B /* SeasonalGates.swift in Sources */,
 				CA31BF29EEEA9CC0D89637E4 /* SettingsNavigator.swift in Sources */,
 				DCE52DEE8C9CEC354443E7DB /* SettingsRoot.swift in Sources */,

@@ -75,6 +75,7 @@ final class GifPickerWindow {
         effect.wantsLayer = true
         effect.layer?.cornerRadius = GifPickerLayout.cornerRadius
         effect.layer?.masksToBounds = true
+        effect.applyRoundedMask(radius: GifPickerLayout.cornerRadius)
         effect.translatesAutoresizingMaskIntoConstraints = false
         effect.addSubview(hosting)
         NSLayoutConstraint.activate([
