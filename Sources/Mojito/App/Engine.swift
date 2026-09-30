@@ -839,6 +839,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .moveGifSelection(let direction):
             gifPickerWindow.move(direction)
 
+        case .toggleGifProvider:
+            gifPickerWindow.toggleProvider()
+
         case .refreshBrowser(let q):
             viewModel.browser?.setQuery(q)
 

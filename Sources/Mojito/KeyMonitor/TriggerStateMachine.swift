@@ -114,6 +114,8 @@ enum TriggerAction: Equatable {
     case pickGif(deleteCount: Int)
     /// Arrow-key navigation across the GIF grid.
     case moveGifSelection(direction: GifMoveDirection)
+    /// Tab inside the GIF picker — switch search provider, keep the query.
+    case toggleGifProvider
     /// Browser search query changed — Engine writes it to the browser model.
     case refreshBrowser(query: String)
     /// Arrow-key navigation across the browser grid.
@@ -1092,11 +1094,13 @@ struct TriggerStateMachine {
         case .escape:
             state = .idle
             return TriggerOutput(action: .closeGifPicker, consumesKey: true)
-        case .returnKey, .tabKey:
+        case .returnKey:
             state = .idle
             // The gif open + query are all sitting in the focused app — delete
             // the full span so the GIF replaces the typed trigger.
             return TriggerOutput(action: .pickGif(deleteCount: q.count + config.gif.open.count), consumesKey: true)
+        case .tabKey:
+            return TriggerOutput(action: .toggleGifProvider, consumesKey: true)
         case .arrowUp:
             return TriggerOutput(action: .moveGifSelection(direction: .up), consumesKey: true)
         case .arrowDown:

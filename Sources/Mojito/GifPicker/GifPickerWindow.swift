@@ -117,6 +117,10 @@ final class GifPickerWindow {
         viewModel.query = query
     }
 
+    func toggleProvider() {
+        viewModel.toggleProvider()
+    }
+
     func move(_ direction: GifMoveDirection) {
         switch direction {
         case .left:  viewModel.moveSelection(.left)
@@ -169,9 +173,10 @@ final class GifPickerWindow {
         copyTask?.cancel()
         let url = asset.originalURL
         let name = viewModel.query
+        let provider = viewModel.provider
         hide()
         copyTask = Task {
-            let copied = await GifClipboard.copy(from: url, name: name)
+            let copied = await GifClipboard.copy(from: url, name: name, provider: provider)
             await MainActor.run {
                 if copied { onGifInserted?() }
                 guard copied, paste else { return }

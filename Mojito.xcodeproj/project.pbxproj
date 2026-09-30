@@ -34,6 +34,7 @@
 		2BF7E787E46AB243597A38CB /* VideoBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83366C0C02EF9F599EC2B65A /* VideoBlob.swift */; };
 		2C2FD54F6E35CCD0374213BB /* PickerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */; };
 		2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F7DB616A5940BE3DE17B77 /* EggStrings.swift */; };
+		2FA6FB3756B0C899537E2A2F /* GifProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5897939779F7A78E278739D7 /* GifProviderTests.swift */; };
 		304C8571D431917AC25596C3 /* PickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3A3B5079FC9275F5947104 /* PickerView.swift */; };
 		30C268985E8FC43E95617345 /* OnboardingWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1F4596F8DFA66A87D50D02 /* OnboardingWindowController.swift */; };
 		30D00DD970495E218C74C279 /* AppRelauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B08003428CEFA7AECC2E66 /* AppRelauncher.swift */; };
@@ -113,6 +114,7 @@
 		9FE6DD159CABAE6FAC74E6BD /* TriggerConfigStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F335AAB3008F02F987CB8DC2 /* TriggerConfigStoreTests.swift */; };
 		A11509496D8522DC13BF31F3 /* QueryStemmerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6401923F7190AFC65A7B6959 /* QueryStemmerTests.swift */; };
 		A1C87132DCD9B263CA32BAAE /* WordleSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F82574CC8A6D051CF87D9B /* WordleSounds.swift */; };
+		A5F633CD57A1712BFA68299F /* EmbeddedKlipyKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = F041E4CFE35F8CAE3B313669 /* EmbeddedKlipyKey.swift */; };
 		A637DCA2905238217427E806 /* EmojiBrowserCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C001583E27CC71D9959055 /* EmojiBrowserCatalog.swift */; };
 		A9A15B339C05195BB45CC09F /* MyLegSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2C4C16E01184684E33C3437 /* MyLegSound.swift */; };
 		A9CDDCEBAC41BF8676B8F2EC /* EasterEggTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3188FF1FD6559BF8E64C19CC /* EasterEggTracker.swift */; };
@@ -156,6 +158,7 @@
 		DD501615C4A6623E5BA03369 /* EmojiDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B842CBBD6C7466F9BA2786 /* EmojiDatabaseTests.swift */; };
 		DD75EE1DF9351238356F60E7 /* SkinTone.swift in Sources */ = {isa = PBXBuildFile; fileRef = B375DE27AC0AE1D8DE965403 /* SkinTone.swift */; };
 		DF4F5EB36D764A99CAB8CADB /* WilhelmScream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 088608D6A2243D8E95953095 /* WilhelmScream.swift */; };
+		DFEEAE1A2B798418F4DF2293 /* GifPickerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E8123A15F116BF7B631277 /* GifPickerViewModelTests.swift */; };
 		E29AE211BD536EA5FD09BF0E /* v11.bin in Resources */ = {isa = PBXBuildFile; fileRef = D3C7F5A4189B7652C993C384 /* v11.bin */; };
 		E3B84D347FB801B6A62E980D /* v06.bin in Resources */ = {isa = PBXBuildFile; fileRef = FACE9E8BAF08240551D5237A /* v06.bin */; };
 		E41E62A3741D084E3630FDEC /* AudioBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DE1B7DD5243E817418580C /* AudioBlob.swift */; };
@@ -182,6 +185,7 @@
 		FB20006241210D1D36AB7EEF /* s06.bin in Resources */ = {isa = PBXBuildFile; fileRef = 2F21A9938263FE3EE577F03D /* s06.bin */; };
 		FB6F709623B1472B32490F1D /* KonamiPayoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = E229DD4E9239183CD578F665 /* KonamiPayoff.swift */; };
 		FBA7F794BE95BEC4E4D84AD8 /* v10.bin in Resources */ = {isa = PBXBuildFile; fileRef = EE4174E56EEBEA3423926E2A /* v10.bin */; };
+		FC0148AE31E4BA9B72643BC2 /* GifProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08FF0D8737F955372338BAB6 /* GifProvider.swift */; };
 		FCC584110B97D56E2E7065FA /* AppIconDev.icon in Resources */ = {isa = PBXBuildFile; fileRef = CDB886D82441D68D2F815AD3 /* AppIconDev.icon */; };
 		FD15928FE17F78588821135E /* Rickroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69B54539CBE867AD7AEBC39 /* Rickroll.swift */; };
 		FE1196787A788B1187BD9934 /* s13.bin in Resources */ = {isa = PBXBuildFile; fileRef = C06E0C983CA81BD9B703651A /* s13.bin */; };
@@ -203,6 +207,7 @@
 		019FC9E40B9630700D2106CE /* EmojiDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiDatabase.swift; sourceTree = "<group>"; };
 		0836B5ACF7E24509928DA7B0 /* BouncingDVD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BouncingDVD.swift; sourceTree = "<group>"; };
 		088608D6A2243D8E95953095 /* WilhelmScream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WilhelmScream.swift; sourceTree = "<group>"; };
+		08FF0D8737F955372338BAB6 /* GifProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifProvider.swift; sourceTree = "<group>"; };
 		100317FDEDAED8905256B964 /* AboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettings.swift; sourceTree = "<group>"; };
 		127F100886742DCE05A171B4 /* v04.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v04.bin; sourceTree = "<group>"; };
 		12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewModelTests.swift; sourceTree = "<group>"; };
@@ -210,6 +215,7 @@
 		151DC25F7CEE4F3BE8F23650 /* CRTPowerOff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRTPowerOff.swift; sourceTree = "<group>"; };
 		160FA9BBA311F77BEBE0C6A4 /* GifPickerWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifPickerWindow.swift; sourceTree = "<group>"; };
 		162291D3BD8AF6CD22BE0378 /* AnimationTicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationTicker.swift; sourceTree = "<group>"; };
+		16E8123A15F116BF7B631277 /* GifPickerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifPickerViewModelTests.swift; sourceTree = "<group>"; };
 		186ED6EF6F678E8C3F082FD8 /* MoofSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoofSound.swift; sourceTree = "<group>"; };
 		19FC0DC96883A143602E6668 /* GifClipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifClipboard.swift; sourceTree = "<group>"; };
 		1A1F4596F8DFA66A87D50D02 /* OnboardingWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindowController.swift; sourceTree = "<group>"; };
@@ -251,6 +257,7 @@
 		52DF280ABF42475053B4EB56 /* MatrixRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixRain.swift; sourceTree = "<group>"; };
 		54037341F6A92839A94F3408 /* s04.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s04.bin; sourceTree = "<group>"; };
 		561D5F53503A9DDE7BE03430 /* KeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMonitor.swift; sourceTree = "<group>"; };
+		5897939779F7A78E278739D7 /* GifProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifProviderTests.swift; sourceTree = "<group>"; };
 		5A80F3946EA93F8F8A25774E /* TriggerStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerStateMachine.swift; sourceTree = "<group>"; };
 		5A8851906565F70B7815640F /* FuzzyMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcher.swift; sourceTree = "<group>"; };
 		5B9E4C2183154C36F1883004 /* PickerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewModel.swift; sourceTree = "<group>"; };
@@ -370,6 +377,7 @@
 		ED949C65ADD9439C1E247759 /* TriggerConfigStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerConfigStore.swift; sourceTree = "<group>"; };
 		EE4174E56EEBEA3423926E2A /* v10.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v10.bin; sourceTree = "<group>"; };
 		EF96A1DA7100EFFEEEEF8B7D /* Mojito.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mojito.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F041E4CFE35F8CAE3B313669 /* EmbeddedKlipyKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedKlipyKey.swift; sourceTree = "<group>"; };
 		F335AAB3008F02F987CB8DC2 /* TriggerConfigStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerConfigStoreTests.swift; sourceTree = "<group>"; };
 		F36FC6BE9A109EAEE6A18CE1 /* AmbientEmoticonTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientEmoticonTableTests.swift; sourceTree = "<group>"; };
 		F5C5BC5F015CABDD85262258 /* SeasonalGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonalGates.swift; sourceTree = "<group>"; };
@@ -409,6 +417,8 @@
 				48BC327DAE8D5D1A43640CF2 /* FavoritesBrowseTests.swift */,
 				42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */,
 				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
+				16E8123A15F116BF7B631277 /* GifPickerViewModelTests.swift */,
+				5897939779F7A78E278739D7 /* GifProviderTests.swift */,
 				12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */,
 				6401923F7190AFC65A7B6959 /* QueryStemmerTests.swift */,
 				9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */,
@@ -679,11 +689,13 @@
 			children = (
 				C31E41F813A67872400E4942 /* AnimatedGifView.swift */,
 				7292DF1A52CC009F5780BB22 /* EmbeddedGiphyKey.swift */,
+				F041E4CFE35F8CAE3B313669 /* EmbeddedKlipyKey.swift */,
 				1B02E1E7C31A388F8B220B6B /* GifAsset.swift */,
 				19FC0DC96883A143602E6668 /* GifClipboard.swift */,
 				C02399494F4CF5825B0401CD /* GifPickerView.swift */,
 				BC98E3E280416083D33326C7 /* GifPickerViewModel.swift */,
 				160FA9BBA311F77BEBE0C6A4 /* GifPickerWindow.swift */,
+				08FF0D8737F955372338BAB6 /* GifProvider.swift */,
 				1C3CAFD7B83168FF01538FF4 /* GifSearcher.swift */,
 			);
 			path = GifPicker;
@@ -970,6 +982,7 @@
 				DADDDB9ED8378048DF84B51A /* EggSound.swift in Sources */,
 				2D020B1589F05DA6D532FAD5 /* EggStrings.swift in Sources */,
 				87514A922406A1535D7BCB42 /* EmbeddedGiphyKey.swift in Sources */,
+				A5F633CD57A1712BFA68299F /* EmbeddedKlipyKey.swift in Sources */,
 				AC7748989CE2B7D96CBB21FE /* Emoji.swift in Sources */,
 				A637DCA2905238217427E806 /* EmojiBrowserCatalog.swift in Sources */,
 				8D584DDFB9305768A3547EAA /* EmojiBrowserViewModel.swift in Sources */,
@@ -991,6 +1004,7 @@
 				0F5899AC76F676DCA0E3368D /* GifPickerView.swift in Sources */,
 				19BEC88C7D1AFE4BAD6C0539 /* GifPickerViewModel.swift in Sources */,
 				28A1C045D2F7BBEC55E4A00A /* GifPickerWindow.swift in Sources */,
+				FC0148AE31E4BA9B72643BC2 /* GifProvider.swift in Sources */,
 				E539CB425388907B1CA7D3CE /* GifSearcher.swift in Sources */,
 				76FDC12E75201F5DC497CBAF /* HatchClock.swift in Sources */,
 				5415584EC4F8698A2A89C32A /* HintsFooter.swift in Sources */,
@@ -1077,6 +1091,8 @@
 				01491C879FFA29F7F655A6E3 /* FavoritesBrowseTests.swift in Sources */,
 				4F9E4BA7A275583B07011809 /* FuzzyMatcherTests.swift in Sources */,
 				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
+				DFEEAE1A2B798418F4DF2293 /* GifPickerViewModelTests.swift in Sources */,
+				2FA6FB3756B0C899537E2A2F /* GifProviderTests.swift in Sources */,
 				2C2FD54F6E35CCD0374213BB /* PickerViewModelTests.swift in Sources */,
 				A11509496D8522DC13BF31F3 /* QueryStemmerTests.swift in Sources */,
 				C025CD4AE30320C3FE69028A /* SeasonalGatesTests.swift in Sources */,

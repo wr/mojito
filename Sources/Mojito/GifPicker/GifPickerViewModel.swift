@@ -12,10 +12,11 @@ final class GifPickerViewModel: ObservableObject {
     /// result set) — gates the "Try Again" affordance.
     @Published var lastSearchFailed: Bool = false
     @Published var isVisible: Bool = false
+    @Published private(set) var provider: GifProvider
 
     /// 3-column grid; arrow keys + Enter handle navigation.
     let columns: Int = 3
-    /// Giphy's max per-page is 50; 24 is roughly the screen-fill threshold
+    /// Both providers cap a page at 50; 24 is roughly the screen-fill threshold
     /// for the 3-col grid, so paging-in-3-rows feels natural.
     private let pageSize: Int = 24
     /// Auto-pagination stops at this many results. Past the cap, the
@@ -24,10 +25,11 @@ final class GifPickerViewModel: ObservableObject {
     let autoPaginateCap: Int = 60
 
     /// Surfaces the "Load more" button when an auto-load was suppressed
-    /// because we hit `autoPaginateCap` (and Giphy has more to give).
+    /// because we hit `autoPaginateCap` (and the provider has more to give).
     @Published var canLoadMore: Bool = false
 
-    private let searcher = GifSearcher()
+    private let searcher: GifSearching
+    private let defaults: UserDefaults
     private var queryCancellable: AnyCancellable?
 
     /// Current trimmed query the result set belongs to. Used to detect
@@ -37,12 +39,31 @@ final class GifPickerViewModel: ObservableObject {
     // dispatched before it. Comparing query strings isn't enough — a
     // same-query retry would let a stale completion through.
     private var searchGeneration: Int = 0
-    private var pageOffset: Int = 0
-    /// False once Giphy returned an under-full page — stops further fetches.
+    /// 0-based index of the next page to request. Counted in pages, not
+    /// results, so a short page (a dropped entry) can't re-request one.
+    private var nextPage: Int = 0
+    /// False once the provider reports no further pages — stops fetches.
     private var hasMore: Bool = false
     private var isPaginating: Bool = false
 
-    init() {
+    /// Each provider's settled results, so Tab-ing back to one for the same
+    /// query restores them instead of spending another request.
+    private struct Snapshot {
+        let query: String
+        let results: [GifAsset]
+        let selectedIndex: Int
+        let nextPage: Int
+        let hasMore: Bool
+        let canLoadMore: Bool
+        let errorMessage: String?
+    }
+    private var snapshots: [GifProvider: Snapshot] = [:]
+
+    init(searcher: GifSearching? = nil, defaults: UserDefaults = .standard) {
+        self.searcher = searcher ?? GifSearcher()
+        self.defaults = defaults
+        self.provider = defaults.string(forKey: PrefsKey.gifProvider)
+            .flatMap(GifProvider.init(rawValue:)) ?? .giphy
         // 300ms debounce — within the 250–400ms window most search-as-you-
         // type UIs target. Waits for the user to actually pause before
         // burning an API call, while still feeling responsive on settle.
@@ -60,10 +81,48 @@ final class GifPickerViewModel: ObservableObject {
         errorMessage = nil
         lastSearchFailed = false
         lastQuery = ""
-        pageOffset = 0
+        nextPage = 0
         hasMore = false
         canLoadMore = false
         isPaginating = false
+        snapshots = [:]
+    }
+
+    /// Tab: re-run the current query against the other provider. The choice
+    /// persists, so the picker reopens on whichever was used last.
+    func toggleProvider() {
+        if !isLoading, !isPaginating, !lastSearchFailed, !lastQuery.isEmpty {
+            snapshots[provider] = Snapshot(
+                query: lastQuery, results: results, selectedIndex: selectedIndex,
+                nextPage: nextPage, hasMore: hasMore, canLoadMore: canLoadMore,
+                errorMessage: errorMessage
+            )
+        } else {
+            snapshots[provider] = nil
+        }
+        provider = provider.toggled
+        defaults.set(provider.rawValue, forKey: PrefsKey.gifProvider)
+
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let snapshot = snapshots[provider], snapshot.query == trimmed {
+            // Drops any completion still in flight for the other provider.
+            searchGeneration += 1
+            results = snapshot.results
+            selectedIndex = snapshot.selectedIndex
+            nextPage = snapshot.nextPage
+            hasMore = snapshot.hasMore
+            canLoadMore = snapshot.canLoadMore
+            errorMessage = snapshot.errorMessage
+            lastSearchFailed = false
+            isLoading = false
+            isPaginating = false
+            lastQuery = snapshot.query
+        } else {
+            // Forces runSearch to treat this as a fresh query and clear the
+            // other provider's grid.
+            lastQuery = ""
+            runSearch(query)
+        }
     }
 
     func selectedAsset() -> GifAsset? {
@@ -131,9 +190,10 @@ final class GifPickerViewModel: ObservableObject {
         // the button would shift the ScrollView content out from under
         // the user. The button's own `disabled` state covers double-tap.
         let queryAtDispatch = lastQuery
-        let offsetAtDispatch = pageOffset
+        let pageAtDispatch = nextPage
         let generation = searchGeneration
-        searcher.search(query: queryAtDispatch, limit: pageSize, offset: offsetAtDispatch) { [weak self] result in
+        searcher.search(provider: provider, query: queryAtDispatch, pageSize: pageSize,
+                        page: pageAtDispatch) { [weak self] result in
             guard let self else { return }
             self.isPaginating = false
             // A new search started while the page was in flight — drop the
@@ -141,11 +201,12 @@ final class GifPickerViewModel: ObservableObject {
             // set (or onto the same query's reset offset after a retry).
             guard self.searchGeneration == generation else { return }
             switch result {
-            case .success(let assets):
+            case .success(let page):
+                let assets = page.assets
                 let oldCount = self.results.count
                 self.results.append(contentsOf: assets)
-                self.pageOffset += assets.count
-                self.hasMore = assets.count >= self.pageSize
+                self.nextPage += 1
+                self.hasMore = page.hasMore
                 // If selection sat on the Load-more pseudo-row, snap it
                 // forward to the first new GIF so navigation continues
                 // naturally instead of pointing at empty space.
@@ -155,7 +216,7 @@ final class GifPickerViewModel: ObservableObject {
             case .failure:
                 self.hasMore = false
             }
-            // Re-evaluate the cap: if we're now at/past it AND Giphy still
+            // Re-evaluate the cap: if we're now at/past it AND the provider still
             // has more, surface the explicit-load button.
             self.canLoadMore = self.hasMore && self.results.count >= self.autoPaginateCap
         }
@@ -172,7 +233,7 @@ final class GifPickerViewModel: ObservableObject {
             lastSearchFailed = false
             selectedIndex = 0
             lastQuery = ""
-            pageOffset = 0
+            nextPage = 0
             hasMore = false
             return
         }
@@ -185,7 +246,7 @@ final class GifPickerViewModel: ObservableObject {
         errorMessage = nil
         lastSearchFailed = false
         lastQuery = trimmed
-        pageOffset = 0
+        nextPage = 0
         hasMore = true
         // `GifSearcher` cancels any in-flight task, including a pagination
         // request mid-flight. Cancelled tasks don't fire their completion,
@@ -197,23 +258,26 @@ final class GifPickerViewModel: ObservableObject {
             selectedIndex = 0
             canLoadMore = false
         }
-        searcher.search(query: trimmed, limit: pageSize, offset: 0) { [weak self] result in
+        let providerAtDispatch = provider
+        searcher.search(provider: providerAtDispatch, query: trimmed, pageSize: pageSize,
+                        page: 0) { [weak self] result in
             guard let self else { return }
             // A newer search (typed or retried) was dispatched while this
             // one was in flight — its cancellation is racy; drop the result.
             guard self.searchGeneration == generation else { return }
             self.isLoading = false
             switch result {
-            case .success(let assets):
+            case .success(let page):
+                let assets = page.assets
                 self.results = assets
-                self.pageOffset = assets.count
-                self.hasMore = assets.count >= self.pageSize
+                self.nextPage = 1
+                self.hasMore = page.hasMore
                 if assets.isEmpty {
                     self.errorMessage = String(localized: "No GIFs found.")
                 }
             case .failure(let error):
                 self.results = []
-                self.errorMessage = error.userMessage
+                self.errorMessage = error.userMessage(for: providerAtDispatch)
                 self.lastSearchFailed = true
                 self.hasMore = false
             }

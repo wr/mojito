@@ -17,17 +17,17 @@ enum GifClipboard {
     /// Fetches the GIF bytes from `url` and writes them to the pasteboard.
     /// `name` (the search query) flavors the staged filename a chat app shows
     /// on upload, e.g. `giphy-fire.gif`. Returns true on success.
-    static func copy(from url: URL, name: String) async -> Bool {
+    static func copy(from url: URL, name: String, provider: GifProvider) async -> Bool {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-            return write(data: data, name: name)
+            return write(data: data, name: name, prefix: provider.rawValue)
         } catch {
             return false
         }
     }
 
-    static func write(data: Data, name: String) -> Bool {
-        guard let fileURL = stageTempFile(data: data, name: name) else { return false }
+    static func write(data: Data, name: String, prefix: String = "giphy") -> Bool {
+        guard let fileURL = stageTempFile(data: data, name: name, prefix: prefix) else { return false }
 
         let pb = NSPasteboard.general
         pb.clearContents()
@@ -47,7 +47,7 @@ enum GifClipboard {
     /// gets its own subdir so the readable, non-unique filename can't clobber
     /// an earlier paste of a different GIF that a chat app is still uploading.
     /// Returns nil if staging fails.
-    private static func stageTempFile(data: Data, name: String) -> URL? {
+    private static func stageTempFile(data: Data, name: String, prefix: String) -> URL? {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("Mojito-GIFs", isDirectory: true)
         do {
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
@@ -55,7 +55,7 @@ enum GifClipboard {
             let dir = root.appendingPathComponent(UUID().uuidString, isDirectory: true)
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             let slug = safeFileBase(name)
-            let fileName = slug.isEmpty ? "giphy.gif" : "giphy-\(slug).gif"
+            let fileName = slug.isEmpty ? "\(prefix).gif" : "\(prefix)-\(slug).gif"
             let fileURL = dir.appendingPathComponent(fileName)
             try data.write(to: fileURL)
             return fileURL
@@ -66,7 +66,7 @@ enum GifClipboard {
 
     /// Turns the search query into a safe, readable filename fragment: keep
     /// alphanumerics, collapse every other run to a single `-`, trim, cap
-    /// length. May return "" (caller falls back to a bare `giphy.gif`).
+    /// length. May return "" (caller falls back to a bare `<prefix>.gif`).
     private static func safeFileBase(_ name: String) -> String {
         var out = ""
         var lastWasDash = false
