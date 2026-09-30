@@ -14,6 +14,7 @@
 #                              unset (recommended), sign_update reads the key
 #                              from your login keychain — that's where
 #                              ./bin/generate_keys stored it.
+#   HOMEBREW_TAP_REPO        — defaults to <owner of GITHUB_REPO>/homebrew-tap.
 #
 # What it does:
 #   1. Builds Release with Xcode, signed with Developer ID.
@@ -24,6 +25,7 @@
 #   6. Creates a GitHub Release with the DMG attached (via gh CLI), tagged at
 #      that commit — so the tag describes the source the DMG was built from.
 #   7. Updates appcast.xml on the gh-pages branch with the new entry.
+#   8. Bumps the Homebrew cask in the tap (scripts/update_homebrew_cask.sh).
 #
 # Must be run from a clean `main` that's in sync with origin; it refuses
 # otherwise, since step 5 would otherwise commit unrelated work.
@@ -393,6 +395,14 @@ cd "$GH_PAGES_DIR"
 git add appcast.xml release-notes
 git commit -m "Mojito $VERSION"
 git push origin gh-pages
+
+echo "→ Updating Homebrew cask"
+# The release is already public by now, so a failure here warns rather than
+# aborting — and re-running release.sh can't retry it (the tag exists).
+if ! "$REPO_ROOT/scripts/update_homebrew_cask.sh" "$VERSION"; then
+    echo "warning: Homebrew cask not updated. Retry with:" >&2
+    echo "         scripts/update_homebrew_cask.sh $VERSION" >&2
+fi
 
 echo "✅ Released $APP_NAME $VERSION"
 echo "   DMG:    $DMG_PATH"

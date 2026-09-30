@@ -30,7 +30,7 @@ xcodebuild -project Mojito.xcodeproj -scheme Mojito -configuration Debug -destin
 # over. Cold builds (app not running) don't auto-launch; start manually:
 open "/Applications/Mojito Dev.app"
 
-# Full release (Developer ID signing → notarize → staple → Sparkle-sign DMG → gh release → push gh-pages).
+# Full release (Developer ID signing → notarize → staple → Sparkle-sign DMG → gh release → push gh-pages → bump Homebrew cask).
 # APPLE_TEAM_ID and GITHUB_REPO come from your shell env (e.g. ~/.zshrc or a local .envrc).
 scripts/release.sh <version>
 
@@ -209,7 +209,7 @@ Both windows route through `DockIconManager.windowDidOpen()` / `.windowDidClose(
 - `Sources/Mojito/Telemetry/` — anonymous daily-aggregate store, uploader, consent gate (see Telemetry above)
 - `Sources/Mojito/Util/PrefsKey.swift` — every UserDefaults key in one place
 - `stats-worker/` — Cloudflare Worker + D1 schema for the public usage stats (ingest + `/api/stats.json`); the front-end page lives in the `mojito-site` repo
-- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `run-tests.sh`, `build_emoji_db.py`, `build_egg_strings.py`, `build_giphy_key.py`, `update_appcast.py`, `sync-localizable.sh`, `translate-localizable.py`, `run-locale.sh`
+- `scripts/` — `release.sh`, `setup-dev-signing.sh`, `run-tests.sh`, `build_emoji_db.py`, `build_egg_strings.py`, `build_giphy_key.py`, `update_appcast.py`, `update_homebrew_cask.sh`, `sync-localizable.sh`, `translate-localizable.py`, `run-locale.sh`
 - `bin/` — vendored `generate_keys` and `sign_update` from Sparkle (committed so release doesn't depend on DerivedData being intact)
 - `Resources/` — Info.plist, entitlements, emoji.json, AppIcon.icns, easter-egg assets
 

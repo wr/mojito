@@ -90,6 +90,7 @@ This script:
 7. Calls `./bin/sign_update` to produce an EdDSA signature for the DMG.
 8. `gh release create v<version>` with the DMG attached, using the `## v<version>` section of `CHANGELOG.md` as the release body (the notes are already correct — there is no placeholder to replace).
 9. Clones the `gh-pages` branch to a tempdir, renders the changelog fragment to HTML release notes, runs `scripts/update_appcast.py` to prepend the new entry (build number, length, EdDSA signature), commits, and pushes.
+10. Runs `scripts/update_homebrew_cask.sh`, which rewrites `version` / `sha256` in `Casks/mojito.rb` on `wr/homebrew-tap` (sha256 from the release asset's GitHub digest) and pushes. This step only warns on failure — the release is already public — so watch for `warning: Homebrew cask not updated` and re-run the script by hand if it appears.
 
 Do **not** suppress output — surface the script's progress so the user can see notarization timing. If the script exits non-zero at any step, stop the skill and report the failure with the last 30 lines of output.
 
@@ -129,6 +130,10 @@ gh release view "v<version>" --repo "$GITHUB_REPO" --json assets,name,tagName
 # item's signature (the appcast lists every past release).
 curl -sf "https://mojito.wells.ee/appcast.xml" \
   | grep -o "https://github.com/wr/mojito/releases/download/v<version>/Mojito.dmg[^/]*sparkle:edSignature=\"[^\"]*\""
+
+# Homebrew cask points at this version (sha256 should equal the asset digest
+# from the `gh release view` above).
+gh api repos/wr/homebrew-tap/contents/Casks/mojito.rb --jq .content | base64 -d | grep -E '^  (version|sha256) '
 ```
 
 The signature it prints must match the `sparkle:edSignature=...` line the script echoed under `→ Signing for Sparkle`. (CDN caching can briefly serve the old appcast; if it doesn't match, re-check against `raw.githubusercontent.com/wr/mojito/gh-pages/appcast.xml`.)
