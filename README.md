@@ -61,7 +61,7 @@ Other things it does:
 
 - Ranks results by how often you use them
 - Recognizes emoticons like `:)` and `<3`, and converts text arrows (`->` → →, `<->` → ↔)
-- GIF search — type `:::` and a query to drop in a GIF, powered by GIPHY
+- GIF search — type `:::` and a query to drop in a GIF, powered by KLIPY
 - Optional symbols and signs: hundreds of them, from `:cmd:` for ⌘ and `:star:` for ★ to currency, arrows, math, and Greek letters
 - Default skin tone
 - Stays out of apps and websites with native emoji input — Slack, Discord, and a long list of others are excluded out of the box. You can edit the list, or flip it into allowlist mode so Mojito runs only where you say.
@@ -89,7 +89,7 @@ scripts/run-locale.sh fr   # or de, ja, ar, zh-Hans, etc.
 
 ## Credits
 
-emojibase, [Emoogle](https://github.com/xitanggg/emoogle-emoji-search-engine), Sparkle, KeyboardShortcuts, GIPHY, and a Swift port of fzy.
+emojibase, [Emoogle](https://github.com/xitanggg/emoogle-emoji-search-engine), Sparkle, KeyboardShortcuts, KLIPY, and a Swift port of fzy.
 
 ## Donate
 

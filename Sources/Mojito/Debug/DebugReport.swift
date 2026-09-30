@@ -9,7 +9,7 @@ import IOKit.hid
 /// **Anonymization invariants** (also covered by `DebugReportTests`):
 /// - No file paths, usernames, hostnames, MAC addresses, IPs.
 /// - Never reads `usageCounts`, `easterEggsDiscovered`, `excludedBundleIDs`,
-///   `excludedURLPatterns`, `giphyApiKey` contents — only counts / booleans.
+///   `excludedURLPatterns`, `klipyApiKey` contents — only counts / booleans.
 /// - No absolute dates in the prefs section (relative "X days ago" only).
 ///   One UTC timestamp in the footer.
 /// - AX values are summarized structurally — never raw contents.
@@ -117,14 +117,14 @@ enum DebugReport {
         let eggsCount = ((d.array(forKey: PrefsKey.easterEggsDiscovered) as? [String]) ?? []).count
         let bundleExcl = ((d.array(forKey: PrefsKey.excludedBundleIDs) as? [String]) ?? []).count
         let urlExcl = ((d.array(forKey: PrefsKey.excludedURLPatterns) as? [String]) ?? []).count
-        let giphySet = !((d.string(forKey: PrefsKey.giphyApiKey)) ?? "").isEmpty
+        let klipySet = !((d.string(forKey: PrefsKey.klipyApiKey)) ?? "").isEmpty
 
         var s = "## Prefs\n"
         s += "- usageCounts.total: \(usageTotal)\n"
         s += "- easterEggs.discoveredCount: \(eggsCount)\n"
         s += "- exclusions.bundleIDCount: \(bundleExcl)\n"
         s += "- exclusions.urlPatternCount: \(urlExcl)\n"
-        s += "- giphyApiKey.set: \(giphySet)\n"
+        s += "- klipyApiKey.set: \(klipySet)\n"
         s += "- useFrequencyBoost: \(bool(PrefsKey.useFrequencyBoost, default: true))\n"
         s += "- emoticonsEnabled: \(bool(PrefsKey.emoticonsEnabled, default: true))\n"
         s += "- gifBypassExclusions: \(bool(PrefsKey.gifBypassExclusions, default: true))\n"

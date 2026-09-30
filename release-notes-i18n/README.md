@@ -18,7 +18,7 @@ the bullet text, and the bold lead-in label; keep verbatim:
 - the version heading (`## v1.2.2`),
 - PR refs like `([#103](https://github.com/wr/mojito/pull/103))`,
 - URLs and `inline code`,
-- product names (Mojito, macOS, Sparkle, Giphy, …).
+- product names (Mojito, macOS, Sparkle, KLIPY, …).
 
 ## Adding a release
 

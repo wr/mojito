@@ -1,9 +1,9 @@
 import Foundation
 
-/// One GIF search result, independent of which provider returned it.
+/// One GIF search result.
 struct GifAsset: Identifiable, Hashable {
     let id: String
-    /// Animated thumbnail URL — small, cheap to load (~100px tall).
+    /// Animated thumbnail URL — small, cheap to load (~90px tall).
     let thumbURL: URL
     /// Full-size animated URL — what we copy to the clipboard.
     let originalURL: URL
@@ -12,23 +12,8 @@ struct GifAsset: Identifiable, Hashable {
 }
 
 extension GifAsset {
-    init?(giphyJSON json: [String: Any]) {
-        guard let id = json["id"] as? String,
-              let images = json["images"] as? [String: Any],
-              let thumb = (images["fixed_height_small"] as? [String: Any])
-                          ?? (images["fixed_height"] as? [String: Any]),
-              let thumbStr = thumb["url"] as? String,
-              let thumbURL = URL(string: thumbStr),
-              let original = images["original"] as? [String: Any],
-              let originalStr = original["url"] as? String,
-              let originalURL = URL(string: originalStr)
-        else { return nil }
-        self.init(id: id, thumbURL: thumbURL, originalURL: originalURL,
-                  title: (json["title"] as? String) ?? "")
-    }
-
-    /// KLIPY ships `xs`/`sm`/`md`/`hd` renditions. `xs` (~90px tall) matches
-    /// GIPHY's thumbnail weight. For the paste, `hd` runs past 10 MB and `md`
+    /// KLIPY ships `xs`/`sm`/`md`/`hd` renditions. `xs` (~90px tall) keeps a
+    /// page of thumbnails light. For the paste, `hd` runs past 10 MB and `md`
     /// is sometimes the larger of the two, so take whichever file is smaller.
     init?(klipyJSON json: [String: Any]) {
         guard let slug = json["slug"] as? String,

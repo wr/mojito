@@ -143,7 +143,7 @@ struct GeneralSettingsView: View {
                     systemImage: "photo.fill",
                     tint: .pink,
                     title: "GIF search",
-                    subtitle: "GIFs from Giphy.",
+                    subtitle: "GIFs from KLIPY.",
                     isOn: $triggers.gif.enabled
                 )
                 if triggers.gif.enabled {

@@ -23,7 +23,7 @@
 # caught and attributable.
 #
 # Requirements (checked, can't be granted here):
-#   - Arc installed; the dev toolchain + a working Debug build (gitignored Giphy
+#   - Arc installed; the dev toolchain + a working Debug build (gitignored KLIPY
 #     key etc. per CLAUDE.md); Accessibility + Input Monitoring for "Mojito Dev";
 #     Accessibility for the driving terminal (to post HID CGEvents). The first
 #     Arc URL read also needs a one-time Automation grant — the warmup below

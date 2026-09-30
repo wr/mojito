@@ -71,14 +71,9 @@ enum PrefsKey {
     static let symbolsRequireDoubleColon = "mojito.symbols.requireDoubleColon"
     /// Key name kept for backward compatibility with existing installs.
     static let perfectBounceCount    = "mojito.perfectBounce.count"
-    /// User-provided Giphy beta API key for GIF search (`:::` trigger).
-    /// `defaults write ee.wells.Mojito.dev mojito.giphyApiKey "<key>"`.
-    static let giphyApiKey           = "mojito.giphyApiKey"
-    /// User-provided KLIPY API key; same override shape as `giphyApiKey`.
+    /// User-provided KLIPY API key for GIF search (`:::` trigger).
+    /// `defaults write ee.wells.Mojito.dev mojito.klipyApiKey "<key>"`.
     static let klipyApiKey           = "mojito.klipyApiKey"
-    /// `GifProvider` raw value the GIF picker opens on — the last one the
-    /// user switched to with Tab.
-    static let gifProvider           = "mojito.gifSearch.provider"
     /// Master switch for the `:::` GIF picker. When off, `:::` is just
     /// three colons in your text — no network call, no panel.
     static let gifSearchEnabled      = "mojito.gifSearch.enabled"

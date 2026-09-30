@@ -43,7 +43,7 @@ struct AboutSettingsView: View {
                             .padding(.vertical, rowPadding)
                         acknowledgement("fzy", url: URL(string: "https://github.com/jhawthorn/fzy")!)
                             .padding(.vertical, rowPadding)
-                        acknowledgement("GIPHY", url: URL(string: "https://giphy.com")!)
+                        acknowledgement("KLIPY", url: URL(string: "https://klipy.com")!)
                             .padding(.vertical, rowPadding)
                     }
                 }

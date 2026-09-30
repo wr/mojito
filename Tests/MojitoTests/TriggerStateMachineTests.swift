@@ -348,20 +348,11 @@ struct TriggerStateMachineTests {
         #expect(sm.state == .idle)
     }
 
-    @Test func gifTabTogglesProviderAndKeepsSearching() {
+    @Test func gifTabAlsoPicksWithEmptyQuery() {
         var sm = enterGifSearching()
-        for ch in "dog" { _ = sm.handle(.nameChar(ch)) }
         let out = sm.handle(.tabKey(shift: false))
-        #expect(out.action == .toggleGifProvider)
+        #expect(out.action == .pickGif(deleteCount: 3))
         #expect(out.consumesKey == true)
-        #expect(sm.state == .gifSearching(query: "dog"))
-    }
-
-    @Test func gifShiftTabAlsoTogglesProvider() {
-        var sm = enterGifSearching()
-        let out = sm.handle(.tabKey(shift: true))
-        #expect(out.action == .toggleGifProvider)
-        #expect(sm.state == .gifSearching(query: ""))
     }
 
     @Test func gifEscapeClosesAndConsumes() {

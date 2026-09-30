@@ -2249,114 +2249,114 @@
         }
       }
     },
-    "Add a Giphy API key to enable GIF search.": {
+    "Add a KLIPY API key to enable GIF search.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "أضف مفتاح Giphy API لتفعيل البحث عن GIF."
+            "value": "أضف مفتاح KLIPY API لتفعيل البحث عن GIF."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Füge einen Giphy-API-Schlüssel hinzu, um die GIF-Suche zu aktivieren."
+            "value": "Füge einen KLIPY-API-Schlüssel hinzu, um die GIF-Suche zu aktivieren."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add a Giphy API key to enable GIF search."
+            "value": "Add a KLIPY API key to enable GIF search."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Añade una clave de la API de Giphy para activar la búsqueda de GIF."
+            "value": "Añade una clave de la API de KLIPY para activar la búsqueda de GIF."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agregá una clave de la API de Giphy para activar la búsqueda de GIF."
+            "value": "Agregá una clave de la API de KLIPY para activar la búsqueda de GIF."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "برای فعال‌سازی جست‌وجوی GIF، یک کلید API Giphy اضافه کنید."
+            "value": "برای فعال‌سازی جست‌وجوی GIF، یک کلید API KLIPY اضافه کنید."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ajoute une clé d'API Giphy pour activer la recherche de GIF."
+            "value": "Ajoute une clé d'API KLIPY pour activer la recherche de GIF."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "הוסף מפתח Giphy API כדי להפעיל חיפוש GIF."
+            "value": "הוסף מפתח KLIPY API כדי להפעיל חיפוש GIF."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF खोज सक्षम करने के लिए Giphy API कुंजी जोड़ें।"
+            "value": "GIF खोज सक्षम करने के लिए KLIPY API कुंजी जोड़ें।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aggiungi una chiave API di Giphy per attivare la ricerca di GIF."
+            "value": "Aggiungi una chiave API di KLIPY per attivare la ricerca di GIF."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF 検索を有効にするには、Giphy の API キーを追加してください。"
+            "value": "GIF 検索を有効にするには、KLIPY の API キーを追加してください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF 검색을 사용하려면 Giphy API 키를 추가하세요."
+            "value": "GIF 검색을 사용하려면 KLIPY API 키를 추가하세요."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Voeg een Giphy API-sleutel toe om GIF-zoeken aan te zetten."
+            "value": "Voeg een KLIPY API-sleutel toe om GIF-zoeken aan te zetten."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dodaj klucz API Giphy, aby włączyć wyszukiwanie GIF-ów."
+            "value": "Dodaj klucz API KLIPY, aby włączyć wyszukiwanie GIF-ów."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Adicione uma chave da API do Giphy para ativar a busca de GIF."
+            "value": "Adicione uma chave da API do KLIPY para ativar a busca de GIF."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Добавьте ключ API Giphy, чтобы включить поиск GIF."
+            "value": "Добавьте ключ API KLIPY, чтобы включить поиск GIF."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "添加 Giphy API 密钥以启用 GIF 搜索。"
+            "value": "添加 KLIPY API 密钥以启用 GIF 搜索。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "新增 Giphy API 金鑰以啟用 GIF 搜尋。"
+            "value": "新增 KLIPY API 金鑰以啟用 GIF 搜尋。"
           }
         }
       }
@@ -5614,114 +5614,114 @@
         }
       }
     },
-    "Couldn't reach Giphy.": {
+    "Couldn't reach KLIPY.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تعذّر الوصول إلى Giphy."
+            "value": "تعذّر الوصول إلى KLIPY."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy nicht erreichbar."
+            "value": "KLIPY nicht erreichbar."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Couldn't reach Giphy."
+            "value": "Couldn't reach KLIPY."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo conectar con Giphy."
+            "value": "No se pudo conectar con KLIPY."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo conectar con Giphy."
+            "value": "No se pudo conectar con KLIPY."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "اتصال به Giphy ممکن نشد."
+            "value": "اتصال به KLIPY ممکن نشد."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Impossible de joindre Giphy."
+            "value": "Impossible de joindre KLIPY."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "לא ניתן להתחבר ל-Giphy."
+            "value": "לא ניתן להתחבר ל-KLIPY."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy तक नहीं पहुँचा जा सका।"
+            "value": "KLIPY तक नहीं पहुँचा जा सका।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Impossibile raggiungere Giphy."
+            "value": "Impossibile raggiungere KLIPY."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy に接続できませんでした。"
+            "value": "KLIPY に接続できませんでした。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy에 연결할 수 없습니다."
+            "value": "KLIPY에 연결할 수 없습니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kon Giphy niet bereiken."
+            "value": "Kon KLIPY niet bereiken."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nie udało się połączyć z Giphy."
+            "value": "Nie udało się połączyć z KLIPY."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Não foi possível acessar o Giphy."
+            "value": "Não foi possível acessar o KLIPY."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Не удалось связаться с Giphy."
+            "value": "Не удалось связаться с KLIPY."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法连接到 Giphy。"
+            "value": "无法连接到 KLIPY。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "無法連線到 Giphy。"
+            "value": "無法連線到 KLIPY。"
           }
         }
       }
@@ -7968,226 +7968,226 @@
         }
       }
     },
-    "Giphy rejected the API key.": {
+    "KLIPY rejected the API key.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "رفض Giphy مفتاح API."
+            "value": "رفض KLIPY مفتاح API."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy hat den API-Schlüssel abgelehnt."
+            "value": "KLIPY hat den API-Schlüssel abgelehnt."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy rejected the API key."
+            "value": "KLIPY rejected the API key."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy rechazó la clave de la API."
+            "value": "KLIPY rechazó la clave de la API."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy rechazó la clave de la API."
+            "value": "KLIPY rechazó la clave de la API."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏Giphy کلید API را رد کرد."
+            "value": "‏KLIPY کلید API را رد کرد."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy a refusé la clé d'API."
+            "value": "KLIPY a refusé la clé d'API."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏Giphy דחתה את מפתח ה-API."
+            "value": "‏KLIPY דחתה את מפתח ה-API."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy ने API कुंजी अस्वीकार कर दी।"
+            "value": "KLIPY ने API कुंजी अस्वीकार कर दी।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy ha rifiutato la chiave API."
+            "value": "KLIPY ha rifiutato la chiave API."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy が API キーを拒否しました。"
+            "value": "KLIPY が API キーを拒否しました。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy가 API 키를 거부했습니다."
+            "value": "KLIPY가 API 키를 거부했습니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy weigerde de API-sleutel."
+            "value": "KLIPY weigerde de API-sleutel."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy odrzuciło klucz API."
+            "value": "KLIPY odrzuciło klucz API."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Giphy rejeitou a chave da API."
+            "value": "O KLIPY rejeitou a chave da API."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy отклонил ключ API."
+            "value": "KLIPY отклонил ключ API."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy 拒绝了 API 密钥。"
+            "value": "KLIPY 拒绝了 API 密钥。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy 拒絕了 API 金鑰。"
+            "value": "KLIPY 拒絕了 API 金鑰。"
           }
         }
       }
     },
-    "Giphy responded with an unexpected result.": {
+    "KLIPY responded with an unexpected result.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ردّ Giphy بنتيجة غير متوقعة."
+            "value": "ردّ KLIPY بنتيجة غير متوقعة."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy hat unerwartet geantwortet."
+            "value": "KLIPY hat unerwartet geantwortet."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy responded with an unexpected result."
+            "value": "KLIPY responded with an unexpected result."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy respondió con un resultado inesperado."
+            "value": "KLIPY respondió con un resultado inesperado."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy respondió con un resultado inesperado."
+            "value": "KLIPY respondió con un resultado inesperado."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏Giphy پاسخی غیرمنتظره برگرداند."
+            "value": "‏KLIPY پاسخی غیرمنتظره برگرداند."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy a répondu avec un résultat inattendu."
+            "value": "KLIPY a répondu avec un résultat inattendu."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏Giphy החזירה תוצאה לא צפויה."
+            "value": "‏KLIPY החזירה תוצאה לא צפויה."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy से अप्रत्याशित प्रतिक्रिया मिली।"
+            "value": "KLIPY से अप्रत्याशित प्रतिक्रिया मिली।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy ha risposto con un risultato inatteso."
+            "value": "KLIPY ha risposto con un risultato inatteso."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy から予期しない応答が返されました。"
+            "value": "KLIPY から予期しない応答が返されました。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy가 예상치 못한 응답을 보냈습니다."
+            "value": "KLIPY가 예상치 못한 응답을 보냈습니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy gaf een onverwacht resultaat."
+            "value": "KLIPY gaf een onverwacht resultaat."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy zwróciło nieoczekiwany wynik."
+            "value": "KLIPY zwróciło nieoczekiwany wynik."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Giphy retornou um resultado inesperado."
+            "value": "O KLIPY retornou um resultado inesperado."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy вернул неожиданный ответ."
+            "value": "KLIPY вернул неожиданный ответ."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy 返回了意外的结果。"
+            "value": "KLIPY 返回了意外的结果。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy 回傳了預期外的結果。"
+            "value": "KLIPY 回傳了預期外的結果。"
           }
         }
       }
@@ -15591,114 +15591,114 @@
         }
       }
     },
-    "Statistics and GIF searches sent to Giphy are never linked to you, and no personally-identifiable data is stored or sent anywhere.": {
+    "Statistics and GIF searches sent to KLIPY are never linked to you, and no personally-identifiable data is stored or sent anywhere.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا تُربَط الإحصائيات وعمليات البحث عن GIF المُرسَلة إلى Giphy بك أبدًا، ولا تُخزَّن أو تُرسَل أي بيانات تُعرّف عنك إلى أي مكان."
+            "value": "لا تُربَط الإحصائيات وعمليات البحث عن GIF المُرسَلة إلى KLIPY بك أبدًا، ولا تُخزَّن أو تُرسَل أي بيانات تُعرّف عنك إلى أي مكان."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statistiken und an Giphy gesendete GIF-Suchen werden nie mit dir verknüpft, und es werden keine personenbezogenen Daten gespeichert oder irgendwohin gesendet."
+            "value": "Statistiken und an KLIPY gesendete GIF-Suchen werden nie mit dir verknüpft, und es werden keine personenbezogenen Daten gespeichert oder irgendwohin gesendet."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statistics and GIF searches sent to Giphy are never linked to you, and no personally-identifiable data is stored or sent anywhere."
+            "value": "Statistics and GIF searches sent to KLIPY are never linked to you, and no personally-identifiable data is stored or sent anywhere."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las estadísticas y las búsquedas de GIF enviadas a Giphy nunca se vinculan contigo, y no se almacena ni se envía a ningún sitio ningún dato que te identifique."
+            "value": "Las estadísticas y las búsquedas de GIF enviadas a KLIPY nunca se vinculan contigo, y no se almacena ni se envía a ningún sitio ningún dato que te identifique."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las estadísticas y las búsquedas de GIF enviadas a Giphy nunca se vinculan contigo, y no se almacena ni se envía a ningún lado ningún dato que te identifique."
+            "value": "Las estadísticas y las búsquedas de GIF enviadas a KLIPY nunca se vinculan contigo, y no se almacena ni se envía a ningún lado ningún dato que te identifique."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "آمار و جست‌وجوهای GIF که به Giphy ارسال می‌شوند هرگز به شما مرتبط نمی‌شوند و هیچ داده‌ای که هویت شما را آشکار کند در جایی ذخیره یا ارسال نمی‌شود."
+            "value": "آمار و جست‌وجوهای GIF که به KLIPY ارسال می‌شوند هرگز به شما مرتبط نمی‌شوند و هیچ داده‌ای که هویت شما را آشکار کند در جایی ذخیره یا ارسال نمی‌شود."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les statistiques et les recherches de GIF envoyées à Giphy ne sont jamais associées à toi, et aucune donnée permettant de t'identifier n'est stockée ni envoyée où que ce soit."
+            "value": "Les statistiques et les recherches de GIF envoyées à KLIPY ne sont jamais associées à toi, et aucune donnée permettant de t'identifier n'est stockée ni envoyée où que ce soit."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "סטטיסטיקה וחיפושי GIF שנשלחים ל-Giphy לעולם אינם מקושרים אליך, ושום מידע שמזהה אותך אישית אינו נשמר או נשלח לשום מקום."
+            "value": "סטטיסטיקה וחיפושי GIF שנשלחים ל-KLIPY לעולם אינם מקושרים אליך, ושום מידע שמזהה אותך אישית אינו נשמר או נשלח לשום מקום."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "आँकड़े और Giphy को भेजी गई GIF खोजें कभी आपसे नहीं जोड़ी जातीं, और कोई व्यक्तिगत पहचान वाला डेटा कहीं संग्रहीत या भेजा नहीं जाता।"
+            "value": "आँकड़े और KLIPY को भेजी गई GIF खोजें कभी आपसे नहीं जोड़ी जातीं, और कोई व्यक्तिगत पहचान वाला डेटा कहीं संग्रहीत या भेजा नहीं जाता।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le statistiche e le ricerche di GIF inviate a Giphy non vengono mai collegate a te, e nessun dato che possa identificarti viene salvato o inviato da nessuna parte."
+            "value": "Le statistiche e le ricerche di GIF inviate a KLIPY non vengono mai collegate a te, e nessun dato che possa identificarti viene salvato o inviato da nessuna parte."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "統計や Giphy に送信される GIF 検索があなたと結び付けられることはなく、個人を特定できるデータがどこかに保存・送信されることもありません。"
+            "value": "統計や KLIPY に送信される GIF 検索があなたと結び付けられることはなく、個人を特定できるデータがどこかに保存・送信されることもありません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "통계와 Giphy로 전송되는 GIF 검색은 절대 당신과 연결되지 않으며, 개인을 식별할 수 있는 데이터는 어디에도 저장되거나 전송되지 않습니다."
+            "value": "통계와 KLIPY로 전송되는 GIF 검색은 절대 당신과 연결되지 않으며, 개인을 식별할 수 있는 데이터는 어디에도 저장되거나 전송되지 않습니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statistieken en GIF-zoekopdrachten die naar Giphy worden gestuurd, worden nooit aan jou gekoppeld, en er worden nergens persoonlijk identificeerbare gegevens opgeslagen of verzonden."
+            "value": "Statistieken en GIF-zoekopdrachten die naar KLIPY worden gestuurd, worden nooit aan jou gekoppeld, en er worden nergens persoonlijk identificeerbare gegevens opgeslagen of verzonden."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statystyki i wyszukiwania GIF-ów wysyłane do Giphy nigdy nie są powiązane z tobą, a żadne dane umożliwiające identyfikację nie są nigdzie przechowywane ani wysyłane."
+            "value": "Statystyki i wyszukiwania GIF-ów wysyłane do KLIPY nigdy nie są powiązane z tobą, a żadne dane umożliwiające identyfikację nie są nigdzie przechowywane ani wysyłane."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "As estatísticas e as buscas de GIF enviadas ao Giphy nunca são vinculadas a você, e nenhum dado que possa identificá-lo é armazenado ou enviado a lugar nenhum."
+            "value": "As estatísticas e as buscas de GIF enviadas ao KLIPY nunca são vinculadas a você, e nenhum dado que possa identificá-lo é armazenado ou enviado a lugar nenhum."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Статистика и поисковые запросы GIF, отправляемые в Giphy, никогда не связываются с вами, и никакие персональные данные нигде не хранятся и не отправляются."
+            "value": "Статистика и поисковые запросы GIF, отправляемые в KLIPY, никогда не связываются с вами, и никакие персональные данные нигде не хранятся и не отправляются."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "统计数据和发送给 Giphy 的 GIF 搜索绝不会与你关联，也不会存储或向任何地方发送任何可识别个人身份的数据。"
+            "value": "统计数据和发送给 KLIPY 的 GIF 搜索绝不会与你关联，也不会存储或向任何地方发送任何可识别个人身份的数据。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "統計資料和傳送給 Giphy 的 GIF 搜尋絕不會與你關聯，也不會儲存或向任何地方傳送任何可識別個人身分的資料。"
+            "value": "統計資料和傳送給 KLIPY 的 GIF 搜尋絕不會與你關聯，也不會儲存或向任何地方傳送任何可識別個人身分的資料。"
           }
         }
       }
@@ -17160,114 +17160,114 @@
         }
       }
     },
-    "Type `:::` then a search term to insert a GIF from Giphy.": {
+    "Type `:::` then a search term to insert a GIF from KLIPY.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "اكتب `:::` ثم كلمة بحث لإدراج صورة GIF من Giphy."
+            "value": "اكتب `:::` ثم كلمة بحث لإدراج صورة GIF من KLIPY."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tippe `:::` und dann einen Suchbegriff, um ein GIF von Giphy einzufügen."
+            "value": "Tippe `:::` und dann einen Suchbegriff, um ein GIF von KLIPY einzufügen."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Type `:::` then a search term to insert a GIF from Giphy."
+            "value": "Type `:::` then a search term to insert a GIF from KLIPY."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Escribe `:::` seguido de un término de búsqueda para insertar un GIF de Giphy."
+            "value": "Escribe `:::` seguido de un término de búsqueda para insertar un GIF de KLIPY."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Escribí `:::` seguido de un término de búsqueda para insertar un GIF de Giphy."
+            "value": "Escribí `:::` seguido de un término de búsqueda para insertar un GIF de KLIPY."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏`:::` و سپس یک عبارت جست‌وجو تایپ کنید تا یک GIF از Giphy درج شود."
+            "value": "‏`:::` و سپس یک عبارت جست‌وجو تایپ کنید تا یک GIF از KLIPY درج شود."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tape `:::` puis un terme de recherche pour insérer un GIF depuis Giphy."
+            "value": "Tape `:::` puis un terme de recherche pour insérer un GIF depuis KLIPY."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "הקלד `:::` ואז ביטוי חיפוש כדי להוסיף GIF מ-Giphy."
+            "value": "הקלד `:::` ואז ביטוי חיפוש כדי להוסיף GIF מ-KLIPY."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy से GIF डालने के लिए `:::` के बाद कोई खोज शब्द टाइप करें।"
+            "value": "KLIPY से GIF डालने के लिए `:::` के बाद कोई खोज शब्द टाइप करें।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Digita `:::` seguito da un termine di ricerca per inserire un GIF da Giphy."
+            "value": "Digita `:::` seguito da un termine di ricerca per inserire un GIF da KLIPY."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "`:::` の後に検索語を入力すると、Giphy から GIF を挿入できます。"
+            "value": "`:::` の後に検索語を入力すると、KLIPY から GIF を挿入できます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "`:::` 다음에 검색어를 입력하면 Giphy에서 GIF를 삽입합니다."
+            "value": "`:::` 다음에 검색어를 입력하면 KLIPY에서 GIF를 삽입합니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Typ `:::` gevolgd door een zoekterm om een GIF van Giphy in te voegen."
+            "value": "Typ `:::` gevolgd door een zoekterm om een GIF van KLIPY in te voegen."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wpisz `:::`, a następnie szukane hasło, aby wstawić GIF z Giphy."
+            "value": "Wpisz `:::`, a następnie szukane hasło, aby wstawić GIF z KLIPY."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Digite `:::` e depois um termo de busca para inserir um GIF do Giphy."
+            "value": "Digite `:::` e depois um termo de busca para inserir um GIF do KLIPY."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Введите `:::` и поисковый запрос, чтобы вставить GIF из Giphy."
+            "value": "Введите `:::` и поисковый запрос, чтобы вставить GIF из KLIPY."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "输入 `:::` 后跟搜索词,从 Giphy 插入 GIF。"
+            "value": "输入 `:::` 后跟搜索词,从 KLIPY 插入 GIF。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "輸入 `:::` 後接搜尋字詞,即可從 Giphy 插入 GIF。"
+            "value": "輸入 `:::` 後接搜尋字詞,即可從 KLIPY 插入 GIF。"
           }
         }
       }
@@ -18282,115 +18282,115 @@
         }
       }
     },
-    "Usage counts, settings, and your exclusion list are stored locally. %@ doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to Giphy.": {
+    "Usage counts, settings, and your exclusion list are stored locally. %@ doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to KLIPY.": {
       "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تُخزَّن أعداد الاستخدام والإعدادات وقائمة الاستثناءات محليًا. لا يرسل %@ أي بيانات تتبّع أو استخدام إلى خادمنا—بل ليس لدينا خادم أصلًا 🙂\n\nاستثناء: يرسل بحث GIF استعلامك إلى Giphy."
+            "value": "تُخزَّن أعداد الاستخدام والإعدادات وقائمة الاستثناءات محليًا. لا يرسل %@ أي بيانات تتبّع أو استخدام إلى خادمنا—بل ليس لدينا خادم أصلًا 🙂\n\nاستثناء: يرسل بحث GIF استعلامك إلى KLIPY."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nutzungszahlen, Einstellungen und deine Ausschlussliste werden lokal gespeichert. %@ sendet keinerlei Telemetrie- oder Nutzungsdaten an unseren Server – wir haben nicht einmal einen Server 🙂\n\nAusnahme: Die GIF-Suche sendet deine Anfrage an Giphy."
+            "value": "Nutzungszahlen, Einstellungen und deine Ausschlussliste werden lokal gespeichert. %@ sendet keinerlei Telemetrie- oder Nutzungsdaten an unseren Server – wir haben nicht einmal einen Server 🙂\n\nAusnahme: Die GIF-Suche sendet deine Anfrage an KLIPY."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Usage counts, settings, and your exclusion list are stored locally. %@ doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to Giphy."
+            "value": "Usage counts, settings, and your exclusion list are stored locally. %@ doesn't send any telemetry or usage data back to our server—we don't even have a server 🙂\n\nException: GIF search sends your query to KLIPY."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los recuentos de uso, los ajustes y tu lista de exclusiones se guardan localmente. %@ no envía telemetría ni datos de uso a nuestro servidor: ni siquiera tenemos un servidor 🙂\n\nExcepción: la búsqueda de GIF envía tu consulta a Giphy."
+            "value": "Los recuentos de uso, los ajustes y tu lista de exclusiones se guardan localmente. %@ no envía telemetría ni datos de uso a nuestro servidor: ni siquiera tenemos un servidor 🙂\n\nExcepción: la búsqueda de GIF envía tu consulta a KLIPY."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los conteos de uso, la configuración y tu lista de exclusiones se guardan localmente. %@ no envía telemetría ni datos de uso a nuestro servidor: ni siquiera tenemos un servidor 🙂\n\nExcepción: la búsqueda de GIF envía tu consulta a Giphy."
+            "value": "Los conteos de uso, la configuración y tu lista de exclusiones se guardan localmente. %@ no envía telemetría ni datos de uso a nuestro servidor: ni siquiera tenemos un servidor 🙂\n\nExcepción: la búsqueda de GIF envía tu consulta a KLIPY."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "شمار استفاده، تنظیمات و فهرست استثناهای شما به‌صورت محلی ذخیره می‌شوند. ‏%@ هیچ داده تله‌متری یا استفاده‌ای به سرور ما نمی‌فرستد—اصلاً سروری نداریم 🙂\n\nاستثنا: جست‌وجوی GIF عبارت شما را به Giphy می‌فرستد."
+            "value": "شمار استفاده، تنظیمات و فهرست استثناهای شما به‌صورت محلی ذخیره می‌شوند. ‏%@ هیچ داده تله‌متری یا استفاده‌ای به سرور ما نمی‌فرستد—اصلاً سروری نداریم 🙂\n\nاستثنا: جست‌وجوی GIF عبارت شما را به KLIPY می‌فرستد."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les compteurs d'utilisation, les réglages et ta liste d'exclusions sont stockés localement. %@ n'envoie aucune donnée de télémétrie ou d'utilisation à notre serveur — nous n'avons même pas de serveur 🙂\n\nException : la recherche de GIF envoie ta requête à Giphy."
+            "value": "Les compteurs d'utilisation, les réglages et ta liste d'exclusions sont stockés localement. %@ n'envoie aucune donnée de télémétrie ou d'utilisation à notre serveur — nous n'avons même pas de serveur 🙂\n\nException : la recherche de GIF envoie ta requête à KLIPY."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "מוני השימוש, ההגדרות ורשימת ההחרגות שלך נשמרים מקומית. ‏%@ לא שולח שום נתוני טלמטריה או שימוש לשרת שלנו—אין לנו בכלל שרת 🙂\n\nחריג: חיפוש GIF שולח את השאילתה שלך ל-Giphy."
+            "value": "מוני השימוש, ההגדרות ורשימת ההחרגות שלך נשמרים מקומית. ‏%@ לא שולח שום נתוני טלמטריה או שימוש לשרת שלנו—אין לנו בכלל שרת 🙂\n\nחריג: חיפוש GIF שולח את השאילתה שלך ל-KLIPY."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "उपयोग गणना, सेटिंग्स और आपकी बहिष्करण सूची स्थानीय रूप से संग्रहीत होती हैं। %@ हमारे सर्वर पर कोई टेलीमेट्री या उपयोग डेटा नहीं भेजता—हमारे पास तो सर्वर ही नहीं है 🙂\n\nअपवाद: GIF खोज आपकी क्वेरी Giphy को भेजती है।"
+            "value": "उपयोग गणना, सेटिंग्स और आपकी बहिष्करण सूची स्थानीय रूप से संग्रहीत होती हैं। %@ हमारे सर्वर पर कोई टेलीमेट्री या उपयोग डेटा नहीं भेजता—हमारे पास तो सर्वर ही नहीं है 🙂\n\nअपवाद: GIF खोज आपकी क्वेरी KLIPY को भेजती है।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "I conteggi d'uso, le impostazioni e la tua lista di esclusioni sono salvati localmente. %@ non invia alcun dato di telemetria o di utilizzo al nostro server: non abbiamo nemmeno un server 🙂\n\nEccezione: la ricerca di GIF invia la tua query a Giphy."
+            "value": "I conteggi d'uso, le impostazioni e la tua lista di esclusioni sono salvati localmente. %@ non invia alcun dato di telemetria o di utilizzo al nostro server: non abbiamo nemmeno un server 🙂\n\nEccezione: la ricerca di GIF invia la tua query a KLIPY."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用回数、設定、除外リストはローカルに保存されます。%@ はテレメトリや使用データをサーバーに送信しません。そもそもサーバーがありません 🙂\n\n例外: GIF 検索では検索語が Giphy に送信されます。"
+            "value": "使用回数、設定、除外リストはローカルに保存されます。%@ はテレメトリや使用データをサーバーに送信しません。そもそもサーバーがありません 🙂\n\n例外: GIF 検索では検索語が KLIPY に送信されます。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "사용 횟수, 설정, 제외 목록은 기기에 로컬로 저장됩니다. %@은(는) 어떠한 텔레메트리나 사용 데이터도 서버로 보내지 않습니다. 애초에 서버가 없습니다 🙂\n\n예외: GIF 검색은 검색어를 Giphy로 보냅니다."
+            "value": "사용 횟수, 설정, 제외 목록은 기기에 로컬로 저장됩니다. %@은(는) 어떠한 텔레메트리나 사용 데이터도 서버로 보내지 않습니다. 애초에 서버가 없습니다 🙂\n\n예외: GIF 검색은 검색어를 KLIPY로 보냅니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gebruiksaantallen, instellingen en je uitsluitingslijst worden lokaal opgeslagen. %@ stuurt geen telemetrie of gebruiksgegevens naar onze server — we hebben niet eens een server 🙂\n\nUitzondering: GIF-zoeken stuurt je zoekopdracht naar Giphy."
+            "value": "Gebruiksaantallen, instellingen en je uitsluitingslijst worden lokaal opgeslagen. %@ stuurt geen telemetrie of gebruiksgegevens naar onze server — we hebben niet eens een server 🙂\n\nUitzondering: GIF-zoeken stuurt je zoekopdracht naar KLIPY."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Liczniki użycia, ustawienia i twoja lista wykluczeń są przechowywane lokalnie. %@ nie wysyła żadnej telemetrii ani danych o użyciu na nasz serwer — nawet nie mamy serwera 🙂\n\nWyjątek: wyszukiwanie GIF-ów wysyła twoje zapytanie do Giphy."
+            "value": "Liczniki użycia, ustawienia i twoja lista wykluczeń są przechowywane lokalnie. %@ nie wysyła żadnej telemetrii ani danych o użyciu na nasz serwer — nawet nie mamy serwera 🙂\n\nWyjątek: wyszukiwanie GIF-ów wysyła twoje zapytanie do KLIPY."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Contagens de uso, configurações e sua lista de exclusões ficam armazenadas localmente. %@ não envia telemetria nem dados de uso ao nosso servidor — nem temos um servidor 🙂\n\nExceção: a busca de GIF envia sua consulta ao Giphy."
+            "value": "Contagens de uso, configurações e sua lista de exclusões ficam armazenadas localmente. %@ não envia telemetria nem dados de uso ao nosso servidor — nem temos um servidor 🙂\n\nExceção: a busca de GIF envia sua consulta ao KLIPY."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Счётчики использования, настройки и ваш список исключений хранятся локально. %@ не отправляет никакой телеметрии или данных об использовании на наш сервер — у нас даже нет сервера 🙂\n\nИсключение: поиск GIF отправляет ваш запрос в Giphy."
+            "value": "Счётчики использования, настройки и ваш список исключений хранятся локально. %@ не отправляет никакой телеметрии или данных об использовании на наш сервер — у нас даже нет сервера 🙂\n\nИсключение: поиск GIF отправляет ваш запрос в KLIPY."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用次数、设置和你的排除列表都存储在本地。%@ 不会向我们的服务器发送任何遥测或使用数据——我们甚至没有服务器 🙂\n\n例外：GIF 搜索会将你的查询发送给 Giphy。"
+            "value": "使用次数、设置和你的排除列表都存储在本地。%@ 不会向我们的服务器发送任何遥测或使用数据——我们甚至没有服务器 🙂\n\n例外：GIF 搜索会将你的查询发送给 KLIPY。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用次數、設定和你的排除清單都儲存在本機。%@ 不會向我們的伺服器傳送任何遙測或使用資料——我們甚至沒有伺服器 🙂\n\n例外：GIF 搜尋會將你的查詢傳送給 Giphy。"
+            "value": "使用次數、設定和你的排除清單都儲存在本機。%@ 不會向我們的伺服器傳送任何遙測或使用資料——我們甚至沒有伺服器 🙂\n\n例外：GIF 搜尋會將你的查詢傳送給 KLIPY。"
           }
         }
       }
@@ -24681,114 +24681,114 @@
         }
       }
     },
-    "Find a GIF on Giphy and drop it into any message.": {
+    "Find a GIF on KLIPY and drop it into any message.": {
       "localizations": {
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Find a GIF on Giphy and drop it into any message."
+            "value": "Find a GIF on KLIPY and drop it into any message."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Finde ein GIF auf Giphy und füge es in jede Nachricht ein."
+            "value": "Finde ein GIF auf KLIPY und füge es in jede Nachricht ein."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encuentra un GIF en Giphy y agrégalo a cualquier mensaje."
+            "value": "Encuentra un GIF en KLIPY y agrégalo a cualquier mensaje."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encuentra un GIF en Giphy y agrégalo a cualquier mensaje."
+            "value": "Encuentra un GIF en KLIPY y agrégalo a cualquier mensaje."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trouve un GIF sur Giphy et glisse-le dans n’importe quel message."
+            "value": "Trouve un GIF sur KLIPY et glisse-le dans n’importe quel message."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trova una GIF su Giphy e inseriscila in qualsiasi messaggio."
+            "value": "Trova una GIF su KLIPY e inseriscila in qualsiasi messaggio."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Encontre um GIF no Giphy e adicione a qualquer mensagem."
+            "value": "Encontre um GIF no KLIPY e adicione a qualquer mensagem."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "GiphyでGIFを見つけて、どんなメッセージにも貼り付け。"
+            "value": "KLIPYでGIFを見つけて、どんなメッセージにも貼り付け。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在 Giphy 上找 GIF，插入任何消息。"
+            "value": "在 KLIPY 上找 GIF，插入任何消息。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "在 Giphy 上找 GIF，插入任何訊息。"
+            "value": "在 KLIPY 上找 GIF，插入任何訊息。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy에서 GIF를 찾아 어떤 메시지에든 넣으세요."
+            "value": "KLIPY에서 GIF를 찾아 어떤 메시지에든 넣으세요."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy पर GIF खोजें और किसी भी संदेश में डालें।"
+            "value": "KLIPY पर GIF खोजें और किसी भी संदेश में डालें।"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Найдите GIF в Giphy и вставьте в любое сообщение."
+            "value": "Найдите GIF в KLIPY и вставьте в любое сообщение."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Znajdź GIF w Giphy i wstaw go do dowolnej wiadomości."
+            "value": "Znajdź GIF w KLIPY i wstaw go do dowolnej wiadomości."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vind een GIF op Giphy en zet ’m in elk bericht."
+            "value": "Vind een GIF op KLIPY en zet ’m in elk bericht."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ابحث عن صورة GIF على Giphy وأضِفها إلى أي رسالة."
+            "value": "ابحث عن صورة GIF على KLIPY وأضِفها إلى أي رسالة."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "یک GIF در Giphy پیدا کن و در هر پیامی بگذار."
+            "value": "یک GIF در KLIPY پیدا کن و در هر پیامی بگذار."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "מצא GIF ב-Giphy ושלב אותו בכל הודעה."
+            "value": "מצא GIF ב-KLIPY ושלב אותו בכל הודעה."
           }
         }
       }
@@ -25017,114 +25017,114 @@
         }
       }
     },
-    "GIFs from Giphy.": {
+    "GIFs from KLIPY.": {
       "localizations": {
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs from Giphy."
+            "value": "GIFs from KLIPY."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs von Giphy."
+            "value": "GIFs von KLIPY."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs de Giphy."
+            "value": "GIFs de KLIPY."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs de Giphy."
+            "value": "GIFs de KLIPY."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF de Giphy."
+            "value": "GIF de KLIPY."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF da Giphy."
+            "value": "GIF da KLIPY."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs do Giphy."
+            "value": "GIFs do KLIPY."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "GiphyのGIF。"
+            "value": "KLIPYのGIF。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "来自 Giphy 的 GIF。"
+            "value": "来自 KLIPY 的 GIF。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "來自 Giphy 的 GIF。"
+            "value": "來自 KLIPY 的 GIF。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy의 GIF."
+            "value": "KLIPY의 GIF."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Giphy से GIF।"
+            "value": "KLIPY से GIF।"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF из Giphy."
+            "value": "GIF из KLIPY."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF-y z Giphy."
+            "value": "GIF-y z KLIPY."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs van Giphy."
+            "value": "GIFs van KLIPY."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "صور GIF من Giphy."
+            "value": "صور GIF من KLIPY."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF از Giphy."
+            "value": "GIF از KLIPY."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF מ-Giphy."
+            "value": "GIF מ-KLIPY."
           }
         }
       }

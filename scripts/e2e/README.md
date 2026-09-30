@@ -75,7 +75,7 @@ never a false pass).
 
 - **Arc installed.**
 - **The dev toolchain + a working Debug build** — `xcodebuild`/`swiftc`, and the
-  gitignored bits (Giphy key, per CLAUDE.md) in place so the build succeeds.
+  gitignored bits (KLIPY key, per CLAUDE.md) in place so the build succeeds.
 - **Accessibility + Input Monitoring granted to `Mojito Dev.app`.** Grants persist
   across rebuilds because the "Mojito Dev" signing identity is stable.
 - **Accessibility for the driving terminal** — `cgtype` posts HID CGEvents, which

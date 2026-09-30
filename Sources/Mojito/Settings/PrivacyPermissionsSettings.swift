@@ -94,7 +94,7 @@ struct PrivacyDetailsRows: View {
         privacyRow(
             icon: "eye.slash",
             title: "You are anonymous",
-            detail: "Statistics and GIF searches sent to Giphy are never linked to you, and no personally-identifiable data is stored or sent anywhere."
+            detail: "Statistics and GIF searches sent to KLIPY are never linked to you, and no personally-identifiable data is stored or sent anywhere."
         )
         privacyRow(
             icon: "dollarsign.circle",
