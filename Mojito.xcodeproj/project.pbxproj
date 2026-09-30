@@ -76,6 +76,7 @@
 		6B48E883C3B324C8ABB16C93 /* AmbientEmoticonTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE7D78A4736AA53650D60DC /* AmbientEmoticonTable.swift */; };
 		6CFD48A60F308CA1FCBF059A /* TelemetryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CC88D13B457E17EBC5B68C5 /* TelemetryStore.swift */; };
 		6F9314FB48040BE582D87716 /* BlueScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD72EE1D10D399387F1DD1C8 /* BlueScreen.swift */; };
+		73AB985F2D639C2AF6343743 /* CaretLocatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AF871C78C453CCF7F39733D /* CaretLocatorTests.swift */; };
 		73BCEA1FC4A0115090ACB735 /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96837E12D46B10FC4D77897A /* ShortcutRecorder.swift */; };
 		74CED6225633C087A96D7E9C /* DebugRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2928BC07BE26CF9B15F23D70 /* DebugRecorder.swift */; };
 		75008F5E9E8750E55512283C /* FzyScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */; };
@@ -235,6 +236,7 @@
 		31F82574CC8A6D051CF87D9B /* WordleSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordleSounds.swift; sourceTree = "<group>"; };
 		36BF5C449E03B6F883693B87 /* EmojiRain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiRain.swift; sourceTree = "<group>"; };
 		392847FD44ED870B7154ED09 /* s03.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s03.bin; sourceTree = "<group>"; };
+		3AF871C78C453CCF7F39733D /* CaretLocatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaretLocatorTests.swift; sourceTree = "<group>"; };
 		42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcherTests.swift; sourceTree = "<group>"; };
 		4512D76E20BD99269775200B /* OnboardingRoot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingRoot.swift; sourceTree = "<group>"; };
 		463478D4F770642DDCBA5C8F /* Snowfall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Snowfall.swift; sourceTree = "<group>"; };
@@ -401,6 +403,7 @@
 				71409240C4105D980C71E264 /* AliasTests.swift */,
 				F36FC6BE9A109EAEE6A18CE1 /* AmbientEmoticonTableTests.swift */,
 				C4D63BC4F9673FBBC43A3699 /* BrowserURLCacheTests.swift */,
+				3AF871C78C453CCF7F39733D /* CaretLocatorTests.swift */,
 				6C69999E4AC7F8B8C054B395 /* DebugReportTests.swift */,
 				B3042E363CC429F15721773F /* EasterEggOrderingTests.swift */,
 				A1B842CBBD6C7466F9BA2786 /* EmojiDatabaseTests.swift */,
@@ -1069,6 +1072,7 @@
 				8D768748EE3F9F440F3F94EA /* AliasTests.swift in Sources */,
 				EFCA5419E2CE5D16F2DE7DB3 /* AmbientEmoticonTableTests.swift in Sources */,
 				64D188B1FE9F71925A3FD279 /* BrowserURLCacheTests.swift in Sources */,
+				73AB985F2D639C2AF6343743 /* CaretLocatorTests.swift in Sources */,
 				B878C3CC891907E89DE33158 /* DebugReportTests.swift in Sources */,
 				B33ABD1825CC5908D3DE7030 /* EasterEggOrderingTests.swift in Sources */,
 				DD501615C4A6623E5BA03369 /* EmojiDatabaseTests.swift in Sources */,

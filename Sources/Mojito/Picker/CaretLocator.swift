@@ -71,26 +71,66 @@ enum CaretLocator {
         var range = CFRange()
         AXValueGetValue((rangeRef as! AXValue), .cfRange, &range)
 
-        for length in [max(range.length, 1), 0] {
-            var queryRange = CFRange(location: range.location, length: length)
-            guard let queryValue = AXValueCreate(.cfRange, &queryRange) else { continue }
+        let rect = resolveCaret(
+            selection: range,
+            bounds: { boundsForRange($0, in: element) },
+            character: { stringForRange(CFRange(location: $0, length: 1), in: element) }
+        )
+        return rect.map(convertFromAXScreen)
+    }
 
-            var boundsRef: AnyObject?
-            let status = AXUIElementCopyParameterizedAttributeValue(
-                element,
-                kAXBoundsForRangeParameterizedAttribute as CFString,
-                queryValue,
-                &boundsRef
-            )
-            guard status == .success, let boundsRef else { continue }
-
-            var rect = CGRect.zero
-            AXValueGetValue((boundsRef as! AXValue), .cgRect, &rect)
-            guard rect.width >= 0, rect.height > 0 else { continue }
-
-            return convertFromAXScreen(rect)
+    /// Picks the caret rect (AX coordinates) from an app's range-bounds
+    /// answers. The next glyph `(loc, 1)` is the reliable probe, but it fails
+    /// at the end of the text — exactly where people type — and NSTextView
+    /// answers the zero-length fallback `(loc, 0)` one line too high. So the
+    /// preceding glyph's trailing edge comes first, unless it's a line break
+    /// (whose rect sits on the line above the caret).
+    static func resolveCaret(
+        selection: CFRange,
+        bounds: (CFRange) -> CGRect?,
+        character: (Int) -> String?
+    ) -> CGRect? {
+        if let next = bounds(CFRange(location: selection.location, length: max(selection.length, 1))) {
+            return next
         }
-        return nil
+        if selection.location > 0,
+           let previous = character(selection.location - 1),
+           previous.rangeOfCharacter(from: .newlines) == nil,
+           let glyph = bounds(CFRange(location: selection.location - 1, length: 1)) {
+            return CGRect(x: glyph.maxX, y: glyph.minY, width: 0, height: glyph.height)
+        }
+        return bounds(CFRange(location: selection.location, length: 0))
+    }
+
+    private static func boundsForRange(_ range: CFRange, in element: AXUIElement) -> CGRect? {
+        var queryRange = range
+        guard let queryValue = AXValueCreate(.cfRange, &queryRange) else { return nil }
+        var boundsRef: AnyObject?
+        let status = AXUIElementCopyParameterizedAttributeValue(
+            element,
+            kAXBoundsForRangeParameterizedAttribute as CFString,
+            queryValue,
+            &boundsRef
+        )
+        guard status == .success, let boundsRef else { return nil }
+        var rect = CGRect.zero
+        AXValueGetValue((boundsRef as! AXValue), .cgRect, &rect)
+        guard rect.width >= 0, rect.height > 0 else { return nil }
+        return rect
+    }
+
+    private static func stringForRange(_ range: CFRange, in element: AXUIElement) -> String? {
+        var queryRange = range
+        guard let queryValue = AXValueCreate(.cfRange, &queryRange) else { return nil }
+        var stringRef: AnyObject?
+        let status = AXUIElementCopyParameterizedAttributeValue(
+            element,
+            kAXStringForRangeParameterizedAttribute as CFString,
+            queryValue,
+            &stringRef
+        )
+        guard status == .success else { return nil }
+        return stringRef as? String
     }
 
     private static func elementFrame(of element: AXUIElement) -> CGRect? {
