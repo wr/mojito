@@ -38,21 +38,6 @@ struct KeyHintLabel: View {
     }
 }
 
-/// Footer insets. On Liquid Glass the keycaps are capsules, set in from the
-/// panel's 20pt corner so the first one sits close to concentric with it.
-enum FooterMetrics {
-    static var horizontalPadding: CGFloat {
-        if #available(macOS 26.0, *) { return 12 }
-        return 10
-    }
-    static var verticalPadding: CGFloat {
-        if #available(macOS 26.0, *) { return 8 }
-        return 5
-    }
-    /// Height added over the pre-Tahoe footer, for panels sized by hand.
-    static var extraHeight: CGFloat { (verticalPadding - 5) * 2 }
-}
-
 /// Keyboard-hint footer row shared by the floating pickers. Trailing content
 /// (e.g. attribution) sits after the spacer.
 struct HintsFooter<Trailing: View>: View {
@@ -74,8 +59,8 @@ struct HintsFooter<Trailing: View>: View {
         }
         .font(.system(size: 12))
         .foregroundStyle(.secondary)
-        .padding(.horizontal, FooterMetrics.horizontalPadding)
-        .padding(.vertical, FooterMetrics.verticalPadding)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
     }
 }
 

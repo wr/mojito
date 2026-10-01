@@ -327,23 +327,25 @@ struct EmojiTooltip: View {
 enum PickerLayout {
     static let width: CGFloat = 280
     static let rowHeight: CGFloat = 30
-    static var footerHeight: CGFloat { 26 + FooterMetrics.extraHeight }
+    static let footerHeight: CGFloat = 26
     static let maxVisibleRows: Int = 6
-    /// NSPopover's radius under Liquid Glass; NSMenu's before it.
+    /// The list reads as a menu, so it takes NSMenu's radius: 13pt on
+    /// Tahoe, 10pt before.
     static var cornerRadius: CGFloat {
-        if #available(macOS 26.0, *) { return PopoverGlass.cornerRadius }
+        if #available(macOS 26.0, *) { return 13 }
         return 10
     }
 
     /// Gap above the first row, and the selection's side inset. Equal on
     /// Liquid Glass, with the selection radius stepped down by the inset, so
-    /// the top highlight runs concentric with the panel corner.
+    /// the top highlight runs concentric with the panel corner, as NSMenu's
+    /// does (13pt corner, 5pt inset, 8pt selection).
     static var listTopGap: CGFloat {
-        if #available(macOS 26.0, *) { return 6 }
+        if #available(macOS 26.0, *) { return 5 }
         return 8
     }
     static var selectionInset: CGFloat {
-        if #available(macOS 26.0, *) { return 6 }
+        if #available(macOS 26.0, *) { return 5 }
         return 4
     }
     static var selectionRadius: CGFloat {

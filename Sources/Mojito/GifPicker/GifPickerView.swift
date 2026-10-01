@@ -201,5 +201,5 @@ enum GifPickerLayout {
     /// hints at scrollability without dominating screen real estate.
     static let contentHeight: CGFloat = 400
     /// Total panel height: contentHeight + divider + footer + chrome.
-    static var panelHeight: CGFloat { 440 + FooterMetrics.extraHeight }
+    static let panelHeight: CGFloat = 440
 }
