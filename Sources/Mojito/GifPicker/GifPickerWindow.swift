@@ -62,7 +62,7 @@ final class GifPickerWindow {
 
     private static func makeChrome(hosting: NSView) -> NSView {
         if #available(macOS 26.0, *) {
-            return PopoverGlass.make(contentView: hosting)
+            return PopoverGlass.make(contentView: hosting, cornerRadius: GifPickerLayout.cornerRadius)
         }
         let effect = NSVisualEffectView()
         effect.material = .menu

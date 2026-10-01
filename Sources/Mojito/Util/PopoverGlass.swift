@@ -17,12 +17,9 @@ import SwiftUI
 /// text, so it matters more here).
 @available(macOS 26.0, *)
 enum PopoverGlass {
-    /// NSPopover's own glass radius.
-    static let cornerRadius: CGFloat = 20
-
     private static let lightVeil = NSColor.white.withAlphaComponent(0.25).cgColor
 
-    static func make(contentView: NSView) -> NSGlassEffectView {
+    static func make(contentView: NSView, cornerRadius: CGFloat) -> NSGlassEffectView {
         let veil = NSView()
         veil.wantsLayer = true
         veil.translatesAutoresizingMaskIntoConstraints = false
@@ -57,12 +54,8 @@ enum PopoverGlass {
 }
 
 extension Color {
-    /// Selected / hovered cell fill in the pickers. On Liquid Glass it's a
-    /// translucent darken, as in the system picker, so it still reads over a
-    /// dark backdrop; the opaque unemphasized-selection grey turns into a
-    /// bright bar there.
-    static var pickerSelection: Color {
-        if #available(macOS 26.0, *) { return Color.primary.opacity(0.16) }
-        return Color(nsColor: .unemphasizedSelectedContentBackgroundColor)
-    }
+    /// Selected / hovered cell fill in the pickers: a translucent darken, as
+    /// in the system picker, so it still reads over a dark backdrop. The
+    /// opaque unemphasized-selection grey turns into a bright bar there.
+    static let pickerSelection = Color.primary.opacity(0.16)
 }

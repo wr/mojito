@@ -193,10 +193,7 @@ private struct GifThumb: View {
 
 enum GifPickerLayout {
     static let width: CGFloat = 360
-    static var cornerRadius: CGFloat {
-        if #available(macOS 26.0, *) { return PopoverGlass.cornerRadius }
-        return 12
-    }
+    static let cornerRadius: CGFloat = BrowserLayout.cornerRadius
     /// Sized to show ~3.5 rows of the 3-col grid — a partial 4th row
     /// hints at scrollability without dominating screen real estate.
     static let contentHeight: CGFloat = 400

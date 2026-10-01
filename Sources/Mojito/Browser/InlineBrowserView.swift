@@ -122,8 +122,7 @@ struct InlineBrowserView: View {
 
     /// The system picker's search header sits a step lighter than its grid.
     private var searchRowLift: Color {
-        guard #available(macOS 26.0, *), colorScheme == .light else { return .clear }
-        return Color.white.opacity(0.2)
+        colorScheme == .light ? Color.white.opacity(0.2) : .clear
     }
 
     /// Blinks from the moment the browser opens: keystrokes are routed to the
@@ -425,8 +424,6 @@ private struct SectionOffsetKey: PreferenceKey {
 enum BrowserLayout {
     static let width: CGFloat = 352
     static let height: CGFloat = 420
-    static var cornerRadius: CGFloat {
-        if #available(macOS 26.0, *) { return PopoverGlass.cornerRadius }
-        return 12
-    }
+    /// The system emoji picker's radius.
+    static let cornerRadius: CGFloat = 20
 }
