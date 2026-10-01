@@ -27,6 +27,7 @@ struct InlineBrowserView: View {
     @State private var tooltipSize: CGSize = .zero
     @State private var typedQuery = ""
     @FocusState private var searchFieldFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
     private static let scrollSpace = "browserScroll"
     private static let cellHeight: CGFloat = 40
@@ -116,10 +117,17 @@ struct InlineBrowserView: View {
         .overlay(Capsule().strokeBorder(Color.primary.opacity(0.1)))
         .padding(.horizontal, 10)
         .frame(height: Self.searchRowHeight)
+        .background(searchRowLift)
         .contentShape(Rectangle())
         .onTapGesture {
             if editableSearch { searchFieldFocused = true }
         }
+    }
+
+    /// The system picker's search header sits a step lighter than its grid.
+    private var searchRowLift: Color {
+        guard #available(macOS 26.0, *), colorScheme == .light else { return .clear }
+        return Color.white.opacity(0.2)
     }
 
     /// Blinks from the moment the browser opens: keystrokes are routed to the
@@ -304,7 +312,7 @@ private struct BrowserCell: View {
             .frame(height: cellHeight)
             .background(
                 RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .fill(highlighted ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
+                    .fill(highlighted ? Color.pickerSelection : Color.clear)
             )
             .contentShape(Rectangle())
             .accessibilityLabel(Text(verbatim: emoji.label))
@@ -370,7 +378,7 @@ private struct CategoryTabBar: View {
                         .frame(width: 30, height: 28)
                         .background(
                             Circle()
-                                .fill(isActive ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : .clear)
+                                .fill(isActive ? Color.pickerSelection : .clear)
                         )
                         .contentShape(Rectangle())
                 }

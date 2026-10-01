@@ -122,10 +122,10 @@ private struct PickerRow: View {
         .padding(.vertical, 3)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            // Neutral gray, not accent-tinted — matches the macOS emoji
+            // Neutral, not accent-tinted — matches the macOS emoji
             // picker's selected-row style.
             RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : .clear)
+                .fill(isSelected ? Color.pickerSelection : .clear)
                 .padding(.horizontal, 4)
         )
         .contentShape(Rectangle())
@@ -247,7 +247,7 @@ private struct CompactCell: View {
                 topTrailingRadius: isLast ? 20 : 10,
                 style: .continuous
             )
-            .fill(isSelected ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : Color.clear)
+            .fill(isSelected ? Color.pickerSelection : Color.clear)
             if isBrowse {
                 Image(systemName: "chevron.down")
                     .font(.system(size: 13, weight: .semibold))

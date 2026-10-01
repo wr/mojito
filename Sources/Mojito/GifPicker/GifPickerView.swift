@@ -186,7 +186,7 @@ private struct GifThumb: View {
     private var borderColor: Color {
         if isSelected { return .accentColor }
         // Match the emoji picker's row highlight so hover feels consistent.
-        if isHovered { return Color(nsColor: .unemphasizedSelectedContentBackgroundColor) }
+        if isHovered { return Color.pickerSelection }
         return .clear
     }
 }

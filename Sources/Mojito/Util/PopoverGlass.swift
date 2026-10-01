@@ -1,14 +1,15 @@
 import AppKit
+import SwiftUI
 
 /// The system emoji picker's Liquid Glass, for our borderless panels. A bare
 /// `NSGlassEffectView` renders the clearer regular glass, which reads as a
 /// flat grey slab over light content. NSPopover hosts the same view with the
 /// private `_variant` 20, which is frostier.
 ///
-/// Even variant 20 is muddier than the system picker, which brightens while
-/// it has focus. Our panel never takes focus but is always the thing being
-/// typed into, so a white veil stands in for that focused state: ~0.7
-/// matches the picker's ~250 over light content, where bare glass sits ~232.
+/// Even variant 20 sits darker than the system picker, which reads ~239
+/// over light content and ~115 over black, where bare glass gives ~232 and
+/// 71. A 0.25 white veil lands on both; a heavier one turns the panel into
+/// a light slab over dark backdrops and hides what's behind it.
 ///
 /// Dark mode keeps the regular glass, unveiled. Over a bright backdrop
 /// variant 20 turns light grey while the content stays dark-scheme, leaving
@@ -19,7 +20,7 @@ enum PopoverGlass {
     /// NSPopover's own glass radius.
     static let cornerRadius: CGFloat = 20
 
-    private static let lightVeil = NSColor.white.withAlphaComponent(0.7).cgColor
+    private static let lightVeil = NSColor.white.withAlphaComponent(0.25).cgColor
 
     static func make(contentView: NSView) -> NSGlassEffectView {
         let veil = NSView()
@@ -52,5 +53,16 @@ enum PopoverGlass {
         // this degrades to the regular glass.
         guard !isDark, glass.responds(to: NSSelectorFromString("set_variant:")) else { return }
         glass.setValue(20, forKey: "_variant")
+    }
+}
+
+extension Color {
+    /// Selected / hovered cell fill in the pickers. On Liquid Glass it's a
+    /// translucent darken, as in the system picker, so it still reads over a
+    /// dark backdrop; the opaque unemphasized-selection grey turns into a
+    /// bright bar there.
+    static var pickerSelection: Color {
+        if #available(macOS 26.0, *) { return Color.primary.opacity(0.16) }
+        return Color(nsColor: .unemphasizedSelectedContentBackgroundColor)
     }
 }
