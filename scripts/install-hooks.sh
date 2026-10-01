@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Install the pre-push hook by symlinking it into .git/hooks/.
-# Safe to re-run.
+# Install the pre-push hook by symlinking it into this checkout's hooks dir.
+# The repo config shares `core.hooksPath = .githooks` with `main` (the app's
+# hook convention), so this lands in ./.githooks/, which is gitignored here.
+# Run once per gh-pages checkout. Safe to re-run.
 
 set -euo pipefail
 

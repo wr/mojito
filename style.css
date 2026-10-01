@@ -2074,6 +2074,7 @@ code { unicode-bidi: isolate; }
    other guide pages are untouched. */
 .compare-table {
   --mojito-ring: color-mix(in srgb, var(--accent) 26%, transparent);
+
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;

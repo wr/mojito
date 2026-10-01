@@ -7,7 +7,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
-PORT=8765
+# A free port rather than a fixed one: if another project's server already
+# holds a fixed port, the readiness check below passes against *that* site
+# and the check silently tests the wrong pages.
+PORT="$(python3 -c 'import socket; s = socket.socket(); s.bind(("", 0)); print(s.getsockname()[1])')"
 # Floors set to pass the current site. Tighten as perf improves; the realistic
 # desktop perf is already 100, mobile is ~84 (picker.js is the heavy hitter).
 PERF_MIN=80
