@@ -24,16 +24,33 @@ struct KeyHintLabel: View {
                 .font(.system(size: 11, weight: .medium, design: .monospaced))
                 .padding(.horizontal, 5)
                 .padding(.vertical, 1)
-                .background(
-                    RoundedRectangle(cornerRadius: 3, style: .continuous)
-                        .fill(Color.primary.opacity(0.08))
-                )
+                .background(keycapShape.fill(Color.primary.opacity(0.08)))
             if let label = hint.label {
                 Text(label)
             }
         }
         .fixedSize()
     }
+
+    private var keycapShape: AnyShape {
+        if #available(macOS 26.0, *) { return AnyShape(Capsule()) }
+        return AnyShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+    }
+}
+
+/// Footer insets. On Liquid Glass the keycaps are capsules, set in from the
+/// panel's 20pt corner so the first one sits close to concentric with it.
+enum FooterMetrics {
+    static var horizontalPadding: CGFloat {
+        if #available(macOS 26.0, *) { return 12 }
+        return 10
+    }
+    static var verticalPadding: CGFloat {
+        if #available(macOS 26.0, *) { return 8 }
+        return 5
+    }
+    /// Height added over the pre-Tahoe footer, for panels sized by hand.
+    static var extraHeight: CGFloat { (verticalPadding - 5) * 2 }
 }
 
 /// Keyboard-hint footer row shared by the floating pickers. Trailing content
@@ -57,8 +74,8 @@ struct HintsFooter<Trailing: View>: View {
         }
         .font(.system(size: 12))
         .foregroundStyle(.secondary)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        .padding(.horizontal, FooterMetrics.horizontalPadding)
+        .padding(.vertical, FooterMetrics.verticalPadding)
     }
 }
 

@@ -287,7 +287,7 @@ final class PickerWindow {
         }
         let rowHeight: CGFloat = PickerLayout.rowHeight
         let footerHeight: CGFloat = PickerLayout.footerHeight
-        let verticalPadding: CGFloat = 6
+        let verticalPadding: CGFloat = PickerLayout.listTopGap - 2
         let count = max(min(viewModel.results.count, PickerLayout.maxVisibleRows), 1)
         let height = (CGFloat(count) * rowHeight) + footerHeight + verticalPadding
         return CGSize(width: PickerLayout.width, height: height)
@@ -327,12 +327,28 @@ struct EmojiTooltip: View {
 enum PickerLayout {
     static let width: CGFloat = 280
     static let rowHeight: CGFloat = 30
-    static let footerHeight: CGFloat = 26
+    static var footerHeight: CGFloat { 26 + FooterMetrics.extraHeight }
     static let maxVisibleRows: Int = 6
     /// NSPopover's radius under Liquid Glass; NSMenu's before it.
     static var cornerRadius: CGFloat {
         if #available(macOS 26.0, *) { return PopoverGlass.cornerRadius }
         return 10
+    }
+
+    /// Gap above the first row, and the selection's side inset. Equal on
+    /// Liquid Glass, with the selection radius stepped down by the inset, so
+    /// the top highlight runs concentric with the panel corner.
+    static var listTopGap: CGFloat {
+        if #available(macOS 26.0, *) { return 6 }
+        return 8
+    }
+    static var selectionInset: CGFloat {
+        if #available(macOS 26.0, *) { return 6 }
+        return 4
+    }
+    static var selectionRadius: CGFloat {
+        if #available(macOS 26.0, *) { return cornerRadius - selectionInset }
+        return 5
     }
 
     // Compact horizontal bar (bare-`:` favorites), styled like the macOS
