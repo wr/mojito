@@ -3776,7 +3776,7 @@
   }
 
   /* ---------- GIF panel (`:::` trigger) ----------
-     The real app pops a Giphy-backed search panel; the demo shows a canned
+     The real app pops a KLIPY-backed search panel; the demo shows a canned
      set of four looping GIFs for any query and "sends" the pick as an
      iMessage bubble. Thumbnails lazy-load on first open so the hero doesn't
      pay ~200KB of GIF up front. */
