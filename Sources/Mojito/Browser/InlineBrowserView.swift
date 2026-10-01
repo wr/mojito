@@ -34,7 +34,7 @@ struct InlineBrowserView: View {
     private static let rowSpacing: CGFloat = 3
     /// Tab bar height (icon row). The grid scrolls under it, so the scroll
     /// content is inset by this much at the bottom.
-    private static let tabBarHeight: CGFloat = 38
+    private static let tabBarHeight: CGFloat = 40
     private static let searchRowHeight: CGFloat = 48
     private let columns = Array(
         repeating: GridItem(.flexible(minimum: 36), spacing: 3),
@@ -182,7 +182,7 @@ struct InlineBrowserView: View {
                     .id(browser.isSearching)
                 }
             }
-            .modifier(BottomTabBar(bar: categoryBar))
+            .safeAreaInset(edge: .bottom, spacing: 0) { categoryBar }
             .coordinateSpace(name: Self.scrollSpace)
             // Active tab follows the scroll position.
             .onPreferenceChange(SectionOffsetKey.self) { offsets in
@@ -257,6 +257,8 @@ struct InlineBrowserView: View {
             tabBarHeight: Self.tabBarHeight,
             onCategory: onCategory
         )
+        .modifier(TabBarBackground())
+        .overlay(alignment: .top) { hairline }
     }
 }
 
@@ -360,7 +362,10 @@ private struct CategoryTabBar: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 8)
+        // With the bar 40pt tall, this centers the first tab 20pt in from the
+        // bottom-left corner, so its circle is concentric with the panel's
+        // 20pt corner radius.
+        .padding(.horizontal, 5)
         .frame(height: tabBarHeight)
         .onReceive(activeCategoryPublisher) { activeCategory = $0 }
     }
@@ -381,25 +386,16 @@ private struct SearchFieldChrome: ViewModifier {
     }
 }
 
-/// Pins the category tab bar under the grid as a hard-edged frosted strip,
-/// like the system picker's. On Tahoe the hard scroll-edge effect blurs the
-/// emoji passing under it, and a light grey wash gives the strip its tone:
-/// a step darker than the panel over light backdrops, lighter over dark ones.
-/// Nested glass lifted it far more than the system bar over dark backdrops.
-private struct BottomTabBar<Bar: View>: ViewModifier {
-    let bar: Bar
-
+/// The tab bar's strip. On Tahoe it's clear glass, which blurs the emoji
+/// passing under it into soft colour blobs as in the system picker. Regular
+/// glass, materials and the hard scroll-edge effect all hide them; a
+/// partly transparent layer leaves crisp ghost emoji instead.
+private struct TabBarBackground: ViewModifier {
     func body(content: Content) -> some View {
         if #available(macOS 26.0, *) {
-            content
-                .scrollEdgeEffectStyle(.hard, for: .bottom)
-                .safeAreaBar(edge: .bottom, spacing: 0) {
-                    bar.background(Color(white: 0.71).opacity(0.18))
-                }
+            content.glassEffect(.clear, in: .rect)
         } else {
-            content.safeAreaInset(edge: .bottom, spacing: 0) {
-                bar.background(.ultraThinMaterial)
-            }
+            content.background(.ultraThinMaterial)
         }
     }
 }
