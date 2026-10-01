@@ -5,6 +5,18 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.10.0
+
+## New
+- **GIF search now uses KLIPY:** `:::` searches KLIPY instead of GIPHY. What you type after `:::` now goes to KLIPY to fetch GIFs, and you can still turn GIF search off in Settings → General. ([#208](https://github.com/wr/mojito/pull/208))
+- **A native look on macOS 26 and later:** the picker, emoji browser, and GIF panel now match the system emoji picker and menus, with the same glass, corners, and selection highlight. ([#214](https://github.com/wr/mojito/pull/214))
+
+## Fixed
+- The emoji and GIF pickers no longer open one line too high, over the text you're typing, when you type at the end of a document in TextEdit and similar apps. ([#209](https://github.com/wr/mojito/pull/209))
+- Holding or tapping Backspace past an empty search no longer deletes text in the app underneath. The emoji browser and the sticky picker (Shift+Return) now stay open until you press Escape. ([#199](https://github.com/wr/mojito/pull/199), [#203](https://github.com/wr/mojito/pull/203))
+- The emoji browser's search caret appears as soon as the grid opens and sits right against what you've typed. ([#197](https://github.com/wr/mojito/pull/197), [#202](https://github.com/wr/mojito/pull/202))
+- On macOS 14 and 15, the picker, emoji browser, and GIF panel have properly rounded corners and shadows instead of a grey rectangle behind them. ([#196](https://github.com/wr/mojito/pull/196))
+
 ## v1.9.1
 
 ## Fixed
