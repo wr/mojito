@@ -34,6 +34,7 @@ struct InlineBrowserView: View {
     /// Tab bar height (icon row). The grid scrolls under it, so the scroll
     /// content is inset by this much at the bottom.
     private static let tabBarHeight: CGFloat = 38
+    private static let searchRowHeight: CGFloat = 48
     /// Soft fade zone above the icons where the glass ramps in from clear.
     private static let tabBarFade: CGFloat = 26
     private let columns = Array(
@@ -59,7 +60,7 @@ struct InlineBrowserView: View {
                     let margin: CGFloat = 6
                     let halfW = tooltipSize.width / 2
                     let x = min(max(cell.midX, halfW + margin), proxy.size.width - halfW - margin)
-                    let fitsAbove = cell.minY - margin - tooltipSize.height >= 40
+                    let fitsAbove = cell.minY - margin - tooltipSize.height >= Self.searchRowHeight + 4
                     let y = fitsAbove
                         ? cell.minY - margin - tooltipSize.height / 2
                         : cell.maxY + margin + tooltipSize.height / 2
@@ -108,8 +109,13 @@ struct InlineBrowserView: View {
             Spacer(minLength: 0)
         }
         .font(.system(size: 14))
-        .padding(.horizontal, 12)
-        .frame(height: 36)
+        .padding(.horizontal, 10)
+        .frame(height: 30)
+        // Capsule field, as in the system emoji picker's search row.
+        .background(Capsule().fill(Color.primary.opacity(0.05)))
+        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.1)))
+        .padding(.horizontal, 10)
+        .frame(height: Self.searchRowHeight)
         .contentShape(Rectangle())
         .onTapGesture {
             if editableSearch { searchFieldFocused = true }
@@ -361,9 +367,9 @@ private struct CategoryTabBar: View {
                     Image(systemName: category.tabSymbol)
                         .font(.system(size: 13))
                         .foregroundStyle(isActive ? Color.primary : Color.secondary)
-                        .frame(width: 30, height: 26)
+                        .frame(width: 30, height: 28)
                         .background(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            Circle()
                                 .fill(isActive ? Color(nsColor: .unemphasizedSelectedContentBackgroundColor) : .clear)
                         )
                         .contentShape(Rectangle())
