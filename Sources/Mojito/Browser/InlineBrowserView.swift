@@ -112,9 +112,7 @@ struct InlineBrowserView: View {
         .font(.system(size: 14))
         .padding(.horizontal, 10)
         .frame(height: 30)
-        // Capsule field, as in the system emoji picker's search row.
-        .background(Capsule().fill(Color.primary.opacity(0.05)))
-        .overlay(Capsule().strokeBorder(Color.primary.opacity(0.1)))
+        .modifier(SearchFieldChrome())
         .padding(.horizontal, 10)
         .frame(height: Self.searchRowHeight)
         .background(searchRowLift)
@@ -390,6 +388,21 @@ private struct CategoryTabBar: View {
         .padding(.horizontal, 8)
         .frame(height: tabBarHeight)
         .onReceive(activeCategoryPublisher) { activeCategory = $0 }
+    }
+}
+
+/// Capsule search field, as in the system emoji picker. On Tahoe it's its
+/// own glass, so it reads lighter than the header over dark backdrops and a
+/// touch darker over light ones, like the system field.
+private struct SearchFieldChrome: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 26.0, *) {
+            content.glassEffect(.regular, in: .capsule)
+        } else {
+            content
+                .background(Capsule().fill(Color.primary.opacity(0.05)))
+                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.1)))
+        }
     }
 }
 
