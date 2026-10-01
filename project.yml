@@ -71,6 +71,10 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: Sources/Mojito
+        # Pre-KLIPY generated key file. A stale local copy would otherwise
+        # be scanned in and compile the old key into the binary.
+        excludes:
+          - GifPicker/EmbeddedGiphyKey.swift
       - path: Resources/Assets.xcassets
       # Xcode 26 Icon Composer `.icon` bundles. xcodegen 2.45+ recognises
       # the extension as `folder.iconcomposer.icon` so actool processes
