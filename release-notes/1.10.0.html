@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>Mojito 1.10.0</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+  font: -apple-system-body, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 16px 18px;
+  color: #1d1d1f;
+  background: transparent;
+}
+h1 { font-size: 17px; margin: 0 0 8px; }
+h2 { font-size: 15px; margin: 16px 0 6px; }
+h3 { font-size: 13px; margin: 12px 0 4px; }
+p { margin: 6px 0; }
+ul { margin: 6px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+a { color: #0a7aff; }
+@media (prefers-color-scheme: dark) {
+  body { color: #f5f5f7; }
+  code { background: rgba(255, 255, 255, 0.12); }
+  a { color: #4aa3ff; }
+}
+</style>
+</head>
+<body>
+<h2>New</h2>
+<ul>
+<li><strong>GIF search now uses KLIPY:</strong> <code>:::</code> searches KLIPY instead of GIPHY. What you type after <code>:::</code> now goes to KLIPY to fetch GIFs, and you can still turn GIF search off in Settings → General. (<a href="https://github.com/wr/mojito/pull/208">#208</a>)</li>
+<li><strong>A native look on macOS 26 and later:</strong> the picker, emoji browser, and GIF panel now match the system emoji picker and menus, with the same glass, corners, and selection highlight. (<a href="https://github.com/wr/mojito/pull/214">#214</a>)</li>
+</ul>
+<h2>Fixed</h2>
+<ul>
+<li>The emoji and GIF pickers no longer open one line too high, over the text you're typing, when you type at the end of a document in TextEdit and similar apps. (<a href="https://github.com/wr/mojito/pull/209">#209</a>)</li>
+<li>Holding or tapping Backspace past an empty search no longer deletes text in the app underneath. The emoji browser and the sticky picker (Shift+Return) now stay open until you press Escape. (<a href="https://github.com/wr/mojito/pull/199">#199</a>, <a href="https://github.com/wr/mojito/pull/203">#203</a>)</li>
+<li>The emoji browser's search caret appears as soon as the grid opens and sits right against what you've typed. (<a href="https://github.com/wr/mojito/pull/197">#197</a>, <a href="https://github.com/wr/mojito/pull/202">#202</a>)</li>
+<li>On macOS 14 and 15, the picker, emoji browser, and GIF panel have properly rounded corners and shadows instead of a grey rectangle behind them. (<a href="https://github.com/wr/mojito/pull/196">#196</a>)</li>
+</ul>
+</body>
+</html>
