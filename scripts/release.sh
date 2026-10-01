@@ -8,6 +8,7 @@
 #   APPLE_TEAM_ID           — your 10-char team ID
 #   APPLE_APP_SPECIFIC_PWD  — app-specific password from appleid.apple.com
 #   GITHUB_REPO             — e.g. wr/mojito
+#   KLIPY_API_KEY           — GIF search key baked into the build
 #
 # Optional:
 #   SPARKLE_PRIVATE_KEY_PATH — path to an exported EdDSA private key file. If
@@ -86,6 +87,22 @@ if [[ -z "$SU_PUBKEY" || "$SU_PUBKEY" == "<null>" ]]; then
     echo "       Put the PUBLIC key into project.yml under SUPublicEDKey," >&2
     echo "       run 'xcodegen generate', and store the PRIVATE key at" >&2
     echo "       \$SPARKLE_PRIVATE_KEY_PATH (chmod 600). Never commit it." >&2
+    exit 1
+fi
+
+# Refuse to release without a KLIPY API key — a keyless build ships GIF search
+# showing "API key required" for everyone. The build's pre-build phase
+# regenerates EmbeddedKlipyKey.swift from env/.env, so an existing keyed copy
+# on disk proves nothing: run the same generator now and inspect what it wrote.
+python3 "$REPO_ROOT/scripts/build_klipy_key.py"
+KLIPY_KEY_FILE="$REPO_ROOT/Sources/Mojito/GifPicker/EmbeddedKlipyKey.swift"
+if ! grep -q 'decode(\[0x' "$KLIPY_KEY_FILE"; then
+    echo "error: no KLIPY API key, so this build would ship with GIF search broken." >&2
+    echo "       Set KLIPY_API_KEY in your environment or in .env:" >&2
+    echo "         KLIPY_API_KEY=<your key>" >&2
+    if [[ -n "${GIPHY_API_KEY:-}" ]]; then
+        echo "       (GIPHY_API_KEY is set but unused — GIF search is KLIPY-only now.)" >&2
+    fi
     exit 1
 fi
 
