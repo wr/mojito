@@ -54,10 +54,12 @@ GitHub Pages serves whatever is on `gh-pages`. Push to deploy. There is no CI st
 
 ```bash
 brew bundle && npm install      # one-time: system + node deps
-./scripts/install-hooks.sh      # one-time: wire up the pre-push hook
+./scripts/install-hooks.sh      # once per checkout: wire up the pre-push hook
 ./scripts/check.sh              # run all checks manually
 ```
 
 Flags: `--skip-{images,lint,meta,links,lighthouse}`, `--no-external` (offline link check), `--ci` (image script reports deltas instead of staging). Individual checks under `scripts/checks/` are standalone.
+
+The repo config shares `core.hooksPath = .githooks` with `main`, so the hook lives in this checkout's gitignored `.githooks/`, not `.git/hooks/`. A checkout without that file pushes with no checks and no warning; if `git rev-parse --git-path hooks` has no `pre-push` in it, rerun the installer. Claude worktrees get an absolute `core.hooksPath` pointing at their source checkout's `.githooks/`, so run the installer from that checkout. Running it inside a worktree repoints the shared hook at the worktree's copy, which breaks once the worktree is removed.
 
 The hook **self-skips when the only file in the push is `appcast.xml`** so the `main`-branch release script's auto-push isn't gated. Emergency bypass: `git push --no-verify`.
