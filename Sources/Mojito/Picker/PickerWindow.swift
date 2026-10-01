@@ -47,8 +47,8 @@ final class PickerWindow {
         // app's Space when shown there.
         panel.collectionBehavior = [.fullScreenAuxiliary, .transient]
 
-        // Tahoe's NSGlassEffectView matches NSMenu / NSPopover's Liquid
-        // Glass; pre-26 falls back to NSVisualEffectView `.menu`.
+        // NSPopover's Liquid Glass on Tahoe+ (see PopoverGlass); pre-26
+        // falls back to NSVisualEffectView `.menu`.
         self.chrome = Self.makeChrome(hosting: hostingView)
         panel.contentView = chrome
 
@@ -135,7 +135,18 @@ final class PickerWindow {
         tooltipPanel?.orderOut(nil)
     }
 
-    /// Vertical list uses the menu corner radius; the compact pill is a
+    /// Follow the live system appearance. A borderless panel created once
+    /// and reused otherwise stays pinned to its launch-time appearance, so
+    /// the picker looked stuck in light mode after a dark-mode switch.
+    private func matchSystemAppearance() {
+        let appearance = NSApp.effectiveAppearance
+        panel.appearance = appearance
+        if #available(macOS 26.0, *), let glass = chrome as? NSGlassEffectView {
+            PopoverGlass.match(glass, to: appearance)
+        }
+    }
+
+    /// Vertical list uses the panel corner radius; the compact pill is a
     /// capsule (radius = half its height).
     private func setCornerRadius(_ radius: CGFloat) {
         if #available(macOS 26.0, *), let glass = chrome as? NSGlassEffectView {
@@ -151,11 +162,7 @@ final class PickerWindow {
 
     private static func makeChrome(hosting: NSHostingView<PickerView>) -> NSView {
         if #available(macOS 26.0, *) {
-            let glass = NSGlassEffectView()
-            glass.cornerRadius = PickerLayout.cornerRadius
-            glass.contentView = hosting
-            glass.translatesAutoresizingMaskIntoConstraints = false
-            return glass
+            return PopoverGlass.make(contentView: hosting)
         } else {
             let effect = NSVisualEffectView()
             effect.material = .menu
@@ -184,10 +191,7 @@ final class PickerWindow {
         // expanded session, snap back to caret-anchored on the next open.
         panel.isMovableByWindowBackground = false
         let anchor = caret ?? PanelPositioner.mouseAnchor()
-        // Follow the live system appearance. A borderless panel created once
-        // and reused otherwise stays pinned to its launch-time appearance, so
-        // the picker looked stuck in light mode after a dark-mode switch.
-        panel.appearance = NSApp.effectiveAppearance
+        matchSystemAppearance()
         let size = preferredSize()
         setCornerRadius(viewModel.compact ? size.height / 2 : PickerLayout.cornerRadius)
         let frame = positionedFrame(anchor: anchor, size: size)
@@ -208,7 +212,7 @@ final class PickerWindow {
     /// animation; otherwise it just appears at full size near the caret.
     func showExpanded(near caret: CGRect?) {
         hidePillTooltip()
-        panel.appearance = NSApp.effectiveAppearance
+        matchSystemAppearance()
         // Browser window can be dragged from any background area (search row,
         // tab bar, gaps between cells) — buttons and cells still receive their
         // own clicks via AppKit's hit-testing.
@@ -325,7 +329,11 @@ enum PickerLayout {
     static let rowHeight: CGFloat = 30
     static let footerHeight: CGFloat = 26
     static let maxVisibleRows: Int = 6
-    static let cornerRadius: CGFloat = 10
+    /// NSPopover's radius under Liquid Glass; NSMenu's before it.
+    static var cornerRadius: CGFloat {
+        if #available(macOS 26.0, *) { return PopoverGlass.cornerRadius }
+        return 10
+    }
 
     // Compact horizontal bar (bare-`:` favorites), styled like the macOS
     // predictive emoji strip: a capsule of cells, selected one filled.

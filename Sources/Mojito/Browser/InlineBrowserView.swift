@@ -416,5 +416,8 @@ private struct SectionOffsetKey: PreferenceKey {
 enum BrowserLayout {
     static let width: CGFloat = 352
     static let height: CGFloat = 420
-    static let cornerRadius: CGFloat = 12
+    static var cornerRadius: CGFloat {
+        if #available(macOS 26.0, *) { return PopoverGlass.cornerRadius }
+        return 12
+    }
 }

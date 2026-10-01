@@ -62,11 +62,7 @@ final class GifPickerWindow {
 
     private static func makeChrome(hosting: NSView) -> NSView {
         if #available(macOS 26.0, *) {
-            let glass = NSGlassEffectView()
-            glass.cornerRadius = GifPickerLayout.cornerRadius
-            glass.contentView = hosting
-            glass.translatesAutoresizingMaskIntoConstraints = false
-            return glass
+            return PopoverGlass.make(contentView: hosting)
         }
         let effect = NSVisualEffectView()
         effect.material = .menu
@@ -97,6 +93,12 @@ final class GifPickerWindow {
         let frame = PanelPositioner.frame(anchor: anchor, size: size, probe: .anchorOrigin, clampMinY: false)
 
         viewModel.reset()
+        // See PickerWindow.matchSystemAppearance: a reused borderless panel
+        // otherwise keeps its launch-time appearance.
+        panel.appearance = NSApp.effectiveAppearance
+        if #available(macOS 26.0, *), let glass = panel.contentView as? NSGlassEffectView {
+            PopoverGlass.match(glass, to: NSApp.effectiveAppearance)
+        }
         panel.setFrame(frame, display: true)
         panel.orderFrontRegardless()
         viewModel.isVisible = true

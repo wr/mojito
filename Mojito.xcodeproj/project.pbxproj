@@ -25,6 +25,7 @@
 		19F991C97D4BEC5232B710AF /* BrowserURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB7AB3DB0E63AF30880FE66 /* BrowserURL.swift */; };
 		1A80F47103BB59733D6292B7 /* QuickAccessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964D290D66BB33D1F21333A0 /* QuickAccessStore.swift */; };
 		1FAF192B04A61639E66B16C8 /* Trogdor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0953EA30C5D11ACF280D7A2 /* Trogdor.swift */; };
+		25D461059851FC9662033886 /* PopoverGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21319C4337BF563CBC3AA349 /* PopoverGlass.swift */; };
 		28A1C045D2F7BBEC55E4A00A /* GifPickerWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FA9BBA311F77BEBE0C6A4 /* GifPickerWindow.swift */; };
 		299FC7D456C30DC3CDEB205A /* TriggerConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED949C65ADD9439C1E247759 /* TriggerConfigStore.swift */; };
 		29B4C683D96EE275A114B5FD /* SingleInstanceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 137C5B7AB01C74DA68FE7B74 /* SingleInstanceCoordinator.swift */; };
@@ -223,6 +224,7 @@
 		1C7AACE4E2FA1FB07AB5083A /* XPLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPLogin.swift; sourceTree = "<group>"; };
 		2027256AFD59D65C41FAA2AD /* PermissionsCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsCoordinator.swift; sourceTree = "<group>"; };
 		212C94A63FBCB28A41CA1A1A /* SynthRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynthRenderer.swift; sourceTree = "<group>"; };
+		21319C4337BF563CBC3AA349 /* PopoverGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverGlass.swift; sourceTree = "<group>"; };
 		21B80C892257DEA88108EE93 /* TriggerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerConfig.swift; sourceTree = "<group>"; };
 		22B06D1C751C2161A7A99DA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2361376F2801DB575F27B480 /* DialupSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialupSound.swift; sourceTree = "<group>"; };
@@ -749,6 +751,7 @@
 				732EB5A5F830B83AD2A745AB /* ClickAwayMonitor.swift */,
 				74DB9192DF20F83CAD8A820C /* ImageBlob.swift */,
 				8C7C809FB011043F44297508 /* PanelPositioner.swift */,
+				21319C4337BF563CBC3AA349 /* PopoverGlass.swift */,
 				2C66984ECCB4DB6B1A018452 /* PrefsKey.swift */,
 				7046B2F9978D044A9746608B /* RoundedMask.swift */,
 				212C94A63FBCB28A41CA1A1A /* SynthRenderer.swift */,
@@ -1023,6 +1026,7 @@
 				304C8571D431917AC25596C3 /* PickerView.swift in Sources */,
 				31277ED14E13ADDE2816BB69 /* PickerViewModel.swift in Sources */,
 				BE6D39677A64B5D4AC31B03B /* PickerWindow.swift in Sources */,
+				25D461059851FC9662033886 /* PopoverGlass.swift in Sources */,
 				ABF54441D03140C8174E13A9 /* PrefsKey.swift in Sources */,
 				BA163217ADDEBAF751D5ABA2 /* PrideWave.swift in Sources */,
 				CEAF9DB89294B0652A8A16F7 /* PrivacyPermissionsSettings.swift in Sources */,

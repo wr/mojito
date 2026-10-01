@@ -5,7 +5,7 @@ struct PickerView: View {
 
     var body: some View {
         // Chrome lives on the panel (NSGlassEffectView / NSVisualEffectView)
-        // so we match NSMenu pixel-faithfully.
+        // so it matches the system popover / menu chrome.
         if viewModel.expanded, let browser = viewModel.browser {
             InlineBrowserView(
                 browser: browser,
