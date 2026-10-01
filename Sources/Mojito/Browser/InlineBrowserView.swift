@@ -36,8 +36,6 @@ struct InlineBrowserView: View {
     /// content is inset by this much at the bottom.
     private static let tabBarHeight: CGFloat = 38
     private static let searchRowHeight: CGFloat = 48
-    /// Soft fade zone above the icons where the glass ramps in from clear.
-    private static let tabBarFade: CGFloat = 26
     private let columns = Array(
         repeating: GridItem(.flexible(minimum: 36), spacing: 3),
         count: EmojiBrowserViewModel.columns
@@ -146,9 +144,9 @@ struct InlineBrowserView: View {
     /// One `LazyVGrid` for the whole library (sectioned) or the flat search
     /// results. A single lazy container recycles cells correctly — splitting it
     /// per section is what let one section's glyphs ghost over another's. The
-    /// tab bar is a bottom `safeAreaInset`: content scrolls *under* it (so emoji
-    /// blur through the glass) while `scrollTo` keeps keyboard-selected cells
-    /// above it instead of leaving them hidden behind it.
+    /// tab bar insets the bottom safe area: content scrolls *under* it (so emoji
+    /// blur through it) while `scrollTo` keeps keyboard-selected cells above it
+    /// instead of leaving them hidden behind it.
     private var grid: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -184,7 +182,7 @@ struct InlineBrowserView: View {
                     .id(browser.isSearching)
                 }
             }
-            .safeAreaInset(edge: .bottom, spacing: 0) { categoryBar }
+            .modifier(BottomTabBar(bar: categoryBar))
             .coordinateSpace(name: Self.scrollSpace)
             // Active tab follows the scroll position.
             .onPreferenceChange(SectionOffsetKey.self) { offsets in
@@ -251,37 +249,14 @@ struct InlineBrowserView: View {
     // MARK: Tab bar
 
     private var categoryBar: some View {
-        ZStack(alignment: .bottom) {
-            tabBarBackdrop
-            CategoryTabBar(
-                categories: browser.visibleCategories,
-                isSearching: browser.isSearching,
-                activeCategoryPublisher: browser.activeCategoryPublisher,
-                initialActiveCategory: browser.activeCategory,
-                tabBarHeight: Self.tabBarHeight,
-                onCategory: onCategory
-            )
-        }
-        .frame(height: Self.tabBarHeight + Self.tabBarFade)
-    }
-
-    /// Glass/material masked by a vertical gradient so it fades *in* toward the
-    /// bottom — no hard top edge. Emoji scrolling under it blur and dim away as
-    /// they approach the icons, matching the native picker's bottom bar.
-    private var tabBarBackdrop: some View {
-        Rectangle().fill(.clear)
-            .modifier(TabBarGlass())
-            .mask(
-                LinearGradient(
-                    stops: [
-                        .init(color: .clear, location: 0),
-                        .init(color: .black, location: 0.55),
-                        .init(color: .black, location: 1),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+        CategoryTabBar(
+            categories: browser.visibleCategories,
+            isSearching: browser.isSearching,
+            activeCategoryPublisher: browser.activeCategoryPublisher,
+            initialActiveCategory: browser.activeCategory,
+            tabBarHeight: Self.tabBarHeight,
+            onCategory: onCategory
+        )
     }
 }
 
@@ -406,14 +381,25 @@ private struct SearchFieldChrome: ViewModifier {
     }
 }
 
-/// Liquid-glass backdrop for the floating tab bar (Tahoe `glassEffect`),
-/// falling back to a translucent material pre-26 so emoji still show through.
-private struct TabBarGlass: ViewModifier {
+/// Pins the category tab bar under the grid as a hard-edged frosted strip,
+/// like the system picker's. On Tahoe the hard scroll-edge effect blurs the
+/// emoji passing under it, and a light grey wash gives the strip its tone:
+/// a step darker than the panel over light backdrops, lighter over dark ones.
+/// Nested glass lifted it far more than the system bar over dark backdrops.
+private struct BottomTabBar<Bar: View>: ViewModifier {
+    let bar: Bar
+
     func body(content: Content) -> some View {
         if #available(macOS 26.0, *) {
-            content.glassEffect(.regular, in: .rect)
+            content
+                .scrollEdgeEffectStyle(.hard, for: .bottom)
+                .safeAreaBar(edge: .bottom, spacing: 0) {
+                    bar.background(Color(white: 0.71).opacity(0.18))
+                }
         } else {
-            content.background(.ultraThinMaterial)
+            content.safeAreaInset(edge: .bottom, spacing: 0) {
+                bar.background(.ultraThinMaterial)
+            }
         }
     }
 }
