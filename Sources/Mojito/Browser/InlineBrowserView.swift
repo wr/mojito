@@ -172,7 +172,6 @@ struct InlineBrowserView: View {
                         }
                     }
                     .padding(.horizontal, 8)
-                    .padding(.top, 2)
                     .padding(.bottom, 8)
                     // Search and library both index cells from 0; give the two
                     // modes distinct grid identity so the library→search switch
@@ -181,6 +180,7 @@ struct InlineBrowserView: View {
                     .id(browser.isSearching)
                 }
             }
+            .contentMargins(.top, 2, for: .scrollContent)
             .safeAreaInset(edge: .bottom, spacing: 0) { categoryBar }
             .coordinateSpace(name: Self.scrollSpace)
             // Active tab follows the scroll position.
