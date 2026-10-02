@@ -275,3 +275,4 @@ Mojito-specific notes:
 - **Branches:** `wells/w-NN-short-slug` (lowercase `w-NN` + kebab slug — matches Linear's auto-generated `gitBranchName`).
 - **Commits / PR titles:** reference the uppercase ID (e.g. `W-42: fix caret position on Sonoma`) so Linear auto-links.
 - **Always open a PR**, even for solo work — don't push directly to `main`. One commit per logical change.
+- **GitHub issues → Linear:** Linear's native GitHub Issues Sync files each new issue in the Personal team; `.github/workflows/linear-project.yml` then moves it into the Mojito project (needs the `LINEAR_API_KEY` repo secret).

@@ -1,0 +1,62 @@
+name: Linear project
+
+# Linear's GitHub Issues Sync files each new issue in the Personal team but
+# can't choose a project, so this moves the synced ticket into Mojito.
+on:
+  issues:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  move:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+      ISSUE_URL: ${{ github.event.issue.html_url }}
+      PROJECT_ID: 08a62212-7546-4dee-b7c4-0ffed3fff097 # Linear project "Mojito"
+    steps:
+      - name: Move the synced Linear issue into the Mojito project
+        run: |
+          set -euo pipefail
+          if [ -z "$LINEAR_API_KEY" ]; then
+            echo "::warning::LINEAR_API_KEY is not set; skipping."
+            exit 0
+          fi
+
+          gql() {
+            local resp
+            resp=$(curl -sS --fail-with-body https://api.linear.app/graphql \
+              -H "Authorization: $LINEAR_API_KEY" -H "Content-Type: application/json" \
+              -d "$(jq -n --arg q "$1" --argjson v "$2" '{query: $q, variables: $v}')")
+            if jq -e '.errors' <<<"$resp" >/dev/null; then
+              echo "::error::Linear API: $(jq -c '.errors' <<<"$resp")" >&2
+              return 1
+            fi
+            echo "$resp"
+          }
+
+          # The sync usually lands within seconds of the issue opening.
+          issue=""
+          for _ in $(seq 1 24); do
+            issue=$(gql 'query($url: String!) { attachmentsForURL(url: $url) { nodes { issue { id identifier project { id } } } } }' \
+              "$(jq -n --arg url "$ISSUE_URL" '{url: $url}')" \
+              | jq -c '.data.attachmentsForURL.nodes[0].issue // empty')
+            [ -n "$issue" ] && break
+            sleep 5
+          done
+          if [ -z "$issue" ]; then
+            echo "::error::No synced Linear issue for $ISSUE_URL after 2 minutes."
+            exit 1
+          fi
+
+          identifier=$(jq -r '.identifier' <<<"$issue")
+          if [ -n "$(jq -r '.project.id // empty' <<<"$issue")" ]; then
+            echo "$identifier already has a project."
+            exit 0
+          fi
+          gql 'mutation($id: String!, $p: String!) { issueUpdate(id: $id, input: { projectId: $p }) { success } }' \
+            "$(jq -n --arg id "$(jq -r '.id' <<<"$issue")" --arg p "$PROJECT_ID" '{id: $id, p: $p}')" \
+            | jq -e '.data.issueUpdate.success' >/dev/null
+          echo "Moved $identifier into the Mojito project."
