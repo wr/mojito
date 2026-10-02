@@ -423,7 +423,10 @@ private struct SectionOffsetKey: PreferenceKey {
 
 enum BrowserLayout {
     static let width: CGFloat = 352
-    static let height: CGFloat = 420
+    static let height: CGFloat = {
+        if #available(macOS 26.0, *) { return 420 }
+        return 425
+    }()
     /// The system emoji picker's radius.
     static let cornerRadius: CGFloat = 20
 }
