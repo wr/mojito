@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Build & test
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - run: brew install xcodegen
+      # Ad-hoc signed: the runner has no "Mojito Dev" identity, and unit
+      # tests don't need the TCC grants that identity exists to keep.
+      - run: scripts/run-tests.sh CODE_SIGN_IDENTITY=- MOJITO_INSTALL_DEV_APP=NO
+
+  # Fails when a user-facing string is left untranslated.
+  localizations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/check_localizations.py
+
+  # Fails when the Swift telemetry client, the worker's ingest allow-list,
+  # and the published feature set drift apart.
+  telemetry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/check_telemetry.py
