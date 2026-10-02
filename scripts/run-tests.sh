@@ -1,7 +1,8 @@
 #!/bin/bash
 # Regenerate the Xcode project (xcodegen is fast + idempotent) so newly
 # added test files are picked up, then run the MojitoTests bundle.
-# Invoked by .githooks/pre-push; also runnable by hand.
+# Invoked by .githooks/pre-push and CI; also runnable by hand. Extra
+# arguments (build-setting overrides, -derivedDataPath, …) go to xcodebuild.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -18,4 +19,5 @@ xcodebuild test \
   -scheme Mojito \
   -configuration Debug \
   -destination 'platform=macOS' \
-  -quiet
+  -quiet \
+  "$@"
