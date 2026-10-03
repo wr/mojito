@@ -27,7 +27,7 @@
 
 ## What is it?
 
-Mojito is the fastest way to type emoji, symbols, and GIFs on your Mac, using your muscle memory from apps like Slack, Discord, and Linear. Use shortcodes like `:this:` for emoji, `::this::` for symbols, and `:::this:::` for GIF search... without ever taking your hands off the keyboard.
+Mojito is the fastest way to type emoji, symbols, and GIFs on your Mac, using your muscle memory from apps like Slack, Discord, and Linear. Use shortcodes like `:emoji:` for emoji, `::symbol::` for symbols, and `:::gif:::` for GIF search... without ever taking your hands off the keyboard.
 
 All shortcuts are customizable. You can also add custom aliases (like `:fart:` → 💨). Emoticons like :) become 🙂, and arrows like -> become →. Any app or website can be excluded.
 
