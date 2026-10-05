@@ -36,6 +36,7 @@ const CARDS = {
   'emoji-picker-not-working-mac':    { glyph: '🛠️', keys: ['fn', 'E'] },
   'best-emoji-app-for-mac':          { glyph: '🏆', chip: ':trophy:' },
   'how-to-send-gifs-on-mac':         { glyph: 'GIF', chip: ':::party' },
+  'tenor-gif-keyboard-mac':          { glyph: 'GIF', chip: ':::party' },
   'guides':                          { glyph: '🍹', small: '° — ⌘ 🎉', title: 'Typing emoji, symbols and GIFs on a Mac' },
 };
 

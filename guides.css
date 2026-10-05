@@ -334,6 +334,17 @@
 }
 .mdemo-foot kbd.is-pressed { background: rgba(0, 0, 0, 0.28); }
 
+/* A GIF pasted inline (Mail, Notes) rather than sent as a bubble. */
+.mdemo-gif-inline {
+  display: block;
+  width: 140px;
+  height: auto;
+  margin: 8px 0 4px;
+  border-radius: 8px;
+}
+.mdemo-gif-inline.is-new { animation: mdemo-send 0.32s ease-out; }
+.mdemo-mail[data-mode="gif"] .mdemo-body { min-height: 380px; }
+
 /* GIF panel: 2×2 thumbnails instead of rows. */
 .mdemo-pop.is-gif { width: 230px; padding: 8px; }
 .mdemo-gifq {
@@ -587,6 +598,15 @@
 @media (prefers-color-scheme: dark) {
   .kbmap-key.is-dead, .kbmap-legend .dead { color: #fb923c; }
 }
+
+/* Tables whose first column is words, not a glyph (timelines, status). */
+.code-table.text-first td:first-child {
+  width: auto;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: 500;
+}
+.code-table.text-first.nowrap-first td:first-child { white-space: nowrap; }
 
 /* Cheat-sheet tables: glyph, code(s), name, so the ten tables line up. */
 .code-table.sc-table { table-layout: fixed; }
