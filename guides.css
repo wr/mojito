@@ -599,6 +599,16 @@
   .kbmap-key.is-dead, .kbmap-legend .dead { color: #fb923c; }
 }
 
+/* Narrow tables (two apps, a few short columns) fit the phone screen
+   instead of scrolling sideways. */
+.table-scroll .code-table.fit,
+.table-scroll .compare-table.fit { min-width: 0; }
+@media (max-width: 620px) {
+  .compare-table.fit th,
+  .compare-table.fit td { padding: 9px 8px; font-size: 13.5px; }
+  .compare-table.fit tbody th { width: 26%; white-space: normal; font-size: 10px; }
+}
+
 /* Tables whose first column is words, not a glyph (timelines, status). */
 .code-table.text-first td:first-child {
   width: auto;
