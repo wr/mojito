@@ -76,7 +76,7 @@
       <tr><th scope="row">Stickers</th><td><span class="mark-yes">✓</span> <code>/sticker</code></td><td class="is-mojito"><span class="mark-no">—</span></td></tr>
       <tr><th scope="row">Emoticons, arrows</th><td><span class="mark-no">—</span></td><td class="is-mojito"><span class="mark-yes">✓</span> <code>:)</code> → 🙂, <code>-&gt;</code> → →</td></tr>
       <tr><th scope="row">Languages</th><td>English</td><td class="is-mojito">19 for the app, 14 for shortcodes</td></tr>
-      <tr><th scope="row">Usage data</th><td>None</td><td class="is-mojito">Optional, asked once, published</td></tr>
+      <tr><th scope="row">Usage data</th><td>None</td><td class="is-mojito">Anonymous, on by default after a notice, published</td></tr>
     </tbody>
   </table>
   </div>
@@ -97,7 +97,7 @@
   <ul>
     <li><strong>Older Macs.</strong> Comoji runs on macOS 13 Ventura; Mojito needs macOS 14 Sonoma.</li>
     <li><strong>Animated stickers.</strong> <code>/sticker</code> inserts animated emoji stickers (Google’s Noto set) at your cursor. Mojito has nothing like it.</li>
-    <li><strong>No usage data, ever.</strong> Comoji says it has no analytics, telemetry, or crash reporter. Mojito asks once whether to share anonymous usage stats and sends nothing unless you agree; Comoji doesn’t need to ask.</li>
+    <li><strong>No usage data, ever.</strong> Comoji says it has no analytics, telemetry, or crash reporter. Mojito’s anonymous usage stats are on by default: it shows a one-time notice before sending anything, and you can decline there or switch them off in Settings.</li>
     <li><strong>A checklist instead of source code.</strong> Comoji publishes every server it talks to and a <a href="https://www.comoji.io/blog/verify-comoji-is-local">step-by-step guide</a> to checking that yourself with <code>lsof</code>, <code>nettop</code>, or a firewall. If you’d rather test behavior than read code, that’s genuinely useful.</li>
     <li><strong>Stricter defaults for sensitive apps.</strong> Comoji stays out of password managers, terminals, and remote-desktop or VM clients out of the box. Mojito skips password fields everywhere and stays out of terminals, but you’d add password-manager and VM apps to its list yourself.</li>
   </ul>
@@ -137,7 +137,7 @@
       <tr><td>Update checks</td><td>Yes</td><td>Yes</td></tr>
       <tr><td>GIF search</td><td>GIPHY</td><td>KLIPY, with your country so results suit where you are</td></tr>
       <tr><td>Other downloads</td><td>Sticker artwork from Google, on first use</td><td>None</td></tr>
-      <tr><td>Usage stats</td><td>None</td><td>Only if you say yes: a daily anonymous count of features and popular emoji, never what you type, published at <a href="/stats">/stats</a></td></tr>
+      <tr><td>Usage stats</td><td>None</td><td>On by default after a one-time notice, and easy to switch off: a daily anonymous count of features and popular emoji, never what you type, published at <a href="/stats">/stats</a></td></tr>
       <tr><td>How you check</td><td>A published server list and a verification guide</td><td>The source code</td></tr>
     </tbody>
   </table>
@@ -182,7 +182,7 @@
   </div>
   <div class="faq-item">
     <h3>Which one sends less data?</h3>
-    <p>Comoji, slightly: it never sends usage data. Mojito sends none unless you agree when it asks, and what it would send is published. Both send your GIF search words to their GIF service, and neither sends what you type otherwise.</p>
+    <p>Comoji: it never sends usage data. Mojito’s anonymous stats are on by default after a one-time notice, everything they contain is published, and switching them off stops them. Both send your GIF search words to their GIF service, and neither sends what you type otherwise.</p>
   </div>
   <div class="faq-item">
     <h3>How do they compare with Rocket and Raycast?</h3>
