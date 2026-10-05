@@ -3,6 +3,8 @@
   "main": "src/index.js",
   "compatibility_date": "2025-01-01",
   "workers_dev": false,
+  // Workers Logs: keeps the per-download {ref, at, referer, country} line.
+  "observability": { "enabled": true },
   "routes": [
     { "pattern": "mojito.wells.ee/download*", "zone_name": "wells.ee" }
   ]
