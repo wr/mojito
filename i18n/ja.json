@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "毎日更新",
   "stats.lastUpdate": "最終更新 {date}",
   "stats.bignum.users": "1日の平均ユーザー数",
+  "stats.bignum.monthlyUsers": "月間ユーザー数",
   "stats.bignum.emoji": "絵文字",
   "stats.bignum.gif": "GIF",
   "stats.bignum.emoticon": "顔文字",

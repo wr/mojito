@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "रोज़ अपडेट होता है",
   "stats.lastUpdate": "अंतिम अपडेट {date}",
   "stats.bignum.users": "औसत दैनिक उपयोगकर्ता",
+  "stats.bignum.monthlyUsers": "मासिक उपयोगकर्ता",
   "stats.bignum.emoji": "इमोजी",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "इमोटिकॉन",

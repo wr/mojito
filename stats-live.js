@@ -70,9 +70,7 @@
   function applyLive(d) {
     setText("updated", t("stats.lastUpdate", "last update {date}").replace("{date}", fmtDate(d.generatedAt)));
 
-    num("bn-macs", d.avgDailyActive != null
-      ? d.avgDailyActive
-      : Math.round((d.macsSharingStats || 0) / ((d.window && d.window.days) || 30)));
+    renderUsers(d);
     num("bn-emoji", d.totals.emoji);
     num("bn-gif", d.totals.gif);
     num("bn-emoticon", d.totals.emoticon);
@@ -89,6 +87,25 @@
     renderDist("bars-lang", d.lang, function (v) { return t("stats.lang." + v, LANG[v] || v.toUpperCase()); });
     renderTones("tones", d.skinTone || []);
     renderFeatures("bars-features", d.features || []);
+  }
+
+  // Headline users tile. Exact monthly users once nearly every ping in the
+  // month carried the unique-install flags — releases before them don't send
+  // any, so a low-coverage month undercounts. Until then, the daily average.
+  // The label's data-i18n key is swapped too, so a language change keeps it.
+  var MAU_MIN_COVERAGE = 0.95;
+  function renderUsers(d) {
+    var m = d.installs && d.installs.monthlyActive;
+    var useMonthly = !!(m && m.count > 0 && m.coverage >= MAU_MIN_COVERAGE);
+    var key = useMonthly ? "stats.bignum.monthlyUsers" : "stats.bignum.users";
+    var label = byId("bn-users-label");
+    if (label) {
+      label.setAttribute("data-i18n", key);
+      label.textContent = t(key, useMonthly ? "Monthly users" : "Avg. daily users");
+    }
+    num("bn-macs", useMonthly ? m.count : d.avgDailyActive != null
+      ? d.avgDailyActive
+      : Math.round((d.macsSharingStats || 0) / ((d.window && d.window.days) || 30)));
   }
 
   // Shared ranked emoji list — drives both Top emoji and Top favorites.
@@ -192,11 +209,16 @@
       '%"></span></span><span class="bar-val">' + val + "</span></div>";
   }
 
+  // emojibase hexcodes drop the FE0F on single code points, so one without
+  // default emoji presentation (2764 ❤, 263A ☺, 2122 ™) would render as its
+  // monochrome text glyph. Re-add the variation selector for those.
+  var TEXT_DEFAULT = /^\P{Emoji_Presentation}$/u;
   function hexToEmoji(hex) {
     try {
-      return String.fromCodePoint.apply(null, hex.split("-").map(function (h) {
+      var s = String.fromCodePoint.apply(null, hex.split("-").map(function (h) {
         return parseInt(h, 16);
       }));
+      return TEXT_DEFAULT.test(s) ? s + "️" : s;
     } catch (e) { return "·"; }
   }
 

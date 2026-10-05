@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "Aktualizacja codziennie",
   "stats.lastUpdate": "ostatnia aktualizacja {date}",
   "stats.bignum.users": "Śr. dzienni użytkownicy",
+  "stats.bignum.monthlyUsers": "Miesięczni użytkownicy",
   "stats.bignum.emoji": "Emoji",
   "stats.bignum.gif": "GIF-y",
   "stats.bignum.emoticon": "Emotikony",

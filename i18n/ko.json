@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "매일 업데이트",
   "stats.lastUpdate": "마지막 업데이트 {date}",
   "stats.bignum.users": "일일 평균 사용자",
+  "stats.bignum.monthlyUsers": "월간 사용자",
   "stats.bignum.emoji": "이모지",
   "stats.bignum.gif": "GIF",
   "stats.bignum.emoticon": "이모티콘",

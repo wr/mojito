@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "מתעדכן מדי יום",
   "stats.lastUpdate": "עדכון אחרון {date}",
   "stats.bignum.users": "ממוצע משתמשים יומי",
+  "stats.bignum.monthlyUsers": "משתמשים בחודש",
   "stats.bignum.emoji": "אימוג'ים",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "סמיילים",
