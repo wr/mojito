@@ -21,7 +21,13 @@ final class TelemetryUploader {
     private let endpoint = URL(string: "https://stats.mojito.wells.ee/ingest")!
     private let schemaVersion = 1
 
-    static func utcDay(_ now: Date = Date()) -> Int { Int(now.timeIntervalSince1970 / 86_400) }
+    nonisolated static func utcDay(_ now: Date = Date()) -> Int { Int(now.timeIntervalSince1970 / 86_400) }
+
+    /// Several triggers (launch, hourly timer, wake, day rollover) can land
+    /// together — an overdue timer fires alongside the wake notification —
+    /// and each would pass the once-a-day gate before the first response
+    /// stamps it, double-counting the install.
+    private var inFlight = false
 
     // Debug builds never upload — keeps dev pings out of production stats.
     private static let uploadsEnabled: Bool = {
@@ -34,13 +40,17 @@ final class TelemetryUploader {
 
     func uploadIfDue() {
         let defaults = UserDefaults.standard
+        let today = Self.utcDay()
+        let lastUploadDay = defaults.integer(forKey: PrefsKey.telemetryLastUploadDay)
         guard Self.uploadsEnabled,
+              !inFlight,
               TelemetryStore.isEnabled,
               defaults.bool(forKey: PrefsKey.telemetryConsentSeen),
-              defaults.integer(forKey: PrefsKey.telemetryLastUploadDay) != Self.utcDay()
+              lastUploadDay != today
         else { return }
 
-        let payload = makePayload(pending: TelemetryStore.snapshotPending())
+        var payload = makePayload(pending: TelemetryStore.snapshotPending())
+        payload["usage"] = Self.usageFlags(lastUploadDay: lastUploadDay, today: today)
         guard let body = try? JSONSerialization.data(withJSONObject: payload) else { return }
 
         var request = URLRequest(url: endpoint)
@@ -49,17 +59,50 @@ final class TelemetryUploader {
         request.httpBody = body
         request.timeoutInterval = 10
 
+        inFlight = true
         let task = URLSession.shared.dataTask(with: request) { [log] _, response, error in
-            if let error { os_log("upload failed: %{public}@", log: log, type: .info, "\(error)"); return }
-            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return }
+            if let error { os_log("upload failed: %{public}@", log: log, type: .info, "\(error)") }
+            let ok = error == nil && (response as? HTTPURLResponse).map { (200...299).contains($0.statusCode) } == true
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
+                    let uploader = TelemetryUploader.shared
+                    uploader.inFlight = false
+                    guard ok else { return }
                     TelemetryStore.clearPending()
-                    UserDefaults.standard.set(Self.utcDay(), forKey: PrefsKey.telemetryLastUploadDay)
+                    // The day the flags were computed for, not "now" — a
+                    // response landing after UTC midnight must not suppress
+                    // the new day's ping.
+                    UserDefaults.standard.set(today, forKey: PrefsKey.telemetryLastUploadDay)
                 }
             }
         }
         task.resume()
+    }
+
+    // MARK: - Unique-install flags
+
+    /// Brave-style usage-ping flags: whether this is the install's first
+    /// report ever, and its first this UTC week (Monday start) / calendar
+    /// month. The server sums each into a per-day counter, so new installs,
+    /// WAU and MAU come out as exact counts with no identifier. A
+    /// `lastUploadDay` of 0 means the install has never reported.
+    nonisolated static func usageFlags(lastUploadDay: Int, today: Int) -> [String: Bool] {
+        let isNew = lastUploadDay <= 0
+        return [
+            "new": isNew,
+            "weekly": isNew || utcWeek(lastUploadDay) != utcWeek(today),
+            "monthly": isNew || utcMonth(lastUploadDay) != utcMonth(today),
+        ]
+    }
+
+    /// Day 0 (1970-01-01) was a Thursday; the +3 puts week boundaries on Mondays.
+    nonisolated static func utcWeek(_ day: Int) -> Int { (day + 3) / 7 }
+
+    nonisolated static func utcMonth(_ day: Int) -> Int {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        let c = cal.dateComponents([.year, .month], from: Date(timeIntervalSince1970: TimeInterval(day) * 86_400))
+        return c.year! * 12 + c.month!
     }
 
     // MARK: - Payload

@@ -36,6 +36,7 @@ curl -s -XPOST localhost:8787/ingest -H 'content-type: application/json' -d '{
   "v":1,"app":"1.2.1","os":"26","arch":"arm64","lang":"en","skinTone":"default",
   "features":{"gifSearch":true,"symbols":false},
   "totals":{"emoji":12,"gif":1},"eggs":1,
+  "usage":{"new":false,"weekly":true,"monthly":false},
   "emoji":{"1F600":5,"2764":3}
 }'
 curl -s localhost:8787/api/stats.json | jq

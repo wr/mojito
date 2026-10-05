@@ -25,6 +25,7 @@
 		19F991C97D4BEC5232B710AF /* BrowserURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FB7AB3DB0E63AF30880FE66 /* BrowserURL.swift */; };
 		1A80F47103BB59733D6292B7 /* QuickAccessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964D290D66BB33D1F21333A0 /* QuickAccessStore.swift */; };
 		1FAF192B04A61639E66B16C8 /* Trogdor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0953EA30C5D11ACF280D7A2 /* Trogdor.swift */; };
+		20024F5CE8551C80EBED5C12 /* TelemetryUsageFlagsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A02F340415DE388061081C /* TelemetryUsageFlagsTests.swift */; };
 		25D461059851FC9662033886 /* PopoverGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21319C4337BF563CBC3AA349 /* PopoverGlass.swift */; };
 		28A1C045D2F7BBEC55E4A00A /* GifPickerWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FA9BBA311F77BEBE0C6A4 /* GifPickerWindow.swift */; };
 		299FC7D456C30DC3CDEB205A /* TriggerConfigStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED949C65ADD9439C1E247759 /* TriggerConfigStore.swift */; };
@@ -367,6 +368,7 @@
 		DF80FD4039CF36F39120673D /* TriggerMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerMatcher.swift; sourceTree = "<group>"; };
 		E229DD4E9239183CD578F665 /* KonamiPayoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KonamiPayoff.swift; sourceTree = "<group>"; };
 		E25EC50F4D58E03E218947DF /* SymbolsDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymbolsDatabaseTests.swift; sourceTree = "<group>"; };
+		E4A02F340415DE388061081C /* TelemetryUsageFlagsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryUsageFlagsTests.swift; sourceTree = "<group>"; };
 		E5E4119DFCFBCC4A92FEEB1C /* v02.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v02.bin; sourceTree = "<group>"; };
 		E6F0EF28CC67A6AB9FFF203F /* DiscoveryNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryNotifier.swift; sourceTree = "<group>"; };
 		E7D1F9E45C5D2C8B6FB43111 /* TrainGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainGame.swift; sourceTree = "<group>"; };
@@ -427,6 +429,7 @@
 				9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */,
 				D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */,
 				E25EC50F4D58E03E218947DF /* SymbolsDatabaseTests.swift */,
+				E4A02F340415DE388061081C /* TelemetryUsageFlagsTests.swift */,
 				F335AAB3008F02F987CB8DC2 /* TriggerConfigStoreTests.swift */,
 				CC7FAA0B07F70AE965ACC79B /* TriggerMatcherTests.swift */,
 				B18B2F281B96164331FE772F /* TriggerStateMachineTests.swift */,
@@ -1102,6 +1105,7 @@
 				C025CD4AE30320C3FE69028A /* SeasonalGatesTests.swift in Sources */,
 				917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */,
 				91A5F2A800EA1FC0700394EA /* SymbolsDatabaseTests.swift in Sources */,
+				20024F5CE8551C80EBED5C12 /* TelemetryUsageFlagsTests.swift in Sources */,
 				9FE6DD159CABAE6FAC74E6BD /* TriggerConfigStoreTests.swift in Sources */,
 				C60E14A1170CE1823562E131 /* TriggerMatcherTests.swift in Sources */,
 				C86E0BA1D69D1A6B33068221 /* TriggerStateMachineTests.swift in Sources */,

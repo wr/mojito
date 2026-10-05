@@ -34,8 +34,11 @@ CREATE TABLE IF NOT EXISTS feature_daily (
 
 -- Insertion volume + daily-active pings. kind ∈
 -- emoji | symbol | gif | emoticon | quickAccess | active | quickAccessActive | eggs
+-- | new | weekly | monthly
 -- (quickAccess = pill picks; quickAccessActive = installs that used the pill,
--- one per ping — the Quick Access daily-active signal.)
+-- one per ping — the Quick Access daily-active signal. new / weekly / monthly
+-- tick on an install's first ping ever / this UTC week / this UTC month, so
+-- summing weekly over a week or monthly over a month is an exact WAU / MAU.)
 CREATE TABLE IF NOT EXISTS totals_daily (
   day   INTEGER NOT NULL,
   kind  TEXT    NOT NULL,
