@@ -217,15 +217,27 @@
       }
 
       if (mode === 'gif') {
-        // The pick is "sent": the GIF lands in the thread, compose clears.
         q.textContent = '';
-        if (thread && finalBubble) {
-          const b = finalBubble.cloneNode(true);
-          b.classList.add('is-new');
-          thread.appendChild(b);
+        if (isImessage) {
+          // The pick is "sent": the GIF lands in the thread, compose clears.
+          if (thread && finalBubble) {
+            const b = finalBubble.cloneNode(true);
+            b.classList.add('is-new');
+            thread.appendChild(b);
+          }
+          ln.textContent = '';
+          ln.appendChild(el('span', 'mdemo-placeholder', 'iMessage'));
+        } else {
+          // Anywhere else the GIF is pasted inline at the cursor.
+          const img = el('img', 'mdemo-gif-inline is-new');
+          img.alt = '';
+          img.src = (gifEls[0] && (gifEls[0].src || gifEls[0].dataset.src)) || '';
+          ln.insertBefore(img, post);
+          for (const ch of d.post || '') {
+            post.data += ch;
+            await step(jitter(55));
+          }
         }
-        ln.textContent = '';
-        ln.appendChild(el('span', 'mdemo-placeholder', 'iMessage'));
         await step(3200);
         return;
       }

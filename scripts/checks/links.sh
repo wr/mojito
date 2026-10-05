@@ -44,7 +44,9 @@ for _ in $(seq 1 30); do
 done
 
 # lychee doesn't crawl, so hand it every page: the homepage plus each guide
-# (<slug>/index.html, served as a clean directory URL).
+# (<slug>/index.html, served as a clean directory URL). Absolute links to our
+# own domain (canonical, og:url) are remapped to the local server, so a page
+# that isn't deployed yet is checked against this branch, not the live site.
 URLS=("http://localhost:$PORT/")
 for page in $(git ls-files '*/index.html' | grep -v '^node_modules/'); do
   URLS+=("http://localhost:$PORT/${page%index.html}")
@@ -54,6 +56,7 @@ gray "  lychee ${#URLS[@]} pages on http://localhost:$PORT/"
 if ! lychee \
     --no-progress \
     --cache --max-cache-age 1d \
+    --remap "^https://mojito\.wells\.ee/(.*)$ http://localhost:$PORT/\$1" \
     ${MODE_ARGS[@]+"${MODE_ARGS[@]}"} \
     "${URLS[@]}"; then
   red "link check failed"
