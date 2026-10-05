@@ -1452,7 +1452,7 @@ main.home { max-width: 1104px; }
   border: 0.5px solid var(--card-border);
   border-radius: 20px;
   box-shadow: var(--card-shadow);
-  text-align: left;
+  text-align: start;
 }
 .trigger-card p,
 .feature-card p {
@@ -1579,6 +1579,47 @@ main.home { max-width: 1104px; }
   font-weight: 600;
 }
 
+/* "Speaks 19 languages": home.js cycles the title and flag through every
+   locale's own translation; the real title sits in .visually-hidden. */
+.lang-cycle,
+.lang-flag {
+  display: inline-block;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.lang-cycle { white-space: nowrap; }
+.lang-cycle.is-out,
+.lang-flag.is-out { opacity: 0; transform: translateY(-4px); }
+
+/* "Works in every app": a loose, overlapping sprinkle of app icons that
+   fans out on hover. Icons are rendered from the apps at 2x (app-icons/). */
+.app-icons {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding-inline-start: 2px;
+}
+.app-icons img {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin-inline-end: -9px;
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.16));
+  transform: rotate(-6deg) translateY(2px);
+  transition: margin 0.25s ease, transform 0.25s ease;
+}
+.app-icons img:nth-child(even) { transform: rotate(5deg) translateY(-3px); }
+.app-icons img:nth-child(3n) { transform: rotate(-2deg) translateY(-1px); }
+.feature-apps:hover .app-icons img { margin-inline-end: -3px; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Privacy: headline left, checklist right. */
 .privacy-card {
   display: grid;
@@ -1632,7 +1673,7 @@ main.home { max-width: 1104px; }
 /* FAQ: questions only until opened. */
 .faq { max-width: 720px; margin: 0 auto; }
 .faq > h2 { margin-bottom: 28px; }
-.faq-row { border-top: 0.5px solid var(--card-border); text-align: left; }
+.faq-row { border-top: 0.5px solid var(--card-border); text-align: start; }
 .faq-row:last-child { border-bottom: 0.5px solid var(--card-border); }
 .faq-row summary {
   display: flex;
@@ -1706,6 +1747,8 @@ main.home { max-width: 1104px; }
   }
   .feature-icon { grid-row: span 2; }
   .feature-card h3 { margin: 2px 0 4px; }
+  .feature-card.feature-apps { display: block; }
+  .feature-apps h3 { margin-top: 14px; }
   .privacy-card { padding: 30px 22px; }
   .press-quote { margin-top: 72px; }
   .home-cta { margin-top: 72px; padding: 36px 22px; }
@@ -1723,7 +1766,10 @@ main.home { max-width: 1104px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mini-caret { animation: none; }
-  .faq-row summary::after { transition: none; }
+  .faq-row summary::after,
+  .lang-cycle,
+  .lang-flag,
+  .app-icons img { transition: none; }
 }
 
 /* footer — a single Tahoe-style frosted pill, lifted right off the

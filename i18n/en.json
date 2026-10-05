@@ -75,10 +75,10 @@
   "features.emoticons.p": "<code>:D</code> becomes 😃, <code>&lt;3</code> becomes ❤️, and <code>-&gt;</code> becomes →.",
   "features.languages.h": "Speaks 19 languages",
   "features.languages.p": "Shortcodes are localized too, so <code>:fuego</code> works in Spanish and <code>:chien</code> in French. <a href=\"https://github.com/wr/mojito#translations\">Corrections welcome</a>.",
-  "features.pause.h": "Steps aside on cue",
-  "features.pause.p": "Pause it for an hour or until tomorrow, or turn it off in any app or website.",
-  "features.updates.h": "Updates itself",
-  "features.updates.p": "New versions install quietly through Sparkle. To uninstall, quit it and drag it to the Trash.",
+  "features.native.h": "Looks exactly like macOS",
+  "features.native.p": "We sweat the details: Liquid Glass on Tahoe, the system menu shadow, and light or dark to match your Mac.",
+  "features.apps.h": "Works in every app",
+  "features.apps.p": "Messages, Mail, Notes, Safari, Chrome, and pretty much anywhere else you type.",
 
   "picker.aria.suggestions": "Emoji suggestions",
   "picker.aria.gifs": "GIF results",
@@ -109,7 +109,7 @@
   "privacy.c1": "Keystrokes are never logged or uploaded",
   "privacy.c2": "Password fields are ignored entirely",
   "privacy.c3": "GIF search sends only the words after <code>:::</code>",
-  "privacy.c4": "Anonymous daily stats, public on the <a href=\"/stats\">stats page</a> and easy to turn off",
+  "privacy.c4": "You can opt out of our <a href=\"/stats\">transparent stats</a>",
   "privacy.c5": "Open source, so you can check every line on <a href=\"https://github.com/wr/mojito\">GitHub</a>",
 
   "footer.aria.socials": "Social links",

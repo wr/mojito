@@ -41,8 +41,8 @@
 <link rel="alternate" hreflang="he" href="https://mojito.wells.ee/?lang=he">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="style.css?v=78">
-<script src="i18n.js?v=7"></script>
+<link rel="stylesheet" href="style.css?v=79">
+<script src="i18n.js?v=8"></script>
 </head>
 <body>
 
@@ -451,20 +451,29 @@ Changes not staged for commit:
       <h3 data-i18n="features.emoticons.h">Emoticons convert too</h3>
       <p data-i18n-html="features.emoticons.p"><code>:D</code> becomes 😃, <code>&lt;3</code> becomes ❤️, and <code>-&gt;</code> becomes →.</p>
     </li>
-    <li class="feature-card">
-      <span class="feature-icon" aria-hidden="true">🌍</span>
-      <h3 data-i18n="features.languages.h">Speaks 19 languages</h3>
+    <li class="feature-card feature-languages">
+      <span class="feature-icon" aria-hidden="true"><span class="lang-flag">🌍</span></span>
+      <h3><span class="visually-hidden" data-i18n="features.languages.h">Speaks 19 languages</span><span class="lang-cycle" aria-hidden="true">Speaks 19 languages</span></h3>
       <p data-i18n-html="features.languages.p">Shortcodes are localized too, so <code>:fuego</code> works in Spanish and <code>:chien</code> in French. <a href="https://github.com/wr/mojito#translations">Corrections welcome</a>.</p>
     </li>
     <li class="feature-card">
-      <span class="feature-icon" aria-hidden="true">🙈</span>
-      <h3 data-i18n="features.pause.h">Steps aside on cue</h3>
-      <p data-i18n="features.pause.p">Pause it for an hour or until tomorrow, or turn it off in any app or website.</p>
+      <span class="feature-icon" aria-hidden="true">🍎</span>
+      <h3 data-i18n="features.native.h">Looks exactly like macOS</h3>
+      <p data-i18n="features.native.p">We sweat the details: Liquid Glass on Tahoe, the system menu shadow, and light or dark to match your Mac.</p>
     </li>
-    <li class="feature-card">
-      <span class="feature-icon" aria-hidden="true">✨</span>
-      <h3 data-i18n="features.updates.h">Updates itself</h3>
-      <p data-i18n="features.updates.p">New versions install quietly through Sparkle. To uninstall, quit it and drag it to the Trash.</p>
+    <li class="feature-card feature-apps">
+      <div class="app-icons" aria-hidden="true">
+        <img src="app-icons/messages.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/mail.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/notes.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/safari.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/chrome.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/arc.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/firefox.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/reminders.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+      </div>
+      <h3 data-i18n="features.apps.h">Works in every app</h3>
+      <p data-i18n="features.apps.p">Messages, Mail, Notes, Safari, Chrome, and pretty much anywhere else you type.</p>
     </li>
   </ul>
 </section>
@@ -481,7 +490,7 @@ Changes not staged for commit:
       <li data-i18n="privacy.c1">Keystrokes are never logged or uploaded</li>
       <li data-i18n="privacy.c2">Password fields are ignored entirely</li>
       <li data-i18n-html="privacy.c3">GIF search sends only the words after <code>:::</code></li>
-      <li data-i18n-html="privacy.c4">Anonymous daily stats, public on the <a href="/stats">stats page</a> and easy to turn off</li>
+      <li data-i18n-html="privacy.c4">You can opt out of our <a href="/stats">transparent stats</a></li>
       <li data-i18n-html="privacy.c5">Open source, so you can check every line on <a href="https://github.com/wr/mojito">GitHub</a></li>
     </ul>
   </div>
@@ -572,6 +581,7 @@ Changes not staged for commit:
 </footer>
 
 <script src="picker.js?v=53" defer></script>
+<script src="home.js?v=1" defer></script>
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
