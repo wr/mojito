@@ -517,7 +517,7 @@ struct FeaturesStep: View {
                         takenOpens: takenOpens(excluding: .symbols),
                         defaultOpen: TriggerConfig.default.symbols.open,
                         sameAsEmoji: $triggers.symbolsFollowEmoji,
-                        defaultFollowsEmoji: true
+                        defaultFollowsEmoji: TriggerConfig.default.symbolsFollowEmoji
                     )
                 }
             }

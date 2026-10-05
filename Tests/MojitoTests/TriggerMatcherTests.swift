@@ -43,11 +43,11 @@ struct TriggerMatcherTests {
         #expect(m.close(for: .quickAccess) == nil)
     }
 
-    @Test func defaultSymbolsDisabledSoNotTerminal() {
-        // Symbols is disabled by default → `::` resolves to nothing terminal,
-        // but is still a viable prefix on the way to `:::`.
+    @Test func defaultDoubleColonIsSymbols() {
+        // Symbols default to their own scoped `::` trigger, which still
+        // extends on toward `:::` (gif).
         let m = TriggerMatcher(config: .default)
-        #expect(m.terminalMode(for: chars("::")) == nil)
+        #expect(m.terminalMode(for: chars("::")) == .symbols)
         #expect(m.canExtend(chars("::")) == true)   // `:::`
     }
 
@@ -154,7 +154,8 @@ struct TriggerMatcherTests {
         cfg.emoji = Trigger(mode: .emoji, open: ";", enabled: true)
         cfg.gif = Trigger(mode: .gif, open: ";;;", enabled: true)
         cfg.quickAccess = Trigger(mode: .quickAccess, open: ";?", enabled: true)
-        // symbols disabled by default; nothing starts with `:`.
+        cfg.symbols = Trigger(mode: .symbols, open: ";;", enabled: true)
+        // Nothing starts with `:`.
         let m = TriggerMatcher(config: cfg)
         #expect(m.colonStartsATrigger == false)
     }

@@ -37,12 +37,17 @@ struct TriggerConfigStoreTests {
          "quickAccess":{"mode":"quickAccess","open":":?","enabled":true}}
         """
         let decoded = try JSONDecoder().decode(TriggerConfig.self, from: Data(legacy.utf8))
-        #expect(decoded == .default)
+        // No `symbolsFollowEmoji` key → it keeps blending (see below); every
+        // other field matches the default.
+        var expected = TriggerConfig.default
+        expected.symbolsFollowEmoji = true
+        #expect(decoded == expected)
     }
 
     @Test func blobMissingSymbolsFollowEmojiDefaultsTrue() throws {
         // A blob written before `symbolsFollowEmoji` existed must decode with it
-        // defaulting true (and adding fields must never nuke the rest).
+        // true, as it behaved then, even though fresh installs now default to
+        // the scoped `::` trigger (and adding fields must never nuke the rest).
         let old = """
         {"emoji":{"mode":"emoji","open":":","enabled":true},
          "symbols":{"mode":"symbols","open":"::","enabled":true},
@@ -57,13 +62,19 @@ struct TriggerConfigStoreTests {
     }
 
     @Test func blobMissingEverythingDecodesToDefault() throws {
-        // An empty object falls back to defaults for every field.
+        // An empty object falls back to defaults for every field, except that a
+        // saved config without `symbolsFollowEmoji` keeps blending.
         let decoded = try JSONDecoder().decode(TriggerConfig.self, from: Data("{}".utf8))
-        #expect(decoded == .default)
+        var expected = TriggerConfig.default
+        expected.symbolsFollowEmoji = true
+        #expect(decoded == expected)
     }
 
-    @Test func symbolsFollowEmojiDefaultsTrue() {
-        #expect(TriggerConfig.default.symbolsFollowEmoji == true)
+    @Test func symbolsDefaultToScopedDoubleColon() {
+        // Fresh installs: `::` is the symbol trigger, not blended into `:`.
+        #expect(TriggerConfig.default.symbolsFollowEmoji == false)
+        #expect(TriggerConfig.default.symbols.open == "::")
+        #expect(TriggerConfig.default.active.contains { $0.mode == .symbols })
     }
 
     // MARK: save / load
@@ -102,17 +113,28 @@ struct TriggerConfigStoreTests {
     @Test func migrationOnEmptyDefaultsEnablesAllFeatures() {
         let suite = freshSuite()
         let config = TriggerConfigStore.load(defaults: suite)
-        // No legacy prefs set → every feature on; symbols blends into emoji
-        // search (follow=true), so its open mirrors the emoji open.
+        // No legacy prefs set → a fresh install: every feature on, symbols on
+        // their own scoped `::` trigger.
         #expect(config.emoji == Trigger(mode: .emoji, open: ":", enabled: true))
-        #expect(config.symbols.enabled == true)
-        #expect(config.symbolsFollowEmoji == true)
+        #expect(config.symbols == Trigger(mode: .symbols, open: "::", enabled: true))
+        #expect(config.symbolsFollowEmoji == false)
         #expect(config.gif == Trigger(mode: .gif, open: ":::", enabled: true))
         #expect(config.quickAccess == Trigger(mode: .quickAccess, open: ":?", enabled: true))
     }
 
     @Test func symbolsTriggerDefaultsOn() {
         #expect(TriggerConfig.default.symbols.enabled == true)
+    }
+
+    @Test func migrationKeepsLegacyBlendedSymbols() {
+        // An old install that turned symbols on before triggers were
+        // configurable (no requireDoubleColon key) blended them into `:`;
+        // migrating keeps that.
+        let legacy = freshSuite()
+        legacy.set(true, forKey: PrefsKey.symbolsEnabled)
+        let config = TriggerConfigStore.load(defaults: legacy)
+        #expect(config.symbols.enabled == true)
+        #expect(config.symbolsFollowEmoji == true)
     }
 
     @Test func migrationMapsSymbolsEnableOntoTrigger() {

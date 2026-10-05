@@ -39,9 +39,17 @@ enum TriggerConfigStore {
         //   enabled + requireDoubleColon → scoped (`::`, follow=false)
         //   enabled + !requireDoubleColon → blended (follow=true)
         //   !enabled → off
-        let symbolsEnabled = defaults.object(forKey: PrefsKey.symbolsEnabled) as? Bool ?? true
-        let requireDoubleColon = defaults.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool ?? false
-        let symbolsFollowEmoji = symbolsEnabled && !requireDoubleColon
+        // A fresh install has neither legacy key and gets the default: the
+        // scoped `::` trigger.
+        let legacyEnabled = defaults.object(forKey: PrefsKey.symbolsEnabled) as? Bool
+        let legacyDoubleColon = defaults.object(forKey: PrefsKey.symbolsRequireDoubleColon) as? Bool
+        let symbolsEnabled = legacyEnabled ?? true
+        let symbolsFollowEmoji: Bool
+        if legacyEnabled == nil && legacyDoubleColon == nil {
+            symbolsFollowEmoji = TriggerConfig.default.symbolsFollowEmoji
+        } else {
+            symbolsFollowEmoji = symbolsEnabled && !(legacyDoubleColon ?? false)
+        }
         let gifEnabled = defaults.object(forKey: PrefsKey.gifSearchEnabled) as? Bool ?? true
         let qaEnabled = defaults.object(forKey: PrefsKey.quickAccessEnabled) as? Bool ?? true
 
