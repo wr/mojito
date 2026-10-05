@@ -89,9 +89,14 @@ async function ingest(request, env) {
   // Daily-active ping (the active-user signal — one per install per day).
   stmts.push(totalStmt(env, day, "active", 1));
 
-  const usage = body.usage && typeof body.usage === "object" ? body.usage : {};
-  for (const kind of USAGE_KINDS) {
-    if (usage[kind] === true) stmts.push(totalStmt(env, day, kind, 1));
+  // Pings from releases that predate the flags still count as `active` but
+  // never set them; `usageReporting` (one per flag-carrying ping) lets the
+  // page tell how complete the unique counts are.
+  if (body.usage && typeof body.usage === "object") {
+    stmts.push(totalStmt(env, day, "usageReporting", 1));
+    for (const kind of USAGE_KINDS) {
+      if (body.usage[kind] === true) stmts.push(totalStmt(env, day, kind, 1));
+    }
   }
 
   // Marginal dimensions.
@@ -262,8 +267,12 @@ async function stats(env) {
            COALESCE(SUM(CASE WHEN kind = 'new' AND day >= ?1 THEN count END), 0) new30,
            COALESCE(SUM(CASE WHEN kind = 'weekly' AND day >= ?2 AND day < ?3 THEN count END), 0) wau,
            COALESCE(SUM(CASE WHEN kind = 'monthly' AND day >= ?4 AND day < ?5 THEN count END), 0) mau,
-           MIN(day) since
-         FROM totals_daily WHERE kind IN ('new', 'weekly', 'monthly')`
+           COALESCE(SUM(CASE WHEN kind = 'usageReporting' AND day >= ?2 AND day < ?3 THEN count END), 0) wkFlagged,
+           COALESCE(SUM(CASE WHEN kind = 'active' AND day >= ?2 AND day < ?3 THEN count END), 0) wkActive,
+           COALESCE(SUM(CASE WHEN kind = 'usageReporting' AND day >= ?4 AND day < ?5 THEN count END), 0) moFlagged,
+           COALESCE(SUM(CASE WHEN kind = 'active' AND day >= ?4 AND day < ?5 THEN count END), 0) moActive,
+           MIN(CASE WHEN kind = 'usageReporting' THEN day END) since
+         FROM totals_daily WHERE kind IN ('new', 'weekly', 'monthly', 'usageReporting', 'active')`
       ).bind(win, weekLo, weekHi, monthLo, monthHi).all(),
     ]);
 
@@ -309,9 +318,8 @@ async function stats(env) {
     avgQuickAccessActive,
     favoritesPinnedPct,
     // Exact unique-install counts from the usage flags — but only of installs
-    // on a release that sends them, so they undercount until adoption is
-    // near-total. `since` is the first day any flag arrived; a week or month
-    // starting before it is partial and shouldn't be shown.
+    // on a release that sends them. `coverage` is the share of that period's
+    // pings that carried the flags; the counts are trustworthy only near 1.
     installs: installsPayload(usage.results[0], weekLo, monthLo),
     totals: {
       emoji: totalsMap.emoji || 0,
@@ -341,9 +349,15 @@ function installsPayload(r, weekLo, monthLo) {
     since: r?.since != null ? iso(r.since) : null,
     reported: r?.reported || 0,
     newLast30Days: r?.new30 || 0,
-    weeklyActive: { weekStart: iso(weekLo), count: r?.wau || 0 },
-    monthlyActive: { month: iso(monthLo).slice(0, 7), count: r?.mau || 0 },
+    weeklyActive: { weekStart: iso(weekLo), count: r?.wau || 0,
+                    coverage: share(r?.wkFlagged, r?.wkActive) },
+    monthlyActive: { month: iso(monthLo).slice(0, 7), count: r?.mau || 0,
+                     coverage: share(r?.moFlagged, r?.moActive) },
   };
+}
+
+function share(part, whole) {
+  return whole ? Math.round((part / whole) * 1000) / 1000 : 0;
 }
 
 async function dim(env, name, win) {
