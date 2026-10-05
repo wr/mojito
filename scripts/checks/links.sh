@@ -43,12 +43,19 @@ for _ in $(seq 1 30); do
   sleep 0.1
 done
 
-gray "  lychee http://localhost:$PORT/"
+# lychee doesn't crawl, so hand it every page: the homepage plus each guide
+# (<slug>/index.html, served as a clean directory URL).
+URLS=("http://localhost:$PORT/")
+for page in $(git ls-files '*/index.html' | grep -v '^node_modules/'); do
+  URLS+=("http://localhost:$PORT/${page%index.html}")
+done
+
+gray "  lychee ${#URLS[@]} pages on http://localhost:$PORT/"
 if ! lychee \
     --no-progress \
     --cache --max-cache-age 1d \
     ${MODE_ARGS[@]+"${MODE_ARGS[@]}"} \
-    "http://localhost:$PORT/"; then
+    "${URLS[@]}"; then
   red "link check failed"
   exit 1
 fi

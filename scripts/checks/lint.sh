@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Lint HTML, CSS, and JS.
-# - htmlhint on index.html
-# - stylelint on style.css
+# - htmlhint on index.html, stats.html and every guide page (*/index.html)
+# - stylelint on style.css, stats.css and guides.css
 # - node --check on picker.js (syntax only; the file is a 4000-line IIFE that mirrors
 #   Swift code intentionally, so stylistic ESLint rules would just generate noise)
 
@@ -20,13 +20,23 @@ need npx
 
 fail=0
 
-gray "  htmlhint index.html"
-if ! npx --no-install htmlhint index.html; then
+# Guide pages live at <slug>/index.html (clean directory URLs).
+GUIDE_PAGES=$(git ls-files '*/index.html' | grep -v '^node_modules/' || true)
+
+gray "  htmlhint index.html stats.html + $(echo "$GUIDE_PAGES" | grep -c . ) guide pages"
+# shellcheck disable=SC2086
+if ! npx --no-install htmlhint index.html stats.html $GUIDE_PAGES; then
   fail=1
 fi
 
-gray "  stylelint style.css"
-if ! npx --no-install stylelint style.css; then
+gray "  stylelint style.css stats.css guides.css"
+if ! npx --no-install stylelint style.css stats.css guides.css; then
+  fail=1
+fi
+
+gray "  node --check guide-demo.js"
+if ! node --check guide-demo.js; then
+  red "  guide-demo.js has a syntax error"
   fail=1
 fi
 

@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-# Validate social/OG/SEO metadata in index.html.
+# Validate social/OG/SEO metadata in index.html and the guide pages.
 # Required tags, sensible length bounds, og-image dimensions ~1200x630.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
+
+# Count characters, not bytes, in the length checks (° — ⌘ are multi-byte).
+export LC_ALL=en_US.UTF-8
 
 red()    { printf '\033[31m%s\033[0m\n' "$*"; }
 green()  { printf '\033[32m%s\033[0m\n' "$*"; }
@@ -23,7 +26,7 @@ attr_val() {
     | tr '\n' ' ' \
     | grep -oE "<meta[^>]*${key}=[\"']${name}[\"'][^>]*>" \
     | head -1 \
-    | sed -E "s/.*content=[\"']([^\"']*)[\"'].*/\1/"
+    | sed -E 's/.*content="([^"]*)".*/\1/; s/.*content='"'"'([^'"'"']*)'"'"'.*/\1/'
 }
 
 title_text() {
@@ -95,6 +98,28 @@ if [[ -f og-image.png ]] && command -v sips >/dev/null 2>&1; then
     fi
   fi
 fi
+
+# Guide pages: same title/description bounds, a canonical that matches the
+# directory, and an og:image that exists locally (og/<slug>.png, rendered by
+# scripts/og-images.mjs).
+for page in $(git ls-files '*/index.html' | grep -v '^node_modules/'); do
+  slug="${page%/index.html}"
+  HTML="$(cat "$page")"
+  gray "  $slug/"
+  check_len  "<title>"          "$(title_text)"                30 65
+  check_len  "meta description" "$(attr_val name description)" 70 160
+  canon="$(link_href canonical)"
+  if [[ "$canon" != "https://mojito.wells.ee/$slug/" ]]; then
+    red "  canonical is \"$canon\", expected https://mojito.wells.ee/$slug/"
+    fail=1
+  fi
+  og="$(attr_val property og:image)"
+  og_file="${og#https://mojito.wells.ee/}"
+  if [[ "$og" == "$og_file" || ! -f "$og_file" ]]; then
+    red "  og:image $og has no local file"
+    fail=1
+  fi
+done
 
 if [[ $fail -eq 1 ]]; then
   red "meta check failed"
