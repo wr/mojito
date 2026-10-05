@@ -225,21 +225,10 @@ struct TriggerStateMachineTests {
         #expect(next.action == .openPicker(query: "a", scope: .symbolsOnly))
     }
 
-    @Test func symbolsTriggerOffByDefaultButResolvesWhenEnabled() {
-        // Default config: symbols off → `::` cancels (no symbols scope).
+    @Test func doubleColonOpensSymbolsScopeByDefault() {
+        // Default config: `::star::` resolves in symbols scope.
         var sm = TriggerStateMachine()
         sm.setConfig(.default)
-        _ = sm.handle(.colon)
-        #expect(sm.handle(.colon).action == .closePicker)
-        #expect(sm.state == .idle)
-
-        // Enable the scoped symbols trigger → `::star::` resolves in symbols
-        // scope. (Blended symbols, `symbolsFollowEmoji`, isn't a `::` opener.)
-        var cfg = TriggerConfig.default
-        cfg.symbols.enabled = true
-        cfg.symbolsFollowEmoji = false
-        sm = TriggerStateMachine()
-        sm.setConfig(cfg)
         _ = sm.handle(.colon)
         _ = sm.handle(.colon)            // `::` → symbolsOnly capture
         for ch in "star" { _ = sm.handle(.nameChar(ch)) }
@@ -248,6 +237,19 @@ struct TriggerStateMachineTests {
         #expect(out.action == .insertEmoji(query: "star", mode: .exactMatch, scope: .symbolsOnly))
         #expect(sm.lastInsertOpenLen == 2)
         #expect(sm.lastInsertCloseLen == 2)
+    }
+
+    @Test func blendedSymbolsMakeDoubleColonCancel() {
+        // Symbols following emoji (blended into `:`) aren't a `::` opener, so
+        // `::` cancels the capture.
+        var cfg = TriggerConfig.default
+        cfg.symbolsFollowEmoji = true
+        cfg.normalize()
+        var sm = TriggerStateMachine()
+        sm.setConfig(cfg)
+        _ = sm.handle(.colon)
+        #expect(sm.handle(.colon).action == .closePicker)
+        #expect(sm.state == .idle)
     }
 
     // MARK: konami (state-machine-driven payoff)

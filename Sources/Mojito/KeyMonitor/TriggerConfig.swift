@@ -28,7 +28,9 @@ struct TriggerConfig: Equatable, Codable {
     /// When symbols is enabled and this is true, symbols aren't a separate
     /// trigger — they blend into the emoji results (the emoji trigger searches
     /// both corpora). When false, symbols are a scoped trigger via their own
-    /// open (`::symbol::`). Defaults true.
+    /// open (`::symbol::`). `default` (fresh installs) is false: `::` is the
+    /// symbol trigger. The `true` here and in the tolerant decode keeps
+    /// configs saved before this flag existed blending, as they always did.
     var symbolsFollowEmoji: Bool = true
     /// When true, the Quick Access open follows the emoji trigger (`:` → `:?`).
     /// When false, `quickAccess.open` is the user's own (preset or custom)
@@ -64,7 +66,7 @@ struct TriggerConfig: Equatable, Codable {
         symbols:     Trigger(mode: .symbols,     open: "::",  enabled: true),
         gif:         Trigger(mode: .gif,         open: ":::", enabled: true),
         quickAccess: Trigger(mode: .quickAccess, open: ":?",  enabled: true),
-        symbolsFollowEmoji: true,
+        symbolsFollowEmoji: false,
         quickAccessFollowEmoji: true
     )
 
