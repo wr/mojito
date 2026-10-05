@@ -23,6 +23,7 @@ To fix a reported gap:
   - feature drift  → add/remove the key in BOTH features() and FEATURE_KEYS.
   - publish gap    → every PUBLIC_FEATURE_KEYS entry must also be in FEATURE_KEYS.
   - totals drift   → keep the Swift `totals` payload keys and TOTAL_KINDS in sync.
+  - usage drift    → keep usageFlags() keys and USAGE_KINDS in sync.
 A key can be ingested but not published (kept for the debug/internal view);
 those are listed as a note, not a failure.
 """
@@ -83,10 +84,13 @@ def main() -> int:
     feat_fn = swift.index("func features()")
     swift_features = swift_block_keys(swift, swift.index("return [", feat_fn))
     swift_totals = swift_block_keys(swift, swift.index('"totals":'))
+    usage_fn = swift.index("func usageFlags(")
+    swift_usage = swift_block_keys(swift, swift.index("return [", usage_fn))
 
     ingest = js_array(worker, "FEATURE_KEYS")
     public = js_array(worker, "PUBLIC_FEATURE_KEYS")
     total_kinds = js_array(worker, "TOTAL_KINDS")
+    usage_kinds = js_array(worker, "USAGE_KINDS")
 
     ok = True
 
@@ -94,7 +98,8 @@ def main() -> int:
     for label, items in [
         ("features()", swift_features), ("FEATURE_KEYS", ingest),
         ("PUBLIC_FEATURE_KEYS", public), ("TOTAL_KINDS", total_kinds),
-        ('"totals" payload', swift_totals),
+        ('"totals" payload', swift_totals), ("usageFlags()", swift_usage),
+        ("USAGE_KINDS", usage_kinds),
     ]:
         if not items:
             fail(f"could not parse any keys from {label} — has it moved or been renamed?")
@@ -133,12 +138,24 @@ def main() -> int:
                  + ", ".join(sorted(tk - st)))
         ok = False
 
+    # 4. Unique-install flags: usageFlags() keys vs worker USAGE_KINDS.
+    su, uk = set(swift_usage), set(usage_kinds)
+    if su != uk:
+        if su - uk:
+            fail("usageFlags() sends flags the worker drops (add to USAGE_KINDS): "
+                 + ", ".join(sorted(su - uk)))
+        if uk - su:
+            fail("USAGE_KINDS expects flags the client never sends: "
+                 + ", ".join(sorted(uk - su)))
+        ok = False
+
     if not ok:
         return 1
 
     not_published = [k for k in ingest if k not in pk]
     print(f"✓ telemetry in sync — {len(ingest)} feature keys "
-          f"({len(public)} published), {len(total_kinds)} insertion totals")
+          f"({len(public)} published), {len(total_kinds)} insertion totals, "
+          f"{len(usage_kinds)} usage flags")
     if not_published:
         print(f"  note: ingested but not on the public page: {', '.join(not_published)}")
     return 0

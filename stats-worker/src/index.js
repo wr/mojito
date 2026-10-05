@@ -41,6 +41,11 @@ const SKIN_TONES = new Set([
   "default", "light", "mediumLight", "medium", "mediumDark", "dark",
 ]);
 const TOTAL_KINDS = ["emoji", "symbol", "gif", "emoticon", "quickAccess"];
+// Unique-install flags (usageFlags() in TelemetryUploader.swift): true on an
+// install's first report ever / first this UTC week / first this UTC month.
+// Each is a one-per-ping tick into totals_daily under the same kind name, so
+// summing over a week or month gives exact WAU / MAU with no identifier.
+const USAGE_KINDS = ["new", "weekly", "monthly"];
 // Quick Access favorites: 8 slots, so cap the per-ping favorite histogram.
 const MAX_FAVORITES_PER_PING = 8;
 
@@ -83,6 +88,16 @@ async function ingest(request, env) {
 
   // Daily-active ping (the active-user signal — one per install per day).
   stmts.push(totalStmt(env, day, "active", 1));
+
+  // Pings from releases that predate the flags still count as `active` but
+  // never set them; `usageReporting` (one per flag-carrying ping) lets the
+  // page tell how complete the unique counts are.
+  if (body.usage && typeof body.usage === "object") {
+    stmts.push(totalStmt(env, day, "usageReporting", 1));
+    for (const kind of USAGE_KINDS) {
+      if (body.usage[kind] === true) stmts.push(totalStmt(env, day, kind, 1));
+    }
+  }
 
   // Marginal dimensions.
   pushDim(stmts, env, day, "app", cleanVersion(body.app));
@@ -200,8 +215,16 @@ async function stats(env) {
   const win = day - 29; // trailing 30 days for "current population" views
   const activeLo = day - 7; // headline avg over the last 7 *complete* UTC days
 
+  // Last *complete* UTC week (Monday start) and calendar month, as day ranges
+  // [lo, hi). Week index matches utcWeek() in TelemetryUploader.swift.
+  const weekLo = (Math.floor((day + 3) / 7) - 1) * 7 - 3;
+  const weekHi = weekLo + 7;
+  const now = new Date(day * 86_400_000);
+  const monthLo = Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1) / 86_400_000;
+  const monthHi = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1) / 86_400_000;
+
   const [emoji, os, arch, lang, app, skin, features, totals, active30, active7,
-         eggs, qaActive7, favorites, topFav] =
+         eggs, qaActive7, favorites, topFav, usage] =
     await Promise.all([
       env.DB.prepare(
         `SELECT hexcode, SUM(count) c FROM emoji_daily WHERE day >= ?
@@ -238,6 +261,19 @@ async function stats(env) {
         `SELECT hexcode, SUM(count) c FROM favorite_daily WHERE day >= ?
          GROUP BY hexcode ORDER BY c DESC LIMIT 20`
       ).bind(win).all(),
+      env.DB.prepare(
+        `SELECT
+           COALESCE(SUM(CASE WHEN kind = 'new' THEN count END), 0) reported,
+           COALESCE(SUM(CASE WHEN kind = 'new' AND day >= ?1 THEN count END), 0) new30,
+           COALESCE(SUM(CASE WHEN kind = 'weekly' AND day >= ?2 AND day < ?3 THEN count END), 0) wau,
+           COALESCE(SUM(CASE WHEN kind = 'monthly' AND day >= ?4 AND day < ?5 THEN count END), 0) mau,
+           COALESCE(SUM(CASE WHEN kind = 'usageReporting' AND day >= ?2 AND day < ?3 THEN count END), 0) wkFlagged,
+           COALESCE(SUM(CASE WHEN kind = 'active' AND day >= ?2 AND day < ?3 THEN count END), 0) wkActive,
+           COALESCE(SUM(CASE WHEN kind = 'usageReporting' AND day >= ?4 AND day < ?5 THEN count END), 0) moFlagged,
+           COALESCE(SUM(CASE WHEN kind = 'active' AND day >= ?4 AND day < ?5 THEN count END), 0) moActive,
+           MIN(CASE WHEN kind = 'usageReporting' THEN day END) since
+         FROM totals_daily WHERE kind IN ('new', 'weekly', 'monthly', 'usageReporting', 'active')`
+      ).bind(win, weekLo, weekHi, monthLo, monthHi).all(),
     ]);
 
   const totalsMap = {};
@@ -281,6 +317,10 @@ async function stats(env) {
     avgDailyActive,
     avgQuickAccessActive,
     favoritesPinnedPct,
+    // Exact unique-install counts from the usage flags — but only of installs
+    // on a release that sends them. `coverage` is the share of that period's
+    // pings that carried the flags; the counts are trustworthy only near 1.
+    installs: installsPayload(usage.results[0], weekLo, monthLo),
     totals: {
       emoji: totalsMap.emoji || 0,
       symbol: totalsMap.symbol || 0,
@@ -301,6 +341,23 @@ async function stats(env) {
     headers: { "Content-Type": "application/json; charset=utf-8",
                "Cache-Control": "public, max-age=900", ...cors() },
   });
+}
+
+function installsPayload(r, weekLo, monthLo) {
+  const iso = (d) => new Date(d * 86_400_000).toISOString().slice(0, 10);
+  return {
+    since: r?.since != null ? iso(r.since) : null,
+    reported: r?.reported || 0,
+    newLast30Days: r?.new30 || 0,
+    weeklyActive: { weekStart: iso(weekLo), count: r?.wau || 0,
+                    coverage: share(r?.wkFlagged, r?.wkActive) },
+    monthlyActive: { month: iso(monthLo).slice(0, 7), count: r?.mau || 0,
+                     coverage: share(r?.moFlagged, r?.moActive) },
+  };
+}
+
+function share(part, whole) {
+  return whole ? Math.round((part / whole) * 1000) / 1000 : 0;
 }
 
 async function dim(env, name, win) {
