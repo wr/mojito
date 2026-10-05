@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "هر روز به‌روزرسانی می‌شود",
   "stats.lastUpdate": "آخرین به‌روزرسانی {date}",
   "stats.bignum.users": "میانگین کاربران روزانه",
+  "stats.bignum.monthlyUsers": "کاربران ماهانه",
   "stats.bignum.emoji": "ایموجی",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "شکلک",

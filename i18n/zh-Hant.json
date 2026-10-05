@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "每日更新",
   "stats.lastUpdate": "最後更新 {date}",
   "stats.bignum.users": "日均使用者",
+  "stats.bignum.monthlyUsers": "月活躍使用者",
   "stats.bignum.emoji": "表情符號",
   "stats.bignum.gif": "GIF",
   "stats.bignum.emoticon": "顏文字",

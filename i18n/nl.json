@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "Dagelijks bijgewerkt",
   "stats.lastUpdate": "laatst bijgewerkt {date}",
   "stats.bignum.users": "Gem. dagelijkse gebruikers",
+  "stats.bignum.monthlyUsers": "Maandelijkse gebruikers",
   "stats.bignum.emoji": "Emoji",
   "stats.bignum.gif": "GIFs",
   "stats.bignum.emoticon": "Emoticons",

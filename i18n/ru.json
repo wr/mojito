@@ -88,6 +88,7 @@
   "stats.hero.updatesDaily": "Обновляется ежедневно",
   "stats.lastUpdate": "последнее обновление {date}",
   "stats.bignum.users": "Польз. в день (сред.)",
+  "stats.bignum.monthlyUsers": "Польз. в месяц",
   "stats.bignum.emoji": "Эмодзи",
   "stats.bignum.gif": "GIF",
   "stats.bignum.emoticon": "Смайлики",
