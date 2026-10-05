@@ -218,35 +218,6 @@ code {
   /* No overflow:hidden here — that's done by .stage. Picker can spill out. */
 }
 
-/* Pill at the top of the hero card while the Terminal scene plays: dev tools
-   are in the app's default exclusions, so the demo says so. Sits in the gap
-   above the centered window (z above .stage, below the picker) and clears
-   the Website folder in the top-right corner. */
-.demo-note {
-  position: absolute;
-  top: 22px;
-  left: 50%;
-  z-index: 2;
-  width: max-content;
-  max-width: calc(100% - 220px);
-  margin: 0;
-  padding: 7px 14px;
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.5);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  backdrop-filter: blur(16px) saturate(1.4);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.35;
-  text-align: center;
-  transform: translate(-50%, -4px);
-  opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  pointer-events: none;
-}
-.hero-card:has(.app-terminal.is-active) .demo-note { opacity: 1; transform: translate(-50%, 0); }
-
 /* desktop icons — sit BEHIND windows (z:0, below .stage at z:1) but the icon
    itself re-enables pointer-events so the folder can be dragged. The folder
    and trash live in corners where the centered app windows don't cover them. */
@@ -1590,9 +1561,6 @@ footer {
      (e.g. the terminal shows the middle of each line, not the whole line). */
   .carousel,
   .picker-anchor { transform: scale(0.55); transform-origin: center center; }
-  /* The scaled-down window leaves no room for the Terminal note to wrap;
-     the FAQ covers default exclusions for phone visitors. */
-  .demo-note { display: none; }
   /* hero-card min-height tracks the carousel scale so the wallpaper card
      wraps the visible content instead of leaving a big empty pad below it.
      Roughly 640px (full-size min-height) × scale factor. */
