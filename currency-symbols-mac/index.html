@@ -14,7 +14,7 @@
 <meta property="og:image" content="https://mojito.wells.ee/og/currency-symbols-mac.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="article:modified_time" content="2026-10-04">
+<meta property="article:modified_time" content="2026-10-05">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@WellsWorkshop">
 <meta name="twitter:title" content="How to type the euro (€), pound (£) and yen (¥) on a Mac">
@@ -46,8 +46,8 @@
 <article class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type currency symbols on a Mac (€, £, ¥ and more)</h1>
-  <p class="guide-sub">On a US keyboard, € is Shift-Option-2. On a British one it’s Option-2. Here’s every currency sign that has a key, why the keys move when your layout changes, and the quickest way to type ₹, ₩, ₿ and the rest that have no key at all.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes Mojito</span><span class="sep">·</span><span>Updated <time datetime="2026-10-04">October 4, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
+  <p class="guide-sub">€ is Shift-Option-2 on a US keyboard, Option-2 on British. Here’s every currency key, and how to type ₹, ₩, ₿ and the rest.</p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
 
   <div class="key-answer" role="img" aria-label="Shift + Option + 2 types the euro sign on a US keyboard">
     <span class="key-chord" aria-hidden="true">
@@ -61,13 +61,36 @@
   </div>
 
   <h2>How do I type the euro sign on a Mac?</h2>
-  <p>On a US Mac keyboard, press <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>2</kbd> to type €. On a British keyboard it’s one key fewer: <kbd>Option</kbd> + <kbd>2</kbd>. The pound sign is <kbd>Option</kbd> + <kbd>3</kbd> on US and <kbd>Shift</kbd> + <kbd>3</kbd> on British, and the yen sign is <kbd>Option</kbd> + <kbd>Y</kbd> on both. They all work in any app, with no setup.</p>
-  <p>They work everywhere because the symbols belong to your keyboard layout, the map macOS uses to turn a key press into a character. That’s also why they differ by country: switch layouts and the map changes, whatever is printed on the keycaps.</p>
+  <p>On a US keyboard, press <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>2</kbd>. On a British keyboard it’s <kbd>Option</kbd> + <kbd>2</kbd>.</p>
+  <p>It works in any app because it’s part of your keyboard layout, so switching layouts moves it, whatever your keycaps say.</p>
 
-  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong>With Mojito</strong>, you type <code>::euro</code>, <code>::pound</code>, or <code>::yen</code> and press <kbd>Return</kbd>. The codes are the same on every layout, and they cover the currencies with no key, like <code>::indian_rupee_sign</code> for ₹.</p></div>
+  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong><a href="/">Mojito</a></strong> lets you type <code>::euro</code> and press <kbd>Return</kbd> instead, on any layout, including signs with no key.</p></div>
+
+  <h2>Other ways to type them</h2>
+  <ul>
+    <li><strong>Character Viewer.</strong> Press <kbd>Fn</kbd> + <kbd>E</kbd> to open the <a href="/how-to-type-emoji-on-mac/">emoji picker</a>, click the expand button (top right), and choose <strong>Currency Symbols</strong>. ₿ isn’t there, so search for it.</li>
+    <li><strong>Unicode Hex Input.</strong> Add it in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span>, switch to it, then hold <kbd>Option</kbd> and type a code from the table below: <code>20B9</code> for ₹.</li>
+    <li><strong>Text replacement.</strong> In <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, map <code>;inr</code> to ₹. Syncs to your iPhone, but only works in Apple’s apps.</li>
+    <li><strong>ABC – India layout.</strong> Same letters as US, with ₹ on <kbd>⌥</kbd> <kbd>4</kbd>. The backtick key types ₹ too, so a real backtick needs <kbd>Option</kbd>.</li>
+    <li><strong>Shortcode.</strong> With Mojito, type <code>::euro</code> in any app and press <kbd>Return</kbd>.</li>
+  </ul>
+
+  <figure class="mdemo mdemo-mail" data-pre="Your total is " data-type="::euro" data-result="€" data-post="1,240, due on the 30th." data-rows="€ ::euro_sign|₠ ::euro_currency_sign">
+    <div class="mdemo-stage" aria-hidden="true">
+      <div class="mdemo-win">
+        <div class="mdemo-bar"><span class="mdemo-lights"><i></i><i></i><i></i></span><span class="mdemo-title">Invoice 1042</span></div>
+        <div class="mdemo-body">
+          <div class="mdemo-field"><b>To:</b> Lena Fischer</div>
+          <div class="mdemo-field"><b>Subject:</b> Invoice 1042</div>
+          <p>Hi Lena,</p>
+          <p class="mdemo-line" data-line>Your total is €1,240, due on the 30th.</p>
+        </div>
+      </div>
+    </div>
+    <figcaption>Mojito in Mail: type <code>::euro</code>, press Return, and € replaces the shortcode. The second row, ₠, is the old ECU sign, not the euro.</figcaption>
+  </figure>
 
   <h2>Every currency symbol on a Mac keyboard</h2>
-  <p>Hold the modifier keys and press the last key. The British column is Apple’s British layout; the Irish layout matches it for every key here, and the ABC layout matches US.</p>
   <div class="table-scroll">
   <table class="code-table">
     <thead><tr><th scope="col">Sign</th><th scope="col">Currency</th><th scope="col">US layout</th><th scope="col">British layout</th><th scope="col">Mojito</th></tr></thead>
@@ -81,26 +104,13 @@
     </tbody>
   </table>
   </div>
-  <p>That’s the whole list. Every other currency sign needs one of the routes further down. One more trap for American readers: when someone says “pound sign” they sometimes mean #, the pound key on a phone. That’s plain <kbd>Shift</kbd> + <kbd>3</kbd> on a US keyboard.</p>
+  <p>Irish matches British, and ABC matches US. To see what your own layout types, choose <strong>Show Keyboard Viewer</strong> from the Input menu.</p>
 
   <figure class="kbmap" data-mark="shift-option:2 option:3 option:Y option:4" hidden>
     <figcaption>€, £, ¥ and ¢ on the US layout. Switch layers to see them, or click any key to copy its character. On a British layout, go by the table instead.</figcaption>
   </figure>
 
-  <h2>Why are the keys different on a British keyboard?</h2>
-  <p>A Mac doesn’t read the symbols printed on your keys. The keyboard reports which key you pressed, and the layout chosen in System Settings decides what character that means. Apple’s British layout puts £ on <kbd>Shift</kbd> + <kbd>3</kbd> because that’s where British keyboards print it, which bumps # to <kbd>Option</kbd> + <kbd>3</kbd>. The euro takes <kbd>Option</kbd> + <kbd>2</kbd>, so ™, which lives there on US, moves to <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>2</kbd>.</p>
-  <p>It isn’t only currency. On British, the <a href="/math-symbols-mac/">per mille sign ‰</a> moves from <kbd>⇧</kbd> <kbd>⌥</kbd> <kbd>R</kbd> to <kbd>⇧</kbd> <kbd>⌥</kbd> <kbd>E</kbd>, and much of the Shift-Option layer becomes accented capital letters. So if a shortcut from a US guide (the <a href="/copyright-trademark-symbols-mac/">™ shortcut</a>, say) types the wrong thing, check your layout before anything else.</p>
-
-  <h3>How to check which layout you’re using</h3>
-  <ol class="guide-steps">
-    <li>Open <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span>. The list on the left shows every layout you’ve added.</li>
-    <li>Turn on <strong>Show Input menu in menu bar</strong>. The menu bar now shows which layout is active, and you can switch from there.</li>
-    <li>In that Input menu, choose <strong>Show Keyboard Viewer</strong>. Hold <kbd>Option</kbd>, or <kbd>Shift</kbd> and <kbd>Option</kbd>, and the on-screen keys change to show exactly what your layout types.</li>
-  </ol>
-  <p>The keyboard map above always shows the US layout. The Keyboard Viewer shows yours.</p>
-
   <h2>Which currency symbols have no Mac shortcut?</h2>
-  <p>On the US and British layouts, none of these has a key. Mojito’s codes for them come straight from each sign’s Unicode name, which makes them long but guessable.</p>
   <div class="table-scroll">
   <table class="code-table">
     <thead><tr><th scope="col">Sign</th><th scope="col">Currency</th><th scope="col">Unicode</th><th scope="col">Mojito</th></tr></thead>
@@ -119,39 +129,14 @@
     </tbody>
   </table>
   </div>
-  <p>You rarely type a whole code: <code>::bitcoin</code>, <code>::won</code>, <code>::ruble</code>, and <code>::naira</code> each put the right sign at the top of the picker. Two quirks. <code>::rupee</code> lists ₨, Unicode’s older and unofficial rupee sign, just above ₹. And Unicode spells shekel “sheqel,” so <code>::sheqel</code> finds ₪ where <code>::shekel</code> finds nothing.</p>
-  <p>Most national layouts carry their own sign. Turkish Q puts ₺ on <kbd>⌥</kbd> <kbd>T</kbd>, Hebrew puts ₪ on <kbd>⇧</kbd> <kbd>7</kbd>, and 2-Set Korean types ₩ from the backtick key. They move your letters too, so they only make sense if you write in that language. The useful exception is <strong>ABC – India</strong>: letters and numbers stay exactly where US has them, and <kbd>⌥</kbd> <kbd>4</kbd> types ₹. The catches are that the backtick key types ₹ as well, so a real backtick needs <kbd>Option</kbd> (programmers will notice), and most of the US Option-layer symbols give way to transliteration accents.</p>
-
-  <h3>The new Saudi riyal sign</h3>
-  <p>Unicode 17 added a sign for the Saudi riyal, ⃁ (U+20C1). The system font in macOS 27 draws it, and Mojito finds it there as <code>::saudi_riyal_sign</code>, or just <code>::riyal</code>. Font support is still catching up elsewhere: on older systems, and in plenty of web fonts, it can show up as an empty box, so check how it renders before it goes on an invoice. Unicode 18 has since added signs for the UAE dirham, the Omani rial, and the Maldivian rufiyaa, and macOS 27 doesn’t draw those yet.</p>
-
-  <h2>6 ways to type a currency symbol on a Mac</h2>
-  <ol class="guide-steps">
-    <li><strong>The Option shortcut:</strong> fastest for €, £, ¥, ¢, and ƒ, in every app. One exception: Terminal sends Option to the shell instead of typing symbols when <strong>Use Option as Meta key</strong> is on in <span class="ui-path"><span>Terminal</span><span>Settings</span><span>Profiles</span><span>Keyboard</span></span>.</li>
-    <li><strong>The Character Viewer:</strong> press <kbd>Fn</kbd> + <kbd>E</kbd> (or <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Space</kbd>) to open the same panel as the <a href="/how-to-type-emoji-on-mac/">emoji picker</a>, click the expand button in its top-right corner, and choose <strong>Currency Symbols</strong> in the sidebar. Double-click a sign to insert it. ₿ isn’t in that list, so search for it by name.</li>
-    <li><strong>Unicode Hex Input:</strong> add it in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span> (click <strong>+</strong> and search for it), switch to it, then hold <kbd>Option</kbd> and type the code from the table. <kbd>Option</kbd> + <code>20B9</code> types ₹.</li>
-    <li><strong>A text replacement:</strong> in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, map something like <code>;inr</code> to ₹. It syncs to your iPhone, but it only fires in apps built on Apple’s text system, so not in Chrome or Slack.</li>
-    <li><strong>A layout with the key:</strong> ABC – India for ₹, as above, or your own language’s layout.</li>
-    <li><strong>A shortcode:</strong> with <a href="/">Mojito</a> installed, type <code>::euro</code> in any text field and press <kbd>Return</kbd>. A picker appears as you type, best match on top.</li>
-  </ol>
-
-  <figure class="mdemo mdemo-mail" data-pre="Your total is " data-type="::euro" data-result="€" data-post="1,240, due on the 30th." data-rows="€ ::euro_sign|₠ ::euro_currency_sign">
-    <div class="mdemo-stage" aria-hidden="true">
-      <div class="mdemo-win">
-        <div class="mdemo-bar"><span class="mdemo-lights"><i></i><i></i><i></i></span><span class="mdemo-title">Invoice 1042</span></div>
-        <div class="mdemo-body">
-          <div class="mdemo-field"><b>To:</b> Lena Fischer</div>
-          <div class="mdemo-field"><b>Subject:</b> Invoice 1042</div>
-          <p>Hi Lena,</p>
-          <p class="mdemo-line" data-line>Your total is €1,240, due on the 30th.</p>
-        </div>
-      </div>
-    </div>
-    <figcaption>Mojito in Mail: type <code>::euro</code>, press Return, and € replaces the shortcode. The second row, ₠, is the old ECU sign, not the euro.</figcaption>
-  </figure>
+  <ul>
+    <li><strong>Short codes work:</strong> <code>::bitcoin</code>, <code>::won</code>, <code>::ruble</code>, and <code>::naira</code> each put the right sign on top.</li>
+    <li><strong>Two quirks:</strong> <code>::rupee</code> lists the older ₨ just above ₹, and Unicode spells shekel “sheqel,” so use <code>::sheqel</code>.</li>
+    <li><strong>⃁ is new</strong> (Unicode 17). It can show up as an empty box on older systems and in web fonts.</li>
+  </ul>
 
   <h2>How do I type € or £ on an iPhone?</h2>
-  <p>Tap <strong>123</strong>, then touch and hold <strong>$</strong>. Other currency signs pop up above it; slide to the one you want and let go. The <strong>#+=</strong> page also has €, £, and ¥ as regular keys.</p>
+  <p>Tap <strong>123</strong>, then touch and hold <strong>$</strong> and slide to the sign you want.</p>
 
   <aside class="get-mojito" aria-labelledby="get-mojito-h">
     <img src="/app-icon-128.png" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -175,23 +160,11 @@
   <h2>More currency questions</h2>
   <div class="faq-item">
     <h3>Why does Option-3 type # instead of £?</h3>
-    <p>You’re on the British layout, where £ is <kbd>Shift</kbd> + <kbd>3</kbd> and # moved to <kbd>Option</kbd> + <kbd>3</kbd>. US does the opposite. The Input menu in your menu bar shows which layout is active.</p>
+    <p>You’re on the British layout, where £ is <kbd>Shift</kbd> + <kbd>3</kbd> and # moved to <kbd>Option</kbd> + <kbd>3</kbd>. The Input menu in your menu bar shows which layout is active.</p>
   </div>
   <div class="faq-item">
     <h3>How do I type € on a Windows keyboard plugged into a Mac?</h3>
-    <p>The Alt key does <a href="/mac-key-symbols/">Option’s</a> job, so on the US layout it’s <kbd>Shift</kbd> + <kbd>Alt</kbd> + <kbd>2</kbd>. Every Option shortcut on this page works the same way with Alt.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Do these shortcuts work in Word and Google Docs?</h3>
-    <p>Yes. They’re part of the keyboard layout, so they work in Word, and in Google Docs in any browser. Docs also has <span class="ui-path"><span>Insert</span><span>Symbols</span><span>Special characters</span></span>, where you can search, enter a Unicode value, or draw the sign you’re after.</p>
-  </div>
-  <div class="faq-item">
-    <h3>What’s the HTML code for the euro sign?</h3>
-    <p><code>&amp;euro;</code> or <code>&amp;#8364;</code> for € (U+20AC). The pound is <code>&amp;pound;</code>, the yen <code>&amp;yen;</code>, the cent <code>&amp;cent;</code>, and ₹ is <code>&amp;#8377;</code>.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Why does <code>:euro:</code> give me 💶 instead of €?</h3>
-    <p>In Mojito, one colon searches emoji and two search symbols. <code>:euro:</code> is the banknote emoji, while <code>::euro_sign</code> is the currency sign. The same goes for <code>:pound:</code> 💷 and <code>::pound</code> £.</p>
+    <p>The Alt key does <a href="/mac-key-symbols/">Option’s</a> job, so on the US layout it’s <kbd>Shift</kbd> + <kbd>Alt</kbd> + <kbd>2</kbd>.</p>
   </div>
 
   <nav class="guide-more" aria-label="More guides">More guides: <a href="/math-symbols-mac/">Math symbols (π ≠ ±)</a> · <a href="/copyright-trademark-symbols-mac/">© ® ™ symbols</a> · <a href="/mac-key-symbols/">⌘ ⌥ ⇧ key symbols</a> · <a href="/guides/">All guides</a></nav>
@@ -229,7 +202,7 @@
    "headline": "How to type currency symbols on a Mac (€, £, ¥ and more)",
    "image": "https://mojito.wells.ee/og/currency-symbols-mac.png",
    "datePublished": "2026-07-21",
-   "dateModified": "2026-10-04",
+   "dateModified": "2026-10-05",
    "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
    "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
    "mainEntityOfPage": "https://mojito.wells.ee/currency-symbols-mac/"

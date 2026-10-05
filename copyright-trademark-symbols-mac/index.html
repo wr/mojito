@@ -14,7 +14,7 @@
 <meta property="og:image" content="https://mojito.wells.ee/og/copyright-trademark-symbols-mac.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="article:modified_time" content="2026-10-04">
+<meta property="article:modified_time" content="2026-10-05">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@WellsWorkshop">
 <meta name="twitter:title" content="How to type ©, ™ and ® on a Mac">
@@ -46,8 +46,8 @@
 <article class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type ©, ™ and ® on a Mac</h1>
-  <p class="guide-sub">Three marks, three Option keys: G for copyright, 2 for trademark, R for registered. Below: the rarer ℠ and ℗, why (c) turns into © in Pages but not in Mail, what changes on a British keyboard, and a plain-English note on which mark you’re allowed to use.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes Mojito</span><span class="sep">·</span><span>Updated <time datetime="2026-10-04">October 4, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
+  <p class="guide-sub">Option-G for ©, Option-2 for ™, Option-R for ®, in any app. Plus ℠, ℗, and which mark you’re allowed to use.</p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
 
   <div class="key-answer" role="img" aria-label="Option + G types the copyright symbol. Option + 2 types the trademark symbol, and Option + R types the registered symbol.">
     <span class="key-chord" aria-hidden="true">
@@ -60,9 +60,31 @@
   </div>
 
   <h2>How do I type the copyright symbol on a Mac?</h2>
-  <p>Press <kbd>Option</kbd> + <kbd>G</kbd> to type ©. The other two are on the same layer: <kbd>Option</kbd> + <kbd>2</kbd> types ™, and <kbd>Option</kbd> + <kbd>R</kbd> types ®. All three work in every app, from Pages and Google Docs to a caption field in Safari, with no setup. Those are the US keys. On the British layout, <kbd>Option</kbd> + <kbd>2</kbd> types € instead, and ™ moves to <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>2</kbd>.</p>
+  <p>Press <kbd>Option</kbd> + <kbd>G</kbd> for ©, <kbd>Option</kbd> + <kbd>2</kbd> for ™, and <kbd>Option</kbd> + <kbd>R</kbd> for ®. They work in every app, with no setup.</p>
+  <p>Those are the US keys. On a British keyboard, <kbd>Option</kbd> + <kbd>2</kbd> types the <a href="/currency-symbols-mac/">euro sign</a>, and ™ moves to <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>2</kbd>.</p>
 
-  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong>With Mojito</strong>, type <code>::copy</code> and press <kbd>Return</kbd> for ©, <code>::tm</code> for ™, and <code>::reg</code> for ®. The marks no keyboard has are in there too, like <code>::sm</code> for ℠.</p></div>
+  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong><a href="/">Mojito</a></strong> lets you type <code>::copy</code>, <code>::tm</code>, or <code>::reg</code> instead, plus <code>::sm</code> for ℠, which no keyboard has.</p></div>
+
+  <h2>Other ways to type them</h2>
+  <ul>
+    <li><strong>Character Viewer.</strong> Press <kbd>Fn</kbd> + <kbd>E</kbd> to open the <a href="/mac-emoji-picker/">emoji picker</a>, click the expand button (top right), search <em>copyright</em>, <em>trademark</em>, or <em>registered</em>, and double-click the result. That’s where ℠ and ℗ live too.</li>
+    <li><strong>Type (c).</strong> Pages, Numbers, Keynote, and Word turn <code>(c)</code> into © as you type. Mail, Notes, TextEdit, and Safari leave it alone.</li>
+    <li><strong>Text replacement.</strong> In <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, map <code>;tm</code> to ™. Syncs to your iPhone, but only works in Apple’s apps.</li>
+    <li><strong>Shortcode.</strong> With Mojito, type <code>::copy</code>, <code>::tm</code>, or <code>::reg</code> in any app. <code>::sm</code> gives you ℠, and <code>::sound</code> finds ℗.</li>
+  </ul>
+
+  <figure class="mdemo mdemo-textedit" data-pre="" data-type="::copy" data-result="©" data-post=" 2026 Northwind Studio. All rights reserved." data-rows="© ::copyright|℗ ::sound_recording_copyright">
+    <div class="mdemo-stage" aria-hidden="true">
+      <div class="mdemo-win">
+        <div class="mdemo-bar"><span class="mdemo-lights"><i></i><i></i><i></i></span><span class="mdemo-title">site-footer.txt</span></div>
+        <div class="mdemo-body">
+          <p class="mdemo-line" data-line>© 2026 Northwind Studio. All rights reserved.</p>
+          <p class="mdemo-muted">Privacy · Terms · Contact</p>
+        </div>
+      </div>
+    </div>
+    <figcaption>Mojito in TextEdit: type <code>::copy</code>, press Return, and © replaces the shortcode.</figcaption>
+  </figure>
 
   <h2>©, ™, ®, ℠ and ℗ at a glance</h2>
   <div class="table-scroll">
@@ -82,48 +104,17 @@
     <figcaption>All three live on the Option layer of the US layout. Click any key to copy its character.</figcaption>
   </figure>
 
-  <h2>5 ways to type ©, ™ and ® on a Mac</h2>
-  <ol class="guide-steps">
-    <li><strong>The Option keys:</strong> <kbd>⌥</kbd> <kbd>G</kbd> for ©, <kbd>⌥</kbd> <kbd>2</kbd> for ™, <kbd>⌥</kbd> <kbd>R</kbd> for ®. Fastest, and they work in every app.</li>
-    <li><strong>The Character Viewer:</strong> press <kbd>Fn</kbd> + <kbd>E</kbd> (or <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Space</kbd>) to open the <a href="/mac-emoji-picker/">emoji picker</a>, click the expand button in the panel’s top-right corner, search for <em>copyright</em>, <em>trademark</em>, or <em>registered</em>, and double-click the result. This is also where ℠ and ℗ live. The compact emoji picker has ©️, ™️, and ®️ as well, but as emoji, which some apps draw differently from the text around them.</li>
-    <li><strong>Auto-substitution in Pages, Numbers, and Keynote:</strong> type <code>(c)</code> and it becomes © as you type, as long as <strong>Symbol and text substitution</strong> is turned on in the app’s Auto-Correction settings. More on where this does and doesn’t work below.</li>
-    <li><strong>A text replacement:</strong> in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, click <strong>+</strong> and map something like <code>;tm</code> to ™. It syncs to your iPhone through iCloud, but it only fires in apps built on Apple’s text system, so not in Chrome, Slack, or VS Code.</li>
-    <li><strong>A shortcode:</strong> with <a href="/">Mojito</a> installed, type <code>::copy</code>, <code>::tm</code>, or <code>::reg</code> in any text field and press <kbd>Return</kbd>. <code>::sm</code> gives you ℠, and <code>::sound</code> finds ℗.</li>
-  </ol>
-
-  <figure class="mdemo mdemo-textedit" data-pre="" data-type="::copy" data-result="©" data-post=" 2026 Northwind Studio. All rights reserved." data-rows="© ::copyright|℗ ::sound_recording_copyright">
-    <div class="mdemo-stage" aria-hidden="true">
-      <div class="mdemo-win">
-        <div class="mdemo-bar"><span class="mdemo-lights"><i></i><i></i><i></i></span><span class="mdemo-title">site-footer.txt</span></div>
-        <div class="mdemo-body">
-          <p class="mdemo-line" data-line>© 2026 Northwind Studio. All rights reserved.</p>
-          <p class="mdemo-muted">Privacy · Terms · Contact</p>
-        </div>
-      </div>
-    </div>
-    <figcaption>Mojito in TextEdit: type <code>::copy</code>, press Return, and © replaces the shortcode.</figcaption>
-  </figure>
-
-  <h2>Why does (c) turn into © on its own?</h2>
-  <p>Because the app you’re in does it, not macOS. Pages, Numbers, and Keynote swap <code>(c)</code> for © when <strong>Symbol and text substitution</strong> is on, under <span class="ui-path"><span>Pages</span><span>Settings</span><span>Auto-Correction</span></span> (Numbers and Keynote have the same setting). Apple’s own guide is explicit that those substitutions apply only to that app. Microsoft Word does the same thing through its own AutoCorrect list, under <span class="ui-path"><span>Word</span><span>Preferences</span><span>AutoCorrect</span></span>.</p>
-  <p>Everywhere else (Mail, Notes, TextEdit, and Safari included), <code>(c)</code> stays <code>(c)</code>. The Mac’s system-wide text replacements ship with exactly one entry, <code>omw</code> for “On my way!”, so if you want <code>(c)</code> to become © in every app, add that replacement yourself. It’s a separate system from the smart quotes and dashes that turn <code>--</code> into an <a href="/em-dash-mac/">em dash</a>.</p>
-  <p>The usual victim is a lettered list: (a), (b), ©. To stop it, turn off Symbol and text substitution or delete just the <code>(c)</code> row from its list. In Word, delete the <code>(c)</code> entry from AutoCorrect.</p>
-
   <h2>™ or ®? What each mark means</h2>
   <ul>
-    <li><strong>™ Trademark:</strong> a claim that a name, logo, or slogan identifies your goods. You can use it whether or not you’ve applied to register anything.</li>
-    <li><strong>℠ Service mark:</strong> the same claim, for services instead of goods.</li>
-    <li><strong>® Registered:</strong> only once the mark is actually registered. In the US, that means after the USPTO registers it (not while the application is pending), and only for the goods and services listed in the registration.</li>
-    <li><strong>© Copyright:</strong> a copyright notice. In the US it has been optional for works published since March 1, 1989, and using it doesn’t require registering anything. The Copyright Office notes it still carries legal benefits. The format is the symbol (or the word “Copyright”), the year of first publication, and the owner: <code>© 2026 Northwind Studio</code>. “All rights reserved” isn’t one of the parts.</li>
-    <li><strong>℗ Sound recording copyright:</strong> the notice for sound recordings on records, tapes, CDs, and the like. It’s the © of the audio itself.</li>
+    <li><strong>™ Trademark:</strong> claims a name, logo, or slogan for your goods. You can use it without registering.</li>
+    <li><strong>℠ Service mark:</strong> the same claim, for services.</li>
+    <li><strong>® Registered:</strong> only once the mark is registered (in the US, by the USPTO), not while the application is pending.</li>
+    <li><strong>© Copyright:</strong> optional in the US since 1989, and no registration needed. Format: <code>© 2026 Northwind Studio</code>.</li>
+    <li><strong>℗ Sound recording copyright:</strong> the © for the audio itself.</li>
   </ul>
-  <p>That’s how the US Copyright Office and the USPTO describe the symbols. It isn’t legal advice, and other countries have their own rules, so ask a trademark or IP lawyer about your situation.</p>
-
-  <h2>Should ® be superscript?</h2>
-  <p>™ and ℠ are drawn as small raised letters by design. © and ® usually sit at full size, which can look heavy next to a brand name, so they’re often set smaller and raised. Apple’s own Pages guide suggests superscript for exactly this: select the mark and press <kbd>⌃</kbd> <kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>+</kbd> (Control-Shift-Command-Plus), or choose Superscript from the Baseline menu in the Format sidebar’s font options. On the web, wrap it in <code>&lt;sup&gt;</code>.</p>
+  <p>That’s US guidance from the Copyright Office and USPTO, not legal advice.</p>
 
   <h2>What about British and other keyboards?</h2>
-  <p>Apple’s main European layouts all have the three marks, just not always on the same keys. These come from the keyboard layouts in macOS 27 (the US column also covers ABC, Australian, and Canadian English):</p>
   <div class="table-scroll">
   <table class="code-table">
     <thead><tr><th scope="col">Mark</th><th scope="col">US</th><th scope="col">British</th><th scope="col">German</th><th scope="col">French</th><th scope="col">Spanish</th><th scope="col">Italian</th></tr></thead>
@@ -134,10 +125,10 @@
     </tbody>
   </table>
   </div>
-  <p>On a British Mac, <kbd>⌥</kbd> <kbd>2</kbd> is the euro sign; the rest of the money symbols are in <a href="/currency-symbols-mac/">Currency symbols on a Mac</a>. Shortcodes skip the whole question, since <code>::tm</code> is the same on every layout.</p>
+  <p>The US column also covers ABC, Australian, and Canadian English.</p>
 
-  <h2>How do I type ©, ™ and ® on iPhone or iPad?</h2>
-  <p>The iPhone keyboard has no key for any of them. The reliable fix is a text replacement: add one on your Mac and it syncs over, or create it on the iPhone in <span class="ui-path"><span>Settings</span><span>General</span><span>Keyboard</span><span>Text Replacement</span></span>, with © as the phrase and something like <code>;copy</code> as the shortcut. The emoji keyboard has ©️, ™️, and ®️ too, but as emoji, which can look out of place in a sentence.</p>
+  <h2>How do I type ©, ™ and ® on iPhone?</h2>
+  <p>There’s no key for them. Set up a text replacement (ones from your Mac sync over), or use the ©️ ™️ ®️ emoji.</p>
 
   <aside class="get-mojito" aria-labelledby="get-mojito-h">
     <img src="/app-icon-128.png" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -160,20 +151,12 @@
 
   <h2>More © ™ ® questions</h2>
   <div class="faq-item">
-    <h3>What’s the HTML code for ©, ™, and ®?</h3>
-    <p><code>&amp;copy;</code> (or <code>&amp;#169;</code>) for ©, <code>&amp;trade;</code> (<code>&amp;#8482;</code>) for ™, and <code>&amp;reg;</code> (<code>&amp;#174;</code>) for ®. ℠ has no named entity, so use <code>&amp;#8480;</code>. ℗ is <code>&amp;copysr;</code> or <code>&amp;#8471;</code>.</p>
+    <h3>How do I stop (c) turning into ©?</h3>
+    <p>In Pages, Numbers, or Keynote, turn off <strong>Symbol and text substitution</strong> under <span class="ui-path"><span>Pages</span><span>Settings</span><span>Auto-Correction</span></span>, or delete just the <code>(c)</code> row. In Word, delete the <code>(c)</code> entry from <span class="ui-path"><span>Word</span><span>Preferences</span><span>AutoCorrect</span></span>.</p>
   </div>
   <div class="faq-item">
-    <h3>Can I put © on my work without registering it?</h3>
-    <p>In the US, yes. The Copyright Office says using a notice doesn’t require its permission or a registration. Registration is a separate process.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Why does ⌥2 type € instead of ™?</h3>
-    <p>You’re probably on the British layout, where the euro took that key. Use <kbd>⇧</kbd> <kbd>⌥</kbd> <kbd>2</kbd> for ™, or switch layouts in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span>.</p>
-  </div>
-  <div class="faq-item">
-    <h3>How do I type ©, ™, and ® on Windows?</h3>
-    <p>Hold <kbd>Alt</kbd> and type <code>0169</code> for ©, <code>0153</code> for ™, or <code>0174</code> for ® on the numeric keypad, or press <kbd>Win</kbd> + <kbd>.</kbd> and look under Symbols.</p>
+    <h3>Should ® be superscript?</h3>
+    <p>Often: © and ® sit at full size, which can look heavy next to a brand name. In Pages, select the mark and press <kbd>⌃</kbd> <kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>+</kbd>; on the web, wrap it in <code>&lt;sup&gt;</code>.</p>
   </div>
 
   <nav class="guide-more" aria-label="More guides">More guides: <a href="/degree-symbol-mac/">Degree symbol (°)</a> · <a href="/check-mark-mac/">Check mark (✓)</a> · <a href="/mac-key-symbols/">⌘ ⌥ ⇧ key symbols</a> · <a href="/guides/">All guides</a></nav>
@@ -211,7 +194,7 @@
    "headline": "How to type ©, ™ and ® on a Mac",
    "image": "https://mojito.wells.ee/og/copyright-trademark-symbols-mac.png",
    "datePublished": "2026-07-21",
-   "dateModified": "2026-10-04",
+   "dateModified": "2026-10-05",
    "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
    "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
    "mainEntityOfPage": "https://mojito.wells.ee/copyright-trademark-symbols-mac/"

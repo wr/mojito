@@ -14,7 +14,7 @@
 <meta property="og:image" content="https://mojito.wells.ee/og/mac-key-symbols.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="article:modified_time" content="2026-10-04">
+<meta property="article:modified_time" content="2026-10-05">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@WellsWorkshop">
 <meta name="twitter:title" content="How to type the Command symbol (⌘) and other Mac key symbols">
@@ -46,8 +46,8 @@
 <article class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type ⌘, ⌥, ⇧ and other Mac key symbols</h1>
-  <p class="guide-sub">None of the Mac’s modifier symbols has a keystroke of its own, which is awkward when you’re writing instructions about keystrokes. Here’s the fastest way to type each one, what Unicode calls them, and the order Apple lists them in.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes Mojito</span><span class="sep">·</span><span>Updated <time datetime="2026-10-04">October 4, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
+  <p class="guide-sub">The Character Viewer types ⌘, ⌥ and ⇧ in any app. Here’s how, four other ways, and the order Apple lists them in.</p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
 
   <div class="key-answer" role="img" aria-label="Typing ::cmd in Mojito inserts the Command symbol. macOS has no keystroke for it.">
     <span class="key-chord" aria-hidden="true">
@@ -59,10 +59,31 @@
   </div>
 
   <h2>How do I type the Command symbol (⌘) on a Mac?</h2>
-  <p>No key combination types ⌘; macOS doesn’t have one. The quickest built-in route is the Character Viewer: press <kbd>Fn</kbd> + <kbd>E</kbd>, expand the panel, add <strong>Technical Symbols</strong> to its sidebar (a one-time step), and double-click ⌘. If you type these often, add the Unicode Hex Input source and type <kbd>Option</kbd> + <code>2318</code> instead.</p>
-  <p>The same goes for ⌥, ⇧, ⌃ and the rest. They’re printed on your keys and shown in every menu, yet nothing on the keyboard types them, even though the Option layer is full of other symbols like <a href="/math-symbols-mac/">π and ≠</a> or <a href="/currency-symbols-mac/">€ and £</a>.</p>
+  <p>Press <kbd>Fn</kbd> + <kbd>E</kbd>, click the expand button (top right), and double-click ⌘ under <strong>Technical Symbols</strong>. The first time, turn that category on under the Action menu’s <strong>Customize List</strong>.</p>
+  <p>No key combination types ⌘, ⌥, ⇧ or ⌃, even though the Option layer has <a href="/math-symbols-mac/">π and ≠</a> and <a href="/currency-symbols-mac/">€ and £</a>.</p>
 
-  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong>With Mojito</strong>, you type <code>::cmd</code>, <code>::option</code>, <code>::shift</code>, or <code>::control</code> in any app. The codes are the key names, so there’s nothing to look up.</p></div>
+  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong><a href="/">Mojito</a></strong> lets you type <code>::cmd</code>, <code>::option</code> or <code>::shift</code> in any app. The codes are the key names.</p></div>
+
+  <h2>Other ways to type them</h2>
+  <ul>
+    <li><strong>Unicode Hex Input.</strong> Worth it if you type them often. Add it in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span>, switch to it, and hold <kbd>Option</kbd> while typing the code from the table: <code>2318</code> is ⌘.</li>
+    <li><strong>Text replacement.</strong> In <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, map <code>;cmd</code> to ⌘. Syncs to your iPhone, but only works in Apple’s apps.</li>
+    <li><strong>HTML entity.</strong> On a web page, <code>&amp;#8984;</code> is ⌘ and <code>&amp;#8997;</code> is ⌥.</li>
+    <li><strong>Shortcode.</strong> With Mojito, type <code>::cmd</code> and press <kbd>Return</kbd>, or type <code>::cmd::</code> to skip the picker.</li>
+  </ul>
+
+  <figure class="mdemo mdemo-textedit" data-pre="To add a link, press " data-type="::cmd" data-result="⌘" data-post="K." data-rows="⌘ ::cmd">
+    <div class="mdemo-stage" aria-hidden="true">
+      <div class="mdemo-win">
+        <div class="mdemo-bar"><span class="mdemo-lights"><i></i><i></i><i></i></span><span class="mdemo-title">Editor help.rtf</span></div>
+        <div class="mdemo-body">
+          <p><strong>Links</strong></p>
+          <p class="mdemo-line" data-line>To add a link, press ⌘K.</p>
+        </div>
+      </div>
+    </div>
+    <figcaption>Mojito in TextEdit: type <code>::cmd</code>, press Return, and ⌘ replaces the shortcode, ready for the next key.</figcaption>
+  </figure>
 
   <h2>Every Mac key symbol, with its Unicode name</h2>
   <div class="table-scroll">
@@ -85,50 +106,22 @@
     </tbody>
   </table>
   </div>
-  <p>Copy a glyph straight from the table if you only need it once. The Unicode names also explain why these are hard to search for: as far as Unicode is concerned, ⌘ is a “place of interest sign” and ⌃ is an “up arrowhead.” The Fn key has no character at all; Apple draws its 🌐 as an icon, so most people write “Fn” or use the 🌐 emoji.</p>
-  <p>The people who need these are mostly writing for someone else: help articles, support replies, release notes, a shortcut cheat sheet for a new teammate. The glyphs match what Mac users see in every menu, and ⌥⌘⎋ scans faster in a table than Option-Command-Escape. Apple’s own support articles spell shortcuts out in words, so for running prose, words are just as correct.</p>
-
-  <h2>What order do the modifier symbols go in?</h2>
-  <p>Apple’s <a href="https://developer.apple.com/design/human-interface-guidelines/keyboards">Human Interface Guidelines</a> say to list modifier keys in this order: Control, Option, Shift, Command. In glyphs that’s ⌃ ⌥ ⇧ ⌘, with the main key last. Apple’s built-in shortcuts follow it:</p>
-  <ul>
-    <li><strong>⌃⌘Q</strong> locks your screen.</li>
-    <li><strong>⌥⌘⎋</strong> opens Force Quit.</li>
-    <li><strong>⌥⇧⌘V</strong> pastes and matches the surrounding style.</li>
-    <li><strong>⌃⌘Space</strong> opens the Character Viewer.</li>
-  </ul>
-  <p>Writing ⌘⇧V instead isn’t wrong, exactly, but it won’t match the menus your reader is looking at.</p>
-
-  <h2>5 ways to type ⌘ and the other key symbols</h2>
-  <ol class="guide-steps">
-    <li><strong>The Character Viewer:</strong> press <kbd>Fn</kbd> + <kbd>E</kbd> (or <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Space</kbd>) to open the same panel as the <a href="/how-to-type-emoji-on-mac/">emoji picker</a>, and click the expand button in its top-right corner. The key symbols aren’t in the sidebar by default: open the Action menu, choose <strong>Customize List</strong>, and turn on <strong>Technical Symbols</strong>. ⌘, ⌥, ⇧, ⌃, ⎋, ⏎, ⌫ and the rest are now one click away; double-click to insert, or add the ones you use to Favorites.</li>
-    <li><strong>Unicode Hex Input:</strong> add it in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span> (click <strong>+</strong> and search for it), and switch to it from the Input menu in the menu bar. Hold <kbd>Option</kbd> and type the code from the table: <code>2318</code> for ⌘, <code>2325</code> for ⌥, <code>21E7</code> for ⇧, <code>2303</code> for ⌃. Switch back to your usual layout when you’re done.</li>
-    <li><strong>A text replacement:</strong> in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, map <code>;cmd</code> to ⌘, <code>;opt</code> to ⌥, and so on. They sync to your iPhone, but only fire in apps built on Apple’s text system, so not in Chrome, Slack, or VS Code.</li>
-    <li><strong>An HTML entity:</strong> on a web page, <code>&amp;#8984;</code> is ⌘, <code>&amp;#8997;</code> is ⌥, <code>&amp;#8679;</code> is ⇧, and <code>&amp;#8963;</code> is ⌃.</li>
-    <li><strong>A shortcode:</strong> with <a href="/">Mojito</a> installed, type <code>::cmd</code> anywhere and press <kbd>Return</kbd>, or type <code>::cmd::</code> to drop it in without the picker.</li>
-  </ol>
-
-  <figure class="mdemo mdemo-textedit" data-pre="To add a link, press " data-type="::cmd" data-result="⌘" data-post="K." data-rows="⌘ ::cmd">
-    <div class="mdemo-stage" aria-hidden="true">
-      <div class="mdemo-win">
-        <div class="mdemo-bar"><span class="mdemo-lights"><i></i><i></i><i></i></span><span class="mdemo-title">Editor help.rtf</span></div>
-        <div class="mdemo-body">
-          <p><strong>Links</strong></p>
-          <p class="mdemo-line" data-line>To add a link, press ⌘K.</p>
-        </div>
-      </div>
-    </div>
-    <figcaption>Mojito in TextEdit: type <code>::cmd</code>, press Return, and ⌘ replaces the shortcode, ready for the next key.</figcaption>
-  </figure>
+  <p>Copy a glyph from the table if you only need it once. The Fn key has no character, so write “Fn” or use the 🌐 emoji.</p>
 
   <h2>The Apple logo is the one symbol with a key</h2>
-  <p><kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>K</kbd> types &#xF8FF;, on both the US and British layouts. It lives at U+F8FF, in a part of Unicode set aside for private use, where each company can put whatever it likes. Only Apple’s fonts draw an apple there, so on Windows, Android, and many web fonts it turns into an empty box or something else entirely. Use it in notes to yourself and messages to other Apple users, not on anything public. In Mojito it’s <code>::apple</code>; with one colon, <code>:apple:</code> is 🍎.</p>
+  <p><kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>K</kbd> types &#xF8FF;. It’s a private-use character only Apple’s fonts draw, so on Windows, Android and many web fonts it shows up as a box. Use it with other Apple users, not on anything public.</p>
 
   <figure class="kbmap" data-mark="shift-option:K" hidden>
     <figcaption>The Apple logo sits on Shift-Option-K. Nothing on either layer types ⌘, ⌥ or ⇧.</figcaption>
   </figure>
 
-  <h2>Where does the ⌘ symbol come from?</h2>
-  <p>In 1983, the Macintosh team showed a little Apple logo next to every menu item that had a keyboard shortcut. Steve Jobs decided there were too many Apples on the screen. Susan Kare, the Mac’s icon designer, leafed through an international symbol dictionary and found a looped square used in Sweden to mark places of interest. Swedish readers have since pointed out it’s a road-sign symbol for sights and historic sites rather than campgrounds, but the name stuck: Unicode still calls U+2318 the place of interest sign, and lists “command key” as its other name.</p>
+  <h2>What order do the modifier symbols go in?</h2>
+  <p>Apple’s <a href="https://developer.apple.com/design/human-interface-guidelines/keyboards">Human Interface Guidelines</a> say <strong>⌃ ⌥ ⇧ ⌘</strong> (Control, Option, Shift, Command), with the main key last:</p>
+  <ul>
+    <li><strong>⌃⌘Q</strong> locks your screen.</li>
+    <li><strong>⌥⌘⎋</strong> opens Force Quit.</li>
+    <li><strong>⌥⇧⌘V</strong> pastes and matches the surrounding style.</li>
+  </ul>
 
   <aside class="get-mojito" aria-labelledby="get-mojito-h">
     <img src="/app-icon-128.png" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -152,19 +145,15 @@
   <h2>More key symbol questions</h2>
   <div class="faq-item">
     <h3>What does ⌥ mean, and why does my keyboard say “alt”?</h3>
-    <p>⌥ is the Option key. Apple stopped printing “alt” on it around 2017, so older Mac keyboards show both, and Apple’s docs still say “Option (or Alt).” On a Windows keyboard plugged into a Mac, Alt does Option’s job and the Windows key (or Ctrl) does Command’s.</p>
+    <p>⌥ is the Option key. Apple stopped printing “alt” on it around 2017, so older Mac keyboards show both.</p>
   </div>
   <div class="faq-item">
     <h3>Is ⌃ the same as the caret (^)?</h3>
-    <p>No. ⌃ (U+2303) is the Control key symbol; ^ is the caret on <kbd>Shift</kbd> + <kbd>6</kbd>. You’ll see ^C in Terminal and Unix docs, which is a different way of writing the same Control-C.</p>
-  </div>
-  <div class="faq-item">
-    <h3>How do I show keyboard shortcuts in Markdown or HTML?</h3>
-    <p>Wrap each key in a <code>&lt;kbd&gt;</code> tag: <code>&lt;kbd&gt;⌘&lt;/kbd&gt;&lt;kbd&gt;C&lt;/kbd&gt;</code>. Most Markdown renderers pass raw HTML through, so it works in both.</p>
+    <p>No. ⌃ (U+2303) is the Control key symbol and ^ is the caret on <kbd>Shift</kbd> + <kbd>6</kbd>, though ^C in Terminal means the same Control-C.</p>
   </div>
   <div class="faq-item">
     <h3>Can I type ⌘ on an iPhone or iPad?</h3>
-    <p>Not from the keyboard. Make a text replacement on your Mac (<code>;cmd</code> → ⌘) and it syncs to your iPhone and iPad through iCloud.</p>
+    <p>Not from the keyboard. Make a text replacement on your Mac (<code>;cmd</code> → ⌘) and it syncs to your iPhone and iPad.</p>
   </div>
 
   <nav class="guide-more" aria-label="More guides">More guides: <a href="/currency-symbols-mac/">Currency symbols (€ £ ¥)</a> · <a href="/math-symbols-mac/">Math symbols (π ≠ ±)</a> · <a href="/how-to-type-emoji-on-mac/">How to type emoji on a Mac</a> · <a href="/guides/">All guides</a></nav>
@@ -202,7 +191,7 @@
    "headline": "How to type ⌘, ⌥, ⇧ and other Mac key symbols",
    "image": "https://mojito.wells.ee/og/mac-key-symbols.png",
    "datePublished": "2026-07-21",
-   "dateModified": "2026-10-04",
+   "dateModified": "2026-10-05",
    "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
    "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
    "mainEntityOfPage": "https://mojito.wells.ee/mac-key-symbols/"

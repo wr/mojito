@@ -14,7 +14,7 @@
 <meta property="og:image" content="https://mojito.wells.ee/og/mojito-vs-comoji.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="article:modified_time" content="2026-10-04">
+<meta property="article:modified_time" content="2026-10-05">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@WellsWorkshop">
 <meta name="twitter:title" content="Mojito vs Comoji: two free Mac emoji pickers, compared">
@@ -46,13 +46,14 @@
 <article class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">Mojito vs Comoji</h1>
-  <p class="guide-sub">Two free Mac apps that autocomplete <code>:shortcodes:</code> right at your cursor, the way Slack does. They’re more alike than different, so this page is about the differences, checked against both apps on October 4, 2026.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes Mojito</span><span class="sep">·</span><span>Updated <time datetime="2026-10-04">October 4, 2026</time></span><span class="sep">·</span><span>Comoji 1.1.12, Mojito 1.10.0</span></p>
+  <p class="guide-sub">Two free Mac apps that autocomplete <code>:shortcodes:</code> at your cursor. Here’s where they differ, checked October 4, 2026.</p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Comoji 1.1.12, Mojito 1.10.0</span></p>
 
-  <p><strong>Disclosure: I make Mojito.</strong> Read this with that in mind. Every Comoji fact here comes from <a href="https://www.comoji.io/">comoji.io</a>, which publishes <a href="https://www.comoji.io/compare/mojito">its own Mojito comparison</a>; where that page is out of date about Mojito, this one says so, with the reason.</p>
+  <p><strong>Disclosure: I make <a href="/">Mojito</a>.</strong> Every Comoji fact here comes from <a href="https://www.comoji.io/">comoji.io</a>, which publishes <a href="https://www.comoji.io/compare/mojito">its own Mojito comparison</a>; where that’s out of date, this page says why.</p>
 
   <h2>Mojito or Comoji: which should you use?</h2>
-  <p>Both are free and do the core job well: type a colon and a few letters in almost any app, and pick an emoji from a list at your cursor. Choose <strong>Comoji</strong> if you’re still on macOS 13 Ventura, want animated stickers, or want an app that sends no usage data at all. Choose <strong>Mojito</strong> if you also type symbols like ⌘, °, — and €, want emoji found by meaning, want source code you can read, or want the app in a language other than English.</p>
+  <p>Both are free and do the core job well. Choose <strong>Comoji</strong> for macOS 13 Ventura, animated stickers, or no usage data at all.</p>
+  <p>Choose <strong>Mojito</strong> for symbols like ⌘, °, — and €, emoji found by meaning, source code you can read, or a non-English interface.</p>
 
   <h2>Mojito vs Comoji at a glance</h2>
   <div class="table-scroll">
@@ -80,37 +81,29 @@
     </tbody>
   </table>
   </div>
-  <p class="table-note">Checked October 4, 2026, against Comoji’s <a href="https://www.comoji.io/features">features</a>, <a href="https://www.comoji.io/install">install</a>, and <a href="https://www.comoji.io/security">security</a> pages, and against Mojito’s <a href="https://github.com/wr/mojito">source</a>. Comoji’s site doesn’t mention searching by keyword.</p>
+  <p class="table-note">Checked October 4, 2026, against Comoji’s <a href="https://www.comoji.io/features">features</a>, <a href="https://www.comoji.io/install">install</a>, and <a href="https://www.comoji.io/security">security</a> pages, and Mojito’s <a href="https://github.com/wr/mojito">source</a>. Comoji’s site doesn’t mention searching by keyword.</p>
 
   <h2>What they have in common</h2>
-  <ul>
-    <li>Free, with no account, trial, or paid tier.</li>
-    <li>A colon opens the picker by default, and both let you change that key. Typing the closing colon (<code>:fire:</code>) inserts the exact match straight away.</li>
-    <li>Slack- and Discord-style codes, a default skin tone, custom aliases of your own, and results that learn what you use.</li>
-    <li>A list of apps and websites to stay out of, which you can edit.</li>
-    <li>The same two macOS permissions: Input Monitoring, to notice a shortcode as you type it, and Accessibility, to find your cursor and put the emoji there.</li>
-    <li>Signed and notarized downloads that update themselves, on Apple silicon and Intel.</li>
-  </ul>
-  <p>Run one at a time, though. Both listen for a colon, so with both running you’d get two pickers fighting over every <code>:</code>.</p>
+  <p>Both are free with no account, use a colon trigger you can change, know Slack and Discord codes, keep an editable list of apps to stay out of, and need Input Monitoring and Accessibility. <strong>Run one at a time</strong>: with both, every <code>:</code> opens two pickers.</p>
 
   <h2>Where Comoji is the better pick</h2>
   <ul>
-    <li><strong>Older Macs.</strong> Comoji runs on macOS 13 Ventura; Mojito needs macOS 14 Sonoma.</li>
-    <li><strong>Animated stickers.</strong> <code>/sticker</code> inserts animated emoji stickers (Google’s Noto set) at your cursor. Mojito has nothing like it.</li>
-    <li><strong>No usage data, ever.</strong> Comoji says it has no analytics, telemetry, or crash reporter. Mojito’s anonymous usage stats are on by default: it shows a one-time notice before sending anything, and you can decline there or switch them off in Settings.</li>
-    <li><strong>A checklist instead of source code.</strong> Comoji publishes every server it talks to and a <a href="https://www.comoji.io/blog/verify-comoji-is-local">step-by-step guide</a> to checking that yourself with <code>lsof</code>, <code>nettop</code>, or a firewall. If you’d rather test behavior than read code, that’s genuinely useful.</li>
-    <li><strong>Stricter defaults for sensitive apps.</strong> Comoji stays out of password managers, terminals, and remote-desktop or VM clients out of the box. Mojito skips password fields everywhere and stays out of terminals, but you’d add password-manager and VM apps to its list yourself.</li>
+    <li><strong>Older Macs.</strong> Comoji runs on macOS 13 Ventura; Mojito needs 14 Sonoma.</li>
+    <li><strong>Animated stickers.</strong> <code>/sticker</code> inserts animated emoji stickers (Google’s Noto set) at your cursor.</li>
+    <li><strong>No usage data, ever.</strong> Comoji says it has no analytics, telemetry, or crash reporter. Mojito’s anonymous stats are on by default after a one-time notice; you can decline there or switch them off later.</li>
+    <li><strong>A checklist instead of source code.</strong> Comoji lists every server it talks to, plus a <a href="https://www.comoji.io/blog/verify-comoji-is-local">guide</a> to checking that yourself: genuinely useful if you’d rather test than read code.</li>
+    <li><strong>Stricter defaults.</strong> Comoji skips password managers, terminals, and remote-desktop or VM clients out of the box. Mojito skips password fields and terminals; you’d add password managers and VMs yourself.</li>
   </ul>
 
   <h2>Where Mojito is the better pick</h2>
   <ul>
-    <li><strong>Symbols.</strong> Two colons search hundreds of symbols: <code>::cmd</code> for ⌘, <code>::degree</code> for °, <code>::em_dash</code> for —, plus currency, math, arrows, fractions, and Greek. Comoji has no symbol search; its <code>::</code> opens an emoji browser.</li>
-    <li><strong>Search by meaning.</strong> On top of names and codes, Mojito knows about 8,300 everyday words, so <code>:deploy</code> finds 🚀 and <code>:ghosting</code> finds 👻.</li>
-    <li><strong>Source you can read.</strong> Mojito is AGPL-3.0 open source, including the code that handles your keystrokes. Comoji is closed source and says it has declined to open its input path “for now.”</li>
-    <li><strong>The small conversions.</strong> <code>:)</code> becomes 🙂, <code>&lt;3</code> becomes ❤️, and <code>-&gt;</code> becomes →, with no picker at all.</li>
-    <li><strong>Favorites and the system shortcut.</strong> <code>:?</code> opens favorites you pin. Mojito can also take over <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>Space</kbd> and the 🌐 key with its own emoji browser, and <kbd>Shift</kbd>-<kbd>Return</kbd> inserts several emoji without closing the picker.</li>
-    <li><strong>Your language.</strong> The app is translated into 19 languages, and shortcodes work in 14 of them alongside English, matched to your Mac’s languages: German speakers can type <code>:daumen_hoch</code> for 👍. Comoji is English-only.</li>
-    <li><strong>Allowlist mode.</strong> Flip the exclusion list around so Mojito runs only in the apps you name.</li>
+    <li><strong>Symbols.</strong> <code>::</code> searches hundreds: <code>::cmd</code> for ⌘, <code>::degree</code> for °, plus currency, math, arrows, fractions, and Greek. Comoji’s <code>::</code> opens an emoji browser.</li>
+    <li><strong>Search by meaning.</strong> About 8,300 everyday words, so <code>:deploy</code> finds 🚀 and <code>:ghosting</code> finds 👻.</li>
+    <li><strong>Source you can read</strong>, including the keystroke code. Comoji says it has declined to open its input path “for now.”</li>
+    <li><strong>Small conversions.</strong> <code>:)</code> becomes 🙂 and <code>-&gt;</code> becomes →, with no picker.</li>
+    <li><strong>Favorites and the system shortcut.</strong> <code>:?</code> opens pinned favorites, and Mojito can take over <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>Space</kbd> and the 🌐 key.</li>
+    <li><strong>Your language.</strong> The app is in 19 languages, and shortcodes work in 14, like <code>:daumen_hoch</code> for 👍.</li>
+    <li><strong>Allowlist mode.</strong> Run Mojito only in the apps you name.</li>
   </ul>
 
   <figure class="mdemo mdemo-textedit" data-pre="Signups " data-type="::up" data-result="↑" data-post=" 18% this week, churn flat." data-rows="↑ ::up|↕ ::updown|υ ::upsilon">
@@ -126,10 +119,10 @@
   </figure>
 
   <h2>GIFs: GIPHY vs KLIPY</h2>
-  <p>Both search GIFs from your cursor and paste the real <code>.gif</code> file, so it animates when it lands. Comoji’s <code>/gif</code> searches GIPHY. Mojito’s <code>:::</code> searched GIPHY too until version 1.10.0 on October 1, 2026, and now searches KLIPY, the GIF service co-founded by one of Tenor’s co-founders (more on that in <a href="/tenor-gif-keyboard-mac/">what happened to Tenor</a>). Mojito’s GIF search also works in apps it otherwise steps aside for, like Slack and Discord; you can switch that off.</p>
+  <p>Both paste a real <code>.gif</code> at your cursor, so it animates. Comoji searches GIPHY; Mojito searches KLIPY, co-founded by one of Tenor’s co-founders (<a href="/tenor-gif-keyboard-mac/">what happened to Tenor</a>). Mojito’s also works in Slack and Discord, unless you switch that off.</p>
 
   <h2>Privacy and what reaches the network</h2>
-  <p>Both apps read keystrokes on your Mac and don’t send them anywhere. GIF search is the exception in both: the words you search for go to the GIF service. Beyond that:</p>
+  <p>Neither app sends your keystrokes anywhere. In both, GIF search words go to the GIF service. Beyond that:</p>
   <div class="table-scroll">
   <table class="code-table text-first fit">
     <thead><tr><th scope="col"></th><th scope="col">Comoji</th><th scope="col">Mojito</th></tr></thead>
@@ -144,11 +137,11 @@
   </div>
 
   <h2>About Comoji’s comparison page</h2>
-  <p>Comoji’s own <a href="https://www.comoji.io/compare/mojito">Mojito comparison</a>, checked on September 11, 2026, is mostly fair. Four points have changed since, or weren’t right:</p>
+  <p>Comoji’s <a href="https://www.comoji.io/compare/mojito">Mojito comparison</a>, checked September 11, 2026, is mostly fair. Four points have changed, or weren’t right:</p>
   <ul>
-    <li><strong>“Mojito queries Giphy.”</strong> True when it was written. Mojito switched GIF search to KLIPY in 1.10.0, on October 1, 2026.</li>
-    <li><strong>“The stand-down list is Mojito’s call rather than yours.”</strong> It’s yours. Mojito ships with a list of apps and sites to stay out of, and you can add, remove, or flip it into allowlist mode in Settings.</li>
-    <li><strong>No custom trigger key.</strong> Mojito’s emoji, symbol, GIF, and favorites triggers have all been customizable since version 1.5.</li>
+    <li><strong>“Mojito queries Giphy.”</strong> True when written. Mojito switched to KLIPY in 1.10.0, on October 1, 2026.</li>
+    <li><strong>“The stand-down list is Mojito’s call rather than yours.”</strong> It’s yours: add, remove, or flip it into allowlist mode in Settings.</li>
+    <li><strong>No custom trigger key.</strong> Every Mojito trigger (emoji, symbol, GIF, favorites) has been customizable since 1.5.</li>
     <li><strong>Permissions not published.</strong> A fair point about our homepage. They’re Input Monitoring and Accessibility, explained above and in the <a href="https://github.com/wr/mojito#privacy">README</a>.</li>
   </ul>
 
@@ -170,24 +163,6 @@
       <li>“Totally free, no upgrades, and it works as advertised.” —<a href="https://9to5mac.com/2026/05/27/mojito-for-mac-is-a-new-and-free-emoji-picker-with-auto-complete/">9to5Mac</a></li>
     </ul>
   </aside>
-
-  <h2>Mojito vs Comoji questions</h2>
-  <div class="faq-item">
-    <h3>Can I run Mojito and Comoji at the same time?</h3>
-    <p>Not usefully. Both watch for a colon, so each <code>:</code> would open two pickers. Quit one, or move one of them to a different trigger key.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Is Comoji open source?</h3>
-    <p>No. It’s free, but closed source under a personal-use license. Mojito is open source under AGPL-3.0.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Which one sends less data?</h3>
-    <p>Comoji: it never sends usage data. Mojito’s anonymous stats are on by default after a one-time notice, everything they contain is published, and switching them off stops them. Both send your GIF search words to their GIF service, and neither sends what you type otherwise.</p>
-  </div>
-  <div class="faq-item">
-    <h3>How do they compare with Rocket and Raycast?</h3>
-    <p>Rocket is the long-running paid-upgrade option, and Raycast’s emoji search lives in its launcher window rather than at your cursor. The side-by-side is in <a href="/best-emoji-app-for-mac/">the best emoji app for Mac</a>.</p>
-  </div>
 
   <nav class="guide-more" aria-label="More guides">More guides: <a href="/best-emoji-app-for-mac/">The best emoji app for Mac</a> · <a href="/emoji-shortcodes/">Emoji shortcode cheat sheet</a> · <a href="/mac-key-symbols/">⌘ ⌥ ⇧ key symbols</a> · <a href="/guides/">All guides</a></nav>
 </article>
@@ -224,7 +199,7 @@
    "headline": "Mojito vs Comoji: two free Mac emoji pickers, compared",
    "image": "https://mojito.wells.ee/og/mojito-vs-comoji.png",
    "datePublished": "2026-10-04",
-   "dateModified": "2026-10-04",
+   "dateModified": "2026-10-05",
    "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
    "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
    "mainEntityOfPage": "https://mojito.wells.ee/mojito-vs-comoji/"

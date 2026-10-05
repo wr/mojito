@@ -14,7 +14,7 @@
 <meta property="og:image" content="https://mojito.wells.ee/og/math-symbols-mac.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="article:modified_time" content="2026-10-04">
+<meta property="article:modified_time" content="2026-10-05">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@WellsWorkshop">
 <meta name="twitter:title" content="How to type math symbols on a Mac: π, ≠, ∞, ± and more">
@@ -46,8 +46,8 @@
 <article class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type π, ≠, ∞, ± and other math symbols on a Mac</h1>
-  <p class="guide-sub">Your Mac keyboard already has nearly twenty math symbols on its Option layer, from π to ∫. Here’s every one, the Greek look-alikes that fool search, and what to do about ×, ², ∈ and the other symbols Apple left off.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes Mojito</span><span class="sep">·</span><span>Updated <time datetime="2026-10-04">October 4, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
+  <p class="guide-sub">Your Mac’s Option layer has nearly twenty math symbols, from π to ∫. Here’s every one, and how to type ×, ² and ∈.</p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
 
   <div class="key-answer" role="img" aria-label="Option + P types the pi symbol">
     <span class="key-chord" aria-hidden="true">
@@ -60,13 +60,33 @@
   </div>
 
   <h2>How do I type the pi symbol on a Mac?</h2>
-  <p>Press <kbd>Option</kbd> + <kbd>P</kbd> and macOS types π, in any app, with no setup. The same Option layer holds most of the math you’d put in a sentence: <kbd>Option</kbd> + <kbd>=</kbd> is ≠, <kbd>Option</kbd> + <kbd>5</kbd> is ∞, <kbd>Option</kbd> + <kbd>X</kbd> is ≈, and <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>=</kbd> is ±.</p>
-  <p>Most of them sit roughly where you’d guess. ≠ and ± share the equals key, ≤ and ≥ share keys with &lt; and &gt;, ÷ is on the slash, π is on P, and √ is on V, which it looks like.</p>
+  <p>Press <kbd>Option</kbd> + <kbd>P</kbd> for π, in any app, with no setup. The same layer has ≠ (<kbd>⌥</kbd> <kbd>=</kbd>), ∞ (<kbd>⌥</kbd> <kbd>5</kbd>), ≈ (<kbd>⌥</kbd> <kbd>X</kbd>) and ± (<kbd>⇧</kbd> <kbd>⌥</kbd> <kbd>=</kbd>).</p>
 
-  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong>With Mojito</strong>, you type <code>::pi</code>, <code>::not_equal</code>, or <code>::plus_minus</code>, and the symbols with no key work the same way: <code>::times</code> for ×, <code>::squared</code> for ², <code>::element_of</code> for ∈.</p></div>
+  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong><a href="/">Mojito</a></strong> lets you type <code>::pi</code>, and the symbols with no key too: <code>::times</code> for ×, <code>::squared</code> for ².</p></div>
+
+  <h2>Other ways to type math symbols</h2>
+  <ul>
+    <li><strong>Character Viewer.</strong> Press <kbd>Fn</kbd> + <kbd>E</kbd>, click the expand button (top right), and open <strong>Math Symbols</strong>. ×, ∈, ∀ and the rest are there.</li>
+    <li><strong>Unicode Hex Input.</strong> Add it in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span>, switch to it, and hold <kbd>Option</kbd> while typing a code: <code>00D7</code> is ×.</li>
+    <li><strong>Text replacement.</strong> In <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, map <code>;x</code> to ×. Syncs to your iPhone, but only works in Apple’s apps.</li>
+    <li><strong>Shortcode.</strong> With Mojito, type <code>::times</code> or <code>::squ</code> in any app and press <kbd>Return</kbd>. Typed arrows convert too: <code>-&gt;</code> becomes →.</li>
+  </ul>
+
+  <figure class="mdemo mdemo-textedit" data-pre="Area = πr" data-type="::squ" data-result="²" data-post=" ≈ 12.57 cm²" data-rows="² ::squared|⊓ ::square_cap|⊔ ::square_cup">
+    <div class="mdemo-stage" aria-hidden="true">
+      <div class="mdemo-win">
+        <div class="mdemo-bar"><span class="mdemo-lights"><i></i><i></i><i></i></span><span class="mdemo-title">Homework.rtf</span></div>
+        <div class="mdemo-body">
+          <p class="mdemo-line" data-line>Area = πr² ≈ 12.57 cm²</p>
+          <p>where r = 2 cm</p>
+        </div>
+      </div>
+    </div>
+    <figcaption>Mojito in TextEdit: type <code>::squ</code>, press Return, and ² replaces the shortcode. Every symbol whose name fits shows up, best match first.</figcaption>
+  </figure>
 
   <h2>Every math symbol on the Mac keyboard</h2>
-  <p>These are the US layout. Everything here is the same on the <a href="/currency-symbols-mac/">British layout</a> except ‰, which moves to <kbd>⇧</kbd> <kbd>⌥</kbd> <kbd>E</kbd>.</p>
+  <p>US layout. The <a href="/currency-symbols-mac/">British layout</a> matches except ‰, which moves to <kbd>⇧</kbd> <kbd>⌥</kbd> <kbd>E</kbd>.</p>
   <div class="table-scroll">
   <table class="code-table">
     <thead><tr><th scope="col">Symbol</th><th scope="col">Name</th><th scope="col">Mac shortcut</th><th scope="col">Mojito</th></tr></thead>
@@ -94,33 +114,14 @@
   </table>
   </div>
 
+  <p><strong>Only π and Ω are real Greek letters.</strong> ∆, ∑, ∏ and µ are look-alike math characters, so a search for one usually won’t find the other. For Greek text, use <code>::Delta</code>, <code>::Sigma</code>, <code>::Pi</code> or <code>::mu</code>.</p>
+
   <figure class="kbmap" data-mark="option:P option:= shift-option:= option:5" hidden>
     <figcaption>π, ≠, ± and ∞ on the US layout. Switch layers to find the rest, or click any key to copy its character.</figcaption>
   </figure>
 
-  <h2>Is π the only Greek letter on the keyboard?</h2>
-  <p>No, whatever you may have read. <kbd>Option</kbd> + <kbd>Z</kbd> types a real capital omega, Ω. Four more keys type characters that look Greek but are, as far as Unicode is concerned, separate math symbols:</p>
-  <div class="table-scroll">
-  <table class="code-table">
-    <thead><tr><th scope="col">Types</th><th scope="col">Key</th><th scope="col">Unicode name</th><th scope="col">Greek letter</th><th scope="col">Mojito</th></tr></thead>
-    <tbody>
-      <tr><td>∆</td><td><kbd>⌥</kbd> <kbd>J</kbd></td><td>Increment</td><td>Δ</td><td><code>::Delta</code></td></tr>
-      <tr><td>∑</td><td><kbd>⌥</kbd> <kbd>W</kbd></td><td>N-ary summation</td><td>Σ</td><td><code>::Sigma</code></td></tr>
-      <tr><td>∏</td><td><kbd>⇧</kbd> <kbd>⌥</kbd> <kbd>P</kbd></td><td>N-ary product</td><td>Π</td><td><code>::Pi</code></td></tr>
-      <tr><td>µ</td><td><kbd>⌥</kbd> <kbd>M</kbd></td><td>Micro sign</td><td>μ</td><td><code>::mu</code></td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p>To a reader they’re identical. To a computer they’re different characters, so searching for one usually won’t find the other, and a font is free to draw them differently. For a quick ∆x in an email, <kbd>⌥</kbd> <kbd>J</kbd> is fine. For Greek text, or anything that will be searched or typeset, use the real letter.</p>
-  <p>The rest of the alphabet (α, β, θ, λ, σ, ω and friends) has no key on the US layout. You have three routes:</p>
-  <ul>
-    <li><strong>Character Viewer:</strong> Greek isn’t in the sidebar by default. In the expanded viewer, open the Action menu, choose <strong>Customize List</strong>, and turn on <strong>Greek</strong>.</li>
-    <li><strong>The Greek layout:</strong> add it under <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span> and switch to it from the Input menu. Most letters map by sound (L types λ, D types δ), with a few surprises, like θ on U.</li>
-    <li><strong>Mojito:</strong> <code>::alpha</code> through <code>::omega</code>, and <code>::lambda</code> works even though Unicode spells it “lamda.” Capitals have their own codes (<code>::Delta</code>, <code>::Sigma</code>, <code>::Omega</code>); type the name and both cases show up in the picker, lowercase first.</li>
-  </ul>
-
   <h2>Which math symbols have no Mac shortcut?</h2>
-  <p>Quite a few everyday ones. The multiplication sign is the big one, which is why so much math in email reads “3 x 4.” None of these is on the US or British layout:</p>
+  <p>None of these has a key. Use the Character Viewer or a shortcode.</p>
   <div class="table-scroll">
   <table class="code-table">
     <thead><tr><th scope="col">Symbols</th><th scope="col">What</th><th scope="col">Mojito</th></tr></thead>
@@ -138,32 +139,6 @@
     </tbody>
   </table>
   </div>
-
-  <h2>4 ways to type the symbols with no key</h2>
-  <ol class="guide-steps">
-    <li><strong>The Character Viewer:</strong> press <kbd>Fn</kbd> + <kbd>E</kbd> (or <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Space</kbd>), click the expand button in the panel’s top-right corner, and open <strong>Math Symbols</strong> in the sidebar. ×, ∈, ∪, ∀ and the rest are there; double-click one to insert it. Arrows have their own category, and superscripts are quickest found by searching for “superscript.”</li>
-    <li><strong>Unicode Hex Input:</strong> add it in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span> (click <strong>+</strong> and search for it), switch to it, then hold <kbd>Option</kbd> and type the code. <kbd>Option</kbd> + <code>00D7</code> types ×, <code>00B2</code> types ².</li>
-    <li><strong>A text replacement:</strong> in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, map something like <code>;x</code> to ×. It syncs to your iPhone, but it only fires in apps built on Apple’s text system, so not in Chrome, Slack, or VS Code.</li>
-    <li><strong>A shortcode:</strong> with <a href="/">Mojito</a> installed, type <code>::times</code> or <code>::squ</code> in any text field and press <kbd>Return</kbd>. It also converts typed arrows as you go: <code>-&gt;</code> becomes →, <code>&lt;-</code> becomes ←, and <code>&lt;-&gt;</code> becomes ↔.</li>
-  </ol>
-
-  <figure class="mdemo mdemo-textedit" data-pre="Area = πr" data-type="::squ" data-result="²" data-post=" ≈ 12.57 cm²" data-rows="² ::squared|⊓ ::square_cap|⊔ ::square_cup">
-    <div class="mdemo-stage" aria-hidden="true">
-      <div class="mdemo-win">
-        <div class="mdemo-bar"><span class="mdemo-lights"><i></i><i></i><i></i></span><span class="mdemo-title">Homework.rtf</span></div>
-        <div class="mdemo-body">
-          <p class="mdemo-line" data-line>Area = πr² ≈ 12.57 cm²</p>
-          <p>where r = 2 cm</p>
-        </div>
-      </div>
-    </div>
-    <figcaption>Mojito in TextEdit: type <code>::squ</code>, press Return, and ² replaces the shortcode. Every symbol whose name fits shows up, best match first.</figcaption>
-  </figure>
-
-  <h2>Should x² be formatting or a character?</h2>
-  <p>In a document, formatting is usually the better choice. In TextEdit, select the 2 and choose <span class="ui-path"><span>Format</span><span>Font</span><span>Baseline</span><span>Superscript</span></span>. Pages has shortcuts: <kbd>⌃</kbd> <kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>+</kbd> for superscript and <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>-</kbd> for subscript.</p>
-  <p>Formatting disappears the moment text goes somewhere plain, though: a message, a spreadsheet cell, a filename, a code comment. The characters ² and ₂ survive anywhere. Unicode only has superscript and subscript digits plus a patchy set of letters, so anything past x² or H₂O wants formatting or an equation.</p>
-  <p>For real equations, use an equation editor. In Pages, choose <span class="ui-path"><span>Insert</span><span>Equation</span></span> and write it in LaTeX or MathML; double-click it later to edit. Word has <span class="ui-path"><span>Insert</span><span>Equation</span></span>, and Google Docs has <span class="ui-path"><span>Insert</span><span>Symbols</span><span>Equation</span></span>.</p>
 
   <aside class="get-mojito" aria-labelledby="get-mojito-h">
     <img src="/app-icon-128.png" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -186,24 +161,12 @@
 
   <h2>More math symbol questions</h2>
   <div class="faq-item">
-    <h3>How do I type the multiplication sign (×) on a Mac?</h3>
-    <p>There’s no key for it. Open the Character Viewer’s Math Symbols list, use Unicode Hex Input (<kbd>Option</kbd> + <code>00D7</code>), or type <code>::times</code> with Mojito. A lowercase x reads fine in casual writing; in anything typeset, the real × is easier on the eye.</p>
-  </div>
-  <div class="faq-item">
     <h3>Why does Option-V type √ instead of a check mark?</h3>
-    <p><kbd>Option</kbd> + <kbd>V</kbd> is the square root sign, and macOS has no check mark key at all. <a href="/check-mark-mac/">Typing a real ✓</a> takes the Character Viewer or a shortcode.</p>
+    <p><kbd>Option</kbd> + <kbd>V</kbd> is the square root sign, and macOS has no check mark key. <a href="/check-mark-mac/">Typing a real ✓</a> takes the Character Viewer or a shortcode.</p>
   </div>
   <div class="faq-item">
     <h3>My Option shortcuts don’t work in Terminal. Why?</h3>
-    <p>Terminal’s <strong>Use Option as Meta key</strong> setting, under <span class="ui-path"><span>Terminal</span><span>Settings</span><span>Profiles</span><span>Keyboard</span></span>, sends Option to the shell instead of typing symbols. Turn it off and ⌥P is π again.</p>
-  </div>
-  <div class="faq-item">
-    <h3>What are the HTML codes for math symbols?</h3>
-    <p><code>&amp;pi;</code> π, <code>&amp;ne;</code> ≠, <code>&amp;le;</code> ≤, <code>&amp;ge;</code> ≥, <code>&amp;plusmn;</code> ±, <code>&amp;times;</code> ×, <code>&amp;divide;</code> ÷, <code>&amp;minus;</code> −, <code>&amp;infin;</code> ∞, <code>&amp;radic;</code> √, and <code>&amp;sum;</code> ∑.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Why does <code>:infinity:</code> give me ♾️ instead of ∞?</h3>
-    <p>In Mojito, one colon searches emoji and two search symbols. <code>:infinity:</code> is the emoji; <code>::infinity</code> is the math symbol. Hyphens and degree signs have look-alikes too: see the guides to the <a href="/em-dash-mac/">minus sign and dashes</a> and the <a href="/degree-symbol-mac/">degree symbol</a>.</p>
+    <p>Turn off <strong>Use Option as Meta key</strong> in <span class="ui-path"><span>Terminal</span><span>Settings</span><span>Profiles</span><span>Keyboard</span></span>. Then ⌥P is π again.</p>
   </div>
 
   <nav class="guide-more" aria-label="More guides">More guides: <a href="/degree-symbol-mac/">Degree symbol (°)</a> · <a href="/currency-symbols-mac/">Currency symbols (€ £ ¥)</a> · <a href="/mac-key-symbols/">⌘ ⌥ ⇧ key symbols</a> · <a href="/guides/">All guides</a></nav>
@@ -241,7 +204,7 @@
    "headline": "How to type π, ≠, ∞, ± and other math symbols on a Mac",
    "image": "https://mojito.wells.ee/og/math-symbols-mac.png",
    "datePublished": "2026-07-21",
-   "dateModified": "2026-10-04",
+   "dateModified": "2026-10-05",
    "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
    "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
    "mainEntityOfPage": "https://mojito.wells.ee/math-symbols-mac/"
