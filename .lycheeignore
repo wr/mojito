@@ -7,3 +7,7 @@
 # but it resolves on the deployed site (mojito.wells.ee/stats). Scope the ignore
 # to the local server so the real URL is still validated if referenced absolutely.
 localhost:[0-9]+/stats$
+
+# /download is the Cloudflare Worker redirect to the latest DMG (mojito repo
+# download-worker); it only exists on the deployed domain.
+localhost:[0-9]+/download
