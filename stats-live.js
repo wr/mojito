@@ -209,11 +209,16 @@
       '%"></span></span><span class="bar-val">' + val + "</span></div>";
   }
 
+  // emojibase hexcodes drop the FE0F on single code points, so one without
+  // default emoji presentation (2764 ❤, 263A ☺, 2122 ™) would render as its
+  // monochrome text glyph. Re-add the variation selector for those.
+  var TEXT_DEFAULT = /^\P{Emoji_Presentation}$/u;
   function hexToEmoji(hex) {
     try {
-      return String.fromCodePoint.apply(null, hex.split("-").map(function (h) {
+      var s = String.fromCodePoint.apply(null, hex.split("-").map(function (h) {
         return parseInt(h, 16);
       }));
+      return TEXT_DEFAULT.test(s) ? s + "️" : s;
     } catch (e) { return "·"; }
   }
 
