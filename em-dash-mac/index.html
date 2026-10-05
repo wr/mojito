@@ -14,7 +14,7 @@
 <meta property="og:image" content="https://mojito.wells.ee/og/em-dash-mac.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="article:modified_time" content="2026-10-04">
+<meta property="article:modified_time" content="2026-10-05">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@WellsWorkshop">
 <meta name="twitter:title" content="How to type an em dash (—) on a Mac">
@@ -46,8 +46,8 @@
 <article class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">How to type an em dash on a Mac (—)</h1>
-  <p class="guide-sub">Hold Shift and Option, press Hyphen. That one shortcut works in every app on your Mac. Below: four other ways in, the en dash it’s easily confused with, and the setting that types dashes for you whether you asked or not.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes Mojito</span><span class="sep">·</span><span>Updated <time datetime="2026-10-04">October 4, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
+  <p class="guide-sub">Shift-Option-Hyphen, in any app. Here’s that, the en dash, and how to stop <code>--</code> turning into a dash on its own.</p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
 
   <div class="key-answer" role="img" aria-label="Shift + Option + Hyphen types the em dash">
     <span class="key-chord" aria-hidden="true">
@@ -60,19 +60,18 @@
   </div>
 
   <h2>What’s the em dash shortcut on a Mac?</h2>
-  <p>Press <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>Hyphen</kbd> (the key just right of <kbd>0</kbd>). macOS types an em dash, —, wherever your cursor is: Pages, Gmail in Chrome, Slack, Terminal, a filename in Finder. Leave out Shift, so it’s <kbd>Option</kbd> + <kbd>Hyphen</kbd>, and you get the shorter en dash, –.</p>
-  <p>It works everywhere because it isn’t an app feature. The dash is printed on your keyboard layout itself, one layer down, the same way <kbd>Shift</kbd> + <kbd>8</kbd> is an asterisk. These shortcuts are for the standard US layout; other layouts can move keys around, so if nothing happens, check the keyboard map further down.</p>
+  <p>Press <kbd>Shift</kbd> + <kbd>Option</kbd> + <kbd>Hyphen</kbd> (the key right of <kbd>0</kbd>). Leave out Shift for the shorter en dash (–).</p>
+  <p>It works in every app because it’s part of the keyboard layout, not an app feature. That’s the US layout; other layouts can put it elsewhere.</p>
 
-  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong>With Mojito</strong>, you can type <code>::em_dash</code> (or just <code>::em</code> and pick it from the list). Shortcodes don’t care which keyboard layout you use.</p></div>
+  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong><a href="/">Mojito</a></strong> lets you type <code>::em</code> and press <kbd>Return</kbd> instead, on any keyboard layout.</p></div>
 
-  <h2>5 ways to type an em dash on a Mac</h2>
-  <ol class="guide-steps">
-    <li><strong>The shortcut:</strong> <kbd>⇧</kbd> <kbd>⌥</kbd> <kbd>-</kbd>. Fastest once it’s in your fingers, and it works in every app.</li>
-    <li><strong>Two hyphens:</strong> in Apple’s own apps (TextEdit, Notes, Mail, Messages), typing <code>--</code> becomes — on its own when Smart Dashes is on. Handy, but it does nothing in Chrome, Slack, VS Code, or most cross-platform apps.</li>
-    <li><strong>The Character Viewer:</strong> press <kbd>Fn</kbd> + <kbd>E</kbd> (or <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Space</kbd>), click the expand button in the panel’s top-right corner, search for <em>em dash</em>, and double-click it.</li>
-    <li><strong>A text replacement:</strong> in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, click <strong>+</strong>, and map something like <code>;em</code> to —. It syncs to your iPhone through iCloud, but like Smart Dashes, it only fires in apps built on Apple’s text system.</li>
-    <li><strong>A shortcode:</strong> with <a href="/">Mojito</a> installed, type <code>::em_dash</code> in any text field. A picker appears as you type, so <code>::em</code> plus <kbd>Return</kbd> is enough.</li>
-  </ol>
+  <h2>Other ways to type it</h2>
+  <ul>
+    <li><strong>Two hyphens.</strong> Type <code>--</code> in Apple’s apps (TextEdit, Notes, Mail, Messages) and Smart Dashes turns it into —. Doesn’t work in Chrome, Slack, or VS Code.</li>
+    <li><strong>Character Viewer.</strong> Press <kbd>Fn</kbd> + <kbd>E</kbd>, click the expand button (top right), search <em>em dash</em>, and double-click it.</li>
+    <li><strong>Text replacement.</strong> In <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Replacements…</span></span>, map <code>;em</code> to —. Syncs to your iPhone, but only works in Apple’s apps.</li>
+    <li><strong>Shortcode.</strong> With Mojito, type <code>::em_dash</code> in any app, or just <code>::em</code> and pick it from the list.</li>
+  </ul>
 
   <figure class="mdemo mdemo-mail" data-pre="The launch moved to Thursday" data-type="::em" data-result="—" data-post="we need one more day for QA." data-rows="— ::em_dash|∅ ::emptyset|⎃ ::emphasis_symbol">
     <div class="mdemo-stage" aria-hidden="true">
@@ -89,7 +88,6 @@
   </figure>
 
   <h2>Em dash, en dash, or hyphen?</h2>
-  <p>They look alike and do three different jobs. Here’s the cheat sheet:</p>
   <div class="table-scroll">
   <table class="code-table">
     <thead><tr><th scope="col">Mark</th><th scope="col">Name</th><th scope="col">Mac shortcut</th><th scope="col">Use it for</th><th scope="col">Mojito</th></tr></thead>
@@ -101,24 +99,23 @@
     </tbody>
   </table>
   </div>
-  <p>The em dash is the loud one. It sets off an aside, marks a sudden turn, or stands in for a colon when you want more punch. The en dash, half its width, means “to” or “versus”: <code>1990–2000</code>, the <code>New York–London</code> flight, a <code>3–1</code> win. The hyphen joins words that work as one. Using a hyphen as a range (<code>Mon-Fri</code>) is the most common slip in otherwise careful writing, and an easy one to fix now that you know <kbd>⌥</kbd> <kbd>-</kbd>.</p>
+  <p>The most common slip is a hyphen in a range (<code>Mon-Fri</code>). Use the en dash: <kbd>⌥</kbd> <kbd>-</kbd>.</p>
 
   <figure class="kbmap" data-mark="shift-option:- option:-" hidden>
     <figcaption>Both dashes live on the Hyphen key. Switch layers to see them, or click any key to copy its character.</figcaption>
   </figure>
 
-  <h2>Why does -- turn into — by itself?</h2>
-  <p>That’s macOS’s <strong>Smart Dashes</strong> substitution, the sibling of smart quotes. In apps that use Apple’s text system, two hyphens in a row become an em dash as you type. If you’re writing code, a command-line flag like <code>--force</code>, or Markdown, that’s exactly what you don’t want.</p>
+  <h2>How do I stop -- turning into —?</h2>
+  <p>That’s Smart Dashes, and it gets in the way when you’re typing code or a flag like <code>--force</code>.</p>
   <ul>
-    <li><strong>One app:</strong> in that app’s menu bar, choose <span class="ui-path"><span>Edit</span><span>Substitutions</span><span>Smart Dashes</span></span> to toggle it.</li>
-    <li><strong>Everywhere:</strong> open <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span> and turn off <strong>Use smart quotes and dashes</strong>. It’s one switch for both, so straight quotes come back too.</li>
-    <li><strong>Pages, Numbers, Keynote:</strong> they keep their own list under <span class="ui-path"><span>Pages</span><span>Settings</span><span>Auto-Correction</span></span>.</li>
-    <li><strong>Microsoft Word:</strong> Word ignores the macOS switch. Look under <span class="ui-path"><span>Word</span><span>Preferences</span><span>AutoCorrect</span><span>AutoFormat As You Type</span></span> for the option that replaces hyphens with dashes.</li>
+    <li><strong>One app:</strong> <span class="ui-path"><span>Edit</span><span>Substitutions</span><span>Smart Dashes</span></span></li>
+    <li><strong>Every app:</strong> turn off <strong>Use smart quotes and dashes</strong> in <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Text Input</span><span>Edit…</span></span>. It turns off smart quotes too.</li>
+    <li><strong>Pages, Numbers, Keynote:</strong> <span class="ui-path"><span>Pages</span><span>Settings</span><span>Auto-Correction</span></span></li>
+    <li><strong>Word:</strong> <span class="ui-path"><span>Word</span><span>Preferences</span><span>AutoCorrect</span><span>AutoFormat As You Type</span></span></li>
   </ul>
-  <p>The reverse problem, a stubborn hyphen that won’t become a dash, usually means the app isn’t using Apple’s text system at all. The keyboard shortcut still works there; the substitution never will.</p>
 
-  <h2>How do I type an em dash on iPhone or iPad?</h2>
-  <p>Switch to the <strong>123</strong> keyboard, then press and hold the hyphen key. A small menu slides up with the en dash (–), the em dash (—), and a bullet (•); slide to the one you want and let go.</p>
+  <h2>How do I type an em dash on iPhone?</h2>
+  <p>On the <strong>123</strong> keyboard, press and hold the hyphen key, then slide to —.</p>
 
   <aside class="get-mojito" aria-labelledby="get-mojito-h">
     <img src="/app-icon-128.png" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -142,23 +139,11 @@
   <h2>More dash questions</h2>
   <div class="faq-item">
     <h3>Should there be spaces around an em dash?</h3>
-    <p>Depends on whose rules you follow. AP style, common in news writing, puts a space on each side ( — ). The Chicago Manual of Style and most book publishers close it up (—). Neither is wrong; pick one per document and stick to it.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Does using em dashes make my writing look AI-generated?</h3>
-    <p>Chatbots lean on the em dash heavily, so some readers now treat it as a tell. It’s a bad heuristic: the mark has been doing honest work in English since long before computers. If a sentence reads better with one, use it. If you’re reaching for one in every paragraph, that’s worth a second look regardless of who’s reading.</p>
+    <p>AP style (news) uses spaces ( — ); Chicago and most books don’t (—). Pick one and stay consistent.</p>
   </div>
   <div class="faq-item">
     <h3>What’s the HTML code for an em dash?</h3>
-    <p><code>&amp;mdash;</code> or <code>&amp;#8212;</code> for — (Unicode U+2014), and <code>&amp;ndash;</code> or <code>&amp;#8211;</code> for – (U+2013).</p>
-  </div>
-  <div class="faq-item">
-    <h3>Why do three hyphens in Markdown make a line instead?</h3>
-    <p>On a line by itself, <code>---</code> is Markdown for a horizontal rule. Directly under a line of text, it turns that text into a heading. Neither has anything to do with dashes; type ⇧⌥- for a real em dash in Markdown.</p>
-  </div>
-  <div class="faq-item">
-    <h3>How do I type an em dash on Windows?</h3>
-    <p>Hold <kbd>Alt</kbd> and type <code>0151</code> on the numeric keypad (<code>0150</code> for the en dash), or press <kbd>Win</kbd> + <kbd>.</kbd> and look under Symbols.</p>
+    <p><code>&amp;mdash;</code> for — and <code>&amp;ndash;</code> for –.</p>
   </div>
 
   <nav class="guide-more" aria-label="More guides">More guides: <a href="/degree-symbol-mac/">Degree symbol (°)</a> · <a href="/math-symbols-mac/">Math symbols (π ≠ ±)</a> · <a href="/mac-key-symbols/">⌘ ⌥ ⇧ key symbols</a> · <a href="/guides/">All guides</a></nav>
@@ -196,7 +181,7 @@
    "headline": "How to type an em dash on a Mac (—)",
    "image": "https://mojito.wells.ee/og/em-dash-mac.png",
    "datePublished": "2026-07-21",
-   "dateModified": "2026-10-04",
+   "dateModified": "2026-10-05",
    "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
    "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
    "mainEntityOfPage": "https://mojito.wells.ee/em-dash-mac/"

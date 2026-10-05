@@ -46,11 +46,11 @@
 <article class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / Privacy</p>
   <h1 class="guide-title">Mojito and your privacy</h1>
-  <p class="guide-sub">Mojito reads your keystrokes, so you should know exactly what it does with them. This page lists every permission it asks for, every request it makes to the internet, and everything it keeps on your Mac, checked line by line against its source code.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes Mojito</span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Checked against Mojito 1.10.0</span></p>
+  <p class="guide-sub">Mojito reads your keystrokes. Here’s every permission it asks for, everything it sends, and everything it keeps, checked against its code.</p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Checked against Mojito 1.10.0</span></p>
 
   <h2>Is Mojito safe to give keystroke access?</h2>
-  <p>Here’s everything in one paragraph. Mojito watches what you type for shortcodes like <code>:tada:</code>, on your Mac. What you type isn’t saved or sent anywhere, with one exception: when you search for a GIF with <code>:::</code>, the search words go to KLIPY, the GIF service. Beyond that, Mojito goes online only to check for updates and, unless you switch it off, to send a once-a-day anonymous count of which features and emoji get used. It never opens in password fields. And it’s <a href="https://github.com/wr/mojito">open source</a>, so none of this has to be taken on trust.</p>
+  <p><a href="/">Mojito</a> watches for shortcodes like <code>:tada:</code> on your Mac. What you type isn’t saved or sent anywhere, except <strong>GIF search words</strong>, which go to KLIPY. It never opens in password fields, and it’s <a href="https://github.com/wr/mojito">open source</a>.</p>
 
   <div class="table-scroll">
   <table class="code-table text-first">
@@ -65,40 +65,42 @@
   </div>
 
   <h2>Why does Mojito need Accessibility and Input Monitoring?</h2>
-  <p>Every app that autocompletes as you type, in any app, needs this same pair. Here’s what Mojito does with each.</p>
   <h3>Input Monitoring: seeing the shortcode</h3>
-  <p>Mojito has to see keystrokes to notice <code>:</code>, <code>::</code>, <code>:::</code>, or <code>:)</code> as you type them. It ignores key combinations that use <kbd>⌘</kbd>, <kbd>⌃</kbd>, or <kbd>⌥</kbd> (except <kbd>⌘</kbd> <kbd>Z</kbd>, so undo works). It holds only the shortcode you’re in the middle of typing, plus the current word so it can turn <code>:)</code> into 🙂, and only in memory. The shortcode is dropped the moment you insert or cancel; the word is dropped at a space or after a second of not typing.</p>
-  <p>The keyboard hook can swallow keys, because <kbd>Return</kbd> and the arrow keys need to drive the picker instead of your document while it’s open. It never swallows anything in an app you’ve excluded, and it’s removed entirely while Mojito is paused.</p>
+  <ul>
+    <li><strong>Watches for</strong> <code>:</code>, <code>::</code>, <code>:::</code>, or <code>:)</code>. Ignores <kbd>⌘</kbd>, <kbd>⌃</kbd>, and <kbd>⌥</kbd> combinations, except <kbd>⌘</kbd> <kbd>Z</kbd>.</li>
+    <li><strong>Holds only</strong> the shortcode you’re typing (until you insert or cancel) and the current word (until a space or a second’s pause), in memory.</li>
+    <li><strong>Can swallow keys</strong>, so <kbd>Return</kbd> and the arrows drive the open picker. Never in excluded apps; the hook is removed while paused.</li>
+  </ul>
   <h3>Accessibility: finding your cursor and inserting the emoji</h3>
-  <p>Accessibility does four jobs:</p>
-  <ol class="guide-steps">
-    <li><strong>Find your text cursor</strong>, so the picker opens right next to it. To tell whether you’re at the start of a line, it looks at the one character before the cursor. It doesn’t read the rest of your document.</li>
-    <li><strong>Check what kind of field you’re in</strong>, so it stays out of password fields.</li>
-    <li><strong>Read the current website’s address</strong> in your browser, so per-site exclusions work. Only the host name is matched.</li>
-    <li><strong>Put the emoji in</strong>, by typing it the way a keyboard would, or by pasting a GIF.</li>
-  </ol>
-  <p>In Electron and Chromium apps such as Slack, Mojito switches on the app’s accessibility support so it can find the cursor there.</p>
-  <h3>Automation: Arc only</h3>
-  <p>Arc doesn’t show its address bar to Accessibility, so to apply per-site exclusions there, Mojito asks Arc for the current tab’s address using AppleScript. macOS asks you first, with this reason: “Mojito reads the current tab’s URL in Arc to apply your per-site exclusions.” Every other browser uses Accessibility instead.</p>
-  <h3>What Mojito doesn’t ask for</h3>
-  <p>Screen Recording, Full Disk Access, your camera, microphone, location, or contacts. To check what it has, open <span class="ui-path"><span>System Settings</span><span>Privacy &amp; Security</span></span>; you can switch any of them off there.</p>
+  <ul>
+    <li><strong>Find your cursor</strong>, reading only the one character before it, not your document.</li>
+    <li><strong>Check the field type</strong>, to stay out of password fields.</li>
+    <li><strong>Read the website’s address</strong>, for per-site exclusions. Only the host name is matched.</li>
+    <li><strong>Insert the emoji</strong> by typing it like a keyboard, or by pasting a GIF.</li>
+  </ul>
+  <h3>Everything else</h3>
+  <ul>
+    <li><strong>Automation, Arc only:</strong> Arc hides its address bar from Accessibility, so Mojito asks Arc for the tab’s address with AppleScript. macOS asks you first.</li>
+    <li><strong>Never requested:</strong> Screen Recording, Full Disk Access, camera, microphone, location, or contacts.</li>
+  </ul>
 
   <h2>Password fields and Secure Input</h2>
-  <p>Mojito won’t open its picker, search GIFs, or paste into a password field. It checks the field’s type before it starts listening for a shortcode, and again before it pastes. If it can’t tell what kind of field you’re in, it treats it as off-limits.</p>
-  <p>Separately, when an app switches on macOS’s Secure Input (Terminal’s Secure Keyboard Entry, some password managers and VPN clients do), macOS cuts off every keystroke tool, Mojito included, until that app lets go. If Mojito suddenly does nothing anywhere, that’s usually why; <a href="/emoji-picker-not-working-mac/">here’s how to find the app responsible</a>.</p>
+  <ul>
+    <li><strong>Password fields</strong>, and any field Mojito can’t identify: no picker, GIF search, or pasting.</li>
+    <li><strong>Secure Input:</strong> when an app turns it on (Terminal’s Secure Keyboard Entry, some password managers and VPN clients), macOS blocks every keystroke tool, Mojito included. <a href="/emoji-picker-not-working-mac/">Find the app responsible</a>.</li>
+  </ul>
 
   <h2>What Mojito keeps on your Mac</h2>
   <ul>
-    <li><strong>Your settings:</strong> triggers, which features are on, your excluded apps and sites, and whether Mojito is paused.</li>
-    <li><strong>How often you use each emoji</strong>, as a single count per emoji with no dates, so the ones you use rise to the top. Plus lifetime totals (emoji, symbols, GIFs), and the date you first opened it.</li>
-    <li><strong>Your favorites and custom aliases.</strong></li>
-    <li><strong>GIFs:</strong> a cache of up to 50 MB of results, and each GIF you paste, kept in a temporary folder for a few minutes. That file’s name includes your search word, because chat apps show it when you upload.</li>
+    <li><strong>Settings:</strong> triggers, features, excluded apps and sites, and whether it’s paused.</li>
+    <li><strong>Emoji counts:</strong> one undated count per emoji, for ranking. Plus lifetime totals and the date you first opened it.</li>
+    <li><strong>Favorites and custom aliases.</strong></li>
+    <li><strong>GIFs:</strong> up to 50 MB of cached results. Each GIF you paste sits in a temporary folder for a few minutes, and <strong>its filename includes your search word</strong>, because chat apps show it on upload.</li>
   </ul>
-  <p>None of it records the text you type. The closest it gets is which emoji you use, your alias words, and, briefly, a GIF search word.</p>
+  <p>None of it is the text you type. The closest is which emoji you use, your alias words, and, briefly, a GIF search word.</p>
 
   <h2>Anonymous usage stats: exactly what’s sent</h2>
-  <p>Stats are on by default, but nothing is sent until Mojito has shown a one-time notice explaining them. You can choose “Not now” there, or switch stats off any time in <span class="ui-path"><span>Settings</span><span>General</span></span>. Development builds never send them.</p>
-  <p>When stats are on, Mojito sends at most one report a day to <code>stats.mojito.wells.ee</code>. This is the complete list of what’s in it:</p>
+  <p><strong>On by default</strong>, but nothing is sent until Mojito has shown a one-time notice; choose “Not now” there, or switch stats off any time. A report contains only this:</p>
   <div class="table-scroll">
   <table class="code-table text-first fit">
     <thead><tr><th scope="col">Sent</th><th scope="col">Example</th></tr></thead>
@@ -113,28 +115,30 @@
     </tbody>
   </table>
   </div>
-  <p><strong>Never sent:</strong> anything you type, which apps or websites you use, your GIF searches, your aliases, timestamps, or any ID that could link one day’s report to the next. The stats service reads only the report itself, never your IP address or device details, and stores daily totals, not individual reports. Everything it has is published at <a href="/stats">mojito.wells.ee/stats</a>.</p>
-  <p><strong>Coming in the next release:</strong> three yes/no answers worked out on your Mac (is this a new install, used this week, used this month) so active users can be counted without giving anyone an ID.</p>
+  <ul>
+    <li><strong>Never sent:</strong> anything you type, apps or sites, GIF searches, aliases, timestamps, or any ID linking one day’s report to the next.</li>
+    <li><strong>On the server:</strong> it never reads your IP address or device details, and stores only daily totals, all public at <a href="/stats">/stats</a>.</li>
+    <li><strong>Next release:</strong> three yes/no answers worked out on your Mac (new install? used this week? this month?), to count active users with no ID.</li>
+  </ul>
 
   <h2>GIF search and KLIPY</h2>
-  <p>Type <code>:::</code> and a word, and Mojito asks KLIPY for matching GIFs. Each request carries:</p>
+  <p>Each <code>:::</code> search sends KLIPY:</p>
   <ul>
-    <li>Your search words. Requests go out after a short pause in typing, so a half-typed word can be sent too.</li>
-    <li>The results page, the number of results (24), a content rating (KLIPY’s “medium”), and “GIFs only.”</li>
-    <li>Your country, so results suit where you are.</li>
-    <li>Mojito’s app key, which is the same for everyone. No customer ID, device ID, or account.</li>
+    <li><strong>Your search words</strong>, after a short typing pause, so a half-typed word can go too.</li>
+    <li><strong>Your country</strong>, to localize results.</li>
+    <li><strong>An app key</strong> that’s the same for everyone.</li>
+    <li>The results page, 24 results, KLIPY’s “medium” rating, and “GIFs only.”</li>
   </ul>
-  <p>The GIF images themselves then load from KLIPY’s servers. KLIPY’s own privacy policy covers what it keeps on its side. Mojito doesn’t keep a list of your searches, though recent results sit in its GIF cache for a while. Mojito used GIPHY until version 1.10.0, and no GIPHY code is left in the app.</p>
-  <p>By default, GIF search works even in apps and sites Mojito otherwise steps aside for, like Slack and Discord. Turn off <strong>Always let GIF search work</strong> in <span class="ui-path"><span>Settings</span><span>Exclusions</span></span> to change that, or switch GIF search off entirely in <span class="ui-path"><span>Settings</span><span>General</span></span>.</p>
+  <p>Mojito keeps no list of your searches. GIF search works even in apps Mojito otherwise skips, like Slack and Discord, unless you <a href="#controls">turn that off</a>.</p>
 
   <h2>How to check all this yourself</h2>
   <ul>
-    <li><strong>Read the code.</strong> Mojito is <a href="https://github.com/wr/mojito">AGPL-3.0 open source</a>. The keyboard hook, the field checks, and the network code are all there, and you can build it yourself.</li>
-    <li><strong>Watch its connections.</strong> With a firewall like <a href="https://objective-see.org/products/lulu.html">LuLu</a> or Little Snitch, you’ll see <code>mojito.wells.ee</code> and <code>github.com</code> (updates), <code>api.klipy.com</code> and KLIPY’s image servers (only during GIF search), and <code>stats.mojito.wells.ee</code> (at most daily). Or, in Terminal: <code>lsof -nP -i -a -c Mojito</code>.</li>
-    <li><strong>Check the signature.</strong> Mojito is signed with an Apple Developer ID and notarized by Apple, and every update is signed with a key the app checks before installing. The Homebrew cask is pinned to the checksum of the GitHub release.</li>
+    <li><strong>Read the code.</strong> The keyboard hook, field checks and network code are all <a href="https://github.com/wr/mojito">on GitHub</a>.</li>
+    <li><strong>Watch its connections</strong> with <a href="https://objective-see.org/products/lulu.html">LuLu</a>, Little Snitch, or <code>lsof -nP -i -a -c Mojito</code>: <code>mojito.wells.ee</code> and <code>github.com</code> (updates), <code>api.klipy.com</code> and KLIPY’s image servers (GIF search only), <code>stats.mojito.wells.ee</code> (at most daily).</li>
+    <li><strong>Check the signature.</strong> Notarized by Apple, with signed updates and a checksum-pinned Homebrew cask.</li>
   </ul>
 
-  <h2>Your controls</h2>
+  <h2 id="controls">Your controls</h2>
   <div class="table-scroll">
   <table class="code-table text-first">
     <thead><tr><th scope="col">To…</th><th scope="col">Go to</th></tr></thead>
@@ -169,7 +173,7 @@
   </div>
 
   <h2>This website</h2>
-  <p>mojito.wells.ee sets no cookies and loads no analytics or tracking scripts. The <a href="/stats">stats page</a> loads its numbers from <code>stats.mojito.wells.ee</code>. Download buttons go through <code>mojito.wells.ee/download</code>, which sends you on to GitHub and may note which page the click came from, the referring site, and your country, with no cookies and no IP address.</p>
+  <p>No cookies, analytics, or tracking scripts. Download links go through <code>mojito.wells.ee/download</code>, which may note the page, referrer, and country, but no IP address.</p>
 
   <aside class="get-mojito" aria-labelledby="get-mojito-h">
     <img src="/app-icon-128.png" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -187,20 +191,8 @@
 
   <h2>Privacy questions</h2>
   <div class="faq-item">
-    <h3>Does Mojito work offline?</h3>
-    <p>Yes. Emoji, symbols, emoticons, and arrows all work with no connection. Only GIF search and update checks need the internet.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Can Mojito see my passwords?</h3>
-    <p>It won’t open in password fields, and when an app turns on macOS Secure Input, macOS blocks Mojito from seeing keystrokes at all.</p>
-  </div>
-  <div class="faq-item">
     <h3>Does Mojito sell or share data?</h3>
-    <p>No. There’s no account, no advertising, and nothing to sell: the only usage data is the anonymous daily counts above, and they’re public. Apart from the services that host downloads and stats (GitHub and Cloudflare), KLIPY is the only outside company involved, and it only sees GIF searches.</p>
-  </div>
-  <div class="faq-item">
-    <h3>Who do I ask about this?</h3>
-    <p>Me: Wells Riley, at <a href="mailto:mojito@wells.ee">mojito@wells.ee</a>. Bug reports about privacy are especially welcome on <a href="https://github.com/wr/mojito/issues">GitHub</a>.</p>
+    <p>No. There’s no account or ads, and the only usage data is the public counts above. Besides hosts GitHub and Cloudflare, KLIPY is the only outside company involved, and it only sees GIF searches.</p>
   </div>
 
   <nav class="guide-more" aria-label="More">More: <a href="/stats">Public usage stats</a> · <a href="/mojito-vs-comoji/">Mojito vs Comoji</a> · <a href="/best-emoji-app-for-mac/">The best emoji app for Mac</a> · <a href="/guides/">All guides</a></nav>

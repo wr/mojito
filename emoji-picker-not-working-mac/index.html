@@ -14,7 +14,7 @@
 <meta property="og:image" content="https://mojito.wells.ee/og/emoji-picker-not-working-mac.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="article:modified_time" content="2026-10-04">
+<meta property="article:modified_time" content="2026-10-05">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@WellsWorkshop">
 <meta name="twitter:title" content="Emoji picker not working on Mac? Here’s the fix">
@@ -46,8 +46,8 @@
 <article class="prose">
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">Emoji picker not working on Mac? Here’s&nbsp;the&nbsp;fix</h1>
-  <p class="guide-sub">Three different routes open the same picker, and which one fails tells you why. Run the 30-second test, then work down the fixes in the order they tend to be the answer.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes Mojito</span><span class="sep">·</span><span>Updated <time datetime="2026-10-04">October 4, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
+  <p class="guide-sub">Three routes open the same picker, and which one fails tells you why. Run the 30-second test, then work down the fixes.</p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
 
   <div class="key-answer" role="img" aria-label="Fn + E opens the emoji picker. If it doesn’t, also try Control + Command + Space and Edit, Emoji and Symbols.">
     <span class="key-chord" aria-hidden="true">
@@ -60,12 +60,12 @@
   </div>
 
   <h2>Why won’t the emoji picker open on my Mac?</h2>
-  <p>Usually one of three things: the 🌐 key was reassigned, an app switched on Secure Keyboard Entry, or another app took the shortcut. Try all three ways in: <kbd>Fn</kbd> + <kbd>E</kbd>, <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Space</kbd>, and Edit › Emoji &amp; Symbols. If only the 🌐 key fails, it’s the setting. If only ⌃⌘Space fails, an app grabbed it. If all three fail everywhere, it’s Secure Keyboard Entry.</p>
+  <p>Usually one of three things: the 🌐 key was reassigned, an app switched on <strong>Secure Keyboard Entry</strong>, or another app took the shortcut.</p>
 
-  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong>With Mojito</strong>, emoji don’t go through Apple’s picker at all: type <code>:smile</code> and press <kbd>Return</kbd> for 😄. A reassigned key or a stolen shortcut can’t break that, though Secure Keyboard Entry blocks it too.</p></div>
+  <div class="guide-tip"><img src="/app-icon.png" alt="" width="22" height="22"><p><strong><a href="/">Mojito</a></strong> lets you type <code>:smile</code> and press <kbd>Return</kbd> for 😄, without Apple’s picker. Secure Keyboard Entry blocks it too.</p></div>
 
   <h2 id="test">The 30-second test</h2>
-  <p>Click into a plain text field (a new TextEdit document is ideal) and try <kbd>Fn</kbd> + <kbd>E</kbd>, <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>Space</kbd>, and <span class="ui-path"><span>Edit</span><span>Emoji &amp; Symbols</span></span>. All three reach the same picker by different paths, so what fails points at the cause:</p>
+  <p>In a plain text field (a new TextEdit document is ideal), try <kbd>Fn</kbd> + <kbd>E</kbd>, <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>Space</kbd>, and <span class="ui-path"><span>Edit</span><span>Emoji &amp; Symbols</span></span>:</p>
   <div class="table-scroll">
   <table class="code-table">
     <thead><tr><th scope="col">Fix</th><th scope="col">What fails</th><th scope="col">Likely cause</th><th scope="col">What still works</th></tr></thead>
@@ -79,54 +79,52 @@
     </tbody>
   </table>
   </div>
+
   <h2 id="globe-key">1. The 🌐 key was switched to something else</h2>
-  <p><strong>You’ll know it’s this if</strong> tapping 🌐 on its own does nothing or changes your keyboard language, while <kbd>Fn</kbd> + <kbd>E</kbd> still opens the picker. (If you type in two languages, Change Input Source may be what you want; keep it and use Fn-E for emoji.)</p>
+  <p><strong>You’ll know it’s this if</strong> tapping 🌐 does nothing or changes your keyboard language, while <kbd>Fn</kbd> + <kbd>E</kbd> still works.</p>
   <ol class="guide-steps">
     <li>Open <span class="ui-path"><span>System Settings</span><span>Keyboard</span></span>.</li>
-    <li>Find <strong>Press 🌐 key to</strong>. On keyboards without a Globe key it reads <strong>Press fn key to</strong>.</li>
-    <li>Choose <strong>Show Emoji &amp; Symbols</strong>, then tap 🌐 in a text field.</li>
+    <li>Set <strong>Press 🌐 key to</strong> (or <strong>Press fn key to</strong>) to <strong>Show Emoji &amp; Symbols</strong>.</li>
+    <li>Use 🌐 for Dictation too? Choosing a Dictation shortcut can change this setting, so give Dictation one without 🌐 in <span class="ui-path"><span>Keyboard</span><span>Dictation</span><span>Shortcut</span></span>, then set the key back.</li>
   </ol>
-  <p>Odds are you didn’t change it on purpose. Apple documents the usual culprit: choosing a Dictation keyboard shortcut can change this setting automatically, so making “press 🌐 twice” your Dictation shortcut quietly turns the key into Start Dictation. To have both, give Dictation a shortcut that doesn’t use 🌐 under <span class="ui-path"><span>Keyboard</span><span>Dictation</span><span>Shortcut</span></span>, then set the key back.</p>
-  <p>Apps that take over the 🌐 key set it to Do Nothing so macOS stays out of their way; Mojito’s Replace System Picker option does exactly that. Delete an app like that without undoing it first, and 🌐 does nothing until you change it back here.</p>
 
   <h2 id="secure-input">2. Secure Keyboard Entry is on</h2>
   <p><strong>You’ll know it’s this if</strong> nothing opens the picker, not even the Edit menu, in any app, and your text expander has gone quiet too.</p>
-  <p>Secure Keyboard Entry (“Secure Input” under the hood) is a lock any app can switch on so other software can’t read your typing. Password fields use it briefly. While it’s on, macOS shuts out every input helper: the emoji picker by every route, plus text expanders and tools like Mojito. Trouble starts when an app never lets go. Usual suspects:</p>
-  <ul>
-    <li><strong>Terminal:</strong> look at <span class="ui-path"><span>Terminal</span><span>Secure Keyboard Entry</span></span>. A checkmark means it’s on. iTerm2 has the same option in its app menu.</li>
-    <li><strong>Cisco AnyConnect</strong> (now Cisco Secure Client), a VPN app many companies use, and <strong>Webroot</strong> antivirus.</li>
-    <li><strong>Password managers</strong>, sometimes long after their unlock prompt has gone away.</li>
-  </ul>
-  <p>To find out exactly which app is holding it:</p>
   <ol class="guide-steps">
-    <li>Open Terminal and run <code>ioreg -l -w 0 | grep SecureInput</code>. If it prints nothing, Secure Input is off; skip to fix 3.</li>
-    <li>If it prints a long line, find <code>"kCGSSessionSecureInputPID"=</code> and the number after it, say <code>1234</code>. That’s a PID (process ID), the number macOS gives every running program.</li>
-    <li>Open Activity Monitor, choose <span class="ui-path"><span>View</span><span>All Processes</span></span>, and click the <strong>PID</strong> column header to sort (missing? add it under <span class="ui-path"><span>View</span><span>Columns</span></span>). Your number’s row is the culprit. Or ask Terminal: <code>ps -p 1234 -o comm=</code>, using your number.</li>
-    <li>Quit that app, or turn off its secure-entry setting, and press <kbd>Fn</kbd> + <kbd>E</kbd> again.</li>
+    <li>Check the usual suspects: <span class="ui-path"><span>Terminal</span><span>Secure Keyboard Entry</span></span> (iTerm2 has the same option), Cisco AnyConnect (now Cisco Secure Client), Webroot, and password managers.</li>
+    <li>Not sure? In Terminal, run <code>ioreg -l -w 0 | grep SecureInput</code>. If it prints nothing, Secure Input is off; skip to fix 3.</li>
+    <li>Otherwise, find the number after <code>"kCGSSessionSecureInputPID"=</code>, say <code>1234</code>, and run <code>ps -p 1234 -o comm=</code> to name the app.</li>
+    <li>Quit that app, or turn off its secure-entry setting, and press <kbd>Fn</kbd> + <kbd>E</kbd> again. If it’s <code>loginwindow</code>, log out and back in (fix 5).</li>
   </ol>
-  <p>If the culprit turns out to be <code>loginwindow</code>, that’s macOS itself holding on, often after the lock screen. You can’t quit it; log out and back in instead (fix 5).</p>
 
   <h2 id="shortcut">3. Another app took the shortcut</h2>
   <p><strong>You’ll know it’s this if</strong> <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>Space</kbd> does nothing, or opens something else, while Fn-E and the Edit menu still work.</p>
-  <p>Don’t count on <span class="ui-path"><span>System Settings</span><span>Keyboard</span><span>Keyboard Shortcuts…</span></span> to flag it. That pane lists macOS’s own shortcuts and any App Shortcuts you’ve added, not the global hotkeys other apps register. Check the apps that hand out hotkeys: Raycast, Alfred, BetterTouchTool, Keyboard Maestro, window managers, IDEs with their own keymaps. Quickest test: quit them one at a time, pressing ⌃⌘Space after each, and change the hotkey in whichever one brings the picker back.</p>
-  <p>Mojito does this on purpose if you ask: its Replace System Picker option points ⌃⌘Space and 🌐 at Mojito’s emoji browser. The reset button next to <strong>Emoji Browser shortcut</strong> in its <span class="ui-path"><span>Settings</span><span>General</span></span> undoes both.</p>
+  <ol class="guide-steps">
+    <li>Quit apps that hand out hotkeys one at a time (Raycast, Alfred, BetterTouchTool, Keyboard Maestro, window managers, IDEs), pressing ⌃⌘Space after each. System Settings won’t list their hotkeys.</li>
+    <li>Change the hotkey in whichever app brings the picker back.</li>
+    <li>If Mojito’s Replace System Picker option is on, the reset button next to <strong>Emoji Browser shortcut</strong> in its <span class="ui-path"><span>Settings</span><span>General</span></span> undoes it.</li>
+  </ol>
   <h3 id="fn-e">If Fn-E is the one that fails</h3>
-  <p>Fn-E needs a keyboard that tells macOS when Fn is down, as the built-in keyboard and Apple’s keyboards do. Many third-party keyboards handle Fn internally, so macOS never hears it; Logitech, for one, says Apple’s Fn/Globe shortcuts aren’t supported on its keyboards. A remapper like Karabiner-Elements can intercept Fn too. On those setups, use ⌃⌘Space.</p>
+  <p>Many third-party keyboards and remappers like Karabiner-Elements handle Fn themselves, so macOS never sees it (Logitech says Apple’s Fn/Globe shortcuts aren’t supported). Use ⌃⌘Space instead.</p>
 
   <h2 id="full-screen">4. It’s opening where you can’t see it</h2>
-  <p><strong>You’ll know it’s this if</strong> the picker works when the app is in a normal window but not in full screen, or it turns up on your other display.</p>
-  <p>The picker comes in two sizes. The small one is anchored to your text cursor. The big one, the Character Viewer behind the expand button in the top-right corner, is a free-floating window, and macOS remembers that you last used it and where you left it. It doesn’t always follow you into a full-screen app, and if you left it on an external display or a Sidecar iPad, that’s where it opens. (<a href="/mac-emoji-picker/">More on the two pickers</a>.)</p>
+  <p><strong>You’ll know it’s this if</strong> the picker works in a normal window but not in full screen, or turns up on your other display.</p>
   <ol class="guide-steps">
-    <li>Leave full screen with <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>F</kbd> (or the green window button), or look on your other display. If that display is gone, plug it back in once.</li>
-    <li>Open the picker. If you get the big Character Viewer, drag it into view if needed and click the button in its top-right corner to shrink it back to the small picker.</li>
+    <li>Leave full screen with <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>F</kbd>, or look on your other display. If that display is gone, plug it back in once.</li>
+    <li>Open the picker. If you get the big Character Viewer, click the button in its top-right corner to shrink it to the small picker (<a href="/mac-emoji-picker/">the two pickers</a>).</li>
     <li>Go back to full screen. The small picker sits at your cursor, so it should appear there.</li>
   </ol>
 
   <h2 id="restart">5. Log out and back in, or restart</h2>
-  <p>If nothing above fits, log out and back in from the Apple menu. A fresh session clears a Secure Input lock stuck on loginwindow and restarts the background processes behind the picker. Still broken? Restart. If the picker then works in safe mode, which skips login items, something that launches at login is interfering: turn items in <span class="ui-path"><span>System Settings</span><span>General</span><span>Login Items &amp; Extensions</span></span> back on a few at a time to find it.</p>
+  <p><strong>You’ll know it’s this if</strong> nothing above fits.</p>
+  <ol class="guide-steps">
+    <li>Log out and back in from the Apple menu. This clears a Secure Input lock stuck on loginwindow.</li>
+    <li>Still broken? Restart.</li>
+    <li>If the picker works in safe mode, which skips login items, turn items in <span class="ui-path"><span>System Settings</span><span>General</span><span>Login Items &amp; Extensions</span></span> back on a few at a time to find the culprit.</li>
+  </ol>
 
   <h2>Or skip the system picker</h2>
-  <p>Every fix above gets Apple’s picker working again. The alternative is one that doesn’t depend on it. <a href="/">Mojito</a> is a free, open-source app that works the way Slack does: type a colon and a few letters in any app, and matches appear at your cursor. <code>:smile</code> plus <kbd>Return</kbd> gives you 😄. It never touches the 🌐 key, ⌃⌘Space, or the Character Viewer, so fixes 1, 3, and 4 can’t happen to it. The codes are the ones Slack and GitHub use (<a href="/emoji-shortcodes/">cheat sheet</a>).</p>
+  <p>Mojito works the way Slack does: type a colon and a few letters in any app, and matches appear at your cursor, using Slack and GitHub’s codes (<a href="/emoji-shortcodes/">cheat sheet</a>). It never touches the 🌐 key, ⌃⌘Space, or the Character Viewer, so fixes 1, 3, and 4 can’t happen to it.</p>
 
   <figure class="mdemo mdemo-textedit" data-pre="Got my emoji back " data-type=":smile" data-result="😄" data-post="" data-rows="😄 :smile:|😃 :smiley:|😸 :smile_cat:">
     <div class="mdemo-stage" aria-hidden="true">
@@ -139,8 +137,6 @@
     </div>
     <figcaption>Mojito in TextEdit: type <code>:smile</code>, press Return, and 😄 replaces the shortcode. No 🌐 key or system panel involved.</figcaption>
   </figure>
-
-  <p>The limits, plainly: Mojito reads keystrokes, so Secure Keyboard Entry blocks it just as it blocks Apple’s picker (fix 2 still applies). It skips password fields, and by default stays out of Slack, Discord, and other apps with their own emoji menu, plus code editors and Terminal. Here’s <a href="/best-emoji-app-for-mac/">how it compares with other emoji apps</a>.</p>
 
   <aside class="get-mojito" aria-labelledby="get-mojito-h">
     <img src="/app-icon-128.png" alt="" width="64" height="64" loading="lazy" decoding="async">
@@ -164,11 +160,11 @@
   <h2>More picker questions</h2>
   <div class="faq-item">
     <h3>Why does the picker work everywhere except one app?</h3>
-    <p>Password fields block it on purpose. Otherwise the app may have its own secure-entry option on (Terminal’s is in its app menu), be in full screen (fix 4), or draw its own text fields instead of using the Mac’s, as many games and remote-desktop windows do.</p>
+    <p>Password fields block it on purpose. Otherwise the app may have its own secure-entry option on, be in full screen (fix 4), or draw its own text fields, as many games and remote-desktop windows do.</p>
   </div>
   <div class="faq-item">
     <h3>Did macOS 27 change the emoji shortcuts?</h3>
-    <p>No. <kbd>Fn</kbd> + <kbd>E</kbd>, <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>Space</kbd>, and the 🌐 setting work as before. The picker got Apple’s glass look and, on Macs with Apple Intelligence, a Genmoji button in its top-right corner.</p>
+    <p>No: <kbd>Fn</kbd> + <kbd>E</kbd>, <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>Space</kbd>, and the 🌐 setting work as before. The picker just got Apple’s glass look and, on Macs with Apple Intelligence, a Genmoji button in its top-right corner.</p>
   </div>
 
   <nav class="guide-more" aria-label="More guides">More guides: <a href="/how-to-type-emoji-on-mac/">How to type emoji on a Mac</a> · <a href="/mac-emoji-picker/">The Mac emoji picker, and alternatives</a> · <a href="/best-emoji-app-for-mac/">The best emoji app for Mac</a> · <a href="/guides/">All guides</a></nav>
@@ -206,7 +202,7 @@
    "headline": "Emoji picker not working on Mac? Here’s the fix",
    "image": "https://mojito.wells.ee/og/emoji-picker-not-working-mac.png",
    "datePublished": "2026-07-21",
-   "dateModified": "2026-10-04",
+   "dateModified": "2026-10-05",
    "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
    "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
    "mainEntityOfPage": "https://mojito.wells.ee/emoji-picker-not-working-mac/"
