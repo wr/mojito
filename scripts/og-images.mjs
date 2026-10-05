@@ -38,6 +38,7 @@ const CARDS = {
   'mojito-vs-comoji':                { glyph: '⚖️', chip: '::up' },
   'how-to-send-gifs-on-mac':         { glyph: 'GIF', chip: ':::party' },
   'tenor-gif-keyboard-mac':          { glyph: 'GIF', chip: ':::party' },
+  'privacy':                         { glyph: '🔒', small: 'open source', title: 'Mojito and your privacy: what it sees and what it sends' },
   'guides':                          { glyph: '🍹', small: '° — ⌘ 🎉', title: 'Typing emoji, symbols and GIFs on a Mac' },
 };
 
