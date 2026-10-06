@@ -22,7 +22,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og/privacy.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/style.css?v=76">
+<link rel="stylesheet" href="/style.css?v=81">
 <link rel="stylesheet" href="/guides.css?v=1">
 <script src="/guide-demo.js?v=1" defer></script>
 </head>
@@ -47,7 +47,7 @@
   <p class="guide-crumb"><a href="/">Mojito</a> / Privacy</p>
   <h1 class="guide-title">Mojito and your privacy</h1>
   <p class="guide-sub">Mojito reads your keystrokes. Here’s every permission it asks for, everything it sends, and everything it keeps, checked against its code.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Checked against Mojito 1.10.0</span></p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a> of Wells Workshop, maker of <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Checked against Mojito 1.10.0</span></p>
 
   <h2>Is Mojito safe to give keystroke access?</h2>
   <p><a href="/">Mojito</a> watches for shortcodes like <code>:tada:</code> on your Mac. What you type isn’t saved or sent anywhere, except <strong>GIF search words</strong>, which go to KLIPY. It never opens in password fields, and it’s <a href="https://github.com/wr/mojito">open source</a>.</p>
@@ -210,7 +210,8 @@
       <a href="mailto:mojito@wells.ee">Contact</a>
     </div>
   </div>
-  <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
+  <p class="maker"><span>A product of</span> <a href="https://wells.ee"><img src="/wells-workshop.svg" alt="Wells Workshop" width="150" height="18"></a></p>
+  <p class="copyright">&copy; 2026 Wells Workshop LLC</p>
 </footer>
 
 <script type="application/ld+json">
@@ -230,9 +231,18 @@
    "image": "https://mojito.wells.ee/og/privacy.png",
    "datePublished": "2026-10-05",
    "dateModified": "2026-10-05",
-   "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
-   "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
+   "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee", "worksFor": {"@id": "https://wells.ee/#org"}},
+   "publisher": {"@id": "https://wells.ee/#org"},
    "mainEntityOfPage": "https://mojito.wells.ee/privacy/"
+  },
+  {
+   "@type": "Organization",
+   "@id": "https://wells.ee/#org",
+   "name": "Wells Workshop",
+   "legalName": "Wells Workshop LLC",
+   "url": "https://wells.ee/",
+   "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/wells-workshop-logo.png", "width": 512, "height": 512},
+   "sameAs": ["https://www.youtube.com/@wellsworkshop"]
   }
  ]
 }

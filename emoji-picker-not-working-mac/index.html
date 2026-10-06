@@ -22,7 +22,7 @@
 <meta name="twitter:image" content="https://mojito.wells.ee/og/emoji-picker-not-working-mac.png">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/style.css?v=76">
+<link rel="stylesheet" href="/style.css?v=81">
 <link rel="stylesheet" href="/guides.css?v=1">
 <script src="/guide-demo.js?v=1" defer></script>
 </head>
@@ -47,7 +47,7 @@
   <p class="guide-crumb"><a href="/">Mojito</a> / <a href="/guides/">Guides</a></p>
   <h1 class="guide-title">Emoji picker not working on Mac? Here’s&nbsp;the&nbsp;fix</h1>
   <p class="guide-sub">Three routes open the same picker, and which one fails tells you why. Run the 30-second test, then work down the fixes.</p>
-  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a>, who makes <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
+  <p class="guide-byline"><img src="/avatar.jpg" alt="" width="22" height="22"><span>By <a href="https://wells.ee">Wells Riley</a> of Wells Workshop, maker of <a href="/">Mojito</a></span><span class="sep">·</span><span>Updated <time datetime="2026-10-05">October 5, 2026</time></span><span class="sep">·</span><span>Tested on macOS 27</span></p>
 
   <div class="key-answer" role="img" aria-label="Fn + E opens the emoji picker. If it doesn’t, also try Control + Command + Space and Edit, Emoji and Symbols.">
     <span class="key-chord" aria-hidden="true">
@@ -182,7 +182,8 @@
       <a href="mailto:mojito@wells.ee">Contact</a>
     </div>
   </div>
-  <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
+  <p class="maker"><span>A product of</span> <a href="https://wells.ee"><img src="/wells-workshop.svg" alt="Wells Workshop" width="150" height="18"></a></p>
+  <p class="copyright">&copy; 2026 Wells Workshop LLC</p>
 </footer>
 
 <script type="application/ld+json">
@@ -203,9 +204,18 @@
    "image": "https://mojito.wells.ee/og/emoji-picker-not-working-mac.png",
    "datePublished": "2026-07-21",
    "dateModified": "2026-10-05",
-   "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee"},
-   "publisher": {"@type": "Organization", "name": "Mojito", "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/app-icon-512.png"}},
+   "author": {"@type": "Person", "name": "Wells Riley", "url": "https://wells.ee", "worksFor": {"@id": "https://wells.ee/#org"}},
+   "publisher": {"@id": "https://wells.ee/#org"},
    "mainEntityOfPage": "https://mojito.wells.ee/emoji-picker-not-working-mac/"
+  },
+  {
+   "@type": "Organization",
+   "@id": "https://wells.ee/#org",
+   "name": "Wells Workshop",
+   "legalName": "Wells Workshop LLC",
+   "url": "https://wells.ee/",
+   "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/wells-workshop-logo.png", "width": 512, "height": 512},
+   "sameAs": ["https://www.youtube.com/@wellsworkshop"]
   }
  ]
 }
