@@ -1,15 +1,15 @@
 <h1 align="center"><img width="50" alt="Mojito icon" align="center" src="https://github.com/user-attachments/assets/cbcd17f9-17f3-4afc-a24a-c48d4c4fdb95" /> Mojito</h1>
 
 <p align="center">
-  <strong>Type <code>:emoji:</code> <code>::symbol::</code> and <code>:::gif:::</code> shortcodes anywhere on macOS.</strong>
+  <strong>Autocomplete <code>:emoji:</code> everywhere on your Mac.</strong><br>
+  Type <code>:</code> to search any emoji, symbol, or GIF in seconds.
 </p>
 
 <p align="center">
-  <a href="#what-is-it">What is it?</a> ⬪
-  <a href="#install">Install</a> ⬪
-  <a href="#how-it-works">How it works</a> ⬪
-  <a href="#donate">Donate</a> ⬪
-  <a href="#privacy">Privacy</a>
+  <a href="https://mojito.wells.ee/download?ref=github&at=readme"><strong>Download for macOS</strong></a> ⬪
+  <a href="https://mojito.wells.ee">Website</a> ⬪
+  <a href="#privacy">Privacy</a> ⬪
+  <a href="#donate">Donate</a>
 </p>
 
 <p align="center">
@@ -19,90 +19,62 @@
   </picture>
 </p>
 
-<p align="center">
-  <sub>`:tada:` becomes 🎉 in any text field.</sub>
-</p>
-
----
-
-## What is it?
-
-Mojito is the fastest way to type emoji, symbols, and GIFs on your Mac, using your muscle memory from apps like Slack, Discord, and Linear. Use shortcodes like `:emoji:` for emoji, `::symbol::` for symbols, and `:::gif:::` for GIF search... without ever taking your hands off the keyboard.
-
-All shortcuts are customizable. You can also add custom aliases (like `:fart:` → 💨). Emoticons like :) become 🙂, and arrows like -> become →. Any app or website can be excluded.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/quickaccess-dark.gif">
-    <img src="docs/quickaccess-light.gif" width="400" alt="Quick access">
-  </picture>
-</p>
-
-With Quick Access, your favorite and most-used emoji are a keystroke away.
-
-
 ## Install
 
-[Download the latest DMG](https://github.com/wr/mojito/releases/latest) from the Releases page and move Mojito to Applications, or install with Homebrew:
+[Download the DMG](https://mojito.wells.ee/download?ref=github&at=readme) and drag Mojito to Applications, or use Homebrew:
 
 ```bash
 brew install --cask wr/tap/mojito
 ```
 
-The app walks through granting Accessibility and Input Monitoring access on first launch. Updates arrive automatically — when one is ready, the menu-bar icon shows a badge.
+Free and open source. Requires macOS 14 or later. On first launch Mojito walks you through granting Accessibility and Input Monitoring, and it updates itself from then on.
 
-## How it works
+## Use it
 
-After you type a colon and a character or two, a picker shows up next to your cursor with fuzzy matches. Arrow keys move the selection; Return or Tab inserts. To skip the picker, type the closing colon — `:heart:` — and the exact match goes in directly.
+| Type | To get |
+|---|---|
+| `:tada` | 🎉 Emoji, using the Slack and GitHub shortcodes you already know |
+| `::cmd` | ⌘ Symbols: arrows, math, currency, and more |
+| `:::cats` | GIFs from KLIPY, pasted where you're typing |
+| `:?` | Your favorite and most-used emoji |
 
-Type `:?` to pull up your favorites, with a row to browse every emoji in a grid.
+Arrow keys pick, Return or Tab inserts, Esc dismisses. Type the closing colon (`:heart:`) to skip the picker. Every trigger is customizable in Settings.
 
-Other things it does:
-
-- Ranks results by how often you use them
-- Recognizes emoticons like `:)` and `<3`, and converts text arrows (`->` → →, `<->` → ↔)
-- GIF search — type `:::` and a query to drop in a GIF, powered by KLIPY
-- Optional symbols and signs: hundreds of them, from `:cmd:` for ⌘ and `:star:` for ★ to currency, arrows, math, and Greek letters
-- Default skin tone
-- Stays out of apps and websites with native emoji input — Slack, Discord, and a long list of others are excluded out of the box. You can edit the list, or flip it into allowlist mode so Mojito runs only where you say.
-- Pause for an hour or until tomorrow, from the menu bar or a keyboard shortcut you set
+- **Learns your favorites:** results re-rank by what you pick.
+- **Your skin tone, every time:** set a default once.
+- **Emoticons convert too:** `:D` → 😃, `<3` → ❤️, `->` → →.
+- **Custom aliases:** make `:fart` mean 💨.
+- **Works in every app:** and skips the ones with their own shortcodes (Slack, Discord, Notion, GitHub), plus terminals and code editors. Edit the list in Settings → Exclusions.
+- **Speaks 19 languages:** with localized shortcodes in 14 of them, so `:fuego` works in Spanish.
 
 ## Privacy
 
-Mojito reads keystrokes to recognize shortcodes. That happens on your Mac — nothing you type is logged, stored, or sent anywhere, and password fields are skipped entirely.
+What you type stays on your Mac.
 
-Mojito can share **anonymous usage stats** to help guide what gets built: counts of popular emoji, which features you have switched on, your macOS and app version, and your language and skin-tone preference. It never includes anything you actually type. You're asked once, you can turn it off anytime in Settings, and the whole dataset is public at [mojito.wells.ee/stats](https://mojito.wells.ee/stats). It's sent at most once a day, carries no identifier, and the server discards your IP. (Dev builds never send it.)
+- Keystrokes are never logged or uploaded, and password fields are ignored.
+- After `:::`, only your search words and country go to KLIPY.
+- Anonymous daily usage counts help guide what gets built. You're asked once, can opt out anytime, and the whole dataset is public at [mojito.wells.ee/stats](https://mojito.wells.ee/stats).
 
-So the only times Mojito reaches the network are the update check, a GIF search when you run one, and — if you leave stats on — that once-a-day anonymous ping.
+Full details: [mojito.wells.ee/privacy](https://mojito.wells.ee/privacy).
 
 ## Translations
 
-Available in English (US + UK), German, Spanish (Spain + Latin America), French, Italian, Brazilian Portuguese, Japanese, Simplified and Traditional Chinese, Korean, Hindi, Russian, Polish, Dutch, Arabic, Farsi, and Hebrew. The non-English strings start as LLM drafts and improve as native speakers review them — corrections are very welcome.
+Corrections from native speakers are very welcome. The non-English strings started as LLM drafts.
 
-To contribute, edit `Resources/Localizable.xcstrings` (open it in Xcode for the catalog editor, or edit the JSON directly), then open a pull request. Preserve `%@` / `%lld` placeholders, Markdown like `**bold**`, and backticked code samples like `` `:tada:` `` exactly as they appear in the source string.
-
-To preview a locale without changing your Mac's system language:
+Edit `Resources/Localizable.xcstrings` (Xcode's catalog editor or the raw JSON) and open a pull request. Keep `%@` / `%lld` placeholders, `**Markdown**`, and backticked samples like `` `:tada:` `` exactly as they appear in the source. Preview a locale without changing your system language:
 
 ```bash
-scripts/run-locale.sh fr   # or de, ja, ar, zh-Hans, etc.
+scripts/run-locale.sh fr
 ```
+
+## Donate
+
+Mojito is free, with no trial, ads, or upsells. If it saves you time, [buy me a coffee](https://buymeacoffee.com/wellsworkshop).
 
 ## Credits
 
 emojibase, [Emoogle](https://github.com/xitanggg/emoogle-emoji-search-engine), Sparkle, KeyboardShortcuts, KLIPY, and a Swift port of fzy.
 
-## Donate
-
-While Mojito is free and open source, donations are deeply appreciated, and make ongoing development and support possible.
-[Donate now](https://www.buymeacoffee.com/wellsworkshop)
-
 ## License
 
-[AGPL-3.0](LICENSE). © 2026 Wells Workshop LLC.
-
-<a href="https://wells.ee">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="Resources/Assets.xcassets/WellsWorkshop.imageset/wells-workshop-dark.svg">
-    <img src="Resources/Assets.xcassets/WellsWorkshop.imageset/wells-workshop.svg" height="22" alt="A product of Wells Workshop">
-  </picture>
-</a>
+[AGPL-3.0](LICENSE). © 2026 Wells Riley.
