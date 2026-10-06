@@ -142,6 +142,15 @@ struct AboutSettingsView: View {
                         .foregroundStyle(.tertiary)
                 }
             }
+
+            Link(destination: URL(string: "https://wells.ee")!) {
+                Image("WellsWorkshop")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 16)
+            }
+            .accessibilityLabel(Text(verbatim: "Wells Workshop"))
+            .padding(.top, 6)
         }
         .frame(maxWidth: .infinity)
     }

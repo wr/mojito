@@ -167,7 +167,7 @@ targets:
         LSMinimumSystemVersion: "14.0"
         LSUIElement: true
         LSApplicationCategoryType: public.app-category.utilities
-        NSHumanReadableCopyright: "© 2026 Wells Riley"
+        NSHumanReadableCopyright: "© 2026 Wells Workshop LLC"
         # Required for the AppleScript fallback that reads Arc's active-tab URL
         # (Arc hides it from accessibility). Without this key macOS denies the
         # Apple event outright instead of prompting. Only Arc triggers it.

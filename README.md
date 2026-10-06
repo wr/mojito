@@ -98,4 +98,11 @@ While Mojito is free and open source, donations are deeply appreciated, and make
 
 ## License
 
-[AGPL-3.0](LICENSE). © 2026 Wells Riley.
+[AGPL-3.0](LICENSE). © 2026 Wells Workshop LLC.
+
+<a href="https://wells.ee">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="Resources/Assets.xcassets/WellsWorkshop.imageset/wells-workshop-dark.svg">
+    <img src="Resources/Assets.xcassets/WellsWorkshop.imageset/wells-workshop.svg" height="22" alt="A product of Wells Workshop">
+  </picture>
+</a>

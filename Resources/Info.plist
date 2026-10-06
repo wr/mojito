@@ -33,7 +33,7 @@
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Mojito reads the current tab's URL in Arc to apply your per-site exclusions.</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>© 2026 Wells Riley</string>
+	<string>© 2026 Wells Workshop LLC</string>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUFeedURL</key>
