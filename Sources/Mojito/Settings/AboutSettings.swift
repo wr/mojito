@@ -142,6 +142,16 @@ struct AboutSettingsView: View {
                         .foregroundStyle(.tertiary)
                 }
             }
+
+            Link(destination: URL(string: "https://wells.ee")!) {
+                Image("WellsWorkshop")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    // Wordmark cap height matches the .callout copyright text.
+                    .frame(height: 14)
+            }
+            .accessibilityLabel(Text(verbatim: "Wells Workshop"))
+            .padding(.top, 6)
         }
         .frame(maxWidth: .infinity)
     }
