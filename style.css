@@ -1857,18 +1857,35 @@ footer {
 
 .copyright {
   margin: 0;
+  unicode-bidi: plaintext;
   font-size: 12px;
   color: var(--text-soft);
   letter-spacing: -0.005em;
 }
 
-.copyright a {
-  color: var(--accent);
-  font-weight: 500;
-  transition: color 0.15s ease;
+.maker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--text-soft);
+  letter-spacing: -0.005em;
 }
 
-.copyright a:hover { color: var(--accent-hover); }
+.footer-guides + .maker { margin-top: 20px; }
+
+.maker a {
+  display: inline-flex;
+  padding: 5px 0;
+  transition: opacity 0.15s ease;
+}
+
+.maker a:hover { opacity: 0.72; }
+
+/* 14px puts the wordmark's cap height level with the 12px label beside it. */
+.maker img { display: block; height: 14px; width: auto; }
 
 @media (max-width: 640px) {
   /* On phones, the demo is autoplay-only — no tapping into the textarea,

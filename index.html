@@ -41,8 +41,8 @@
 <link rel="alternate" hreflang="he" href="https://mojito.wells.ee/?lang=he">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="style.css?v=80">
-<script src="i18n.js?v=9"></script>
+<link rel="stylesheet" href="style.css?v=82">
+<script src="i18n.js?v=10"></script>
 </head>
 <body>
 
@@ -577,7 +577,8 @@ Changes not staged for commit:
     <li><a href="/privacy/">Privacy</a></li>
     <li><a href="/guides/">All guides →</a></li>
   </ul>
-  <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
+  <p class="maker"><span data-i18n="footer.productOf">A product of</span> <a href="https://wells.ee"><img src="wells-workshop.svg" alt="Wells Workshop" width="117" height="14"></a></p>
+  <p class="copyright">&copy; 2026 Wells Workshop LLC</p>
 </footer>
 
 <script src="picker.js?v=55" defer></script>
@@ -585,14 +586,29 @@ Changes not staged for commit:
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
- "@type": "SoftwareApplication",
- "name": "Mojito",
- "operatingSystem": "macOS 14 or later",
- "applicationCategory": "UtilitiesApplication",
- "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
- "downloadUrl": "https://github.com/wr/mojito/releases/latest/download/Mojito.dmg",
- "url": "https://mojito.wells.ee/",
- "sameAs": ["https://github.com/wr/mojito"]
+ "@graph": [
+  {
+   "@type": "SoftwareApplication",
+   "name": "Mojito",
+   "operatingSystem": "macOS 14 or later",
+   "applicationCategory": "UtilitiesApplication",
+   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+   "downloadUrl": "https://github.com/wr/mojito/releases/latest/download/Mojito.dmg",
+   "url": "https://mojito.wells.ee/",
+   "author": {"@id": "https://wells.ee/#org"},
+   "publisher": {"@id": "https://wells.ee/#org"},
+   "sameAs": ["https://github.com/wr/mojito"]
+  },
+  {
+   "@type": "Organization",
+   "@id": "https://wells.ee/#org",
+   "name": "Wells Workshop",
+   "legalName": "Wells Workshop LLC",
+   "url": "https://wells.ee/",
+   "logo": {"@type": "ImageObject", "url": "https://mojito.wells.ee/wells-workshop-logo.png", "width": 512, "height": 512},
+   "sameAs": ["https://www.youtube.com/@wellsworkshop"]
+  }
+ ]
 }
 </script>
 </body>
