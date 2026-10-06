@@ -41,8 +41,8 @@
 <link rel="alternate" hreflang="he" href="https://mojito.wells.ee/?lang=he">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="style.css?v=77">
-<script src="i18n.js?v=6"></script>
+<link rel="stylesheet" href="style.css?v=80">
+<script src="i18n.js?v=9"></script>
 </head>
 <body>
 
@@ -370,10 +370,10 @@ Changes not staged for commit:
           <span class="gif-query" id="gif-query"></span>
         </div>
         <div class="gif-grid" role="listbox" aria-label="GIF results" data-i18n-attr="aria-label:picker.aria.gifs">
-          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/party-confetti.gif" alt="confetti" width="128" height="128">
-          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/party-balloons.gif" alt="balloons" width="128" height="128">
-          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/party-sparkles.gif" alt="sparkles" width="128" height="128">
-          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/party-disco.gif" alt="disco ball" width="128" height="128">
+          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/spongebob-band.gif" alt="SpongeBob marching with the band" width="128" height="128">
+          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/spongebob-woot.gif" alt="SpongeBob: woot woot!" width="128" height="128">
+          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/spongebob-omfg.gif" alt="SpongeBob: OMFG" width="128" height="128">
+          <img class="gif-thumb" role="option" aria-selected="false" data-src="gifs/spongebob-crowd.gif" alt="SpongeBob laughing in the crowd" width="128" height="128">
         </div>
         <div class="picker-divider"></div>
         <div class="picker-footer">
@@ -387,75 +387,158 @@ Changes not staged for commit:
   </div>
 </section>
 
-<main>
+<main class="home">
 
-<section id="about" class="prose">
-  <h2 data-i18n="about.h2">About</h2>
-  <p data-i18n-html="about.body">I built Mojito because Slack's <code>:tada:</code> → 🎉 should work everywhere on macOS, not just in Slack. It's free and open source.</p>
+<section id="how" class="home-section" aria-labelledby="how-h">
+  <p class="eyebrow" data-i18n="how.eyebrow">How it works</p>
+  <h2 id="how-h" data-i18n="how.h2">Emoji, symbols, and GIFs without leaving the keyboard.</h2>
+  <div class="trigger-grid">
+    <article class="trigger-card">
+      <div class="trigger-visual" aria-hidden="true" dir="ltr">
+        <div class="mini-field">:fire<span class="mini-caret"></span></div>
+        <ol class="mini-picker picker-list">
+          <li class="picker-row active"><span class="px-emoji">🔥</span><span class="px-code">:<span class="match">fire</span>:</span></li>
+          <li class="picker-row"><span class="px-emoji">🎆</span><span class="px-code">:<span class="match">fire</span>works:</span></li>
+          <li class="picker-row"><span class="px-emoji">🧨</span><span class="px-code">:<span class="match">fire</span>cracker:</span></li>
+        </ol>
+      </div>
+      <h3><kbd>:</kbd> <span data-i18n="how.emoji.h">Emoji</span></h3>
+      <p data-i18n-html="how.emoji.p">Type a colon and a few letters. The Slack and GitHub shortcodes you already know, like <code>:tada</code>, just work.</p>
+    </article>
+    <article class="trigger-card">
+      <div class="trigger-visual" aria-hidden="true" dir="ltr">
+        <div class="mini-field">::degree<span class="mini-caret"></span></div>
+        <ol class="mini-picker picker-list">
+          <li class="picker-row active"><span class="px-emoji">°</span><span class="px-code">::<span class="match">degree</span></span></li>
+          <li class="picker-row"><span class="px-emoji">℃</span><span class="px-code">::<span class="match">degree</span>_celsius</span></li>
+          <li class="picker-row"><span class="px-emoji">℉</span><span class="px-code">::<span class="match">degree</span>_fahrenheit</span></li>
+        </ol>
+      </div>
+      <h3><kbd>::</kbd> <span data-i18n="how.symbols.h">Symbols</span></h3>
+      <p data-i18n-html="how.symbols.p">Two colons for everything that isn't an emoji: <code>::cmd</code> → ⌘, <code>::em_dash</code> → —, arrows, math, and currency.</p>
+    </article>
+    <article class="trigger-card">
+      <div class="trigger-visual" aria-hidden="true" dir="ltr">
+        <div class="mini-field">:::sponge<span class="mini-caret"></span></div>
+        <div class="mini-gifs">
+          <picture><source srcset="gifs/spongebob-band-still.png" media="(prefers-reduced-motion: reduce)"><img src="gifs/spongebob-band.gif" alt="" width="66" height="66" loading="lazy" decoding="async"></picture>
+          <picture><source srcset="gifs/spongebob-grin-still.png" media="(prefers-reduced-motion: reduce)"><img src="gifs/spongebob-grin.gif" alt="" width="66" height="66" loading="lazy" decoding="async"></picture>
+          <picture><source srcset="gifs/spongebob-smug-still.png" media="(prefers-reduced-motion: reduce)"><img src="gifs/spongebob-smug.gif" alt="" width="66" height="66" loading="lazy" decoding="async"></picture>
+        </div>
+      </div>
+      <h3><kbd>:::</kbd> <span data-i18n="how.gifs.h">GIFs</span></h3>
+      <p data-i18n-html="how.gifs.p">Three colons search GIFs from <a href="https://klipy.com">KLIPY</a> and paste your pick right where you're typing.</p>
+    </article>
+  </div>
 </section>
 
-<section id="faq" class="prose">
-  <h2 data-i18n="faq.h2">FAQ</h2>
+<section id="features" class="home-section" aria-labelledby="features-h">
+  <p class="eyebrow" data-i18n="features.eyebrow">The details</p>
+  <h2 id="features-h" data-i18n="features.h2">Built to stay out of your way.</h2>
+  <ul class="feature-grid">
+    <li class="feature-card">
+      <span class="feature-icon" aria-hidden="true">⭐</span>
+      <h3 data-i18n="features.favorites.h">Learns your favorites</h3>
+      <p data-i18n="features.favorites.p">Results re-rank by what you pick, so your go-to emoji float to the top.</p>
+    </li>
+    <li class="feature-card">
+      <span class="feature-icon" aria-hidden="true">👋🏽</span>
+      <h3 data-i18n="features.skin.h">Your skin tone, every time</h3>
+      <p data-i18n="features.skin.p">Pick a default once and every hand and person emoji follows it.</p>
+    </li>
+    <li class="feature-card">
+      <span class="feature-icon" aria-hidden="true">😃</span>
+      <h3 data-i18n="features.emoticons.h">Emoticons convert too</h3>
+      <p data-i18n-html="features.emoticons.p"><code>:D</code> becomes 😃, <code>&lt;3</code> becomes ❤️, and <code>-&gt;</code> becomes →.</p>
+    </li>
+    <li class="feature-card feature-languages">
+      <span class="feature-icon" aria-hidden="true"><span class="lang-cycle-flag">🌍</span></span>
+      <h3><span class="visually-hidden" data-i18n="features.languages.h">Speaks 19 languages</span><span class="lang-cycle" aria-hidden="true">Speaks 19 languages</span></h3>
+      <p data-i18n-html="features.languages.p">Shortcodes are localized in 14 of them, so <code>:fuego</code> works in Spanish and <code>:chien</code> in French. <a href="https://github.com/wr/mojito#translations">Corrections welcome</a>.</p>
+    </li>
+    <li class="feature-card">
+      <span class="feature-icon" aria-hidden="true">🍎</span>
+      <h3 data-i18n="features.native.h">Looks exactly like macOS</h3>
+      <p data-i18n="features.native.p">We sweat the details: Liquid Glass on Tahoe, the system menu shadow, and light or dark to match your Mac.</p>
+    </li>
+    <li class="feature-card feature-apps">
+      <div class="app-icons" aria-hidden="true">
+        <img src="app-icons/messages.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/mail.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/notes.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/safari.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/chrome.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/arc.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/firefox.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+        <img src="app-icons/reminders.png" alt="" width="40" height="40" loading="lazy" decoding="async">
+      </div>
+      <h3 data-i18n="features.apps.h">Works in every app</h3>
+      <p data-i18n="features.apps.p">Messages, Mail, Notes, Safari, Chrome, and pretty much anywhere else you type.</p>
+    </li>
+  </ul>
+</section>
 
-  <div class="faq-item">
-    <h3 data-i18n="faq.q1.q">How is this different from macOS's built-in emoji picker?</h3>
+<section id="privacy" class="home-section" aria-labelledby="privacy-h">
+  <div class="privacy-card">
+    <div class="privacy-copy">
+      <p class="eyebrow" data-i18n="privacy.h2">Privacy</p>
+      <h2 id="privacy-h" data-i18n="privacy.title">What you type stays on your Mac.</h2>
+      <p data-i18n="privacy.sub">Shortcodes are matched on-device, and there's no account to sign in to.</p>
+      <a class="more-link" href="/privacy/" data-i18n="privacy.more">Full privacy details →</a>
+    </div>
+    <ul class="check-list">
+      <li data-i18n="privacy.c1">Keystrokes are never logged or uploaded</li>
+      <li data-i18n="privacy.c2">Password fields are ignored entirely</li>
+      <li data-i18n-html="privacy.c3">After <code>:::</code>, only your search words and country go to KLIPY</li>
+      <li data-i18n-html="privacy.c4">You can opt out of our <a href="/stats">transparent stats</a></li>
+      <li data-i18n-html="privacy.c5">Open source, so you can check every line on <a href="https://github.com/wr/mojito">GitHub</a></li>
+    </ul>
+  </div>
+</section>
+
+<figure class="press-quote" lang="en" dir="ltr">
+  <blockquote>“Totally free, no upgrades, and it works as advertised.”</blockquote>
+  <figcaption><a href="https://9to5mac.com/2026/05/27/mojito-for-mac-is-a-new-and-free-emoji-picker-with-auto-complete/">9to5Mac</a></figcaption>
+</figure>
+
+<section id="faq" class="home-section faq" aria-labelledby="faq-h">
+  <h2 id="faq-h" data-i18n="faq.h2">FAQ</h2>
+
+  <details class="faq-row">
+    <summary><h3 data-i18n="faq.q1.q">How is this different from macOS's built-in emoji picker?</h3></summary>
     <p data-i18n-html="faq.q1.a">The macOS picker (⌃⌘Space) is a separate window — open it, search, click, switch back. Mojito just appears next to your cursor as you type. Hit a colon, type a couple letters, arrow keys + Return to insert. No window, no mouse, no context switch.</p>
-  </div>
+  </details>
 
-  <div class="faq-item">
-    <h3 data-i18n="faq.q2.q">Which apps does it work in?</h3>
+  <details class="faq-row">
+    <summary><h3 data-i18n="faq.q2.q">Which apps does it work in?</h3></summary>
     <p data-i18n-html="faq.q2.a">Almost anywhere you can type — Mail, Notes, Messages, TextEdit, browsers. Out of the box it skips apps and sites with their own shortcode emoji (Slack, Discord, Notion, GitHub), plus terminals and code editors. Change the list in Settings &rarr; Exclusions.</p>
-  </div>
+  </details>
 
-  <div class="faq-item">
-    <h3 data-i18n="faq.q3.q">Can I customize it?</h3>
-    <p data-i18n-html="faq.q3.a">From the menu bar you can set a default skin tone or pause for an hour or until tomorrow. Symbols are on out of the box: <code>::cmd</code> → ⌘, <code>::degree</code> → °. Results re-rank by how often you use them, and common emoticons like <code>:)</code> and <code>&lt;3</code> are recognized.</p>
-  </div>
-
-  <div class="faq-item">
-    <h3 data-i18n="faq.q4.q">Can I insert GIFs too?</h3>
-    <p data-i18n-html="faq.q4.a">Yes — type <code>:::</code> (three colons) then a search term to grab a GIF from <a href="https://klipy.com">KLIPY</a>. It's on by default; flip it off in Settings &rarr; General if you'd rather keep things local.</p>
-  </div>
-
-  <div class="faq-item">
-    <h3 data-i18n="faq.q5.q">What languages is it available in?</h3>
-    <p data-i18n-html="faq.q5.a">The interface is translated into 19 locales — English (US + UK), German, Spanish (Spain + Latin America), French, Italian, Brazilian Portuguese, Japanese, Simplified and Traditional Chinese, Korean, Hindi, Russian, Polish, Dutch, Arabic, Farsi, and Hebrew. Emoji shortcodes are localized in 14 of those, so <code>:gato:</code> works in Spanish, <code>:chien:</code> in French, and so on. Translations started as LLM drafts; <a href="https://github.com/wr/mojito#translations">native-speaker corrections</a> are very welcome.</p>
-  </div>
-
-  <div class="faq-item">
-    <h3 data-i18n="faq.q6.q">What are the system requirements?</h3>
+  <details class="faq-row">
+    <summary><h3 data-i18n="faq.q6.q">What are the system requirements?</h3></summary>
     <p data-i18n-html="faq.q6.a">macOS 14 (Sonoma) or later. Native on Apple Silicon and Intel.</p>
-  </div>
+  </details>
 
-  <div class="faq-item">
-    <h3 data-i18n="faq.q7.q">How do updates and uninstall work?</h3>
-    <p data-i18n-html="faq.q7.a">Updates arrive automatically through Sparkle, the standard macOS update framework. To uninstall, quit Mojito from the menu bar and drag it from Applications to the Trash.</p>
-  </div>
-
-  <div class="faq-item">
-    <h3 data-i18n="faq.q8.q">Is it open source?</h3>
+  <details class="faq-row">
+    <summary><h3 data-i18n="faq.q8.q">Is it open source?</h3></summary>
     <p data-i18n-html="faq.q8.a">Full source on <a href="https://github.com/wr/mojito">GitHub</a>, AGPL-3.0.</p>
-  </div>
+  </details>
 
-  <div class="faq-item">
-    <h3 data-i18n="faq.q9.q">Is it really free? How can I support it?</h3>
+  <details class="faq-row">
+    <summary><h3 data-i18n="faq.q9.q">Is it really free? How can I support it?</h3></summary>
     <p data-i18n-html="faq.q9.a">Yes — no trial, no ads, no upsells. If you'd like to chip in, <a href="https://buymeacoffee.com/wellsworkshop">Buy Me a Coffee</a> is much appreciated.</p>
-  </div>
+  </details>
 
-  <div class="faq-item">
-    <h3 data-i18n="faq.q10.q">Is the app full of easter eggs for me to find?</h3>
+  <details class="faq-row">
+    <summary><h3 data-i18n="faq.q10.q">Is the app full of easter eggs for me to find?</h3></summary>
     <p data-i18n-html="faq.q10.a">Yes — unlike most software built today, Mojito is both useful <em>and</em> soulful. Have fun with it.</p>
-  </div>
-</section>
-
-<section id="privacy" class="prose">
-  <h2 data-i18n="privacy.h2">Privacy</h2>
-  <p data-i18n-html="privacy.p1">Keystrokes are matched on your Mac — <strong>nothing you type</strong> leaves it, except the words after <code>:::</code> when you search for a GIF. Password fields are ignored and there's no account. <a href="/privacy/">Full privacy details</a></p>
+  </details>
 </section>
 
 <section class="home-cta" aria-labelledby="home-cta-h">
   <img src="app-icon-128.png" alt="" width="64" height="64" loading="lazy" decoding="async">
   <h2 id="home-cta-h" data-i18n="cta.h2">Get Mojito</h2>
+  <p class="home-cta-sub" data-i18n-html="about.body">I built Mojito because Slack's <code>:tada:</code> → 🎉 should work everywhere on macOS, not just in Slack. It's free and open source.</p>
   <a class="nav-cta" href="/download?ref=home&amp;at=cta">
     <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v7.69l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 0 1 1.06-1.06l2.72 2.72V2.25A.75.75 0 0 1 8 1.5Zm-5.25 11a.75.75 0 0 1 .75.75v.25a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-.25a.75.75 0 0 1 1.5 0v.25A2 2 0 0 1 12 15.5H4a2 2 0 0 1-2-2v-.25a.75.75 0 0 1 .75-.75Z"/></svg>
     <span data-i18n="nav.download">Download for macOS</span>
@@ -497,7 +580,8 @@ Changes not staged for commit:
   <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
 </footer>
 
-<script src="picker.js?v=53" defer></script>
+<script src="picker.js?v=55" defer></script>
+<script src="home.js?v=2" defer></script>
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
