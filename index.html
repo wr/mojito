@@ -41,8 +41,8 @@
 <link rel="alternate" hreflang="he" href="https://mojito.wells.ee/?lang=he">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper.webp" type="image/webp" media="(prefers-color-scheme: light)">
 <link rel="preload" as="image" fetchpriority="high" href="wallpaper-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)">
-<link rel="stylesheet" href="style.css?v=79">
-<script src="i18n.js?v=8"></script>
+<link rel="stylesheet" href="style.css?v=80">
+<script src="i18n.js?v=9"></script>
 </head>
 <body>
 
@@ -421,9 +421,9 @@ Changes not staged for commit:
       <div class="trigger-visual" aria-hidden="true" dir="ltr">
         <div class="mini-field">:::sponge<span class="mini-caret"></span></div>
         <div class="mini-gifs">
-          <img src="gifs/spongebob-band.gif" alt="" width="64" height="64" loading="lazy" decoding="async">
-          <img src="gifs/spongebob-grin.gif" alt="" width="64" height="64" loading="lazy" decoding="async">
-          <img src="gifs/spongebob-smug.gif" alt="" width="64" height="64" loading="lazy" decoding="async">
+          <picture><source srcset="gifs/spongebob-band-still.png" media="(prefers-reduced-motion: reduce)"><img src="gifs/spongebob-band.gif" alt="" width="66" height="66" loading="lazy" decoding="async"></picture>
+          <picture><source srcset="gifs/spongebob-grin-still.png" media="(prefers-reduced-motion: reduce)"><img src="gifs/spongebob-grin.gif" alt="" width="66" height="66" loading="lazy" decoding="async"></picture>
+          <picture><source srcset="gifs/spongebob-smug-still.png" media="(prefers-reduced-motion: reduce)"><img src="gifs/spongebob-smug.gif" alt="" width="66" height="66" loading="lazy" decoding="async"></picture>
         </div>
       </div>
       <h3><kbd>:::</kbd> <span data-i18n="how.gifs.h">GIFs</span></h3>
@@ -452,9 +452,9 @@ Changes not staged for commit:
       <p data-i18n-html="features.emoticons.p"><code>:D</code> becomes 😃, <code>&lt;3</code> becomes ❤️, and <code>-&gt;</code> becomes →.</p>
     </li>
     <li class="feature-card feature-languages">
-      <span class="feature-icon" aria-hidden="true"><span class="lang-flag">🌍</span></span>
+      <span class="feature-icon" aria-hidden="true"><span class="lang-cycle-flag">🌍</span></span>
       <h3><span class="visually-hidden" data-i18n="features.languages.h">Speaks 19 languages</span><span class="lang-cycle" aria-hidden="true">Speaks 19 languages</span></h3>
-      <p data-i18n-html="features.languages.p">Shortcodes are localized too, so <code>:fuego</code> works in Spanish and <code>:chien</code> in French. <a href="https://github.com/wr/mojito#translations">Corrections welcome</a>.</p>
+      <p data-i18n-html="features.languages.p">Shortcodes are localized in 14 of them, so <code>:fuego</code> works in Spanish and <code>:chien</code> in French. <a href="https://github.com/wr/mojito#translations">Corrections welcome</a>.</p>
     </li>
     <li class="feature-card">
       <span class="feature-icon" aria-hidden="true">🍎</span>
@@ -489,7 +489,7 @@ Changes not staged for commit:
     <ul class="check-list">
       <li data-i18n="privacy.c1">Keystrokes are never logged or uploaded</li>
       <li data-i18n="privacy.c2">Password fields are ignored entirely</li>
-      <li data-i18n-html="privacy.c3">GIF search sends only the words after <code>:::</code></li>
+      <li data-i18n-html="privacy.c3">After <code>:::</code>, only your search words and country go to KLIPY</li>
       <li data-i18n-html="privacy.c4">You can opt out of our <a href="/stats">transparent stats</a></li>
       <li data-i18n-html="privacy.c5">Open source, so you can check every line on <a href="https://github.com/wr/mojito">GitHub</a></li>
     </ul>
@@ -580,8 +580,8 @@ Changes not staged for commit:
   <p class="copyright">&copy; 2026 <a href="https://wells.ee">Wells Riley</a></p>
 </footer>
 
-<script src="picker.js?v=54" defer></script>
-<script src="home.js?v=1" defer></script>
+<script src="picker.js?v=55" defer></script>
+<script src="home.js?v=2" defer></script>
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",

@@ -3779,7 +3779,7 @@
      The real app pops a KLIPY-backed search panel; the demo shows a canned
      set of four looping GIFs for any query and "sends" the pick as an
      iMessage bubble. Thumbnails lazy-load on first open so the hero doesn't
-     pay ~200KB of GIF up front. */
+     pay ~280KB of GIF up front. */
 
   const gifPanel = document.getElementById('gif-panel');
   const gifQueryEl = document.getElementById('gif-query');

@@ -74,7 +74,7 @@
   "features.emoticons.h": "Emoticons convert too",
   "features.emoticons.p": "<code>:D</code> becomes 😃, <code>&lt;3</code> becomes ❤️, and <code>-&gt;</code> becomes →.",
   "features.languages.h": "Speaks 19 languages",
-  "features.languages.p": "Shortcodes are localized too, so <code>:fuego</code> works in Spanish and <code>:chien</code> in French. <a href=\"https://github.com/wr/mojito#translations\">Corrections welcome</a>.",
+  "features.languages.p": "Shortcodes are localized in 14 of them, so <code>:fuego</code> works in Spanish and <code>:chien</code> in French. <a href=\"https://github.com/wr/mojito#translations\">Corrections welcome</a>.",
   "features.native.h": "Looks exactly like macOS",
   "features.native.p": "We sweat the details: Liquid Glass on Tahoe, the system menu shadow, and light or dark to match your Mac.",
   "features.apps.h": "Works in every app",
@@ -108,7 +108,7 @@
   "privacy.more": "Full privacy details →",
   "privacy.c1": "Keystrokes are never logged or uploaded",
   "privacy.c2": "Password fields are ignored entirely",
-  "privacy.c3": "GIF search sends only the words after <code>:::</code>",
+  "privacy.c3": "After <code>:::</code>, only your search words and country go to KLIPY",
   "privacy.c4": "You can opt out of our <a href=\"/stats\">transparent stats</a>",
   "privacy.c5": "Open source, so you can check every line on <a href=\"https://github.com/wr/mojito\">GitHub</a>",
 

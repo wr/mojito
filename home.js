@@ -34,7 +34,7 @@
   var FADE = 250;
 
   var text = document.querySelector(".lang-cycle");
-  var flag = document.querySelector(".lang-flag");
+  var flag = document.querySelector(".lang-cycle-flag");
   if (!text || !flag) return;
   var card = text.closest(".feature-card");
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -42,6 +42,7 @@
 
   var idx = 0;
   var timer = null;
+  var fade = null;
   var visible = false;
 
   function currentLocale() { return (I18N && I18N.locale) || "en"; }
@@ -66,7 +67,8 @@
   function step() {
     text.classList.add("is-out");
     flag.classList.add("is-out");
-    setTimeout(function () {
+    fade = setTimeout(function () {
+      fade = null;
       idx = (idx + 1) % LANGS.length;
       show(idx);
       text.classList.remove("is-out");
@@ -78,7 +80,10 @@
   // the language changes; only tick while the card is on screen.
   function sync() {
     clearInterval(timer);
-    timer = null;
+    clearTimeout(fade);
+    timer = fade = null;
+    text.classList.remove("is-out");
+    flag.classList.remove("is-out");
     idx = startIndex();
     show(idx, FLAGS[currentLocale()]);
     if (visible && !reduce.matches) timer = setInterval(step, INTERVAL);
@@ -86,7 +91,7 @@
 
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(function (entries) {
-      visible = entries[0].isIntersecting;
+      visible = entries[entries.length - 1].isIntersecting;
       sync();
     }).observe(card);
   }
