@@ -12,7 +12,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "xcodebuild -project Mojito.xcodeproj -scheme Mojito -configuration Debug -destination 'platform=macOS' build > /tmp/mojito-build.log 2>&1",
+            "command": "cd \"$(jq -r .cwd)\" && xcodebuild -project Mojito.xcodeproj -scheme Mojito -configuration Debug -destination 'platform=macOS' build > /tmp/mojito-build.log 2>&1",
             "timeout": 300,
             "async": true,
             "statusMessage": "Rebuilding Mojito Dev → /Applications"
