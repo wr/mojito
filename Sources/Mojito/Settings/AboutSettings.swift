@@ -147,7 +147,8 @@ struct AboutSettingsView: View {
                 Image("WellsWorkshop")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(height: 16)
+                    // Wordmark cap height matches the .callout copyright text.
+                    .frame(height: 14)
             }
             .accessibilityLabel(Text(verbatim: "Wells Workshop"))
             .padding(.top, 6)
