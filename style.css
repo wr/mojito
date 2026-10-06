@@ -1878,13 +1878,14 @@ footer {
 
 .maker a {
   display: inline-flex;
-  padding: 4px 0;
+  padding: 5px 0;
   transition: opacity 0.15s ease;
 }
 
 .maker a:hover { opacity: 0.72; }
 
-.maker img { display: block; height: 18px; width: auto; }
+/* 14px puts the wordmark's cap height level with the 12px label beside it. */
+.maker img { display: block; height: 14px; width: auto; }
 
 @media (max-width: 640px) {
   /* On phones, the demo is autoplay-only — no tapping into the textarea,
