@@ -4145,7 +4145,7 @@
         prefilled: docTemplate.replace('{date}', localizedDocDate(_now)),
         before: tr('demo.scene.deadline', '\n- Hit deadline '), query: 'fire', after: '',
       },
-      { app: 1, before: tr('demo.scene.party', 'so ready for tonight '),      query: 'party',  gif: true },
+      { app: 1, before: tr('demo.scene.party', 'so ready for tonight '),      query: 'sponge', gif: true },
       { app: 2, before: 'echo "coverage ',                                    query: 'approx', after: ' 94%"', symbol: true },
       { app: 3, before: tr('demo.scene.shipped', 'Just shipped a new app '),  query: 'rocket', after: '' },
       { app: 4, before: tr('demo.scene.pickup', 'Pick up '),                  query: 'gift',   after: tr('demo.scene.formom', ' for mom') },
