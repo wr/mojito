@@ -16,7 +16,7 @@ import Foundation
 enum GifClipboard {
     /// Fetches the GIF bytes from `url` and writes them to the pasteboard.
     /// `name` (the search query) flavors the staged filename a chat app shows
-    /// on upload, e.g. `klipy-fire.gif`. Returns true on success.
+    /// on upload, e.g. `mojito-fire.gif`. Returns true on success.
     static func copy(from url: URL, name: String) async -> Bool {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
@@ -55,7 +55,7 @@ enum GifClipboard {
             let dir = root.appendingPathComponent(UUID().uuidString, isDirectory: true)
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             let slug = safeFileBase(name)
-            let fileName = slug.isEmpty ? "klipy.gif" : "klipy-\(slug).gif"
+            let fileName = slug.isEmpty ? "mojito.gif" : "mojito-\(slug).gif"
             let fileURL = dir.appendingPathComponent(fileName)
             try data.write(to: fileURL)
             return fileURL
@@ -66,7 +66,7 @@ enum GifClipboard {
 
     /// Turns the search query into a safe, readable filename fragment: keep
     /// alphanumerics, collapse every other run to a single `-`, trim, cap
-    /// length. May return "" (caller falls back to a bare `klipy.gif`).
+    /// length. May return "" (caller falls back to a bare `mojito.gif`).
     private static func safeFileBase(_ name: String) -> String {
         var out = ""
         var lastWasDash = false
