@@ -41,8 +41,8 @@ The embedded shortcode `DB` (lines ~85–3530) is a JS-shaped subset of the app'
 
 ## CSS gotchas (load-bearing — read before editing `style.css`)
 
-- **Dark-mode app overrides must live at the END of `style.css`.** Per-app rules later in the file use the `background:` shorthand, which resets `background-color` and wins the cascade over earlier `@media (prefers-color-scheme: dark)` blocks. Keep two dark-mode blocks: one near the top for `:root` variable overrides, one at the very bottom for `.hero-card` / `.app-*` / pill backgrounds. See `~/.claude/projects/-Users-wells-projects-mojito/memory/css-dark-mode-cascade.md`.
-- **macOS Tahoe (26) window chrome spec** (used by every `.app .title-bar` variant): 14px stoplights, 9px gap, 18px padding above/below/left, 50px bar height, 14px squircle corners, **no `border-bottom` on any title bar**. See `~/.claude/projects/-Users-wells-projects-mojito/memory/macos-tahoe-stoplight-spec.md`.
+- **Dark-mode app overrides must live at the END of `style.css`.** Per-app rules later in the file use the `background:` shorthand, which resets `background-color` and wins the cascade over earlier `@media (prefers-color-scheme: dark)` blocks. Keep two dark-mode blocks: one near the top for `:root` variable overrides, one at the very bottom for `.hero-card` / `.app-*` / pill backgrounds.
+- **macOS Tahoe (26) window chrome spec** (used by every `.app .title-bar` variant): 14px stoplights, 9px gap, 18px padding above/below/left, 50px bar height, 14px squircle corners, **no `border-bottom` on any title bar**.
 - The picker uses CSS `border-radius: 14px`, not a `clip-path` superellipse — `clip-path` breaks the box-shadow + border, and at 14px the rounded corner is visually indistinguishable from a true squircle anyway. The picker.js header has a comment explaining this; don't reintroduce `clip-path`.
 - `style.css` and `picker.js` are referenced with `?v=NN` cache busters in `index.html`. Bump both when shipping a visible change so users on Cloudflare/GitHub Pages caches see it.
 
