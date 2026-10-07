@@ -238,7 +238,7 @@ A reader of the GitHub repo, issue tracker, branch list, PR list, or
 release page should be unable to enumerate the eggs or work out what any
 of them does. This is load-bearing for the discovery design implemented
 in `EggIndex.swift` (hashed triggers) and `EggStrings.swift` (XOR-masked
-display strings) — see [[easter-egg-keyword-obfuscation]].
+display strings).
 
 **Allowed**, anywhere — a bare CRUD acknowledgment and nothing else:
 
@@ -266,7 +266,7 @@ code itself (where the obfuscation already lives) or skip it.
 
 ## Issue tracking & workflow
 
-Linear + Git workflow lives in `~/.claude/CLAUDE.md` (Linear SSOT + Git workflow sections). The `## Source of truth` block at the top of this file scopes those behaviors to this repo.
+The Linear + Git workflow lives in the `linear-workflow` skill (`~/.claude/skills/linear-workflow/`). The `## Source of truth` block at the top of this file scopes it to this repo.
 
 Mojito-specific notes:
 
