@@ -67,7 +67,10 @@ final class GifSearcher: GifSearching {
     private func finish(data: Data?, response: URLResponse?, error: Error?,
                         completion: (Result<GifPage, GifSearchError>) -> Void) {
         if let error {
-            os_log("GIF search failed: %{public}@", log: log, type: .info, "\(error)")
+            // Domain and code only: a URLError's description embeds the
+            // request URL, which carries the search text and the API key.
+            let nsError = error as NSError
+            os_log("GIF search failed: %{public}@ %ld", log: log, type: .info, nsError.domain, nsError.code)
             completion(.failure(.network(error)))
             return
         }
