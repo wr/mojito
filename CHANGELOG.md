@@ -5,6 +5,17 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.10.1
+
+## New
+- New installs get symbols on their own `::` trigger instead of mixed into emoji results. Existing setups are unchanged. ([#225](https://github.com/wr/mojito/pull/225))
+- Anonymous stats now also say whether this is a Mac's first report ever, this week, or this month, so the public stats page can show real weekly and monthly user counts, still with no ID. ([#221](https://github.com/wr/mojito/pull/221))
+
+## Fixed
+- On macOS 27.2 in light mode, the picker, emoji browser, Quick Access, and GIF panel are no longer see-through with their edges cut off. ([#237](https://github.com/wr/mojito/pull/237))
+- The emoji browser no longer leaves a sliver under its tab bar on macOS 14 and 15, and keeps its top spacing when search results scroll. ([#217](https://github.com/wr/mojito/pull/217), [#218](https://github.com/wr/mojito/pull/218))
+- Pasted GIFs are named `mojito-….gif` instead of `klipy-….gif`. ([#241](https://github.com/wr/mojito/pull/241))
+
 ## v1.10.0
 
 ## New
