@@ -156,6 +156,7 @@
 		D57C0BA3F93C45531A439D89 /* v07.bin in Resources */ = {isa = PBXBuildFile; fileRef = 7CCBA41F4C17CC47E155A9BE /* v07.bin */; };
 		D69A33630F4FD6D6EB950C67 /* UpdaterCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702AC2870CD686AB17CC518E /* UpdaterCoordinator.swift */; };
 		D7FD72169491380D742F69BC /* ChooChooSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = C060B27E6970531BEBA3673E /* ChooChooSound.swift */; };
+		D8CD1BAA49BB0D0B96A7C2CC /* ScratchDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8D795EF2026F5349717D49 /* ScratchDefaults.swift */; };
 		DADDDB9ED8378048DF84B51A /* EggSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1732A13138B365E5C880F62 /* EggSound.swift */; };
 		DCE52DEE8C9CEC354443E7DB /* SettingsRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFC142D2205F1C089F7524D2 /* SettingsRoot.swift */; };
 		DD501615C4A6623E5BA03369 /* EmojiDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B842CBBD6C7466F9BA2786 /* EmojiDatabaseTests.swift */; };
@@ -262,6 +263,7 @@
 		561D5F53503A9DDE7BE03430 /* KeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMonitor.swift; sourceTree = "<group>"; };
 		5A80F3946EA93F8F8A25774E /* TriggerStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerStateMachine.swift; sourceTree = "<group>"; };
 		5A8851906565F70B7815640F /* FuzzyMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatcher.swift; sourceTree = "<group>"; };
+		5A8D795EF2026F5349717D49 /* ScratchDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchDefaults.swift; sourceTree = "<group>"; };
 		5B9E4C2183154C36F1883004 /* PickerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewModel.swift; sourceTree = "<group>"; };
 		5C9E01A82260E8A38DF8D7EA /* DebugReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugReport.swift; sourceTree = "<group>"; };
 		5FB7AB3DB0E63AF30880FE66 /* BrowserURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserURL.swift; sourceTree = "<group>"; };
@@ -426,6 +428,7 @@
 				AEB65C36C1B1D1A3ECADC6FE /* KlipyAPITests.swift */,
 				12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */,
 				6401923F7190AFC65A7B6959 /* QueryStemmerTests.swift */,
+				5A8D795EF2026F5349717D49 /* ScratchDefaults.swift */,
 				9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */,
 				D74BDC060E2EAACF7A71A3A6 /* SkinToneTests.swift */,
 				E25EC50F4D58E03E218947DF /* SymbolsDatabaseTests.swift */,
@@ -1102,6 +1105,7 @@
 				98422299C980042CFA642B78 /* KlipyAPITests.swift in Sources */,
 				2C2FD54F6E35CCD0374213BB /* PickerViewModelTests.swift in Sources */,
 				A11509496D8522DC13BF31F3 /* QueryStemmerTests.swift in Sources */,
+				D8CD1BAA49BB0D0B96A7C2CC /* ScratchDefaults.swift in Sources */,
 				C025CD4AE30320C3FE69028A /* SeasonalGatesTests.swift in Sources */,
 				917B8512B30F3B6E8C9D2B8C /* SkinToneTests.swift in Sources */,
 				91A5F2A800EA1FC0700394EA /* SymbolsDatabaseTests.swift in Sources */,
