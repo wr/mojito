@@ -219,9 +219,10 @@ struct TriggerStateMachineBrowseTests {
 
 @MainActor
 struct QuickAccessStoreTests {
+    private let scratch = ScratchDefaults()
+
     private func makeStore() -> QuickAccessStore {
-        let suite = UserDefaults(suiteName: "mojito.tests.quickaccess.\(UUID().uuidString)")!
-        return QuickAccessStore(defaults: suite)
+        QuickAccessStore(defaults: scratch.make())
     }
 
     @Test func startsAllAuto() {
@@ -254,8 +255,7 @@ struct QuickAccessStoreTests {
     }
 
     @Test func persistsAcrossInstances() {
-        let suiteName = "mojito.tests.quickaccess.persist.\(UUID().uuidString)"
-        let suite = UserDefaults(suiteName: suiteName)!
+        let suite = scratch.make()
         let first = QuickAccessStore(defaults: suite)
         first.pin("2764", at: 2)
         let second = QuickAccessStore(defaults: suite)

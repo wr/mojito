@@ -5,8 +5,10 @@ import Testing
 /// Round-trip persistence and one-time legacy migration of `TriggerConfig`.
 struct TriggerConfigStoreTests {
 
+    private let scratch = ScratchDefaults()
+
     private func freshSuite() -> UserDefaults {
-        UserDefaults(suiteName: "mojito.tests.triggers.\(UUID().uuidString)")!
+        scratch.make()
     }
 
     // MARK: Codable round-trip

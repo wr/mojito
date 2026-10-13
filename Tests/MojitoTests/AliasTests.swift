@@ -5,9 +5,10 @@ import Foundation
 /// Custom shortcut (alias) storage + validation.
 @MainActor
 struct AliasStoreTests {
+    private let scratch = ScratchDefaults()
+
     private func makeStore() -> AliasStore {
-        let suite = UserDefaults(suiteName: "mojito.tests.alias.\(UUID().uuidString)")!
-        return AliasStore(defaults: suite)
+        AliasStore(defaults: scratch.make())
     }
 
     @Test func startsEmpty() {
@@ -61,8 +62,7 @@ struct AliasStoreTests {
     }
 
     @Test func persistsAcrossInstances() {
-        let suiteName = "mojito.tests.alias.persist.\(UUID().uuidString)"
-        let suite = UserDefaults(suiteName: suiteName)!
+        let suite = scratch.make()
         let first = AliasStore(defaults: suite)
         first.add(alias: "check", hexcode: "2705")
         let second = AliasStore(defaults: suite)
