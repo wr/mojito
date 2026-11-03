@@ -61,18 +61,20 @@ struct ResolvedSlot {
 }
 
 /// Resolves the Quick Access slots to concrete emoji: pinned slots show their
-/// emoji; auto slots fill, in slot order, from most-used (skipping symbols,
-/// pinned glyphs, and anything already shown).
+/// emoji; auto slots fill, in slot order, from most-used (emoji, plus symbols
+/// while the Symbols trigger is on), skipping pinned glyphs and anything
+/// already shown. A pinned symbol shows either way.
 @MainActor
 enum QuickAccess {
     static func resolvedPerSlot(
         store: QuickAccessStore,
         database: EmojiDatabase,
-        usage: [String: Int]
+        usage: [String: Int],
+        symbolsEnabled: Bool
     ) -> [ResolvedSlot] {
         let pinned = Set(store.slots.compactMap { $0 })
         var pool = usage
-            .filter { $0.value > 0 && !$0.key.hasPrefix("SYM_") && !pinned.contains($0.key) }
+            .filter { $0.value > 0 && !pinned.contains($0.key) && (symbolsEnabled || !$0.key.hasPrefix("SYM_")) }
             .sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
             .map(\.key)
             .makeIterator()
@@ -80,15 +82,11 @@ enum QuickAccess {
         var out: [ResolvedSlot] = []
         for slot in store.slots {
             if let hex = slot {
-                // A pinned symbol stores a `SYM_…` hexcode, which lives in
-                // SymbolsDatabase, not the emoji DB.
-                let emoji = database.byHexcode[hex]
-                    ?? (hex.hasPrefix("SYM_") ? SymbolsDatabase.byHexcode[hex] : nil)
-                out.append(ResolvedSlot(emoji: emoji, pinned: true))
+                out.append(ResolvedSlot(emoji: lookup(hex, in: database), pinned: true))
             } else {
                 var fill: Emoji?
                 while let hex = pool.next() {
-                    guard !used.contains(hex), let emoji = database.byHexcode[hex] else { continue }
+                    guard !used.contains(hex), let emoji = lookup(hex, in: database) else { continue }
                     used.insert(hex)
                     fill = emoji
                     break
@@ -99,13 +97,21 @@ enum QuickAccess {
         return out
     }
 
+    /// A `SYM_…` hexcode lives in SymbolsDatabase, not the emoji DB. Its index
+    /// is built on first access, so it is only touched for a symbol hexcode.
+    private static func lookup(_ hex: String, in database: EmojiDatabase) -> Emoji? {
+        database.byHexcode[hex] ?? (hex.hasPrefix("SYM_") ? SymbolsDatabase.byHexcode[hex] : nil)
+    }
+
     /// Flat list of the resolved emoji (drops empty auto slots) — the bare-`:`
     /// pill corpus and the browser's Quick Access section.
     static func resolved(
         store: QuickAccessStore,
         database: EmojiDatabase,
-        usage: [String: Int]
+        usage: [String: Int],
+        symbolsEnabled: Bool
     ) -> [Emoji] {
-        resolvedPerSlot(store: store, database: database, usage: usage).compactMap(\.emoji)
+        resolvedPerSlot(store: store, database: database, usage: usage, symbolsEnabled: symbolsEnabled)
+            .compactMap(\.emoji)
     }
 }

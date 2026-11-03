@@ -16,12 +16,6 @@ struct ScoredEmoji {
     }
 }
 
-/// Built lazily so apps that never enable Symbols don't pay for it.
-@MainActor
-private enum SymbolsCorpus {
-    static let entries: [IndexedEmoji] = SymbolsDatabase.indexed()
-}
-
 /// Set by Engine from symbol prefs + state-machine scope.
 enum SearchCorpus {
     case emojiOnly          // `:foo` with symbols off, OR symbols on + double-colon required
@@ -174,11 +168,11 @@ struct FuzzyMatcher {
             // rendered) twice, colliding on hexcode in the picker's ForEach.
             let promoted = database.aliasedSymbolHexcodes
             let symbols = promoted.isEmpty
-                ? SymbolsCorpus.entries
-                : SymbolsCorpus.entries.filter { !promoted.contains($0.emoji.hexcode) }
+                ? SymbolsDatabase.all
+                : SymbolsDatabase.all.filter { !promoted.contains($0.emoji.hexcode) }
             pool = database.indexed + symbols
         case .symbolsOnly:
-            pool = SymbolsCorpus.entries
+            pool = SymbolsDatabase.all
         }
 
         var trimmed = rankedResults(

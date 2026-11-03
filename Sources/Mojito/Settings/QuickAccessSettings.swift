@@ -55,7 +55,10 @@ struct QuickAccessSection: View {
     }
 
     private var slotGrid: some View {
-        let slots = QuickAccess.resolvedPerSlot(store: store, database: database, usage: usage)
+        let slots = QuickAccess.resolvedPerSlot(
+            store: store, database: database, usage: usage,
+            symbolsEnabled: TriggerConfigStore.load().symbols.enabled
+        )
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
                 // Mirror the live pill: a glassy capsule of cells.

@@ -966,7 +966,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     /// auto-fill), then a trailing "Browse all emojis…" row.
     private func emptyQueryResults() -> [ScoredEmoji] {
         var rows = QuickAccess
-            .resolved(store: quickAccess, database: database, usage: usage)
+            .resolved(
+                store: quickAccess, database: database, usage: usage,
+                symbolsEnabled: stateMachine.config.symbols.enabled
+            )
             .map { ScoredEmoji(emoji: $0, matchedShortcode: $0.primaryShortcode) }
         rows.append(EmojiBrowser.browseRow)
         return rows
@@ -1175,7 +1178,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
                 )
                 if let exact = hits.first(where: { $0.matchedShortcode.lowercased() == key }) {
                     TextInserter.replace(charactersToDelete: charsToDelete, with: exact.emoji.character)
-                    bumpSymbolCounter()
+                    recordUsage(emoji: exact.emoji)
                 }
                 return
             }

@@ -291,7 +291,9 @@ final class EmojiBrowserViewModel: ObservableObject {
         }
 
         // Quick Access first (mirrors the bare-`:` pill), then the categories.
-        add(.quickAccess, QuickAccess.resolved(store: quickAccess, database: database, usage: usage))
+        add(.quickAccess, QuickAccess.resolved(
+            store: quickAccess, database: database, usage: usage, symbolsEnabled: symbolsEnabled
+        ))
 
         for category in EmojiCategory.allCases where !category.isDynamic {
             let groups = Set(category.groups)
@@ -302,7 +304,7 @@ final class EmojiBrowserViewModel: ObservableObject {
         // is slow and the corpus is large. Forced on in the alias picker so a
         // symbol can be chosen as an alias target.
         if symbolsEnabled {
-            add(.specialCharacters, SymbolsDatabase.indexed().map(\.emoji))
+            add(.specialCharacters, SymbolsDatabase.all.map(\.emoji))
         }
         return sections
     }

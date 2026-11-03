@@ -175,7 +175,7 @@ enum DebugReport {
     private static func databaseSection() -> String {
         var s = "## Database\n"
         s += "- emoji.count: \(EmojiDatabase.shared.all.count)\n"
-        s += "- symbols.count: \(SymbolsDatabase.indexed().count)\n"
+        s += "- symbols.count: \(SymbolsDatabase.all.count)\n"
         return s
     }
 

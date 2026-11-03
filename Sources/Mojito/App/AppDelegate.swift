@@ -46,6 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         engine.attach(permissions: permissions)
         // Start observing focus changes before the user types their first `:`.
         _ = FocusedElementCache.shared
+        warmSymbolsIfQuickAccessNeedsThem()
         UpdaterCoordinator.shared.start()
 
         // About → Stats reads this for "User since".
@@ -182,6 +183,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             .receive(on: RunLoop.main)
             .sink { _ in TelemetryUploader.shared.uploadIfDue() }
             .store(in: &observers)
+    }
+
+    /// Quick Access resolves a pinned `SYM_…` hexcode, and a used one while
+    /// the Symbols trigger is on, through `SymbolsDatabase`, whose first access
+    /// runs the slow CoreText sweep. The bare-`:` pill is built inside the
+    /// event-tap callback, so build it here, off the main thread, instead of on
+    /// the first `:`.
+    private func warmSymbolsIfQuickAccessNeedsThem() {
+        let usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
+        let isSymbol = { (hex: String) in hex.hasPrefix("SYM_") }
+        guard (TriggerConfigStore.load().symbols.enabled && usage.keys.contains(where: isSymbol))
+            || QuickAccessStore.shared.slots.contains(where: { $0.map(isSymbol) ?? false })
+        else { return }
+        DispatchQueue.global(qos: .utility).async { _ = SymbolsDatabase.byHexcode }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

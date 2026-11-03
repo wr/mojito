@@ -272,7 +272,7 @@ struct QuickAccessStoreTests {
         let b = db.all[2].hexcode
         store.pin(pin, at: 1)
         // slot 0 auto → top most-used (b:10), slot 1 pinned, slot 2 auto → next (a:3)
-        let resolved = QuickAccess.resolved(store: store, database: db, usage: [a: 3, b: 10]).map(\.hexcode)
+        let resolved = QuickAccess.resolved(store: store, database: db, usage: [a: 3, b: 10], symbolsEnabled: true).map(\.hexcode)
         #expect(resolved.count >= 3)
         #expect(resolved[0] == b)
         #expect(resolved[1] == pin)
@@ -286,8 +286,34 @@ struct QuickAccessStoreTests {
         let x = db.all[0].hexcode
         store.pin(x, at: 0)
         // x is also the most-used — it must not also appear in an auto slot.
-        let resolved = QuickAccess.resolved(store: store, database: db, usage: [x: 99]).map(\.hexcode)
+        let resolved = QuickAccess.resolved(store: store, database: db, usage: [x: 99], symbolsEnabled: true).map(\.hexcode)
         #expect(resolved.filter { $0 == x }.count == 1)
+    }
+
+    @Test func resolvedAutoFillsUsedSymbols() throws {
+        let db = EmojiDatabase.shared
+        let e = try #require(db.all.first).hexcode
+        let sym = "SYM_cmd"
+        try #require(SymbolsDatabase.byHexcode[sym] != nil)
+        let store = makeStore()
+        // A symbol used more than an emoji takes the first auto slot.
+        let resolved = QuickAccess.resolved(store: store, database: db, usage: [e: 2, sym: 7], symbolsEnabled: true).map(\.hexcode)
+        #expect(Array(resolved.prefix(2)) == [sym, e])
+    }
+
+    @Test func resolvedSkipsUsedSymbolsWhenSymbolsOff() throws {
+        let db = EmojiDatabase.shared
+        let e = try #require(db.all.first).hexcode
+        let used = "SYM_cmd", pinned = "SYM_option"
+        try #require(SymbolsDatabase.byHexcode[used] != nil)
+        try #require(SymbolsDatabase.byHexcode[pinned] != nil)
+        let store = makeStore()
+        store.pin(pinned, at: 0)
+        // With Symbols off, a used symbol never takes an auto slot; a pin stays.
+        let resolved = QuickAccess.resolved(
+            store: store, database: db, usage: [e: 2, used: 7], symbolsEnabled: false
+        ).map(\.hexcode)
+        #expect(resolved == [pinned, e])
     }
 
     @Test func resolvedIsDeterministic() {
@@ -297,8 +323,8 @@ struct QuickAccessStoreTests {
         let x = db.all[0].hexcode
         let y = db.all[1].hexcode
         let usage = [x: 5, y: 5]
-        let first = QuickAccess.resolved(store: store, database: db, usage: usage).map(\.hexcode)
-        let second = QuickAccess.resolved(store: store, database: db, usage: usage).map(\.hexcode)
+        let first = QuickAccess.resolved(store: store, database: db, usage: usage, symbolsEnabled: true).map(\.hexcode)
+        let second = QuickAccess.resolved(store: store, database: db, usage: usage, symbolsEnabled: true).map(\.hexcode)
         #expect(first == second)
         #expect(Array(first.prefix(2)) == [min(x, y), max(x, y)])
     }
