@@ -6,9 +6,9 @@ import Foundation
 /// programmatic sweep that derives shortcodes from Unicode names
 /// (`PLACE OF INTEREST SIGN` → `place_of_interest_sign`). Opt-in.
 enum SymbolsDatabase {
-    /// The symbol corpus, swept once per launch. The CoreText sweep is slow,
-    /// so `AppDelegate` warms this off the main thread when Quick Access will
-    /// need it, rather than letting the first `:` pay for it.
+    /// The symbol corpus, swept once per launch. The CoreText sweep is slow
+    /// and first access blocks, so `warmInBackground()` it before the
+    /// keystroke path can need it.
     static let all: [IndexedEmoji] = indexed()
 
     /// `SYM_…` hexcode → symbol, for resolving a stored hexcode (a Quick Access
@@ -18,6 +18,12 @@ enum SymbolsDatabase {
         all.map { ($0.emoji.hexcode, $0.emoji) },
         uniquingKeysWith: { first, _ in first }
     )
+
+    /// Builds `all` and `byHexcode` on a utility queue. A main-thread access
+    /// during the build waits for it rather than sweeping again.
+    static func warmInBackground() {
+        DispatchQueue.global(qos: .utility).async { _ = byHexcode }
+    }
 
     static func indexed() -> [IndexedEmoji] {
         var seenCharacters = Set<String>()

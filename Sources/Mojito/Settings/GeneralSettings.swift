@@ -115,7 +115,8 @@ struct GeneralSettingsView: View {
                 open: $triggers.quickAccess.open,
                 followEmoji: $triggers.quickAccessFollowEmoji,
                 emojiOpen: triggers.emoji.open,
-                takenOpens: takenOpens(excluding: .quickAccess)
+                takenOpens: takenOpens(excluding: .quickAccess),
+                symbolsEnabled: triggers.symbols.enabled
             )
 
             Section {
