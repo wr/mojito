@@ -6,11 +6,16 @@ import Foundation
 /// programmatic sweep that derives shortcodes from Unicode names
 /// (`PLACE OF INTEREST SIGN` → `place_of_interest_sign`). Opt-in.
 enum SymbolsDatabase {
-    /// `SYM_…` hexcode → symbol, for resolving a pinned Quick Access slot.
-    /// Built once on first access (the sweep is the slow part); only touched
-    /// when a symbol is actually pinned.
+    /// The symbol corpus, swept once per launch. The CoreText sweep is slow,
+    /// so `AppDelegate` warms this off the main thread when Quick Access will
+    /// need it, rather than letting the first `:` pay for it.
+    static let all: [IndexedEmoji] = indexed()
+
+    /// `SYM_…` hexcode → symbol, for resolving a stored hexcode (a Quick Access
+    /// slot or used symbol, an alias target). Reach for it only for a `SYM_`
+    /// key: first access builds `all`.
     static let byHexcode: [String: Emoji] = Dictionary(
-        indexed().map { ($0.emoji.hexcode, $0.emoji) },
+        all.map { ($0.emoji.hexcode, $0.emoji) },
         uniquingKeysWith: { first, _ in first }
     )
 
