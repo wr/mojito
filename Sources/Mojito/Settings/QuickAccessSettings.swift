@@ -12,6 +12,9 @@ struct QuickAccessSection: View {
     let emojiOpen: String
     /// Opens claimed by the other active triggers — grayed in the picker.
     let takenOpens: Set<String>
+    /// The live (unsaved) Symbols toggle; `TriggerConfigStore` lags it by a
+    /// render, since the parent persists in `.onChange`.
+    let symbolsEnabled: Bool
 
     @StateObject private var store = QuickAccessStore.shared
     @State private var editing: EditingSlot?
@@ -56,8 +59,7 @@ struct QuickAccessSection: View {
 
     private var slotGrid: some View {
         let slots = QuickAccess.resolvedPerSlot(
-            store: store, database: database, usage: usage,
-            symbolsEnabled: TriggerConfigStore.load().symbols.enabled
+            store: store, database: database, usage: usage, symbolsEnabled: symbolsEnabled
         )
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {

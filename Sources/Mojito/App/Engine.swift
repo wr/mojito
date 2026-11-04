@@ -224,7 +224,15 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             queue: .main
         ) { [weak self] _ in
             MainActor.assumeIsolated {
-                self?.refreshPreferences()
+                guard let self else { return }
+                let symbolsWereOn = self.stateMachine.config.symbols.enabled
+                self.refreshPreferences()
+                // Launch warms only when Quick Access needs symbols. Turning
+                // Symbols on later warms here, so the next `:` doesn't run the
+                // sweep inside the event-tap callback.
+                if !symbolsWereOn && self.stateMachine.config.symbols.enabled {
+                    SymbolsDatabase.warmInBackground()
+                }
             }
         }
     }

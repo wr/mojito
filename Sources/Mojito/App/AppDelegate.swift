@@ -196,7 +196,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         guard (TriggerConfigStore.load().symbols.enabled && usage.keys.contains(where: isSymbol))
             || QuickAccessStore.shared.slots.contains(where: { $0.map(isSymbol) ?? false })
         else { return }
-        DispatchQueue.global(qos: .utility).async { _ = SymbolsDatabase.byHexcode }
+        SymbolsDatabase.warmInBackground()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
