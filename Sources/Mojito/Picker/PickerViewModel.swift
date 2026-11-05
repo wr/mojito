@@ -12,6 +12,9 @@ final class PickerViewModel: ObservableObject {
     @Published var compact: Bool = false
     /// True once the pill has grown into the full-library grid (same panel).
     @Published var expanded: Bool = false
+    /// Leading list rows that a digit 1–9 inserts directly (0 = off). Drives
+    /// the row number badges and the footer's digit hint.
+    @Published var quickPickCount: Int = 0
 
     /// Drives the grid while `expanded`. Set by the Engine on expand.
     var browser: EmojiBrowserViewModel?
@@ -65,6 +68,7 @@ final class PickerViewModel: ObservableObject {
         isVisible = false
         compact = false
         expanded = false
+        quickPickCount = 0
         browser = nil
     }
 }

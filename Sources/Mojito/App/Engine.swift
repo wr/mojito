@@ -94,6 +94,18 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         self.usage = (UserDefaults.standard.dictionary(forKey: PrefsKey.usageCounts) as? [String: Int]) ?? [:]
         refreshPreferences()
 
+        // Collision guard for list quick-pick: a digit that keeps the query
+        // matching (`:clock1` → 🕐) is typing, not picking. Only runs on a
+        // digit while the list is up.
+        stateMachine.queryHasMatches = { [weak self] query, scope in
+            guard let self else { return true }
+            return !FuzzyMatcher.search(
+                query: query, in: self.database, usage: [:],
+                corpus: self.corpusFor(scope: scope),
+                useFrequencyBoost: false, limit: 1
+            ).isEmpty
+        }
+
         // Click-away behaves like Esc but doesn't consume the click.
         pickerWindow.onClickAway = { [weak self] in
             self?.cancelCapture()
@@ -600,6 +612,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         if case .insertEmoji(_, .fromPicker, _) = output.action, viewModel.topResult == nil {
             consumesKey = false
         }
+        // Never swallow a quick-pick digit without a row to insert.
+        if case .pickListIndex(let index, _, _) = output.action, !isListPickable(index) {
+            consumesKey = false
+        }
         // Same guard for the sticky entering pick (Shift+Return): if the
         // picker never surfaced there's no row to pick — let the key through.
         // Once a session is live the keyboard is owned, so keep consuming.
@@ -647,6 +663,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             viewModel.reset()
             pickerWindow.hide()
             stateMachine.emptyPickerActive = false
+            setListQuickPick(0)
             // Backspacing below the picker threshold (or demoting `::` symbols
             // scope) emits .closePicker while the SM stays in .capturing. The
             // capture metadata — exclusion flag, focus snapshot — must survive
@@ -872,6 +889,17 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             viewModel.selectedIndex = index
             insert(query: "", mode: .fromPicker, scope: .normal, openLen: max(1, stateMachine.captureOpenLen), closeLen: 0)
 
+        case .pickListIndex(let index, let q, let scope):
+            if captureExcluded { break }
+            // The state machine already went idle; tear down rather than
+            // leave an orphaned list up.
+            guard isListPickable(index) else {
+                cancelCapture()
+                break
+            }
+            viewModel.selectedIndex = index
+            insert(query: q, mode: .fromPicker, scope: scope, openLen: stateMachine.lastInsertOpenLen, closeLen: 0)
+
         case .stickyPick(let scope, let deleteCount, let keepOpen):
             guard !captureExcluded, let top = viewModel.topResult else {
                 // The state machine moved to `.stickyPicking`, which owns the
@@ -968,6 +996,20 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             self.stateMachine.pillEmojiCount = max(0, self.viewModel.results.count - 1)
             self.stateMachine.emptyPickerActive = true
         }
+    }
+
+    /// A typed-query list row a digit may pick: in range, and not the
+    /// trailing Browse row.
+    private func isListPickable(_ index: Int) -> Bool {
+        guard !viewModel.compact, index >= 0, index < viewModel.results.count else { return false }
+        return viewModel.results[index].emoji.hexcode != EmojiBrowser.sentinelHexcode
+    }
+
+    /// Arms or disarms list quick-pick. The state machine's gate and the
+    /// picker's number badges always move together.
+    private func setListQuickPick(_ count: Int) {
+        stateMachine.listQuickPickCount = count
+        viewModel.quickPickCount = count
     }
 
     /// Bare-`:` corpus: the 8 Quick Access slots (pinned glyphs + most-used
@@ -1101,6 +1143,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // vertical shortcode list.
         viewModel.compact = query.isEmpty
         guard !query.isEmpty else {
+            setListQuickPick(0)
             viewModel.update(query: "", results: emptyQueryResults())
             return
         }
@@ -1123,6 +1166,11 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             results.append(EmojiBrowser.browseRow)
         }
         viewModel.update(query: query, results: results)
+        // Digits pick from the first 9 rows (never the trailing Browse row)
+        // while a capture shows the list; a sticky session types them into
+        // its search instead.
+        let capturing: Bool = { if case .capturing = stateMachine.state { return true } else { return false } }()
+        setListQuickPick(capturing ? min(9, max(0, results.count - 1)) : 0)
     }
 
     private func corpusFor(scope: CaptureScope) -> SearchCorpus {
@@ -1225,7 +1273,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         defer {
             // Any text-modifying action drops the pending emoticon undo.
             pendingEmoticonUndo = nil
-            if !sessionContinues {
+            if sessionContinues {
+                // Now a sticky session, which types digits into its search.
+                setListQuickPick(0)
+            } else {
                 stateMachine.reset()
                 viewModel.reset()
                 pickerWindow.hide()

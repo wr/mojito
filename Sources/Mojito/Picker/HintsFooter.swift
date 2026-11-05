@@ -1,17 +1,22 @@
 import SwiftUI
 
-/// One keyboard hint for a picker footer: a keycap glyph plus an optional
-/// localized label.
+/// One keyboard hint for a picker footer: one or more keycap glyphs plus an
+/// optional localized label.
 struct KeyHint: Identifiable {
-    let key: String
+    let keys: [String]
     let label: LocalizedStringKey?
 
     init(_ key: String, _ label: LocalizedStringKey? = nil) {
-        self.key = key
+        self.init(keys: [key], label)
+    }
+
+    /// Several keys sharing one label (`↵` `1–9` insert).
+    init(keys: [String], _ label: LocalizedStringKey? = nil) {
+        self.keys = keys
         self.label = label
     }
 
-    var id: String { key }
+    var id: String { keys.joined(separator: " ") }
 }
 
 /// A single keycap + label pair, styled like the macOS menu hint text.
@@ -20,11 +25,15 @@ struct KeyHintLabel: View {
 
     var body: some View {
         HStack(spacing: 5) {
-            Text(verbatim: hint.key)
-                .font(.system(size: 11, weight: .medium, design: .monospaced))
-                .padding(.horizontal, 5)
-                .padding(.vertical, 1)
-                .background(Capsule().fill(Color.primary.opacity(0.08)))
+            HStack(spacing: 3) {
+                ForEach(hint.keys, id: \.self) { key in
+                    Text(verbatim: key)
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
+                        .background(Capsule().fill(Color.primary.opacity(0.08)))
+                }
+            }
             if let label = hint.label {
                 Text(label)
             }

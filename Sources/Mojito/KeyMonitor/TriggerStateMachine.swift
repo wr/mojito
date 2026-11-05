@@ -127,6 +127,9 @@ enum TriggerAction: Equatable {
     case expandBrowser
     /// Pill quick-pick: insert the row at this index (digit 1–8 → 0–7).
     case pickIndex(Int)
+    /// Typed-query list quick-pick: insert the row at this index (digit
+    /// 1–9 → 0–8), erasing the typed `:query` like Return does.
+    case pickListIndex(Int, query: String, scope: CaptureScope)
     /// Close the pill and type back the swallowed trigger char so e.g. `:?`+Esc
     /// leaves the literal `:?` (the char is the trigger's last, customizable).
     case closePickerRestoringTrigger(Character)
@@ -272,6 +275,17 @@ struct TriggerStateMachine {
     /// quick-pick so an out-of-range digit falls through to a normal search
     /// instead of being swallowed.
     var pillEmojiCount: Int = 0
+
+    /// Rows of the typed-query list a digit can quick-pick (the first 9;
+    /// never the trailing Browse row). The Engine arms it from the results
+    /// it shows; any edit to the query disarms it until the next refresh,
+    /// so a digit only ever picks a row from the list on screen.
+    var listQuickPickCount: Int = 0
+
+    /// Engine-supplied search probe: does this query match anything in the
+    /// scope? A digit that would continue a real shortcode (`:1` → `:100:`)
+    /// types through instead of picking. Nil disables list quick-pick.
+    var queryHasMatches: ((String, CaptureScope) -> Bool)?
 
     /// The active capture's scope. Read by the Engine's global-hotkey browser
     /// entry, which synthesizes a pick outside the normal action flow and needs
@@ -608,6 +622,15 @@ struct TriggerStateMachine {
             if let close = closeChar(query: q), close == c {
                 return handleCloseChar(c, query: q)
             }
+            // List quick-pick: `:smil` + `2` inserts the 2nd row. Swallowed,
+            // and the typed `:query` is erased as on Return.
+            if let index = listQuickPickIndex(for: c, query: q) {
+                let scope = captureScope
+                state = .idle
+                lastInsertOpenLen = capturedOpenLen
+                lastInsertCloseLen = 0
+                return TriggerOutput(action: .pickListIndex(index, query: q, scope: scope), consumesKey: true)
+            }
             return appendQueryChar(c, query: q)
 
         // MARK: capturing — backspace
@@ -625,6 +648,7 @@ struct TriggerStateMachine {
                 state = .idle
                 return TriggerOutput(action: .closePicker, consumesKey: false)
             }
+            listQuickPickCount = 0
             let next = String(q.dropLast())
             state = .capturing(query: next)
             let threshold = pickerThreshold(for: captureScope, query: next)
@@ -703,6 +727,7 @@ struct TriggerStateMachine {
                 // keyboard.
                 let deleteCount = q.count + capturedOpenLen + closeProgress
                 closeProgress = 0
+                listQuickPickCount = 0
                 stickyPickJustFired = true
                 state = .stickyPicking(query: q)
                 return TriggerOutput(
@@ -769,6 +794,7 @@ struct TriggerStateMachine {
     mutating func enterBrowsing(query: String) {
         state = .browsing(query: query)
         emptyPickerActive = false
+        listQuickPickCount = 0
         konamiProgress = 0
     }
 
@@ -779,6 +805,7 @@ struct TriggerStateMachine {
         state = .stickyPicking(query: query)
         stickyPickJustFired = true
         emptyPickerActive = false
+        listQuickPickCount = 0
         openBuffer = []
         closeProgress = 0
         konamiProgress = 0
@@ -800,6 +827,7 @@ struct TriggerStateMachine {
         closeProgress = 0
         emptyPickerActive = false
         pillEmojiCount = 0
+        listQuickPickCount = 0
         lastWasWordChar = false
         konamiProgress = 0
         idleWord = ""
@@ -840,6 +868,7 @@ struct TriggerStateMachine {
         capturedOpenLen = 0
         // Not visible yet — the Engine flips this on after the debounced show.
         emptyPickerActive = false
+        listQuickPickCount = 0
         return handleOpening(char: c, input: input, now: now)
     }
 
@@ -954,6 +983,7 @@ struct TriggerStateMachine {
     private mutating func appendQueryChar(_ c: Character, query q: String) -> TriggerOutput {
         let wasEmptyPicker = emptyPickerActive
         emptyPickerActive = false
+        listQuickPickCount = 0
         let next = q + String(c)
         state = .capturing(query: next)
         let scope = captureScope
@@ -970,6 +1000,19 @@ struct TriggerStateMachine {
             action = .refreshPicker(query: next, scope: scope)
         }
         return TriggerOutput(action: action, consumesKey: false)
+    }
+
+    /// The 0-based list row digit `c` quick-picks, or nil when it should type
+    /// through: no list armed, not an ASCII 1–9 in range, mid-close, or the
+    /// digit would extend the query into something that still matches.
+    private func listQuickPickIndex(for c: Character, query q: String) -> Int? {
+        guard listQuickPickCount > 0, !q.isEmpty, closeProgress == 0,
+              c.isASCII, let digit = c.wholeNumberValue,
+              digit >= 1, digit <= min(9, listQuickPickCount),
+              let hasMatches = queryHasMatches,
+              !hasMatches(q + String(c), captureScope)
+        else { return nil }
+        return digit - 1
     }
 
     /// Drive the multi-char close. `c` is known to be a close-string char (the
