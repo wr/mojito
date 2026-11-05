@@ -12,6 +12,8 @@ struct GeneralSettingsView: View {
     @AppStorage(PrefsKey.eggsEnabled) private var eggsEnabled: Bool = true
     @AppStorage(PrefsKey.eggDiscoverySoundEnabled) private var eggDiscoverySound: Bool = true
     @AppStorage(PrefsKey.eggEffectSoundsEnabled) private var eggEffectSounds: Bool = true
+    @AppStorage(PrefsKey.gifProvider) private var gifProvider: GifProvider = .default
+    @AppStorage(PrefsKey.giphyApiKey) private var giphyApiKey: String = ""
     @State private var autoUpdates: Bool = UpdaterCoordinator.shared.automaticUpdates
 
     /// The single source of truth for every trigger control on this page.
@@ -144,7 +146,7 @@ struct GeneralSettingsView: View {
                     systemImage: "photo.fill",
                     tint: .pink,
                     title: "GIF search",
-                    subtitle: "GIFs from KLIPY.",
+                    subtitle: "GIFs from \(gifProvider.displayName).",
                     isOn: $triggers.gif.enabled
                 )
                 if triggers.gif.enabled {
@@ -154,6 +156,20 @@ struct GeneralSettingsView: View {
                         takenOpens: takenOpens(excluding: .gif),
                         defaultOpen: TriggerConfig.default.gif.open
                     )
+                    Picker("Provider", selection: $gifProvider) {
+                        ForEach(GifProvider.allCases) { provider in
+                            Text(verbatim: provider.displayName).tag(provider)
+                        }
+                    }
+                    if gifProvider == .giphy {
+                        SecureField("API key", text: $giphyApiKey)
+                    }
+                }
+            } footer: {
+                if triggers.gif.enabled, gifProvider == .giphy {
+                    Text("GIPHY runs on your own free API key. [Get one](https://developers.giphy.com/dashboard/)")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
             }
 

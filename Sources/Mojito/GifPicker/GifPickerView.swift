@@ -28,7 +28,7 @@ struct GifPickerView: View {
         } else if viewModel.results.isEmpty {
             // KLIPY's attribution terms require "Search KLIPY" as the prompt.
             placeholder(text: viewModel.query.isEmpty
-                        ? "Search KLIPY"
+                        ? "Search \(viewModel.provider.displayName)"
                         : String(localized: "Searching…"))
         } else {
             grid
@@ -152,9 +152,10 @@ struct GifPickerView: View {
             KeyHint("↵", "insert"),
             KeyHint("esc", "dismiss"),
         ]) {
+            // Attribution both providers' terms ask for.
             (
                 Text(verbatim: "Powered by ").font(.system(size: 10))
-                + Text(verbatim: "KLIPY").font(.system(size: 12, weight: .bold)).tracking(-0.4)
+                + Text(verbatim: viewModel.provider.displayName).font(.system(size: 12, weight: .bold)).tracking(-0.4)
             )
             .foregroundStyle(.secondary)
             .fixedSize()

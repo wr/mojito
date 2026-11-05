@@ -35,7 +35,7 @@ Free and open source. Requires macOS 14 or later. On first launch Mojito walks y
 |---|---|
 | `:tada` | 🎉 Emoji, using the Slack and GitHub shortcodes you already know |
 | `::cmd` | ⌘ Symbols: arrows, math, currency, and more |
-| `:::cats` | GIFs from KLIPY, pasted where you're typing |
+| `:::cats` | GIFs from KLIPY (or GIPHY, with your own key), pasted where you're typing |
 | `:?` | Your favorite and most-used emoji |
 
 Arrow keys pick, Return or Tab inserts, Esc dismisses. Type the closing colon (`:heart:`) to skip the picker. Every trigger is customizable in Settings.

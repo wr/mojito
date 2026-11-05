@@ -12,10 +12,13 @@ final class GifPickerViewModel: ObservableObject {
     /// result set) — gates the "Try Again" affordance.
     @Published var lastSearchFailed: Bool = false
     @Published var isVisible: Bool = false
+    /// Names the idle prompt and attribution footer. Re-read on every
+    /// `reset()` (each show), so a Settings switch shows up next time.
+    @Published private(set) var provider: GifProvider = .current
 
     /// 3-column grid; arrow keys + Enter handle navigation.
     let columns: Int = 3
-    /// KLIPY caps a page at 50; 24 is roughly the screen-fill threshold
+    /// Both providers cap a page at 50; 24 is roughly the screen-fill threshold
     /// for the 3-col grid, so paging-in-3-rows feels natural.
     private let pageSize: Int = 24
     /// Auto-pagination stops at this many results. Past the cap, the
@@ -56,6 +59,7 @@ final class GifPickerViewModel: ObservableObject {
     }
 
     func reset() {
+        provider = .current
         query = ""
         results = []
         selectedIndex = 0

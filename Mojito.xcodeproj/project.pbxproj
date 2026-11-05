@@ -19,6 +19,7 @@
 		0A4AAE2AE35D2C90AB9735B7 /* s02.bin in Resources */ = {isa = PBXBuildFile; fileRef = A3781043056BF9F399D00EDD /* s02.bin */; };
 		0D48DFE069D4D6C6F2E568B5 /* AnimationTicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162291D3BD8AF6CD22BE0378 /* AnimationTicker.swift */; };
 		0F5899AC76F676DCA0E3368D /* GifPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02399494F4CF5825B0401CD /* GifPickerView.swift */; };
+		1213E0EA6D575D1D6F75A4C2 /* GiphyAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE85585379509B49442957E /* GiphyAPI.swift */; };
 		13A5B7C53702606B6868EB50 /* s05.bin in Resources */ = {isa = PBXBuildFile; fileRef = 9C90F0A490BC13D9CC5ADF90 /* s05.bin */; };
 		155360187C1F8C68452934E7 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF01308E9212227B8106776 /* SettingsWindowController.swift */; };
 		19BEC88C7D1AFE4BAD6C0539 /* GifPickerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC98E3E280416083D33326C7 /* GifPickerViewModel.swift */; };
@@ -53,6 +54,7 @@
 		42DC32C9130BAB5381534226 /* EggIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB126DDBD153A051CDEF105B /* EggIndex.swift */; };
 		492E99ABC57E92DE1DDE5A1E /* SystemEmojiPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C166F241AD0718D2067AF1 /* SystemEmojiPicker.swift */; };
 		4949BE63FAD5A5FC2573CFE1 /* DefaultExclusions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */; };
+		49919AB59936681524CE68E0 /* GiphyAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB53531700BA845BBEBCC63 /* GiphyAPITests.swift */; };
 		4AE8FF96950E4AD801A5D632 /* AnimatedGifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31E41F813A67872400E4942 /* AnimatedGifView.swift */; };
 		4C024B6EA9665C5DFDB80CE7 /* WarpDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9658C9CF3396443D22FF4E28 /* WarpDrive.swift */; };
 		4F9E4BA7A275583B07011809 /* FuzzyMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */; };
@@ -189,6 +191,7 @@
 		FB20006241210D1D36AB7EEF /* s06.bin in Resources */ = {isa = PBXBuildFile; fileRef = 2F21A9938263FE3EE577F03D /* s06.bin */; };
 		FB6F709623B1472B32490F1D /* KonamiPayoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = E229DD4E9239183CD578F665 /* KonamiPayoff.swift */; };
 		FBA7F794BE95BEC4E4D84AD8 /* v10.bin in Resources */ = {isa = PBXBuildFile; fileRef = EE4174E56EEBEA3423926E2A /* v10.bin */; };
+		FC0148AE31E4BA9B72643BC2 /* GifProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08FF0D8737F955372338BAB6 /* GifProvider.swift */; };
 		FCC584110B97D56E2E7065FA /* AppIconDev.icon in Resources */ = {isa = PBXBuildFile; fileRef = CDB886D82441D68D2F815AD3 /* AppIconDev.icon */; };
 		FD15928FE17F78588821135E /* Rickroll.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69B54539CBE867AD7AEBC39 /* Rickroll.swift */; };
 		FE1196787A788B1187BD9934 /* s13.bin in Resources */ = {isa = PBXBuildFile; fileRef = C06E0C983CA81BD9B703651A /* s13.bin */; };
@@ -210,6 +213,7 @@
 		019FC9E40B9630700D2106CE /* EmojiDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiDatabase.swift; sourceTree = "<group>"; };
 		0836B5ACF7E24509928DA7B0 /* BouncingDVD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BouncingDVD.swift; sourceTree = "<group>"; };
 		088608D6A2243D8E95953095 /* WilhelmScream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WilhelmScream.swift; sourceTree = "<group>"; };
+		08FF0D8737F955372338BAB6 /* GifProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifProvider.swift; sourceTree = "<group>"; };
 		100317FDEDAED8905256B964 /* AboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSettings.swift; sourceTree = "<group>"; };
 		127F100886742DCE05A171B4 /* v04.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v04.bin; sourceTree = "<group>"; };
 		12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewModelTests.swift; sourceTree = "<group>"; };
@@ -252,6 +256,7 @@
 		489170955CD25EB1DE2E681C /* OnboardingScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreens.swift; sourceTree = "<group>"; };
 		48BC327DAE8D5D1A43640CF2 /* FavoritesBrowseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesBrowseTests.swift; sourceTree = "<group>"; };
 		4BC763FD3C4773231C72CFDD /* LaunchAtLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLogin.swift; sourceTree = "<group>"; };
+		4BE85585379509B49442957E /* GiphyAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiphyAPI.swift; sourceTree = "<group>"; };
 		4E3A3B5079FC9275F5947104 /* PickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerView.swift; sourceTree = "<group>"; };
 		4F4CFB098FFC29AB8C8B9855 /* v09.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v09.bin; sourceTree = "<group>"; };
 		4F59A4077DA036DF99C272DC /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
@@ -334,6 +339,7 @@
 		B3154DBEA72DA316E341C440 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		B375DE27AC0AE1D8DE965403 /* SkinTone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinTone.swift; sourceTree = "<group>"; };
 		B99F9C3810949A5B47E733AD /* HintsFooter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HintsFooter.swift; sourceTree = "<group>"; };
+		BAB53531700BA845BBEBCC63 /* GiphyAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiphyAPITests.swift; sourceTree = "<group>"; };
 		BC79E6EAFAF655E0E63E78DC /* Shortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shortcuts.swift; sourceTree = "<group>"; };
 		BC98E3E280416083D33326C7 /* GifPickerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifPickerViewModel.swift; sourceTree = "<group>"; };
 		BF593CBC722955734BC5166E /* AliasesSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AliasesSettings.swift; sourceTree = "<group>"; };
@@ -425,6 +431,7 @@
 				42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */,
 				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
 				16E8123A15F116BF7B631277 /* GifPickerViewModelTests.swift */,
+				BAB53531700BA845BBEBCC63 /* GiphyAPITests.swift */,
 				AEB65C36C1B1D1A3ECADC6FE /* KlipyAPITests.swift */,
 				12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */,
 				6401923F7190AFC65A7B6959 /* QueryStemmerTests.swift */,
@@ -703,7 +710,9 @@
 				C02399494F4CF5825B0401CD /* GifPickerView.swift */,
 				BC98E3E280416083D33326C7 /* GifPickerViewModel.swift */,
 				160FA9BBA311F77BEBE0C6A4 /* GifPickerWindow.swift */,
+				08FF0D8737F955372338BAB6 /* GifProvider.swift */,
 				1C3CAFD7B83168FF01538FF4 /* GifSearcher.swift */,
+				4BE85585379509B49442957E /* GiphyAPI.swift */,
 				C95680766E7F3D9EEC81CC04 /* KlipyAPI.swift */,
 			);
 			path = GifPicker;
@@ -1012,7 +1021,9 @@
 				0F5899AC76F676DCA0E3368D /* GifPickerView.swift in Sources */,
 				19BEC88C7D1AFE4BAD6C0539 /* GifPickerViewModel.swift in Sources */,
 				28A1C045D2F7BBEC55E4A00A /* GifPickerWindow.swift in Sources */,
+				FC0148AE31E4BA9B72643BC2 /* GifProvider.swift in Sources */,
 				E539CB425388907B1CA7D3CE /* GifSearcher.swift in Sources */,
+				1213E0EA6D575D1D6F75A4C2 /* GiphyAPI.swift in Sources */,
 				76FDC12E75201F5DC497CBAF /* HatchClock.swift in Sources */,
 				5415584EC4F8698A2A89C32A /* HintsFooter.swift in Sources */,
 				CA9FE651B042EFCC920407D5 /* ImageBlob.swift in Sources */,
@@ -1102,6 +1113,7 @@
 				4F9E4BA7A275583B07011809 /* FuzzyMatcherTests.swift in Sources */,
 				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
 				DFEEAE1A2B798418F4DF2293 /* GifPickerViewModelTests.swift in Sources */,
+				49919AB59936681524CE68E0 /* GiphyAPITests.swift in Sources */,
 				98422299C980042CFA642B78 /* KlipyAPITests.swift in Sources */,
 				2C2FD54F6E35CCD0374213BB /* PickerViewModelTests.swift in Sources */,
 				A11509496D8522DC13BF31F3 /* QueryStemmerTests.swift in Sources */,

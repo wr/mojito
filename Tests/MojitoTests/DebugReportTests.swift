@@ -28,6 +28,7 @@ struct DebugReportTests {
             PrefsKey.excludedBundleIDs,
             PrefsKey.excludedURLPatterns,
             PrefsKey.klipyApiKey,
+            PrefsKey.giphyApiKey,
             PrefsKey.easterEggsDiscovered,
         ] {
             #expect(!out.contains(forbidden), "report leaks \(forbidden)")

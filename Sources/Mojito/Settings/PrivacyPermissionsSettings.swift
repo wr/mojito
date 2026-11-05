@@ -94,7 +94,11 @@ struct PrivacyDetailsRows: View {
         privacyRow(
             icon: "eye.slash",
             title: "You are anonymous",
-            detail: "Statistics and GIF searches sent to KLIPY are never linked to you, and no personally-identifiable data is stored or sent anywhere."
+            // GIPHY searches carry the user's own API key, which GIPHY can
+            // tie to their developer account.
+            detail: GifProvider.current == .giphy
+                ? "Statistics are never linked to you. GIF searches go to GIPHY with your own API key. No other personally-identifiable data is stored or sent anywhere."
+                : "Statistics and GIF searches sent to \(GifProvider.current.displayName) are never linked to you, and no personally-identifiable data is stored or sent anywhere."
         )
         privacyRow(
             icon: "dollarsign.circle",

@@ -797,7 +797,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             // is tracked across any state, so the secure-field guard at
             // the first-colon site (which only fires in `.idle`) does not
             // cover this case — without this check, keystrokes after
-            // `:::` typed in a password field would leak to KLIPY.
+            // `:::` typed in a password field would leak to the GIF provider.
             let liveGifContext = AppContextDetector.current()
             if liveGifContext.focusedFieldIsSecure {
                 stateMachine.reset()
