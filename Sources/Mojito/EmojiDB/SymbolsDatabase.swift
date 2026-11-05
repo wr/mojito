@@ -11,6 +11,10 @@ enum SymbolsDatabase {
     /// keystroke path can need it.
     static let all: [IndexedEmoji] = indexed()
 
+    /// What the Symbols trigger searches: `all` plus kaomoji. Kaomoji stay out
+    /// of `all` (and so out of the browser grid and `byHexcode`).
+    static let searchable: [IndexedEmoji] = all + KaomojiTable.all
+
     /// `SYM_…` hexcode → symbol, for resolving a stored hexcode (a Quick Access
     /// slot or used symbol, an alias target). Reach for it only for a `SYM_`
     /// key: first access builds `all`.

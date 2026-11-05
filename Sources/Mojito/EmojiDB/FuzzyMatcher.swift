@@ -168,11 +168,11 @@ struct FuzzyMatcher {
             // rendered) twice, colliding on hexcode in the picker's ForEach.
             let promoted = database.aliasedSymbolHexcodes
             let symbols = promoted.isEmpty
-                ? SymbolsDatabase.all
-                : SymbolsDatabase.all.filter { !promoted.contains($0.emoji.hexcode) }
+                ? SymbolsDatabase.searchable
+                : SymbolsDatabase.searchable.filter { !promoted.contains($0.emoji.hexcode) }
             pool = database.indexed + symbols
         case .symbolsOnly:
-            pool = SymbolsDatabase.all
+            pool = SymbolsDatabase.searchable
         }
 
         var trimmed = rankedResults(

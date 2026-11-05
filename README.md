@@ -35,6 +35,7 @@ Free and open source. Requires macOS 14 or later. On first launch Mojito walks y
 |---|---|
 | `:tada` | 🎉 Emoji, using the Slack and GitHub shortcodes you already know |
 | `::cmd` | ⌘ Symbols: arrows, math, currency, and more |
+| `::shrug` | ¯\\\_(ツ)\_/¯ Kaomoji: table flips, bears, and other text faces |
 | `:::cats` | GIFs from KLIPY, pasted where you're typing |
 | `:?` | Your favorite and most-used emoji |
 

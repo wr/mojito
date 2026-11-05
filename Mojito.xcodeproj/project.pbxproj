@@ -54,6 +54,7 @@
 		492E99ABC57E92DE1DDE5A1E /* SystemEmojiPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C166F241AD0718D2067AF1 /* SystemEmojiPicker.swift */; };
 		4949BE63FAD5A5FC2573CFE1 /* DefaultExclusions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877AFBCD3CD8EE7B154C73BD /* DefaultExclusions.swift */; };
 		4AE8FF96950E4AD801A5D632 /* AnimatedGifView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C31E41F813A67872400E4942 /* AnimatedGifView.swift */; };
+		4BDF07DE7CC1936FA054224A /* KaomojiTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1122338F7FE8E9F185A3E4 /* KaomojiTableTests.swift */; };
 		4C024B6EA9665C5DFDB80CE7 /* WarpDrive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9658C9CF3396443D22FF4E28 /* WarpDrive.swift */; };
 		4F9E4BA7A275583B07011809 /* FuzzyMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */; };
 		505F6B7F84EC1D9EF7AB55C9 /* SolitaireWin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E63ABA27E65953D84162097 /* SolitaireWin.swift */; };
@@ -92,6 +93,7 @@
 		76FDC12E75201F5DC497CBAF /* HatchClock.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0FF35FD4D76396E0A9631E /* HatchClock.swift */; };
 		77BA9E46A329913C637E2009 /* v01.bin in Resources */ = {isa = PBXBuildFile; fileRef = 51A28AC761A1481017B493E0 /* v01.bin */; };
 		786D4AD196F221CD0F7887DA /* EmojiDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 019FC9E40B9630700D2106CE /* EmojiDatabase.swift */; };
+		7EEE00DC7B18F8BC8A4EBEF6 /* KaomojiTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2488862DDDF93D661BA8E829 /* KaomojiTable.swift */; };
 		84EDC215BBA74C168E6E96B2 /* MatrixRain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DF280ABF42475053B4EB56 /* MatrixRain.swift */; };
 		8669DFC49B3F7DBE689337C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F5C937DB8C91F3847F55D8A6 /* Assets.xcassets */; };
 		87092993DA5EF300593E8021 /* s07.bin in Resources */ = {isa = PBXBuildFile; fileRef = C876AD00FBA92A6CA56ABD95 /* s07.bin */; };
@@ -231,6 +233,7 @@
 		21B80C892257DEA88108EE93 /* TriggerConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerConfig.swift; sourceTree = "<group>"; };
 		22B06D1C751C2161A7A99DA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2361376F2801DB575F27B480 /* DialupSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialupSound.swift; sourceTree = "<group>"; };
+		2488862DDDF93D661BA8E829 /* KaomojiTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KaomojiTable.swift; sourceTree = "<group>"; };
 		276275D749C5A73951269AF7 /* QueryStemmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryStemmer.swift; sourceTree = "<group>"; };
 		2928BC07BE26CF9B15F23D70 /* DebugRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugRecorder.swift; sourceTree = "<group>"; };
 		2C4CF18CE5AC46767EFCA557 /* v03.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = v03.bin; sourceTree = "<group>"; };
@@ -365,6 +368,7 @@
 		DBB27C78330DB1E6F05BDAE7 /* EmoticonTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmoticonTableTests.swift; sourceTree = "<group>"; };
 		DC6BDC5E636ADC61D8671950 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		DD6171603CD5F5CC6ED9A636 /* ExclusionsSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExclusionsSettings.swift; sourceTree = "<group>"; };
+		DE1122338F7FE8E9F185A3E4 /* KaomojiTableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KaomojiTableTests.swift; sourceTree = "<group>"; };
 		DF0A9FF25BC996BC640A35A0 /* s01.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s01.bin; sourceTree = "<group>"; };
 		DF44D58B49F923004BEED6E7 /* FlyingToasters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlyingToasters.swift; sourceTree = "<group>"; };
 		DF80FD4039CF36F39120673D /* TriggerMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerMatcher.swift; sourceTree = "<group>"; };
@@ -425,6 +429,7 @@
 				42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */,
 				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
 				16E8123A15F116BF7B631277 /* GifPickerViewModelTests.swift */,
+				DE1122338F7FE8E9F185A3E4 /* KaomojiTableTests.swift */,
 				AEB65C36C1B1D1A3ECADC6FE /* KlipyAPITests.swift */,
 				12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */,
 				6401923F7190AFC65A7B6959 /* QueryStemmerTests.swift */,
@@ -732,6 +737,7 @@
 				6E2009C3B36DF9228B873244 /* EmoticonTable.swift */,
 				5A8851906565F70B7815640F /* FuzzyMatcher.swift */,
 				FE5EDBB8F234B21B8D4A3324 /* FzyScorer.swift */,
+				2488862DDDF93D661BA8E829 /* KaomojiTable.swift */,
 				276275D749C5A73951269AF7 /* QueryStemmer.swift */,
 				964D290D66BB33D1F21333A0 /* QuickAccessStore.swift */,
 				F5C5BC5F015CABDD85262258 /* SeasonalGates.swift */,
@@ -1017,6 +1023,7 @@
 				5415584EC4F8698A2A89C32A /* HintsFooter.swift in Sources */,
 				CA9FE651B042EFCC920407D5 /* ImageBlob.swift in Sources */,
 				75402AE472D5B43CE11590A9 /* InlineBrowserView.swift in Sources */,
+				7EEE00DC7B18F8BC8A4EBEF6 /* KaomojiTable.swift in Sources */,
 				87ACEE7E1331065BA81E0B52 /* KeyMonitor.swift in Sources */,
 				385A6398C10A67B807AF56BC /* KlipyAPI.swift in Sources */,
 				FB6F709623B1472B32490F1D /* KonamiPayoff.swift in Sources */,
@@ -1102,6 +1109,7 @@
 				4F9E4BA7A275583B07011809 /* FuzzyMatcherTests.swift in Sources */,
 				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
 				DFEEAE1A2B798418F4DF2293 /* GifPickerViewModelTests.swift in Sources */,
+				4BDF07DE7CC1936FA054224A /* KaomojiTableTests.swift in Sources */,
 				98422299C980042CFA642B78 /* KlipyAPITests.swift in Sources */,
 				2C2FD54F6E35CCD0374213BB /* PickerViewModelTests.swift in Sources */,
 				A11509496D8522DC13BF31F3 /* QueryStemmerTests.swift in Sources */,
