@@ -69,6 +69,10 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
     private var useFrequencyBoost = true
     private var gifBypassExclusions = true
     private var emoticonsEnabled = true
+    /// The live trigger config, mirrored off the state machine so `corpusFor`
+    /// can run inside `stateMachine.handle` (the quick-pick probe) without an
+    /// overlapping access to `stateMachine`.
+    private var triggerConfig = TriggerConfig.default
 
     /// Most-recent emoticon insertion still inside its undo window. Cleared on
     /// successful undo, timeout, focus change, any text-mutating keystroke,
@@ -96,7 +100,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
 
         // Collision guard for list quick-pick: a digit that keeps the query
         // matching (`:clock1` → 🕐) is typing, not picking. Only runs on a
-        // digit while the list is up.
+        // digit while the list is up. It runs inside `stateMachine.handle`,
+        // so it must not touch `stateMachine` (a runtime exclusivity trap).
         stateMachine.queryHasMatches = { [weak self] query, scope in
             guard let self else { return true }
             return !FuzzyMatcher.search(
@@ -259,7 +264,8 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         // The trigger config (incl. symbols mode) lives entirely in the
         // user-editable config. Cache it so `corpusFor` can read it off the
         // keystroke path.
-        stateMachine.setConfig(TriggerConfigStore.load())
+        triggerConfig = TriggerConfigStore.load()
+        stateMachine.setConfig(triggerConfig)
         // Gating arrows in the SM means a disabled arrow never defers or
         // consumes a following char (which would otherwise be dropped when
         // the insert is suppressed downstream).
@@ -1166,11 +1172,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
             results.append(EmojiBrowser.browseRow)
         }
         viewModel.update(query: query, results: results)
-        // Digits pick from the first 9 rows (never the trailing Browse row)
-        // while a capture shows the list; a sticky session types them into
-        // its search instead.
+        // Digits pick from the rows the list draws without scrolling (never
+        // the trailing Browse row) while a capture shows it; a sticky session
+        // types them into its search instead.
         let capturing: Bool = { if case .capturing = stateMachine.state { return true } else { return false } }()
-        setListQuickPick(capturing ? min(9, max(0, results.count - 1)) : 0)
+        let drawn = min(9, PickerLayout.maxVisibleRows)
+        setListQuickPick(capturing ? min(drawn, max(0, results.count - 1)) : 0)
     }
 
     private func corpusFor(scope: CaptureScope) -> SearchCorpus {
@@ -1181,7 +1188,7 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         case .normal:
             // When symbols are on and set to follow emoji, blend them into the
             // normal `:fire:` results; otherwise emoji only.
-            let config = stateMachine.config
+            let config = triggerConfig
             return config.symbols.enabled && config.symbolsFollowEmoji
                 ? .emojiAndSymbols
                 : .emojiOnly
