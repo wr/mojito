@@ -175,6 +175,8 @@ KLIPY's integration terms shape the picker: the idle prompt must read "Search KL
 
 Wiring lives in `project.yml`: `options.preGenCommand` runs the script before xcodegen scans `Sources/Mojito` (so fresh clones bootstrap correctly), and `targets.Mojito.preBuildScripts` re-runs it per build so editing `.env` flows through without an explicit `xcodegen generate`. The script no-ops when content is unchanged, so builds aren't churned.
 
+**GIPHY (opt-in).** Settings → General → GIF search → Provider switches `:::` to GIPHY (`GifProvider`, stored in `mojito.gifProvider`; absent = KLIPY). No GIPHY key ships with the build — GIPHY search runs on the user's own key from the Settings field (`mojito.giphyApiKey`, or `GIPHY_API_KEY` in the launch environment), and an empty key shows "Add a GIPHY API key". `GifSearcher` reads the provider per search; request shape and parsing for each live on `KlipyAPI` / `GiphyAPI`. The picker's idle prompt and "Powered by …" footer name the active provider, as both providers' attribution terms require. Tenor isn't an option: Google shut its API down on June 30, 2026.
+
 ### Security / signing posture
 
 - Dev (`Resources/Mojito.dev.entitlements`) carries `cs.disable-library-validation` so the self-signed identity can load Xcode-signed SwiftPM dylibs.

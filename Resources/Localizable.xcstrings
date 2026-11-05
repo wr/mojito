@@ -2249,114 +2249,114 @@
         }
       }
     },
-    "Add a KLIPY API key to enable GIF search.": {
+    "Add a %@ API key to enable GIF search.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "أضف مفتاح KLIPY API لتفعيل البحث عن GIF."
+            "value": "أضف مفتاح %@ API لتفعيل البحث عن GIF."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Füge einen KLIPY-API-Schlüssel hinzu, um die GIF-Suche zu aktivieren."
+            "value": "Füge einen %@-API-Schlüssel hinzu, um die GIF-Suche zu aktivieren."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add a KLIPY API key to enable GIF search."
+            "value": "Add a %@ API key to enable GIF search."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Añade una clave de la API de KLIPY para activar la búsqueda de GIF."
+            "value": "Añade una clave de la API de %@ para activar la búsqueda de GIF."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Agregá una clave de la API de KLIPY para activar la búsqueda de GIF."
+            "value": "Agregá una clave de la API de %@ para activar la búsqueda de GIF."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "برای فعال‌سازی جست‌وجوی GIF، یک کلید API KLIPY اضافه کنید."
+            "value": "برای فعال‌سازی جست‌وجوی GIF، یک کلید API %@ اضافه کنید."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ajoute une clé d'API KLIPY pour activer la recherche de GIF."
+            "value": "Ajoute une clé d'API %@ pour activer la recherche de GIF."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "הוסף מפתח KLIPY API כדי להפעיל חיפוש GIF."
+            "value": "הוסף מפתח %@ API כדי להפעיל חיפוש GIF."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF खोज सक्षम करने के लिए KLIPY API कुंजी जोड़ें।"
+            "value": "GIF खोज सक्षम करने के लिए %@ API कुंजी जोड़ें।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aggiungi una chiave API di KLIPY per attivare la ricerca di GIF."
+            "value": "Aggiungi una chiave API di %@ per attivare la ricerca di GIF."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF 検索を有効にするには、KLIPY の API キーを追加してください。"
+            "value": "GIF 検索を有効にするには、%@ の API キーを追加してください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF 검색을 사용하려면 KLIPY API 키를 추가하세요."
+            "value": "GIF 검색을 사용하려면 %@ API 키를 추가하세요."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Voeg een KLIPY API-sleutel toe om GIF-zoeken aan te zetten."
+            "value": "Voeg een %@ API-sleutel toe om GIF-zoeken aan te zetten."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dodaj klucz API KLIPY, aby włączyć wyszukiwanie GIF-ów."
+            "value": "Dodaj klucz API %@, aby włączyć wyszukiwanie GIF-ów."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Adicione uma chave da API do KLIPY para ativar a busca de GIF."
+            "value": "Adicione uma chave da API do %@ para ativar a busca de GIF."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Добавьте ключ API KLIPY, чтобы включить поиск GIF."
+            "value": "Добавьте ключ API %@, чтобы включить поиск GIF."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "添加 KLIPY API 密钥以启用 GIF 搜索。"
+            "value": "添加 %@ API 密钥以启用 GIF 搜索。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "新增 KLIPY API 金鑰以啟用 GIF 搜尋。"
+            "value": "新增 %@ API 金鑰以啟用 GIF 搜尋。"
           }
         }
       }
@@ -3253,6 +3253,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "僅匿名的彙總計數——沒有任何識別碼。完整資料集公開在 [mojito.wells.ee/stats](https://mojito.wells.ee/stats)。"
+          }
+        }
+      }
+    },
+    "API key": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-Schlüssel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clave de API"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clave de API"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé d'API"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiave API"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chave de API"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API キー"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API 密钥"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API 金鑰"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API 키"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API कुंजी"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ API"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klucz API"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-sleutel"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مفتاح API"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کلید API"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מפתח API"
           }
         }
       }
@@ -5614,114 +5726,114 @@
         }
       }
     },
-    "Couldn't reach KLIPY.": {
+    "Couldn't reach %@.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تعذّر الوصول إلى KLIPY."
+            "value": "تعذّر الوصول إلى %@."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY nicht erreichbar."
+            "value": "%@ nicht erreichbar."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Couldn't reach KLIPY."
+            "value": "Couldn't reach %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo conectar con KLIPY."
+            "value": "No se pudo conectar con %@."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "No se pudo conectar con KLIPY."
+            "value": "No se pudo conectar con %@."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "اتصال به KLIPY ممکن نشد."
+            "value": "اتصال به %@ ممکن نشد."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Impossible de joindre KLIPY."
+            "value": "Impossible de joindre %@."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "לא ניתן להתחבר ל-KLIPY."
+            "value": "לא ניתן להתחבר ל-%@."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY तक नहीं पहुँचा जा सका।"
+            "value": "%@ तक नहीं पहुँचा जा सका।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Impossibile raggiungere KLIPY."
+            "value": "Impossibile raggiungere %@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY に接続できませんでした。"
+            "value": "%@ に接続できませんでした。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY에 연결할 수 없습니다."
+            "value": "%@에 연결할 수 없습니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kon KLIPY niet bereiken."
+            "value": "Kon %@ niet bereiken."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nie udało się połączyć z KLIPY."
+            "value": "Nie udało się połączyć z %@."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Não foi possível acessar o KLIPY."
+            "value": "Não foi possível acessar o %@."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Не удалось связаться с KLIPY."
+            "value": "Не удалось связаться с %@."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法连接到 KLIPY。"
+            "value": "无法连接到 %@。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "無法連線到 KLIPY。"
+            "value": "無法連線到 %@。"
           }
         }
       }
@@ -7968,226 +8080,338 @@
         }
       }
     },
-    "KLIPY rejected the API key.": {
+    "%@ rejected the API key.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "رفض KLIPY مفتاح API."
+            "value": "رفض %@ مفتاح API."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY hat den API-Schlüssel abgelehnt."
+            "value": "%@ hat den API-Schlüssel abgelehnt."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY rejected the API key."
+            "value": "%@ rejected the API key."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY rechazó la clave de la API."
+            "value": "%@ rechazó la clave de la API."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY rechazó la clave de la API."
+            "value": "%@ rechazó la clave de la API."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏KLIPY کلید API را رد کرد."
+            "value": "‏%@ کلید API را رد کرد."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY a refusé la clé d'API."
+            "value": "%@ a refusé la clé d'API."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏KLIPY דחתה את מפתח ה-API."
+            "value": "‏%@ דחתה את מפתח ה-API."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY ने API कुंजी अस्वीकार कर दी।"
+            "value": "%@ ने API कुंजी अस्वीकार कर दी।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY ha rifiutato la chiave API."
+            "value": "%@ ha rifiutato la chiave API."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY が API キーを拒否しました。"
+            "value": "%@ が API キーを拒否しました。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY가 API 키를 거부했습니다."
+            "value": "%@가 API 키를 거부했습니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY weigerde de API-sleutel."
+            "value": "%@ weigerde de API-sleutel."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY odrzuciło klucz API."
+            "value": "%@ odrzuciło klucz API."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O KLIPY rejeitou a chave da API."
+            "value": "O %@ rejeitou a chave da API."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY отклонил ключ API."
+            "value": "%@ отклонил ключ API."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY 拒绝了 API 密钥。"
+            "value": "%@ 拒绝了 API 密钥。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY 拒絕了 API 金鑰。"
+            "value": "%@ 拒絕了 API 金鑰。"
           }
         }
       }
     },
-    "KLIPY responded with an unexpected result.": {
+    "%@ responded with an unexpected result.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ردّ KLIPY بنتيجة غير متوقعة."
+            "value": "ردّ %@ بنتيجة غير متوقعة."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY hat unerwartet geantwortet."
+            "value": "%@ hat unerwartet geantwortet."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY responded with an unexpected result."
+            "value": "%@ responded with an unexpected result."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY respondió con un resultado inesperado."
+            "value": "%@ respondió con un resultado inesperado."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY respondió con un resultado inesperado."
+            "value": "%@ respondió con un resultado inesperado."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏KLIPY پاسخی غیرمنتظره برگرداند."
+            "value": "‏%@ پاسخی غیرمنتظره برگرداند."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY a répondu avec un résultat inattendu."
+            "value": "%@ a répondu avec un résultat inattendu."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "‏KLIPY החזירה תוצאה לא צפויה."
+            "value": "‏%@ החזירה תוצאה לא צפויה."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY से अप्रत्याशित प्रतिक्रिया मिली।"
+            "value": "%@ से अप्रत्याशित प्रतिक्रिया मिली।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY ha risposto con un risultato inatteso."
+            "value": "%@ ha risposto con un risultato inatteso."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY から予期しない応答が返されました。"
+            "value": "%@ から予期しない応答が返されました。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY가 예상치 못한 응답을 보냈습니다."
+            "value": "%@가 예상치 못한 응답을 보냈습니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY gaf een onverwacht resultaat."
+            "value": "%@ gaf een onverwacht resultaat."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY zwróciło nieoczekiwany wynik."
+            "value": "%@ zwróciło nieoczekiwany wynik."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O KLIPY retornou um resultado inesperado."
+            "value": "O %@ retornou um resultado inesperado."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY вернул неожиданный ответ."
+            "value": "%@ вернул неожиданный ответ."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY 返回了意外的结果。"
+            "value": "%@ 返回了意外的结果。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY 回傳了預期外的結果。"
+            "value": "%@ 回傳了預期外的結果。"
+          }
+        }
+      }
+    },
+    "GIPHY runs on your own free API key. [Get one](https://developers.giphy.com/dashboard/)": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY runs on your own free API key. [Get one](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY läuft mit deinem eigenen kostenlosen API-Schlüssel. [Hol dir einen](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY funciona con tu propia clave de API gratuita. [Consigue una](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY funciona con tu propia clave de API gratuita. [Conseguí una](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY fonctionne avec ta propre clé d'API gratuite. [En obtenir une](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY funziona con la tua chiave API gratuita. [Ottienine una](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O GIPHY funciona com a sua própria chave de API gratuita. [Obtenha uma](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY を使うには、ご自身の無料 API キーが必要です。[取得する](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY 需要使用你自己的免费 API 密钥。[获取密钥](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY 需要使用你自己的免費 API 金鑰。[取得金鑰](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY는 직접 발급받은 무료 API 키로 작동합니다. [키 받기](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY आपकी अपनी मुफ़्त API कुंजी से चलता है। [कुंजी पाएँ](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY работает с вашим собственным бесплатным ключом API. [Получить ключ](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY działa z Twoim własnym darmowym kluczem API. [Zdobądź klucz](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY werkt met je eigen gratis API-sleutel. [Vraag er een aan](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يعمل GIPHY بمفتاح API مجاني خاص بك. [احصل على مفتاح](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY با کلید API رایگان خودتان کار می‌کند. [یک کلید بگیرید](https://developers.giphy.com/dashboard/)"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GIPHY פועל עם מפתח API חינמי משלך. [קבל מפתח](https://developers.giphy.com/dashboard/)"
           }
         }
       }
@@ -12453,6 +12677,118 @@
         }
       }
     },
+    "Provider": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provider"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anbieter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proveedor"
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proveedor"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fournisseur"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fornitore"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Provedor"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プロバイダ"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提供方"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提供者"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "제공업체"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "प्रदाता"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Провайдер"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostawca"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aanbieder"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المزوّد"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ارائه‌دهنده"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ספק"
+          }
+        }
+      }
+    },
     "Quick Access": {
       "localizations": {
         "ar": {
@@ -15591,114 +15927,114 @@
         }
       }
     },
-    "Statistics and GIF searches sent to KLIPY are never linked to you, and no personally-identifiable data is stored or sent anywhere.": {
+    "Statistics and GIF searches sent to %@ are never linked to you, and no personally-identifiable data is stored or sent anywhere.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا تُربَط الإحصائيات وعمليات البحث عن GIF المُرسَلة إلى KLIPY بك أبدًا، ولا تُخزَّن أو تُرسَل أي بيانات تُعرّف عنك إلى أي مكان."
+            "value": "لا تُربَط الإحصائيات وعمليات البحث عن GIF المُرسَلة إلى %@ بك أبدًا، ولا تُخزَّن أو تُرسَل أي بيانات تُعرّف عنك إلى أي مكان."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statistiken und an KLIPY gesendete GIF-Suchen werden nie mit dir verknüpft, und es werden keine personenbezogenen Daten gespeichert oder irgendwohin gesendet."
+            "value": "Statistiken und an %@ gesendete GIF-Suchen werden nie mit dir verknüpft, und es werden keine personenbezogenen Daten gespeichert oder irgendwohin gesendet."
           }
         },
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statistics and GIF searches sent to KLIPY are never linked to you, and no personally-identifiable data is stored or sent anywhere."
+            "value": "Statistics and GIF searches sent to %@ are never linked to you, and no personally-identifiable data is stored or sent anywhere."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las estadísticas y las búsquedas de GIF enviadas a KLIPY nunca se vinculan contigo, y no se almacena ni se envía a ningún sitio ningún dato que te identifique."
+            "value": "Las estadísticas y las búsquedas de GIF enviadas a %@ nunca se vinculan contigo, y no se almacena ni se envía a ningún sitio ningún dato que te identifique."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Las estadísticas y las búsquedas de GIF enviadas a KLIPY nunca se vinculan contigo, y no se almacena ni se envía a ningún lado ningún dato que te identifique."
+            "value": "Las estadísticas y las búsquedas de GIF enviadas a %@ nunca se vinculan contigo, y no se almacena ni se envía a ningún lado ningún dato que te identifique."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "آمار و جست‌وجوهای GIF که به KLIPY ارسال می‌شوند هرگز به شما مرتبط نمی‌شوند و هیچ داده‌ای که هویت شما را آشکار کند در جایی ذخیره یا ارسال نمی‌شود."
+            "value": "آمار و جست‌وجوهای GIF که به %@ ارسال می‌شوند هرگز به شما مرتبط نمی‌شوند و هیچ داده‌ای که هویت شما را آشکار کند در جایی ذخیره یا ارسال نمی‌شود."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Les statistiques et les recherches de GIF envoyées à KLIPY ne sont jamais associées à toi, et aucune donnée permettant de t'identifier n'est stockée ni envoyée où que ce soit."
+            "value": "Les statistiques et les recherches de GIF envoyées à %@ ne sont jamais associées à toi, et aucune donnée permettant de t'identifier n'est stockée ni envoyée où que ce soit."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "סטטיסטיקה וחיפושי GIF שנשלחים ל-KLIPY לעולם אינם מקושרים אליך, ושום מידע שמזהה אותך אישית אינו נשמר או נשלח לשום מקום."
+            "value": "סטטיסטיקה וחיפושי GIF שנשלחים ל-%@ לעולם אינם מקושרים אליך, ושום מידע שמזהה אותך אישית אינו נשמר או נשלח לשום מקום."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "आँकड़े और KLIPY को भेजी गई GIF खोजें कभी आपसे नहीं जोड़ी जातीं, और कोई व्यक्तिगत पहचान वाला डेटा कहीं संग्रहीत या भेजा नहीं जाता।"
+            "value": "आँकड़े और %@ को भेजी गई GIF खोजें कभी आपसे नहीं जोड़ी जातीं, और कोई व्यक्तिगत पहचान वाला डेटा कहीं संग्रहीत या भेजा नहीं जाता।"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le statistiche e le ricerche di GIF inviate a KLIPY non vengono mai collegate a te, e nessun dato che possa identificarti viene salvato o inviato da nessuna parte."
+            "value": "Le statistiche e le ricerche di GIF inviate a %@ non vengono mai collegate a te, e nessun dato che possa identificarti viene salvato o inviato da nessuna parte."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "統計や KLIPY に送信される GIF 検索があなたと結び付けられることはなく、個人を特定できるデータがどこかに保存・送信されることもありません。"
+            "value": "統計や %@ に送信される GIF 検索があなたと結び付けられることはなく、個人を特定できるデータがどこかに保存・送信されることもありません。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "통계와 KLIPY로 전송되는 GIF 검색은 절대 당신과 연결되지 않으며, 개인을 식별할 수 있는 데이터는 어디에도 저장되거나 전송되지 않습니다."
+            "value": "통계와 %@로 전송되는 GIF 검색은 절대 당신과 연결되지 않으며, 개인을 식별할 수 있는 데이터는 어디에도 저장되거나 전송되지 않습니다."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statistieken en GIF-zoekopdrachten die naar KLIPY worden gestuurd, worden nooit aan jou gekoppeld, en er worden nergens persoonlijk identificeerbare gegevens opgeslagen of verzonden."
+            "value": "Statistieken en GIF-zoekopdrachten die naar %@ worden gestuurd, worden nooit aan jou gekoppeld, en er worden nergens persoonlijk identificeerbare gegevens opgeslagen of verzonden."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Statystyki i wyszukiwania GIF-ów wysyłane do KLIPY nigdy nie są powiązane z tobą, a żadne dane umożliwiające identyfikację nie są nigdzie przechowywane ani wysyłane."
+            "value": "Statystyki i wyszukiwania GIF-ów wysyłane do %@ nigdy nie są powiązane z tobą, a żadne dane umożliwiające identyfikację nie są nigdzie przechowywane ani wysyłane."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "As estatísticas e as buscas de GIF enviadas ao KLIPY nunca são vinculadas a você, e nenhum dado que possa identificá-lo é armazenado ou enviado a lugar nenhum."
+            "value": "As estatísticas e as buscas de GIF enviadas ao %@ nunca são vinculadas a você, e nenhum dado que possa identificá-lo é armazenado ou enviado a lugar nenhum."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Статистика и поисковые запросы GIF, отправляемые в KLIPY, никогда не связываются с вами, и никакие персональные данные нигде не хранятся и не отправляются."
+            "value": "Статистика и поисковые запросы GIF, отправляемые в %@, никогда не связываются с вами, и никакие персональные данные нигде не хранятся и не отправляются."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "统计数据和发送给 KLIPY 的 GIF 搜索绝不会与你关联，也不会存储或向任何地方发送任何可识别个人身份的数据。"
+            "value": "统计数据和发送给 %@ 的 GIF 搜索绝不会与你关联，也不会存储或向任何地方发送任何可识别个人身份的数据。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "統計資料和傳送給 KLIPY 的 GIF 搜尋絕不會與你關聯，也不會儲存或向任何地方傳送任何可識別個人身分的資料。"
+            "value": "統計資料和傳送給 %@ 的 GIF 搜尋絕不會與你關聯，也不會儲存或向任何地方傳送任何可識別個人身分的資料。"
           }
         }
       }
@@ -25017,114 +25353,114 @@
         }
       }
     },
-    "GIFs from KLIPY.": {
+    "GIFs from %@.": {
       "localizations": {
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs from KLIPY."
+            "value": "GIFs from %@."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs von KLIPY."
+            "value": "GIFs von %@."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs de KLIPY."
+            "value": "GIFs de %@."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs de KLIPY."
+            "value": "GIFs de %@."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF de KLIPY."
+            "value": "GIF de %@."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF da KLIPY."
+            "value": "GIF da %@."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs do KLIPY."
+            "value": "GIFs do %@."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPYのGIF。"
+            "value": "%@のGIF。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "来自 KLIPY 的 GIF。"
+            "value": "来自 %@ 的 GIF。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "來自 KLIPY 的 GIF。"
+            "value": "來自 %@ 的 GIF。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY의 GIF."
+            "value": "%@의 GIF."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "KLIPY से GIF।"
+            "value": "%@ से GIF।"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF из KLIPY."
+            "value": "GIF из %@."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF-y z KLIPY."
+            "value": "GIF-y z %@."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIFs van KLIPY."
+            "value": "GIFs van %@."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "صور GIF من KLIPY."
+            "value": "صور GIF من %@."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF از KLIPY."
+            "value": "GIF از %@."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "GIF מ-KLIPY."
+            "value": "GIF מ-%@."
           }
         }
       }

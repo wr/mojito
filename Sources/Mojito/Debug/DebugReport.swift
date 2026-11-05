@@ -118,6 +118,7 @@ enum DebugReport {
         let bundleExcl = ((d.array(forKey: PrefsKey.excludedBundleIDs) as? [String]) ?? []).count
         let urlExcl = ((d.array(forKey: PrefsKey.excludedURLPatterns) as? [String]) ?? []).count
         let klipySet = !((d.string(forKey: PrefsKey.klipyApiKey)) ?? "").isEmpty
+        let giphySet = !((d.string(forKey: PrefsKey.giphyApiKey)) ?? "").isEmpty
 
         var s = "## Prefs\n"
         s += "- usageCounts.total: \(usageTotal)\n"
@@ -125,6 +126,8 @@ enum DebugReport {
         s += "- exclusions.bundleIDCount: \(bundleExcl)\n"
         s += "- exclusions.urlPatternCount: \(urlExcl)\n"
         s += "- klipyApiKey.set: \(klipySet)\n"
+        s += "- gifProvider: \(GifProvider.selected(in: d).rawValue)\n"
+        s += "- giphyApiKey.set: \(giphySet)\n"
         s += "- useFrequencyBoost: \(bool(PrefsKey.useFrequencyBoost, default: true))\n"
         s += "- emoticonsEnabled: \(bool(PrefsKey.emoticonsEnabled, default: true))\n"
         s += "- gifBypassExclusions: \(bool(PrefsKey.gifBypassExclusions, default: true))\n"

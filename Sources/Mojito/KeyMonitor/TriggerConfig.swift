@@ -5,7 +5,7 @@ import Foundation
 enum TriggerMode: String, CaseIterable, Codable, Equatable {
     case emoji          // `:query:` → emoji picker / exact match
     case symbols        // `::query::` → experimental symbol corpus
-    case gif            // `:::query` → KLIPY GIF picker
+    case gif            // `:::query` → GIF picker (KLIPY or GIPHY)
     case quickAccess    // `:?` → favorites pill (open derived from emoji)
 }
 

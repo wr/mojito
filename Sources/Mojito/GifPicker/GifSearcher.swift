@@ -8,7 +8,8 @@ protocol GifSearching: AnyObject {
                 completion: @escaping (Result<GifPage, GifSearchError>) -> Void)
 }
 
-/// KLIPY search client; request shape and parsing live on `KlipyAPI`.
+/// GIF search client for the provider picked in Settings; request shape and
+/// parsing live on `GifProvider`.
 @MainActor
 final class GifSearcher: GifSearching {
     private let log = OSLog(subsystem: "ee.wells.Mojito", category: "GifSearcher")
@@ -33,9 +34,12 @@ final class GifSearcher: GifSearching {
         inFlight?.cancel()
         inFlight = nil
 
-        let key = KlipyAPI.apiKey
+        // Read per search, so a provider switched in Settings applies to the
+        // next query.
+        let provider = GifProvider.current
+        let key = provider.apiKey
         guard !key.isEmpty else {
-            completion(.failure(.missingApiKey))
+            completion(.failure(.missingApiKey(provider)))
             return
         }
 
@@ -45,10 +49,8 @@ final class GifSearcher: GifSearching {
             return
         }
 
-        let region = Locale.current.region?.identifier.lowercased()
-        guard let url = KlipyAPI.searchURL(key: key, query: trimmed, pageSize: pageSize,
-                                           page: page, region: region) else {
-            completion(.failure(.badURL))
+        guard let url = provider.searchURL(key: key, query: trimmed, pageSize: pageSize, page: page) else {
+            completion(.failure(.badURL(provider)))
             return
         }
 
@@ -56,7 +58,8 @@ final class GifSearcher: GifSearching {
             if let error = error as NSError?, error.code == NSURLErrorCancelled { return }
             DispatchQueue.main.async {
                 MainActor.assumeIsolated {
-                    self?.finish(data: data, response: response, error: error, completion: completion)
+                    self?.finish(provider: provider, pageSize: pageSize, data: data, response: response,
+                                 error: error, completion: completion)
                 }
             }
         }
@@ -64,30 +67,30 @@ final class GifSearcher: GifSearching {
         task.resume()
     }
 
-    private func finish(data: Data?, response: URLResponse?, error: Error?,
-                        completion: (Result<GifPage, GifSearchError>) -> Void) {
+    private func finish(provider: GifProvider, pageSize: Int, data: Data?, response: URLResponse?,
+                        error: Error?, completion: (Result<GifPage, GifSearchError>) -> Void) {
         if let error {
             // Domain and code only: a URLError's description embeds the
             // request URL, which carries the search text and the API key.
             let nsError = error as NSError
             os_log("GIF search failed: %{public}@ %ld", log: log, type: .info, nsError.domain, nsError.code)
-            completion(.failure(.network(error)))
+            completion(.failure(.network(provider, error)))
             return
         }
         guard let http = response as? HTTPURLResponse else {
-            completion(.failure(.badResponse))
+            completion(.failure(.badResponse(provider)))
             return
         }
         guard (200...299).contains(http.statusCode) else {
             if http.statusCode == 401 || http.statusCode == 403 {
-                completion(.failure(.unauthorized))
+                completion(.failure(.unauthorized(provider)))
             } else {
-                completion(.failure(.httpStatus(http.statusCode)))
+                completion(.failure(.httpStatus(provider, http.statusCode)))
             }
             return
         }
-        guard let data, let page = KlipyAPI.parsePage(data) else {
-            completion(.failure(.badResponse))
+        guard let data, let page = provider.parsePage(data, pageSize: pageSize) else {
+            completion(.failure(.badResponse(provider)))
             return
         }
         completion(.success(page))
@@ -95,23 +98,32 @@ final class GifSearcher: GifSearching {
 }
 
 enum GifSearchError: Error {
-    case missingApiKey
-    case unauthorized
-    case badURL
-    case badResponse
-    case httpStatus(Int)
-    case network(Error)
+    case missingApiKey(GifProvider)
+    case unauthorized(GifProvider)
+    case badURL(GifProvider)
+    case badResponse(GifProvider)
+    case httpStatus(GifProvider, Int)
+    case network(GifProvider, Error)
+
+    var provider: GifProvider {
+        switch self {
+        case .missingApiKey(let p), .unauthorized(let p), .badURL(let p),
+             .badResponse(let p), .httpStatus(let p, _), .network(let p, _):
+            return p
+        }
+    }
 
     var userMessage: String {
+        let name = provider.displayName
         switch self {
         case .missingApiKey:
-            return String(localized: "Add a KLIPY API key to enable GIF search.")
+            return String(localized: "Add a \(name) API key to enable GIF search.")
         case .unauthorized:
-            return String(localized: "KLIPY rejected the API key.")
+            return String(localized: "\(name) rejected the API key.")
         case .badURL, .badResponse, .httpStatus:
-            return String(localized: "KLIPY responded with an unexpected result.")
+            return String(localized: "\(name) responded with an unexpected result.")
         case .network:
-            return String(localized: "Couldn't reach KLIPY.")
+            return String(localized: "Couldn't reach \(name).")
         }
     }
 }

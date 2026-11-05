@@ -45,6 +45,8 @@ struct AboutSettingsView: View {
                             .padding(.vertical, rowPadding)
                         acknowledgement("KLIPY", url: URL(string: "https://klipy.com")!)
                             .padding(.vertical, rowPadding)
+                        acknowledgement("GIPHY", url: URL(string: "https://giphy.com")!)
+                            .padding(.vertical, rowPadding)
                     }
                 }
                 .formStyle(.grouped)

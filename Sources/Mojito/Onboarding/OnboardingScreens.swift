@@ -527,7 +527,7 @@ struct FeaturesStep: View {
                     systemImage: "photo.fill",
                     tint: .pink,
                     title: "GIF search",
-                    subtitle: "GIFs from KLIPY.",
+                    subtitle: "GIFs from \(GifProvider.current.displayName).",
                     isOn: $triggers.gif.enabled
                 )
                 if triggers.gif.enabled {

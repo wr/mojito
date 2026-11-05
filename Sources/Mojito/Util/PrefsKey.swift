@@ -74,6 +74,11 @@ enum PrefsKey {
     /// User-provided KLIPY API key for GIF search (`:::` trigger).
     /// `defaults write ee.wells.Mojito.dev mojito.klipyApiKey "<key>"`.
     static let klipyApiKey           = "mojito.klipyApiKey"
+    /// `GifProvider` raw value — where `:::` searches. Absent = KLIPY.
+    static let gifProvider           = "mojito.gifProvider"
+    /// The user's own GIPHY API key, from Settings → General. GIPHY search
+    /// has no built-in key.
+    static let giphyApiKey           = "mojito.giphyApiKey"
     /// Master switch for the `:::` GIF picker. When off, `:::` is just
     /// three colons in your text — no network call, no panel.
     static let gifSearchEnabled      = "mojito.gifSearch.enabled"
