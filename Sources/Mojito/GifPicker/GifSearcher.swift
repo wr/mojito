@@ -84,6 +84,8 @@ final class GifSearcher: GifSearching {
         guard (200...299).contains(http.statusCode) else {
             if http.statusCode == 401 || http.statusCode == 403 {
                 completion(.failure(.unauthorized(provider)))
+            } else if http.statusCode == 429 {
+                completion(.failure(.rateLimited(provider)))
             } else {
                 completion(.failure(.httpStatus(provider, http.statusCode)))
             }
@@ -100,6 +102,8 @@ final class GifSearcher: GifSearching {
 enum GifSearchError: Error {
     case missingApiKey(GifProvider)
     case unauthorized(GifProvider)
+    /// Per-key quotas are tight on GIPHY's free keys (and KLIPY test keys).
+    case rateLimited(GifProvider)
     case badURL(GifProvider)
     case badResponse(GifProvider)
     case httpStatus(GifProvider, Int)
@@ -107,7 +111,7 @@ enum GifSearchError: Error {
 
     var provider: GifProvider {
         switch self {
-        case .missingApiKey(let p), .unauthorized(let p), .badURL(let p),
+        case .missingApiKey(let p), .unauthorized(let p), .rateLimited(let p), .badURL(let p),
              .badResponse(let p), .httpStatus(let p, _), .network(let p, _):
             return p
         }
@@ -120,6 +124,8 @@ enum GifSearchError: Error {
             return String(localized: "Add a \(name) API key to enable GIF search.")
         case .unauthorized:
             return String(localized: "\(name) rejected the API key.")
+        case .rateLimited:
+            return String(localized: "\(name) is limiting searches right now. Try again in a few minutes.")
         case .badURL, .badResponse, .httpStatus:
             return String(localized: "\(name) responded with an unexpected result.")
         case .network:

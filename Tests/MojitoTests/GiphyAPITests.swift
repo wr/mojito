@@ -175,6 +175,8 @@ struct GifProviderTests {
     @Test func errorsNameTheProvider() {
         #expect(GifSearchError.missingApiKey(.giphy).userMessage.contains("GIPHY"))
         #expect(GifSearchError.unauthorized(.klipy).userMessage.contains("KLIPY"))
-        #expect(GifSearchError.httpStatus(.giphy, 429).provider == .giphy)
+        #expect(GifSearchError.httpStatus(.giphy, 500).provider == .giphy)
+        // A rate limit says so, rather than "unexpected result".
+        #expect(GifSearchError.rateLimited(.giphy).userMessage.contains("limiting"))
     }
 }

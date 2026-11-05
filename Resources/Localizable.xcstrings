@@ -450,6 +450,118 @@
         }
       }
     },
+    "%@ is limiting searches right now. Try again in a few minutes.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is limiting searches right now. Try again in a few minutes."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ begrenzt gerade die Suchanfragen. Versuch es in ein paar Minuten noch mal."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ está limitando las búsquedas ahora mismo. Inténtalo de nuevo en unos minutos."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ está limitando las búsquedas en este momento. Probá de nuevo en unos minutos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ limite les recherches pour le moment. Réessaie dans quelques minutes."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sta limitando le ricerche in questo momento. Riprova tra qualche minuto."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O %@ está limitando as buscas agora. Tente de novo em alguns minutos."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ が現在検索を制限しています。数分後にもう一度お試しください。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 目前正在限制搜索。请几分钟后再试。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 目前正在限制搜尋。請幾分鐘後再試。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@에서 현재 검색을 제한하고 있습니다. 몇 분 후에 다시 시도하세요."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ अभी खोज सीमित कर रहा है। कुछ मिनट बाद फिर कोशिश करें।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ сейчас ограничивает поиск. Попробуйте ещё раз через несколько минут."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ogranicza teraz wyszukiwania. Spróbuj ponownie za kilka minut."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ beperkt zoekopdrachten op dit moment. Probeer het over een paar minuten opnieuw."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يقيّد %@ عمليات البحث حاليًا. حاول مرة أخرى بعد بضع دقائق."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ در حال حاضر جست‌وجوها را محدود کرده است. چند دقیقهٔ دیگر دوباره امتحان کنید."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ מגביל כרגע חיפושים. נסה שוב בעוד כמה דקות."
+          }
+        }
+      }
+    },
     "%@ is off": {
       "localizations": {
         "ar": {
@@ -16035,6 +16147,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "統計資料和傳送給 %@ 的 GIF 搜尋絕不會與你關聯，也不會儲存或向任何地方傳送任何可識別個人身分的資料。"
+          }
+        }
+      }
+    },
+    "Statistics are never linked to you. GIF searches go to GIPHY with your own API key. No other personally-identifiable data is stored or sent anywhere.": {
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistics are never linked to you. GIF searches go to GIPHY with your own API key. No other personally-identifiable data is stored or sent anywhere."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistiken werden nie mit dir verknüpft. GIF-Suchen gehen mit deinem eigenen API-Schlüssel an GIPHY. Sonst werden nirgends personenbezogene Daten gespeichert oder gesendet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las estadísticas nunca se vinculan contigo. Las búsquedas de GIF van a GIPHY con tu propia clave de API. No se guarda ni se envía ningún otro dato personal."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las estadísticas nunca se vinculan con vos. Las búsquedas de GIF van a GIPHY con tu propia clave de API. No se guarda ni se envía ningún otro dato personal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les statistiques ne sont jamais liées à toi. Les recherches de GIF vont à GIPHY avec ta propre clé d'API. Aucune autre donnée personnelle n'est stockée ni envoyée."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le statistiche non sono mai collegate a te. Le ricerche di GIF vanno a GIPHY con la tua chiave API. Nessun altro dato personale viene salvato o inviato."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As estatísticas nunca são vinculadas a você. As buscas de GIF vão para o GIPHY com a sua própria chave de API. Nenhum outro dado pessoal é armazenado ou enviado."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "統計があなたと結び付けられることはありません。GIF 検索はあなた自身の API キーで GIPHY に送られます。それ以外の個人を特定できるデータは、保存も送信もされません。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "统计数据绝不会与你关联。GIF 搜索会使用你自己的 API 密钥发送到 GIPHY。不会存储或发送任何其他可识别个人身份的数据。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "統計資料絕不會與你連結。GIF 搜尋會使用你自己的 API 金鑰傳送到 GIPHY。不會儲存或傳送任何其他可識別個人身分的資料。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "통계는 절대 사용자와 연결되지 않습니다. GIF 검색은 사용자의 API 키와 함께 GIPHY로 전송됩니다. 그 외의 개인 식별 정보는 저장되거나 전송되지 않습니다."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आँकड़े कभी आपसे नहीं जोड़े जाते। GIF खोजें आपकी अपनी API कुंजी के साथ GIPHY को जाती हैं। कोई अन्य व्यक्तिगत पहचान योग्य डेटा कहीं संग्रहीत या भेजा नहीं जाता।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Статистика никогда не связывается с вами. Поиск GIF уходит в GIPHY с вашим собственным ключом API. Никакие другие персональные данные нигде не хранятся и не отправляются."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statystyki nigdy nie są z Tobą powiązane. Wyszukiwania GIF-ów trafiają do GIPHY z Twoim własnym kluczem API. Żadne inne dane osobowe nie są nigdzie przechowywane ani wysyłane."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistieken worden nooit aan jou gekoppeld. GIF-zoekopdrachten gaan naar GIPHY met je eigen API-sleutel. Er worden nergens andere persoonsgegevens opgeslagen of verzonden."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا تُربط الإحصائيات بك أبدًا. تُرسل عمليات البحث عن GIF إلى GIPHY مع مفتاح API الخاص بك. لا تُخزَّن أي بيانات شخصية أخرى ولا تُرسل إلى أي مكان."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آمار هرگز به شما مرتبط نمی‌شود. جست‌وجوهای GIF با کلید API خودتان به GIPHY فرستاده می‌شوند. هیچ دادهٔ شخصی دیگری ذخیره یا به جایی فرستاده نمی‌شود."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הסטטיסטיקות אף פעם לא מקושרות אליך. חיפושי GIF נשלחים ל-GIPHY עם מפתח ה-API שלך. שום מידע מזהה אישי אחר לא נשמר או נשלח לשום מקום."
           }
         }
       }
