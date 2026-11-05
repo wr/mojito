@@ -77,8 +77,15 @@ struct PickerView: View {
 
     private var footer: some View {
         // Bare `esc` keycap: the label had to go to make room for the
-        // keep-open hint in the 280 pt panel.
-        HintsFooter([
+        // keep-open hint in the 280 pt panel. The digit keycap takes the
+        // room of the arrows' label, so it shares `insert` with `↵`.
+        let count = viewModel.quickPickCount
+        return HintsFooter(count > 0 ? [
+            KeyHint("↑↓"),
+            KeyHint(keys: ["↵", count == 1 ? "1" : "1–\(count)"], "insert"),
+            KeyHint("⇧↵", "more"),
+            KeyHint("esc"),
+        ] : [
             KeyHint("↑↓", "select"),
             KeyHint("↵", "insert"),
             KeyHint("⇧↵", "more"),
@@ -117,6 +124,13 @@ private struct PickerRow: View {
                 .frame(width: 24)
             label
             Spacer(minLength: 0)
+            if index < viewModel.quickPickCount {
+                // The digit that inserts this row — reads like a menu's
+                // key equivalent.
+                Text(verbatim: "\(index + 1)")
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.tertiary)
+            }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 3)

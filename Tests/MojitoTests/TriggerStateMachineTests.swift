@@ -945,3 +945,145 @@ struct StickyPickingTests {
         #expect(out.action == .openPicker(query: "fo", scope: .normal))
     }
 }
+
+/// Digit quick-pick on the typed-query list (`:smil` + `2` → 2nd row). The
+/// Engine arms `listQuickPickCount` from the rows it shows and supplies the
+/// `queryHasMatches` probe; these pin the state machine's half of the gate.
+struct ListQuickPickTests {
+
+    /// `:smil` captured with `rows` pickable rows and a probe that reports
+    /// `matching` queries as live.
+    private func capturingSmil(rows: Int = 6, matching: Set<String> = []) -> TriggerStateMachine {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        for ch in "smil" { _ = sm.handle(.nameChar(ch)) }
+        sm.listQuickPickCount = rows
+        sm.queryHasMatches = { query, _ in matching.contains(query) }
+        return sm
+    }
+
+    @Test func digitPicksRowWhenItWouldDeadEndTheQuery() {
+        var sm = capturingSmil()
+        let out = sm.handle(.nameChar("2"))
+        #expect(out.action == .pickListIndex(1, query: "smil", scope: .normal))
+        #expect(out.consumesKey == true)
+        #expect(sm.state == .idle)
+        // Erases `:smil` like Return: the open delimiter, no close.
+        #expect(sm.lastInsertOpenLen == 1)
+        #expect(sm.lastInsertCloseLen == 0)
+    }
+
+    @Test func digitThatContinuesAShortcodeKeepsTyping() {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        for ch in "clock" { _ = sm.handle(.nameChar(ch)) }
+        sm.listQuickPickCount = 6
+        sm.queryHasMatches = { query, _ in query == "clock1" }
+        let out = sm.handle(.nameChar("1"))
+        #expect(out.action == .refreshPicker(query: "clock1", scope: .normal))
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .capturing(query: "clock1"))
+    }
+
+    @Test func probeSeesTheExtendedQueryAndScope() {
+        var sm = capturingSmil()
+        var probed: [(String, CaptureScope)] = []
+        sm.queryHasMatches = { query, scope in
+            probed.append((query, scope))
+            return false
+        }
+        _ = sm.handle(.nameChar("3"))
+        #expect(probed.count == 1)
+        #expect(probed.first?.0 == "smil3")
+        #expect(probed.first?.1 == .normal)
+    }
+
+    @Test func zeroNeverPicks() {
+        var sm = capturingSmil()
+        let out = sm.handle(.nameChar("0"))
+        #expect(out.action == .refreshPicker(query: "smil0", scope: .normal))
+        #expect(sm.state == .capturing(query: "smil0"))
+    }
+
+    @Test func digitPastTheVisibleRowsKeepsTyping() {
+        var sm = capturingSmil(rows: 3)
+        let out = sm.handle(.nameChar("4"))
+        #expect(out.action == .refreshPicker(query: "smil4", scope: .normal))
+        #expect(sm.state == .capturing(query: "smil4"))
+    }
+
+    @Test func nineIsTheLastPickableRow() {
+        var sm = capturingSmil(rows: 12)
+        let out = sm.handle(.nameChar("9"))
+        #expect(out.action == .pickListIndex(8, query: "smil", scope: .normal))
+    }
+
+    @Test func unarmedListNeverPicks() {
+        var sm = capturingSmil(rows: 0)
+        var probed = false
+        sm.queryHasMatches = { _, _ in probed = true; return false }
+        let out = sm.handle(.nameChar("1"))
+        #expect(out.action == .refreshPicker(query: "smil1", scope: .normal))
+        #expect(probed == false)  // no list, no search
+    }
+
+    @Test func missingProbeNeverPicks() {
+        var sm = capturingSmil()
+        sm.queryHasMatches = nil
+        let out = sm.handle(.nameChar("1"))
+        #expect(out.action == .refreshPicker(query: "smil1", scope: .normal))
+    }
+
+    @Test func editingTheQueryDisarmsUntilTheEngineReArms() {
+        var sm = capturingSmil()
+        _ = sm.handle(.nameChar("e"))
+        #expect(sm.listQuickPickCount == 0)
+        let typed = sm.handle(.nameChar("1"))
+        #expect(typed.action == .refreshPicker(query: "smile1", scope: .normal))
+
+        var back = capturingSmil()
+        _ = back.handle(.backspace)
+        #expect(back.listQuickPickCount == 0)
+    }
+
+    @Test func symbolsScopeErasesTheDoubleColonOpen() {
+        var sm = TriggerStateMachine()
+        sm.symbolsDoubleColonEnabled = true
+        _ = sm.handle(.colon)
+        _ = sm.handle(.colon)
+        for ch in "star" { _ = sm.handle(.nameChar(ch)) }
+        sm.listQuickPickCount = 6
+        sm.queryHasMatches = { _, _ in false }
+        let out = sm.handle(.nameChar("1"))
+        #expect(out.action == .pickListIndex(0, query: "star", scope: .symbolsOnly))
+        #expect(sm.lastInsertOpenLen == 2)
+    }
+
+    @Test func stickySessionTypesDigitsIntoItsSearch() {
+        var sm = capturingSmil()
+        _ = sm.handle(.returnKey(shift: true))
+        #expect(sm.listQuickPickCount == 0)
+        sm.listQuickPickCount = 6  // even if re-armed, sticky owns the keys
+        let out = sm.handle(.nameChar("1"))
+        #expect(out.action == .refreshPicker(query: "1", scope: .normal))
+        #expect(sm.state == .stickyPicking(query: "1"))
+    }
+
+    @Test func pillDigitPickIsUnchanged() {
+        var sm = TriggerStateMachine()
+        sm.quickAccessTrigger = "?"
+        _ = sm.handle(.colon)
+        _ = sm.handle(.cancelChar("?"))
+        sm.emptyPickerActive = true
+        sm.pillEmojiCount = 8
+        sm.listQuickPickCount = 6
+        sm.queryHasMatches = { _, _ in false }
+        #expect(sm.handle(.nameChar("2")).action == .pickIndex(1))
+    }
+
+    @Test func resetDisarms() {
+        var sm = capturingSmil()
+        sm.reset()
+        #expect(sm.listQuickPickCount == 0)
+    }
+}
