@@ -106,8 +106,9 @@ final class EmojiBrowserViewModel: ObservableObject {
             useFrequencyBoost: true, limit: 240
         )
         .map(\.emoji)
-        // Keep real emoji + symbols; drop egg/sentinel rows.
-        .filter { database.byHexcode[$0.hexcode] != nil || $0.hexcode.hasPrefix("SYM_") }
+        // Keep real emoji + symbols; drop egg/sentinel rows, and kaomoji,
+        // which don't fit a grid cell.
+        .filter { database.byHexcode[$0.hexcode] != nil || ($0.hexcode.hasPrefix("SYM_") && !$0.isKaomoji) }
     }
 
     var isSearching: Bool { !query.trimmingCharacters(in: .whitespaces).isEmpty }

@@ -113,10 +113,24 @@ private struct PickerRow: View {
     var body: some View {
         let isSelected = (index == viewModel.selectedIndex)
         HStack(spacing: 10) {
-            leadingGlyph
-                .frame(width: 24)
-            label
-            Spacer(minLength: 0)
+            if scored.emoji.isKaomoji {
+                // Too wide for the glyph column: the face leads the row and
+                // its shortcode trails.
+                Text(verbatim: scored.emoji.character)
+                    .font(.system(size: 14))
+                    .lineLimit(1)
+                    .fixedSize()
+                Spacer(minLength: 8)
+                highlightedShortcode(scored.matchedShortcode, query: viewModel.query)
+                    .font(.system(size: 12))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            } else {
+                leadingGlyph
+                    .frame(width: 24)
+                label
+                Spacer(minLength: 0)
+            }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 3)

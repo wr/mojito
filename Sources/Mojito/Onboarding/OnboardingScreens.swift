@@ -507,7 +507,7 @@ struct FeaturesStep: View {
                     systemImage: "command",
                     tint: .indigo,
                     title: "Symbols",
-                    subtitle: "Symbols like ★ ✓ ÷ ©.",
+                    subtitle: "Symbols like ★ ✓ ÷ © and kaomoji like ʕ•ᴥ•ʔ.",
                     isOn: $triggers.symbols.enabled
                 )
                 if triggers.symbols.enabled {

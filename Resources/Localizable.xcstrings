@@ -25353,114 +25353,114 @@
         }
       }
     },
-    "Symbols like ★ ✓ ÷ ©.": {
+    "Symbols like ★ ✓ ÷ © and kaomoji like ʕ•ᴥ•ʔ.": {
       "localizations": {
         "en-GB": {
           "stringUnit": {
             "state": "translated",
-            "value": "Symbols like ★ ✓ ÷ ©."
+            "value": "Symbols like ★ ✓ ÷ © and kaomoji like ʕ•ᴥ•ʔ."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Symbole wie ★ ✓ ÷ ©."
+            "value": "Symbole wie ★ ✓ ÷ © und Kaomoji wie ʕ•ᴥ•ʔ."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Símbolos como ★ ✓ ÷ ©."
+            "value": "Símbolos como ★ ✓ ÷ © y kaomojis como ʕ•ᴥ•ʔ."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Símbolos como ★ ✓ ÷ ©."
+            "value": "Símbolos como ★ ✓ ÷ © y kaomojis como ʕ•ᴥ•ʔ."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Symboles comme ★ ✓ ÷ ©."
+            "value": "Symboles comme ★ ✓ ÷ © et kaomojis comme ʕ•ᴥ•ʔ."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Simboli come ★ ✓ ÷ ©."
+            "value": "Simboli come ★ ✓ ÷ © e kaomoji come ʕ•ᴥ•ʔ."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Símbolos como ★ ✓ ÷ ©."
+            "value": "Símbolos como ★ ✓ ÷ © e kaomojis como ʕ•ᴥ•ʔ."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "★ ✓ ÷ © などの記号。"
+            "value": "★ ✓ ÷ © などの記号と、ʕ•ᴥ•ʔ などの顔文字。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "★ ✓ ÷ © 等符号。"
+            "value": "★ ✓ ÷ © 等符号，以及 ʕ•ᴥ•ʔ 等颜文字。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "★ ✓ ÷ © 等符號。"
+            "value": "★ ✓ ÷ © 等符號，以及 ʕ•ᴥ•ʔ 等顏文字。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "★ ✓ ÷ © 같은 기호."
+            "value": "★ ✓ ÷ © 같은 기호와 ʕ•ᴥ•ʔ 같은 카오모지."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "★ ✓ ÷ © जैसे प्रतीक।"
+            "value": "★ ✓ ÷ © जैसे प्रतीक और ʕ•ᴥ•ʔ जैसे काओमोजी।"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Символы вроде ★ ✓ ÷ ©."
+            "value": "Символы вроде ★ ✓ ÷ © и каомодзи вроде ʕ•ᴥ•ʔ."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Symbole jak ★ ✓ ÷ ©."
+            "value": "Symbole jak ★ ✓ ÷ © i kaomoji jak ʕ•ᴥ•ʔ."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Symbolen zoals ★ ✓ ÷ ©."
+            "value": "Symbolen zoals ★ ✓ ÷ © en kaomoji zoals ʕ•ᴥ•ʔ."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "رموز مثل ★ ✓ ÷ ©."
+            "value": "رموز مثل ★ ✓ ÷ © ووجوه كاوموجي مثل ʕ•ᴥ•ʔ."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "نمادهایی مانند ★ ✓ ÷ ©."
+            "value": "نمادهایی مانند ★ ✓ ÷ © و کائوموجی‌هایی مانند ʕ•ᴥ•ʔ."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "סמלים כמו ★ ✓ ÷ ©."
+            "value": "סמלים כמו ★ ✓ ÷ © וקאומוג׳י כמו ʕ•ᴥ•ʔ."
           }
         }
       }
