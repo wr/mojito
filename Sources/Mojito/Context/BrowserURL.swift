@@ -99,8 +99,6 @@ enum BrowserURL {
         "ru.yandex.desktop.yandex-browser",         // Yandex
         "com.naver.Whale",                          // Naver Whale
         "io.wavebox.wavebox",                       // Wavebox
-        "com.phibrowser.Mac",                       // Phi
-        "com.phibrowser.canary.Mac",                // Phi Canary
         "com.ardia.browser",                        // Ardia
         "com.pauldavis.crest",                      // Crest
 
