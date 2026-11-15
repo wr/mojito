@@ -71,7 +71,6 @@ enum BrowserURL {
         "com.officecommun.search",                  // Search
         "com.orabrowser.app",                       // Ora
         "com.gstudios.nook",                        // Nook
-        "app.zephium",                              // Zephium
 
         // Chromium
         "com.google.Chrome",
@@ -104,8 +103,6 @@ enum BrowserURL {
         "com.phibrowser.canary.Mac",                // Phi Canary
         "com.ardia.browser",                        // Ardia
         "com.pauldavis.crest",                      // Crest
-        "surf.deta",                                // Surf
-        "dev.iamevan.flow",                         // Flow
 
         // Gecko
         "org.mozilla.firefox",
