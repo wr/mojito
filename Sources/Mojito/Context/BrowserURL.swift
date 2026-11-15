@@ -68,6 +68,10 @@ enum BrowserURL {
         "com.kagi.kagimacOS.RC",                    // Orion RC
         "com.duckduckgo.macos.browser",             // DuckDuckGo
         "com.sigmaos.sigmaos.macos",                // SigmaOS
+        "com.officecommun.search",                  // Search
+        "com.orabrowser.app",                       // Ora
+        "com.gstudios.nook",                        // Nook
+        "app.zephium",                              // Zephium
 
         // Chromium
         "com.google.Chrome",
@@ -96,6 +100,12 @@ enum BrowserURL {
         "ru.yandex.desktop.yandex-browser",         // Yandex
         "com.naver.Whale",                          // Naver Whale
         "io.wavebox.wavebox",                       // Wavebox
+        "com.phibrowser.Mac",                       // Phi
+        "com.phibrowser.canary.Mac",                // Phi Canary
+        "com.ardia.browser",                        // Ardia
+        "com.pauldavis.crest",                      // Crest
+        "surf.deta",                                // Surf
+        "dev.iamevan.flow",                         // Flow
 
         // Gecko
         "org.mozilla.firefox",
