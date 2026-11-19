@@ -105,6 +105,11 @@ fi
 for page in $(git ls-files '*/index.html' | grep -v '^node_modules/'); do
   slug="${page%/index.html}"
   HTML="$(cat "$page")"
+  # A merged guide leaves a redirect page behind; it has no metadata of its own.
+  if grep -q 'http-equiv="refresh"' "$page"; then
+    gray "  $slug/ (redirect)"
+    continue
+  fi
   gray "  $slug/"
   check_len  "<title>"          "$(title_text)"                30 65
   check_len  "meta description" "$(attr_val name description)" 70 160
