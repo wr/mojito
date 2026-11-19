@@ -29,7 +29,6 @@ const CARDS = {
   'math-symbols-mac':                { glyph: 'π', small: '≠ ± √ ∞', keys: ['⌥', 'P'] },
   'copyright-trademark-symbols-mac': { glyph: '©', small: '™ ®', keys: ['⌥', 'G'] },
   'mac-key-symbols':                 { glyph: '⌘', small: '⌥ ⇧ ⌃', chip: '::cmd' },
-  'how-to-type-emoji-on-mac':        { glyph: '😀', keys: ['fn', 'E'] },
   'emoji-shortcuts-mac':             { glyph: '🚀', keys: ['⌃', '⌘', 'Space'] },
   'emoji-shortcodes':                { glyph: '🎉', chip: ':tada:' },
   'mac-emoji-picker':                { glyph: '☕', chip: ':coffee:' },

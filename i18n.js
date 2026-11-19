@@ -208,6 +208,19 @@
     });
   }
 
+  // A ?lang= URL that the page lists as an hreflang alternate is its own
+  // canonical; search engines drop alternates that canonicalize elsewhere.
+  var canonicalEl = document.querySelector('link[rel="canonical"]');
+  var canonicalBase = canonicalEl && canonicalEl.getAttribute("href");
+  function syncCanonical() {
+    if (!canonicalEl) return;
+    var code = resolveOne(paramLang() || "");
+    var alt = code && code !== "en" &&
+      document.querySelector('link[rel="alternate"][hreflang="' + code + '"]');
+    canonicalEl.setAttribute("href", alt ? alt.getAttribute("href") : canonicalBase);
+  }
+  syncCanonical();
+
   function updateUrl(code) {
     try {
       var url = new URL(location.href);
@@ -215,6 +228,7 @@
       else url.searchParams.set("lang", code);
       history.replaceState(null, "", url);
     } catch (e) {}
+    syncCanonical();
   }
 
   // Explicit user pick: persist + reflect in URL.
