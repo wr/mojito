@@ -158,6 +158,7 @@
 		D7FD72169491380D742F69BC /* ChooChooSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = C060B27E6970531BEBA3673E /* ChooChooSound.swift */; };
 		D8CD1BAA49BB0D0B96A7C2CC /* ScratchDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8D795EF2026F5349717D49 /* ScratchDefaults.swift */; };
 		DADDDB9ED8378048DF84B51A /* EggSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1732A13138B365E5C880F62 /* EggSound.swift */; };
+		DB4DC41BF9F45DD2CCF471F5 /* KeyMonitorEditShortcutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9980042A0064F2B7D20FA4B5 /* KeyMonitorEditShortcutTests.swift */; };
 		DCE52DEE8C9CEC354443E7DB /* SettingsRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFC142D2205F1C089F7524D2 /* SettingsRoot.swift */; };
 		DD501615C4A6623E5BA03369 /* EmojiDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B842CBBD6C7466F9BA2786 /* EmojiDatabaseTests.swift */; };
 		DD75EE1DF9351238356F60E7 /* SkinTone.swift in Sources */ = {isa = PBXBuildFile; fileRef = B375DE27AC0AE1D8DE965403 /* SkinTone.swift */; };
@@ -306,6 +307,7 @@
 		96837E12D46B10FC4D77897A /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorder.swift; sourceTree = "<group>"; };
 		96C001583E27CC71D9959055 /* EmojiBrowserCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBrowserCatalog.swift; sourceTree = "<group>"; };
 		9903710C7A46FB1BB47A47BA /* WarpSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarpSound.swift; sourceTree = "<group>"; };
+		9980042A0064F2B7D20FA4B5 /* KeyMonitorEditShortcutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMonitorEditShortcutTests.swift; sourceTree = "<group>"; };
 		9C81578D7A36FB7EA31D1985 /* Fireworks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fireworks.swift; sourceTree = "<group>"; };
 		9C90F0A490BC13D9CC5ADF90 /* s05.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s05.bin; sourceTree = "<group>"; };
 		9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonalGatesTests.swift; sourceTree = "<group>"; };
@@ -425,6 +427,7 @@
 				42FA18E36A4027D4CB96ADA5 /* FuzzyMatcherTests.swift */,
 				69CD38087938C1E258718C69 /* FzyScorerTests.swift */,
 				16E8123A15F116BF7B631277 /* GifPickerViewModelTests.swift */,
+				9980042A0064F2B7D20FA4B5 /* KeyMonitorEditShortcutTests.swift */,
 				AEB65C36C1B1D1A3ECADC6FE /* KlipyAPITests.swift */,
 				12F71260B63547A6DF1B01AD /* PickerViewModelTests.swift */,
 				6401923F7190AFC65A7B6959 /* QueryStemmerTests.swift */,
@@ -1102,6 +1105,7 @@
 				4F9E4BA7A275583B07011809 /* FuzzyMatcherTests.swift in Sources */,
 				B32AE99482DA334BDD7CEEAC /* FzyScorerTests.swift in Sources */,
 				DFEEAE1A2B798418F4DF2293 /* GifPickerViewModelTests.swift in Sources */,
+				DB4DC41BF9F45DD2CCF471F5 /* KeyMonitorEditShortcutTests.swift in Sources */,
 				98422299C980042CFA642B78 /* KlipyAPITests.swift in Sources */,
 				2C2FD54F6E35CCD0374213BB /* PickerViewModelTests.swift in Sources */,
 				A11509496D8522DC13BF31F3 /* QueryStemmerTests.swift in Sources */,
