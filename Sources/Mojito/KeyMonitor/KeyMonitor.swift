@@ -133,6 +133,12 @@ final class KeyMonitor {
         let keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
         let flags = event.flags
 
+        // Modifier combos that rewrite the field or move the caret end a
+        // capture — the tracked `:query` is no longer what's in the field.
+        if Self.isEditShortcut(keyCode: keyCode, flags: flags) {
+            return .editShortcut
+        }
+
         // Cmd+Z (no other modifiers) routes through so the engine can
         // offer emoticon-undo. Other modifier combos must not trigger or
         // interrupt capture.
@@ -170,6 +176,29 @@ final class KeyMonitor {
         if char == ":" { return .colon }
         if isNameChar(char) { return .nameChar(char) }
         return .cancelChar(char)
+    }
+
+    /// True for a Cmd / Option / Control combo that deletes or replaces text,
+    /// or jumps the caret: a modified Delete or arrow key, or Cmd+A / X / V.
+    /// These pass through to the focused app like every other modifier combo,
+    /// but the state machine must hear about them — after Cmd+A then Delete
+    /// (or Cmd+Delete, Option+Delete) the typed `:query` is gone, and a capture
+    /// left open would swallow the next `:` as its closing delimiter.
+    /// Key codes are physical positions, like the Cmd+Z check below.
+    nonisolated static func isEditShortcut(keyCode: Int, flags: CGEventFlags) -> Bool {
+        let command = flags.contains(.maskCommand)
+        guard command || flags.contains(.maskAlternate) || flags.contains(.maskControl) else {
+            return false
+        }
+        switch keyCode {
+        case kVK_Delete, kVK_ForwardDelete,
+             kVK_LeftArrow, kVK_RightArrow, kVK_UpArrow, kVK_DownArrow:
+            return true
+        case kVK_ANSI_A, kVK_ANSI_X, kVK_ANSI_V:
+            return command
+        default:
+            return false
+        }
     }
 
     private func isNameChar(_ c: Character) -> Bool {

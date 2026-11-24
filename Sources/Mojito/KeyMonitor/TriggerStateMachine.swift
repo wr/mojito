@@ -45,6 +45,12 @@ enum TriggerInput {
     /// Cmd+Z with no other modifiers. Routed through so Engine can undo a
     /// recent emoticon; passes through when nothing's pending.
     case cmdZ
+    /// A modifier combo that rewrites the field's text or moves the caret out
+    /// of `:query` — Cmd/Option+Delete, Cmd+A / X / V, a modified arrow (see
+    /// `KeyMonitor.isEditShortcut`). Never consumed. It ends a typed capture,
+    /// because the query we tracked no longer matches what's in the field;
+    /// without it the next `:` would be read as that stale capture's close.
+    case editShortcut
 }
 
 /// **Design choice:** during capture, the `:` and name chars pass through to
@@ -750,7 +756,7 @@ struct TriggerStateMachine {
             }
             return TriggerOutput(action: .checkEmoticon(query: q, terminator: c), consumesKey: false)
 
-        case (.capturing, .focusChange):
+        case (.capturing, .focusChange), (.capturing, .editShortcut):
             state = .idle
             return TriggerOutput(action: .closePicker, consumesKey: false)
         }
@@ -1111,6 +1117,9 @@ struct TriggerStateMachine {
         case .cmdZ:
             state = .idle
             return TriggerOutput(action: .closeGifPicker, consumesKey: false)
+        case .editShortcut:
+            // The search text lives in the panel, not the field — nothing to desync.
+            return .passthrough
         }
     }
 
@@ -1165,6 +1174,9 @@ struct TriggerStateMachine {
         case .cmdZ:
             state = .idle
             return TriggerOutput(action: .closeBrowser, consumesKey: false)
+        case .editShortcut:
+            // The search text lives in the panel, not the field — nothing to desync.
+            return .passthrough
         }
     }
 
@@ -1220,6 +1232,9 @@ struct TriggerStateMachine {
             // exhaustiveness (mirrors the browser).
             state = .idle
             return TriggerOutput(action: .closePicker, consumesKey: false)
+        case .editShortcut:
+            // The typed `:query` was already erased — nothing to desync.
+            return .passthrough
         }
     }
 

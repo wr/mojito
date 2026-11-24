@@ -498,7 +498,12 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         if case .nameChar(let c) = input, c.isNumber { lastDigitSeq = inputSeq }
         // BSOD-style "press any key" effects pre-empt everything; the key is
         // consumed so it doesn't leak into the focused app underneath.
-        if case .idle = stateMachine.state, EffectDismisser.topWantsAnyKey() {
+        // An edit shortcut (Cmd+A, Cmd+V, …) is never consumed, so it skips
+        // the pre-emption below and reaches the state machine only to end a
+        // capture it has made stale.
+        var isEditShortcut = false
+        if case .editShortcut = input { isEditShortcut = true }
+        if !isEditShortcut, case .idle = stateMachine.state, EffectDismisser.topWantsAnyKey() {
             EffectDismisser.dismissTop()
             return true
         }
@@ -552,6 +557,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         let wasInStickySession = inStickySession
 
         let output = stateMachine.handle(input)
+        if isEditShortcut, case .closePicker = output.action {
+            DebugRecorder.record(.picker, "editShortcut")
+        }
 
         // Secure-field check short-circuits — we never want to inspect a
         // password field. The exclusion list is honored per-action: emoji

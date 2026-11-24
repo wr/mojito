@@ -620,6 +620,68 @@ struct TriggerStateMachineTests {
         #expect(sm.state == .capturing(query: "f"))
     }
 
+    // MARK: edit shortcuts (Cmd+A, Cmd/Option+Delete, …)
+
+    /// Type `:test` so the picker is up on a 4-char query.
+    private func capturingTest() -> TriggerStateMachine {
+        var sm = TriggerStateMachine()
+        _ = sm.handle(.colon)
+        for c in "test" { _ = sm.handle(.nameChar(c)) }
+        return sm
+    }
+
+    @Test func editShortcutEndsCaptureWithoutConsuming() {
+        var sm = capturingTest()
+        let out = sm.handle(.editShortcut)
+        #expect(out.action == .closePicker)
+        // The shortcut itself must still reach the focused app.
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .idle)
+    }
+
+    /// `:test`, wipe the field with Cmd+A then Delete, type `:test` again: the
+    /// second `:` opens a fresh capture rather than closing the first one.
+    @Test func colonAfterSelectAllDeleteOpensFreshCapture() {
+        var sm = capturingTest()
+        _ = sm.handle(.editShortcut)  // Cmd+A
+        _ = sm.handle(.backspace)     // Delete — removes the whole selection
+        let colon = sm.handle(.colon)
+        #expect(colon.action == .none)
+        #expect(sm.state == .capturing(query: ""))
+        _ = sm.handle(.nameChar("t"))
+        let out = sm.handle(.nameChar("e"))
+        #expect(out.action == .openPicker(query: "te", scope: .normal))
+    }
+
+    /// Same wipe with a single combo (Cmd+Delete / Option+Delete): no plain
+    /// backspace ever reaches the state machine.
+    @Test func colonAfterModifiedDeleteOpensFreshCapture() {
+        var sm = capturingTest()
+        _ = sm.handle(.editShortcut)
+        _ = sm.handle(.colon)
+        #expect(sm.state == .capturing(query: ""))
+    }
+
+    /// Cmd+A then typing over the selection: the `:` replaces the word, so the
+    /// "5:35" word-char carve-out must not suppress it.
+    @Test func editShortcutInIdleClearsWordBoundary() {
+        var sm = TriggerStateMachine()
+        for c in "foo" { _ = sm.handle(.nameChar(c)) }
+        let out = sm.handle(.editShortcut)
+        #expect(out.action == .none)
+        #expect(out.consumesKey == false)
+        _ = sm.handle(.colon)
+        #expect(sm.state == .capturing(query: ""))
+    }
+
+    @Test func editShortcutLeavesGifSearchOpen() {
+        var sm = enterGifSearching()
+        let out = sm.handle(.editShortcut)
+        #expect(out.action == .none)
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .gifSearching(query: ""))
+    }
+
     // MARK: symbols-scope backspace demotion
 
     @Test func symbolsScopeBackspaceDemotesToNormalWithoutEndingCapture() {
@@ -864,6 +926,14 @@ struct StickyPickingTests {
         #expect(out.action == .closePicker)
         #expect(out.consumesKey == false)
         #expect(sm.state == .idle)
+    }
+
+    @Test func editShortcutLeavesStickySessionOpen() {
+        var sm = stickyFoo()
+        let out = sm.handle(.editShortcut)
+        #expect(out.action == .none)
+        #expect(out.consumesKey == false)
+        #expect(sm.state == .stickyPicking(query: "foo"))
     }
 
     @Test func stickySurvivesSymbolsScope() {
