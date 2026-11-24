@@ -5,6 +5,17 @@ single source of truth for that release: `scripts/release.sh` extracts it for
 both the GitHub Release body and the Sparkle update notes shown in the in-app
 updater.
 
+## v1.10.2
+
+## New
+- Site exceptions now apply in five more browsers people are moving to from Arc: Search, Ora, Nook, Ardia, and Crest. ([#253](https://github.com/wr/mojito/pull/253))
+- Symbols you use now show up in Quick Access, the way emoji do. ([#247](https://github.com/wr/mojito/pull/247))
+
+## Fixed
+- Clearing a half-typed shortcode with Cmd+A then Delete, Cmd+Delete, or Option+Delete no longer stops the next `:` from opening the picker. ([#255](https://github.com/wr/mojito/pull/255))
+- Cmd+A, Cmd+X, Cmd+V, and Cmd+Z are now recognized on French, German, Dvorak, and other non-US keyboard layouts. ([#256](https://github.com/wr/mojito/pull/256))
+- The Quick Access grid in Settings updates right away when you turn Symbols on or off, and turning Symbols on no longer delays the first `:`. ([#248](https://github.com/wr/mojito/pull/248))
+
 ## v1.10.1
 
 ## New
