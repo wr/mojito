@@ -14,10 +14,13 @@ fi
 
 xcodegen generate >/dev/null
 
+# MOJITO_INSTALL_DEV_APP=NO skips the Debug build's install to /Applications,
+# so a test run (or a push) doesn't replace or restart the Mojito Dev you're using.
 xcodebuild test \
   -project Mojito.xcodeproj \
   -scheme Mojito \
   -configuration Debug \
   -destination 'platform=macOS' \
   -quiet \
+  MOJITO_INSTALL_DEV_APP=NO \
   "$@"

@@ -228,8 +228,9 @@ targets:
       # shows up in Spotlight / Finder / Launchpad consistently and can be
       # launched from a stable path. Release builds skip this — those go
       # through scripts/release.sh which handles signing + DMG separately.
-      # CI opts out with MOJITO_INSTALL_DEV_APP=NO: the runner has no
-      # "Mojito Dev" identity and no installed app to replace.
+      # scripts/run-tests.sh (and so CI and the pre-push hook) opts out with
+      # MOJITO_INSTALL_DEV_APP=NO: a test run shouldn't replace or restart
+      # the Mojito Dev you're using.
       - name: Install Mojito Dev to /Applications (Debug only)
         script: |
           if [ "$CONFIGURATION" = "Debug" ] && [ "${MOJITO_INSTALL_DEV_APP:-YES}" != "NO" ]; then
@@ -241,15 +242,24 @@ targets:
             # Sparkle.framework was signed earlier in the build and rsyncs
             # over already-signed; we just need to (re)sign the dylibs and
             # the bundle wrapper.
-            rsync -a --delete "$TARGET_BUILD_DIR/$WRAPPER_NAME/" "/Applications/$WRAPPER_NAME/"
+            #
+            # The unit tests are hosted in this app, so a test build puts
+            # MojitoTests.xctest in Contents/PlugIns, still half-built while
+            # this runs. Copying it makes codesign reject the whole bundle,
+            # and the installed app never needs it.
             DEST="/Applications/$WRAPPER_NAME"
+            rsync -a --delete --delete-excluded --exclude '/Contents/PlugIns/*.xctest' \
+              "$TARGET_BUILD_DIR/$WRAPPER_NAME/" "$DEST/"
             for f in "$DEST/Contents/MacOS"/*.dylib; do
               [ -f "$f" ] && codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" \
                 --options runtime --timestamp=none "$f" >/dev/null
             done
-            codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" \
+            if ! codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" \
               --entitlements "$SRCROOT/$CODE_SIGN_ENTITLEMENTS" \
-              --options runtime --timestamp=none "$DEST" >/dev/null
+              --options runtime --timestamp=none "$DEST" >/dev/null; then
+              echo "error: couldn't sign $DEST, so it won't launch until a Debug build installs it cleanly" >&2
+              exit 1
+            fi
             echo "Copied $WRAPPER_NAME to /Applications/ (signed in place)"
             # If the app was already running, quit and relaunch from the new
             # build. `pkill` returns 0 only when it actually signalled something,

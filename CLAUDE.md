@@ -62,10 +62,11 @@ Pure-logic unit tests live under `Tests/MojitoTests/` and use Apple's Swift
 Testing framework (`@Test` / `#expect`). `scripts/run-tests.sh` regenerates
 the Xcode project and runs `xcodebuild test`; the `.githooks/pre-push` hook
 calls it, so a failing test blocks `git push` once the hook is enabled.
-CI (`.github/workflows/ci.yml`) runs the same script on a `macos-26` runner
-for every PR and push to `main`, alongside the localization and telemetry
-checks. It signs ad-hoc and passes `MOJITO_INSTALL_DEV_APP=NO`, which skips
-the Debug post-build install to `/Applications`.
+The script passes `MOJITO_INSTALL_DEV_APP=NO`, which skips the Debug
+post-build install to `/Applications`, so a test run never replaces or
+restarts the installed Mojito Dev. CI (`.github/workflows/ci.yml`) runs the
+same script, signed ad-hoc, on a `macos-26` runner for every PR and push to
+`main`, alongside the localization and telemetry checks.
 
 What's worth testing here: anything pure-logic with no AppKit / AX /
 CGEventTap dependency — `TriggerStateMachine`, `FzyScorer`, `FuzzyMatcher`,

@@ -22,7 +22,7 @@ jobs:
       - run: brew install xcodegen
       # Ad-hoc signed: the runner has no "Mojito Dev" identity, and unit
       # tests don't need the TCC grants that identity exists to keep.
-      - run: scripts/run-tests.sh CODE_SIGN_IDENTITY=- MOJITO_INSTALL_DEV_APP=NO
+      - run: scripts/run-tests.sh CODE_SIGN_IDENTITY=-
 
   # Fails when a user-facing string is left untranslated.
   localizations:
