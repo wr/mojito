@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>Mojito 1.10.2</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+  font: -apple-system-body, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 16px 18px;
+  color: #1d1d1f;
+  background: transparent;
+}
+h1 { font-size: 17px; margin: 0 0 8px; }
+h2 { font-size: 15px; margin: 16px 0 6px; }
+h3 { font-size: 13px; margin: 12px 0 4px; }
+p { margin: 6px 0; }
+ul { margin: 6px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+a { color: #0a7aff; }
+@media (prefers-color-scheme: dark) {
+  body { color: #f5f5f7; }
+  code { background: rgba(255, 255, 255, 0.12); }
+  a { color: #4aa3ff; }
+}
+</style>
+</head>
+<body>
+<h2>New</h2>
+<ul>
+<li>Site exceptions now apply in five more browsers people are moving to from Arc: Search, Ora, Nook, Ardia, and Crest. (<a href="https://github.com/wr/mojito/pull/253">#253</a>)</li>
+<li>Symbols you use now show up in Quick Access, the way emoji do. (<a href="https://github.com/wr/mojito/pull/247">#247</a>)</li>
+</ul>
+<h2>Fixed</h2>
+<ul>
+<li>Clearing a half-typed shortcode with Cmd+A then Delete, Cmd+Delete, or Option+Delete no longer stops the next <code>:</code> from opening the picker. (<a href="https://github.com/wr/mojito/pull/255">#255</a>)</li>
+<li>Cmd+A, Cmd+X, Cmd+V, and Cmd+Z are now recognized on French, German, Dvorak, and other non-US keyboard layouts. (<a href="https://github.com/wr/mojito/pull/256">#256</a>)</li>
+<li>The Quick Access grid in Settings updates right away when you turn Symbols on or off, and turning Symbols on no longer delays the first <code>:</code>. (<a href="https://github.com/wr/mojito/pull/248">#248</a>)</li>
+</ul>
+</body>
+</html>
