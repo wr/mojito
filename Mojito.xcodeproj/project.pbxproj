@@ -19,6 +19,7 @@
 		0A4AAE2AE35D2C90AB9735B7 /* s02.bin in Resources */ = {isa = PBXBuildFile; fileRef = A3781043056BF9F399D00EDD /* s02.bin */; };
 		0D48DFE069D4D6C6F2E568B5 /* AnimationTicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162291D3BD8AF6CD22BE0378 /* AnimationTicker.swift */; };
 		0F5899AC76F676DCA0E3368D /* GifPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02399494F4CF5825B0401CD /* GifPickerView.swift */; };
+		119AB156C660D1E5159A06CD /* CommandKeyLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8E6316DB8AA96A48D7D5FA /* CommandKeyLayout.swift */; };
 		13A5B7C53702606B6868EB50 /* s05.bin in Resources */ = {isa = PBXBuildFile; fileRef = 9C90F0A490BC13D9CC5ADF90 /* s05.bin */; };
 		155360187C1F8C68452934E7 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF01308E9212227B8106776 /* SettingsWindowController.swift */; };
 		19BEC88C7D1AFE4BAD6C0539 /* GifPickerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC98E3E280416083D33326C7 /* GifPickerViewModel.swift */; };
@@ -309,6 +310,7 @@
 		9903710C7A46FB1BB47A47BA /* WarpSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WarpSound.swift; sourceTree = "<group>"; };
 		9980042A0064F2B7D20FA4B5 /* KeyMonitorEditShortcutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMonitorEditShortcutTests.swift; sourceTree = "<group>"; };
 		9C81578D7A36FB7EA31D1985 /* Fireworks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fireworks.swift; sourceTree = "<group>"; };
+		9C8E6316DB8AA96A48D7D5FA /* CommandKeyLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandKeyLayout.swift; sourceTree = "<group>"; };
 		9C90F0A490BC13D9CC5ADF90 /* s05.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = s05.bin; sourceTree = "<group>"; };
 		9E0C646543028E968FB6287E /* SeasonalGatesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonalGatesTests.swift; sourceTree = "<group>"; };
 		A0DE1B7DD5243E817418580C /* AudioBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioBlob.swift; sourceTree = "<group>"; };
@@ -563,6 +565,7 @@
 		4A24B87614BF02CF9976B336 /* KeyMonitor */ = {
 			isa = PBXGroup;
 			children = (
+				9C8E6316DB8AA96A48D7D5FA /* CommandKeyLayout.swift */,
 				561D5F53503A9DDE7BE03430 /* KeyMonitor.swift */,
 				21B80C892257DEA88108EE93 /* TriggerConfig.swift */,
 				ED949C65ADD9439C1E247759 /* TriggerConfigStore.swift */,
@@ -975,6 +978,7 @@
 				C892E976ED36AA1810770521 /* CeleryMan.swift in Sources */,
 				D7FD72169491380D742F69BC /* ChooChooSound.swift in Sources */,
 				F971A237FFEABE6C68B56C29 /* ClickAwayMonitor.swift in Sources */,
+				119AB156C660D1E5159A06CD /* CommandKeyLayout.swift in Sources */,
 				F46B89A2E807D259981405E5 /* ConfettiRain.swift in Sources */,
 				6A8EC5B13FA4A0AC0F338875 /* ConfettiSound.swift in Sources */,
 				FFB109C762E7363A39A54111 /* CopyToast.swift in Sources */,

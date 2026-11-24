@@ -35,6 +35,7 @@ final class KeyMonitor {
         // if the tap installs on the main run loop.
         dispatchPrecondition(condition: .onQueue(.main))
         guard !isRunning else { return true }
+        _ = CommandKeyLayout.shared  // load the layout before the first keypress
 
         let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.flagsChanged.rawValue)
         let context = Unmanaged.passUnretained(self).toOpaque()
@@ -132,24 +133,18 @@ final class KeyMonitor {
     private func translate(event: CGEvent) -> TriggerInput? {
         let keyCode = Int(event.getIntegerValueField(.keyboardEventKeycode))
         let flags = event.flags
+        let commandLetter = flags.contains(.maskCommand) ? Self.commandLetter(keyCode: keyCode) : nil
 
         // Modifier combos that rewrite the field or move the caret end a
         // capture — the tracked `:query` is no longer what's in the field.
-        if Self.isEditShortcut(keyCode: keyCode, flags: flags) {
+        if Self.isEditShortcut(keyCode: keyCode, flags: flags, commandLetter: commandLetter) {
             return .editShortcut
         }
 
-        // Cmd+Z (no other modifiers) routes through so the engine can
-        // offer emoticon-undo. Other modifier combos must not trigger or
-        // interrupt capture.
+        // Cmd+Z routes through so the engine can offer emoticon-undo. Other
+        // modifier combos must not trigger or interrupt capture.
         if flags.contains(.maskCommand) {
-            if keyCode == kVK_ANSI_Z
-                && !flags.contains(.maskControl)
-                && !flags.contains(.maskAlternate)
-                && !flags.contains(.maskShift) {
-                return .cmdZ
-            }
-            return nil
+            return Self.isCmdZ(flags: flags, commandLetter: commandLetter) ? .cmdZ : nil
         }
         if flags.contains(.maskControl) || flags.contains(.maskAlternate) {
             return nil
@@ -184,8 +179,9 @@ final class KeyMonitor {
     /// but the state machine must hear about them — after Cmd+A then Delete
     /// (or Cmd+Delete, Option+Delete) the typed `:query` is gone, and a capture
     /// left open would swallow the next `:` as its closing delimiter.
-    /// Key codes are physical positions, like the Cmd+Z check below.
-    nonisolated static func isEditShortcut(keyCode: Int, flags: CGEventFlags) -> Bool {
+    /// Delete and the arrows are matched by key code (they don't move between
+    /// layouts); letters by `commandLetter`, since they do.
+    nonisolated static func isEditShortcut(keyCode: Int, flags: CGEventFlags, commandLetter: Character?) -> Bool {
         let command = flags.contains(.maskCommand)
         guard command || flags.contains(.maskAlternate) || flags.contains(.maskControl) else {
             return false
@@ -194,12 +190,30 @@ final class KeyMonitor {
         case kVK_Delete, kVK_ForwardDelete,
              kVK_LeftArrow, kVK_RightArrow, kVK_UpArrow, kVK_DownArrow:
             return true
-        case kVK_ANSI_A, kVK_ANSI_X, kVK_ANSI_V:
-            return command
         default:
-            return false
+            guard command, let commandLetter else { return false }
+            return commandLetter == "a" || commandLetter == "x" || commandLetter == "v"
         }
     }
+
+    /// Cmd+Z with no other modifiers.
+    nonisolated static func isCmdZ(flags: CGEventFlags, commandLetter: Character?) -> Bool {
+        commandLetter == "z"
+            && flags.contains(.maskCommand)
+            && !flags.contains(.maskControl)
+            && !flags.contains(.maskAlternate)
+            && !flags.contains(.maskShift)
+    }
+
+    /// The letter a key types with Cmd held under the current layout. Falls
+    /// back to the US position when the input source has no layout data.
+    private static func commandLetter(keyCode: Int) -> Character? {
+        CommandKeyLayout.shared.letter(forKeyCode: keyCode) ?? usCommandLetters[keyCode]
+    }
+
+    private static let usCommandLetters: [Int: Character] = [
+        kVK_ANSI_A: "a", kVK_ANSI_X: "x", kVK_ANSI_V: "v", kVK_ANSI_Z: "z",
+    ]
 
     private func isNameChar(_ c: Character) -> Bool {
         if c.isLetter || c.isNumber { return true }
