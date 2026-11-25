@@ -89,6 +89,9 @@ struct WelcomeStep: View {
                 VStack(spacing: 6) {
                     Text(Self.tinted(act.title))
                         .font(.system(size: 28, weight: .semibold))
+                        // Longer translations shrink to fit rather than truncate.
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                         .contentTransition(.opacity)
                     Text("Emoji, symbols and GIFs in any text field on your Mac.")
                         .font(.callout)
