@@ -84,7 +84,7 @@ struct ScopedPermissionsStep: View {
                     step(
                         5,
                         done: inputMonitoringGranted,
-                        title: "Turn on \(name) under \(privacyIcon) Privacy & Security → \(inputIcon) Input Monitoring",
+                        title: "Open \(privacyIcon) Privacy & Security → \(inputIcon) Input Monitoring, click the \(plusIcon) button and choose \(name)",
                         actionTitle: inputMonitoringGranted ? nil : "Open Settings",
                         action: openInputMonitoringSettings
                     )
