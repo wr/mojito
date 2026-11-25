@@ -149,7 +149,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ هنوز نمی‌تواند صفحه‌کلید شما را ببیند"
+            "value": "‏%@ هنوز نمی‌تواند صفحه‌کلید شما را ببیند"
           }
         },
         "fr": {
@@ -1045,7 +1045,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ در نوار منوی شما قرار دارد — امتحانش کنید:"
+            "value": "‏%@ در نوار منوی شما قرار دارد — امتحانش کنید:"
           }
         },
         "fr": {
@@ -1494,7 +1494,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ به اجازه شما نیاز دارد"
+            "value": "‏%@ به اجازه شما نیاز دارد"
           }
         },
         "fr": {
@@ -1718,7 +1718,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ با «Choose Apps» اضافه شده است، بنابراین نمی‌تواند صفحه‌کلید شما را ببیند"
+            "value": "‏%@ با «Choose Apps» اضافه شده است، بنابراین نمی‌تواند صفحه‌کلید شما را ببیند"
           }
         },
         "fr": {
@@ -4071,13 +4071,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `:::gifs` siempre."
+            "value": "Autocompleta `:::gifs` donde sea."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `:::gifs` siempre."
+            "value": "Autocompleta `:::gifs` donde sea."
           }
         },
         "fa": {
@@ -4095,7 +4095,7 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "השלמה אוטומטית של `:::gifs` בכל מקום."
+            "value": "השלמת `:::gifs` בכל מקום."
           }
         },
         "hi": {
@@ -4125,7 +4125,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocomplete `:::gifs` overal."
+            "value": "Overal `:::gifs` aanvullen."
           }
         },
         "pl": {
@@ -4137,7 +4137,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompletar `:::gifs` sempre."
+            "value": "Complete `:::gifs` em todo lugar."
           }
         },
         "ru": {
@@ -4183,13 +4183,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `::symbols` siempre."
+            "value": "Autocompleta `::symbols` donde sea."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `::symbols` siempre."
+            "value": "Autocompleta `::symbols` donde sea."
           }
         },
         "fa": {
@@ -4207,7 +4207,7 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "השלמה אוטומטית של `::symbols` בכל מקום."
+            "value": "השלמת `::symbols` בכל מקום."
           }
         },
         "hi": {
@@ -4237,7 +4237,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocomplete `::symbols` overal."
+            "value": "Overal `::symbols` aanvullen."
           }
         },
         "pl": {
@@ -4249,7 +4249,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompletar `::symbols` sempre."
+            "value": "Complete `::symbols` em todo lugar."
           }
         },
         "ru": {
@@ -4295,13 +4295,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `:emoji:` siempre."
+            "value": "Autocompleta `:emoji:` donde sea."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `:emoji:` siempre."
+            "value": "Autocompleta `:emoji:` donde sea."
           }
         },
         "fa": {
@@ -4319,7 +4319,7 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "השלמה אוטומטית של `:emoji:` בכל מקום."
+            "value": "השלמת `:emoji:` בכל מקום."
           }
         },
         "hi": {
@@ -4349,7 +4349,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocomplete `:emoji:` overal."
+            "value": "Overal `:emoji:` aanvullen."
           }
         },
         "pl": {
@@ -4361,7 +4361,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompletar `:emoji:` sempre."
+            "value": "Complete `:emoji:` em todo lugar."
           }
         },
         "ru": {
@@ -6114,7 +6114,7 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "לחץ על כל כפתורי OK האדומים כדי להפעיל את הכפתור האדום ‏Allow System & App Protection Override, ולחץ עליו"
+            "value": "לחץ על כל כפתורי OK האדומים כדי להפעיל את הכפתור האדום ״Allow System & App Protection Override״, ולחץ עליו"
           }
         },
         "hi": {
@@ -9591,7 +9591,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "ماشه ایموجی"
+            "value": "محرک ایموجی"
           }
         },
         "fr": {
@@ -11277,7 +11277,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "ماشه GIF"
+            "value": "محرک GIF"
           }
         },
         "fr": {
@@ -14333,7 +14333,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esci e rientra per completare il passaggio del tasto %@."
+            "value": "Esci dalla sessione e accedi di nuovo per completare il passaggio del tasto %@."
           }
         },
         "ja": {
@@ -14363,7 +14363,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saia e entre novamente para concluir a transferência da tecla %@."
+            "value": "Encerre a sessão e entre novamente para concluir a transferência da tecla %@."
           }
         },
         "ru": {
@@ -14445,7 +14445,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esci e rientra per completare il passaggio del tasto %@ a Mojito."
+            "value": "Esci dalla sessione e accedi di nuovo per completare il passaggio del tasto %@ a Mojito."
           }
         },
         "ja": {
@@ -14475,7 +14475,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saia e entre novamente para concluir a transferência da tecla %@ para o Mojito."
+            "value": "Encerre a sessão e entre novamente para concluir a transferência da tecla %@ para o Mojito."
           }
         },
         "ru": {
@@ -15424,7 +15424,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abre %@ Privacidad y seguridad → %@ Monitorización de entrada, haz clic en el botón %@ y elige %@"
+            "value": "Abre %@ Privacidad y seguridad → %@ Monitorización de los dispositivos de entrada, haz clic en el botón %@ y elige %@"
           }
         },
         "es-419": {
@@ -15436,13 +15436,13 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ Privacy & Security ← %@ نظارت بر ورودی را باز کنید، روی دکمه %@ کلیک کنید و %@ را انتخاب کنید"
+            "value": "‏%@ Privacy & Security ← %@ Input Monitoring را باز کنید، روی دکمه %@ کلیک کنید و %@ را انتخاب کنید"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ouvrez %@ Confidentialité et sécurité → %@ Surveillance des entrées, cliquez sur le bouton %@ et choisissez %@"
+            "value": "Ouvrez %@ Confidentialité et sécurité → %@ Surveillance de l’entrée, cliquez sur le bouton %@ et choisissez %@"
           }
         },
         "he": {
@@ -15460,7 +15460,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Apri %@ Privacy e sicurezza → %@ Monitoraggio dell’input, fai clic sul pulsante %@ e scegli %@"
+            "value": "Apri %@ Privacy e sicurezza → %@ Monitoraggio input, fai clic sul pulsante %@ e scegli %@"
           }
         },
         "ja": {
@@ -15478,7 +15478,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open %@ Privacy en beveiliging → %@ Invoercontrole, klik op de knop %@ en kies %@"
+            "value": "Open %@ Privacy en beveiliging → %@ Invoer vastleggen, klik op de knop %@ en kies %@"
           }
         },
         "pl": {
@@ -15490,7 +15490,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abra %@ Privacidade e Segurança → %@ Monitoramento de Entrada, clique no botão %@ e escolha %@"
+            "value": "Abra %@ Privacidade e Segurança → %@ Monitoração de Entrada, clique no botão %@ e escolha %@"
           }
         },
         "ru": {
@@ -15554,7 +15554,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ Privacy & Security ← %@ System & App Protection Override را باز کنید"
+            "value": "‏%@ Privacy & Security ← %@ System & App Protection Override را باز کنید"
           }
         },
         "fr": {
@@ -15672,7 +15672,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ را با ‎⌃⌘Space و کلید %@ باز کنید."
+            "value": "‏%@ را با ‎⌃⌘Space و کلید %@ باز کنید."
           }
         },
         "fr": {
@@ -15908,13 +15908,13 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "פתח הגדרות"
+            "value": "פתיחת ההגדרות"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "सेटिंग खोलें"
+            "value": "सेटिंग्स खोलें"
           }
         },
         "it": {
@@ -17142,7 +17142,7 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "בחר אימוג'י או סמל"
+            "value": "בחירת אימוג'י או סמל"
           }
         },
         "hi": {
@@ -18815,7 +18815,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "ماشه دسترسی سریع"
+            "value": "محرک دسترسی سریع"
           }
         },
         "fr": {
@@ -19488,7 +19488,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ را از فهرست حذف کنید، دوباره اضافه کنید و روی «Override System Protections» کلیک کنید."
+            "value": "‏%@ را از فهرست حذف کنید، دوباره اضافه کنید و روی «Override System Protections» کلیک کنید."
           }
         },
         "fr": {
@@ -19612,7 +19612,7 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "הסר הכול"
+            "value": "הסרת הכול"
           }
         },
         "hi": {
@@ -24315,7 +24315,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "ماشه نمادها"
+            "value": "محرک نمادها"
           }
         },
         "fr": {
@@ -24357,7 +24357,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Symbool-trigger"
+            "value": "Symbooltrigger"
           }
         },
         "pl": {
@@ -26561,7 +26561,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "امتحان کنید ‎:smile را تایپ کنید"
+            "value": "‏تایپ ‎:smile را امتحان کنید"
           }
         },
         "fr": {
@@ -27285,13 +27285,13 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wpisz te aliasy, aby wstawić odpowiadające im emoji lub symbole. Działają obok wbudowanych skrótów."
+            "value": "Wpisz te aliasy, aby wstawić odpowiadające im emoji lub symbole. Działają obok wbudowanych kodów skrótowych."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Digite esses apelidos para inserir o emoji ou símbolo correspondente. Eles funcionam junto com os atalhos integrados."
+            "value": "Digite esses apelidos para inserir o emoji ou símbolo correspondente. Eles funcionam junto com os códigos curtos integrados."
           }
         },
         "ru": {
@@ -28926,7 +28926,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ چه چیزی را خودکار تکمیل کند؟"
+            "value": "‏%@ چه چیزی را خودکار تکمیل کند؟"
           }
         },
         "fr": {
@@ -29044,7 +29044,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pourquoi un outil d’emoji a-t-il besoin de ça ?"
+            "value": "Pourquoi un outil d’emoji a-t-il besoin de cette autorisation ?"
           }
         },
         "he": {
@@ -29710,7 +29710,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mac برای تأیید رمز عبور یا Touch ID را درخواست می‌کند."
+            "value": "‏Mac برای تأیید رمز عبور یا Touch ID را درخواست می‌کند."
           }
         },
         "fr": {
@@ -29782,7 +29782,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "你的 Mac 會要求輸入密碼或使用觸控 ID 進行確認。"
+            "value": "你的 Mac 會要求輸入密碼或使用Touch ID 進行確認。"
           }
         }
       }

@@ -1323,11 +1323,11 @@
     "Autocomplete `:emoji:` everywhere.": {
       "en-GB": "Autocomplete `:emoji:` everywhere.",
       "de": "`:emoji:` überall ergänzen.",
-      "es": "Autocompleta `:emoji:` siempre.",
-      "es-419": "Autocompleta `:emoji:` siempre.",
+      "es": "Autocompleta `:emoji:` donde sea.",
+      "es-419": "Autocompleta `:emoji:` donde sea.",
       "fr": "Autocomplétez `:emoji:` partout.",
       "it": "Autocompleta `:emoji:` ovunque.",
-      "pt-BR": "Autocompletar `:emoji:` sempre.",
+      "pt-BR": "Complete `:emoji:` em todo lugar.",
       "ja": "どこでも `:emoji:` を自動補完。",
       "zh-Hans": "随处自动补全 `:emoji:`。",
       "zh-Hant": "到處都能自動完成 `:emoji:`。",
@@ -1335,10 +1335,10 @@
       "hi": "हर जगह `:emoji:` ऑटोकम्प्लीट करें।",
       "ru": "Автодополнение `:emoji:` везде.",
       "pl": "Autouzupełniaj `:emoji:` wszędzie.",
-      "nl": "Autocomplete `:emoji:` overal.",
+      "nl": "Overal `:emoji:` aanvullen.",
       "ar": "الإكمال التلقائي لـ `:emoji:` في كل مكان.",
       "fa": "تکمیل خودکار `:emoji:` همه‌جا.",
-      "he": "השלמה אוטומטית של `:emoji:` בכל מקום."
+      "he": "השלמת `:emoji:` בכל מקום."
     },
     "Automatic updates": {
       "en-GB": "Automatic updates",
@@ -4617,7 +4617,7 @@
       "pl": "%@ nie widzi jeszcze Twojej klawiatury",
       "nl": "%@ kan je toetsenbord nog niet zien",
       "ar": "لا يستطيع %@ رؤية لوحة المفاتيح بعد",
-      "fa": "%@ هنوز نمی‌تواند صفحه‌کلید شما را ببیند",
+      "fa": "‏%@ هنوز نمی‌تواند صفحه‌کلید شما را ببیند",
       "he": "‏%@ עדיין לא יכול לראות את המקלדת שלך"
     },
     "%@ lives in your menu bar — give it a try:": {
@@ -4637,7 +4637,7 @@
       "pl": "%@ działa na pasku menu — wypróbuj:",
       "nl": "%@ zit in je menubalk — probeer het uit:",
       "ar": "يوجد %@ في شريط القوائم — جرّبه:",
-      "fa": "%@ در نوار منوی شما قرار دارد — امتحانش کنید:",
+      "fa": "‏%@ در نوار منوی شما قرار دارد — امتحانش کنید:",
       "he": "‏%@ נמצא בשורת התפריטים שלך — נסה אותו:"
     },
     "%@ needs your permission": {
@@ -4657,7 +4657,7 @@
       "pl": "%@ potrzebuje Twojej zgody",
       "nl": "%@ heeft je toestemming nodig",
       "ar": "يحتاج %@ إلى إذنك",
-      "fa": "%@ به اجازه شما نیاز دارد",
+      "fa": "‏%@ به اجازه شما نیاز دارد",
       "he": "‏%@ זקוק להרשאה שלך"
     },
     "%@ was added with Choose Apps, so it can't see your keyboard": {
@@ -4677,7 +4677,7 @@
       "pl": "%@ został dodany przez „Wybierz aplikacje”, więc nie widzi Twojej klawiatury",
       "nl": "%@ is toegevoegd met ‘Kies apps’ en kan je toetsenbord daarom niet zien",
       "ar": "تمت إضافة %@ عبر «اختيار التطبيقات»، لذا لا يستطيع رؤية لوحة المفاتيح",
-      "fa": "%@ با «Choose Apps» اضافه شده است، بنابراین نمی‌تواند صفحه‌کلید شما را ببیند",
+      "fa": "‏%@ با «Choose Apps» اضافه شده است، بنابراین نمی‌تواند صفحه‌کلید شما را ببیند",
       "he": "‏%@ נוסף דרך ״בחירת יישומים״, ולכן הוא לא יכול לראות את המקלדת שלך"
     },
     ":%@: already exists — adding updates its target.": {
@@ -4838,7 +4838,7 @@
       "nl": "Klik op alle rode OK-knoppen om de rode knop ‘Allow System & App Protection Override’ in te schakelen en klik erop",
       "ar": "انقر على جميع أزرار OK الحمراء لتفعيل الزر الأحمر «Allow System & App Protection Override»، ثم انقر عليه",
       "fa": "روی همه دکمه‌های قرمز OK کلیک کنید تا دکمه قرمز «Allow System & App Protection Override» فعال شود، سپس روی آن کلیک کنید",
-      "he": "לחץ על כל כפתורי OK האדומים כדי להפעיל את הכפתור האדום ‏Allow System & App Protection Override, ולחץ עליו"
+      "he": "לחץ על כל כפתורי OK האדומים כדי להפעיל את הכפתור האדום ״Allow System & App Protection Override״, ולחץ עליו"
     },
     "Click the %@ button at the bottom of the list and choose %@ in the file browser": {
       "en-GB": "Click the %@ button at the bottom of the list and choose %@ in the file browser",
@@ -4917,7 +4917,7 @@
       "pl": "Wyzwalacz emoji",
       "nl": "Emoji-trigger",
       "ar": "مُشغِّل الإيموجي",
-      "fa": "ماشه ایموجی",
+      "fa": "محرک ایموجی",
       "he": "טריגר אימוג'י"
     },
     "Funded by donations, not ads, tracking, or subscriptions.": {
@@ -4957,7 +4957,7 @@
       "pl": "Wyzwalacz GIF",
       "nl": "GIF-trigger",
       "ar": "مُشغِّل GIF",
-      "fa": "ماشه GIF",
+      "fa": "محرک GIF",
       "he": "טריגר GIF"
     },
     "It was added with Choose Apps. Remove %@ from the list, add it again, and choose Override System Protections.": {
@@ -4986,8 +4986,8 @@
       "es": "Cierra sesión y vuelve a iniciarla para terminar de ceder la tecla %@.",
       "es-419": "Cierra sesión y vuelve a iniciarla para terminar de ceder la tecla %@.",
       "fr": "Fermez la session puis rouvrez-la pour terminer le transfert de la touche %@.",
-      "it": "Esci e rientra per completare il passaggio del tasto %@.",
-      "pt-BR": "Saia e entre novamente para concluir a transferência da tecla %@.",
+      "it": "Esci dalla sessione e accedi di nuovo per completare il passaggio del tasto %@.",
+      "pt-BR": "Encerre a sessão e entre novamente para concluir a transferência da tecla %@.",
       "ja": "%@ キーの引き継ぎを完了するには、ログアウトしてもう一度ログインしてください。",
       "zh-Hans": "请退出登录后重新登录，以完成 %@ 键的移交。",
       "zh-Hant": "請登出後重新登入，以完成 %@ 鍵的移交。",
@@ -5006,8 +5006,8 @@
       "es": "Cierra sesión y vuelve a iniciarla para terminar de ceder la tecla %@ a Mojito.",
       "es-419": "Cierra sesión y vuelve a iniciarla para terminar de ceder la tecla %@ a Mojito.",
       "fr": "Fermez la session puis rouvrez-la pour terminer le transfert de la touche %@ à Mojito.",
-      "it": "Esci e rientra per completare il passaggio del tasto %@ a Mojito.",
-      "pt-BR": "Saia e entre novamente para concluir a transferência da tecla %@ para o Mojito.",
+      "it": "Esci dalla sessione e accedi di nuovo per completare il passaggio del tasto %@ a Mojito.",
+      "pt-BR": "Encerre a sessão e entre novamente para concluir a transferência da tecla %@ para o Mojito.",
       "ja": "%@ キーの Mojito への引き継ぎを完了するには、ログアウトしてもう一度ログインしてください。",
       "zh-Hans": "请退出登录后重新登录，以完成将 %@ 键移交给 Mojito。",
       "zh-Hant": "請登出後重新登入，以完成將 %@ 鍵移交給 Mojito。",
@@ -5043,11 +5043,11 @@
     "Open %@ Privacy & Security → %@ Input Monitoring, click the %@ button and choose %@": {
       "en-GB": "Open %@ Privacy & Security → %@ Input Monitoring, click the %@ button and choose %@",
       "de": "Öffne %@ Datenschutz & Sicherheit → %@ Eingabeüberwachung, klicke auf die Taste %@ und wähle %@ aus",
-      "es": "Abre %@ Privacidad y seguridad → %@ Monitorización de entrada, haz clic en el botón %@ y elige %@",
+      "es": "Abre %@ Privacidad y seguridad → %@ Monitorización de los dispositivos de entrada, haz clic en el botón %@ y elige %@",
       "es-419": "Abre %@ Privacidad y seguridad → %@ Monitoreo de entrada, haz clic en el botón %@ y elige %@",
-      "fr": "Ouvrez %@ Confidentialité et sécurité → %@ Surveillance des entrées, cliquez sur le bouton %@ et choisissez %@",
-      "it": "Apri %@ Privacy e sicurezza → %@ Monitoraggio dell’input, fai clic sul pulsante %@ e scegli %@",
-      "pt-BR": "Abra %@ Privacidade e Segurança → %@ Monitoramento de Entrada, clique no botão %@ e escolha %@",
+      "fr": "Ouvrez %@ Confidentialité et sécurité → %@ Surveillance de l’entrée, cliquez sur le bouton %@ et choisissez %@",
+      "it": "Apri %@ Privacy e sicurezza → %@ Monitoraggio input, fai clic sul pulsante %@ e scegli %@",
+      "pt-BR": "Abra %@ Privacidade e Segurança → %@ Monitoração de Entrada, clique no botão %@ e escolha %@",
       "ja": "%@ プライバシーとセキュリティ → %@ 入力監視 を開き、%@ ボタンをクリックして %@ を選択します",
       "zh-Hans": "打开 %@ 隐私与安全 → %@ 输入监控，点按 %@ 按钮并选择 %@",
       "zh-Hant": "打開 %@ 隱私權與安全性 → %@ 輸入監控，點按 %@ 按鈕並選擇 %@",
@@ -5055,9 +5055,9 @@
       "hi": "%@ गोपनीयता और सुरक्षा → %@ इनपुट मॉनिटरिंग खोलें, %@ बटन पर क्लिक करें और %@ चुनें",
       "ru": "Откройте %@ Конфиденциальность и безопасность → %@ Мониторинг ввода, нажмите кнопку %@ и выберите %@",
       "pl": "Otwórz %@ Prywatność i ochrona → %@ Monitorowanie wprowadzania, kliknij przycisk %@ i wybierz %@",
-      "nl": "Open %@ Privacy en beveiliging → %@ Invoercontrole, klik op de knop %@ en kies %@",
+      "nl": "Open %@ Privacy en beveiliging → %@ Invoer vastleggen, klik op de knop %@ en kies %@",
       "ar": "افتح %@ الخصوصية والأمن ← %@ مراقبة الإدخال، وانقر على الزر %@ ثم اختر %@",
-      "fa": "%@ Privacy & Security ← %@ نظارت بر ورودی را باز کنید، روی دکمه %@ کلیک کنید و %@ را انتخاب کنید",
+      "fa": "‏%@ Privacy & Security ← %@ Input Monitoring را باز کنید، روی دکمه %@ کلیک کنید و %@ را انتخاب کنید",
       "he": "פתח %@ פרטיות ואבטחה ← %@ ניטור קלט, לחץ על הכפתור %@ ובחר %@"
     },
     "Open %@ Privacy & Security → %@ System & App Protection Override": {
@@ -5077,7 +5077,7 @@
       "pl": "Otwórz %@ Prywatność i ochrona → %@ System & App Protection Override",
       "nl": "Open %@ Privacy en beveiliging → %@ System & App Protection Override",
       "ar": "افتح %@ الخصوصية والأمن ← %@ System & App Protection Override",
-      "fa": "%@ Privacy & Security ← %@ System & App Protection Override را باز کنید",
+      "fa": "‏%@ Privacy & Security ← %@ System & App Protection Override را باز کنید",
       "he": "פתח %@ פרטיות ואבטחה ← %@ System & App Protection Override"
     },
     "Open %@ on ⌃⌘Space and the %@ key.": {
@@ -5097,7 +5097,7 @@
       "pl": "Otwieraj %@ skrótem ⌃⌘Spacja i klawiszem %@.",
       "nl": "Open %@ met ⌃⌘Spatie en de %@-toets.",
       "ar": "افتح %@ بالضغط على ‎⌃⌘Space وعلى المفتاح %@.",
-      "fa": "%@ را با ‎⌃⌘Space و کلید %@ باز کنید.",
+      "fa": "‏%@ را با ‎⌃⌘Space و کلید %@ باز کنید.",
       "he": "פתח את %@ באמצעות ‎⌃⌘Space והמקש %@."
     },
     "Open Mojito on ⌃⌘Space instead of the macOS Emoji & Symbols panel, and turn on the Globe key": {
@@ -5132,13 +5132,13 @@
       "zh-Hans": "打开设置",
       "zh-Hant": "打開設定",
       "ko": "설정 열기",
-      "hi": "सेटिंग खोलें",
+      "hi": "सेटिंग्स खोलें",
       "ru": "Открыть настройки",
       "pl": "Otwórz ustawienia",
       "nl": "Open instellingen",
       "ar": "فتح الإعدادات",
       "fa": "باز کردن تنظیمات",
-      "he": "פתח הגדרות"
+      "he": "פתיחת ההגדרות"
     },
     "Pick an emoji or symbol": {
       "en-GB": "Pick an emoji or symbol",
@@ -5158,7 +5158,7 @@
       "nl": "Kies een emoji of symbool",
       "ar": "اختر إيموجي أو رمزًا",
       "fa": "یک ایموجی یا نماد انتخاب کنید",
-      "he": "בחר אימוג'י או סמל"
+      "he": "בחירת אימוג'י או סמל"
     },
     "Press %@ key to open Mojito": {
       "en-GB": "Press %@ key to open Mojito",
@@ -5197,7 +5197,7 @@
       "pl": "Wyzwalacz szybkiego dostępu",
       "nl": "Trigger voor snelle toegang",
       "ar": "مُشغِّل الوصول السريع",
-      "fa": "ماشه دسترسی سریع",
+      "fa": "محرک دسترسی سریع",
       "he": "טריגר גישה מהירה"
     },
     "Record Shortcut": {
@@ -5237,7 +5237,7 @@
       "pl": "Usuń %@ z listy, dodaj go ponownie i kliknij „Override System Protections”.",
       "nl": "Verwijder %@ uit de lijst, voeg het opnieuw toe en klik op ‘Override System Protections’.",
       "ar": "احذف %@ من القائمة، وأضفه مرة أخرى، ثم انقر على «Override System Protections».",
-      "fa": "%@ را از فهرست حذف کنید، دوباره اضافه کنید و روی «Override System Protections» کلیک کنید.",
+      "fa": "‏%@ را از فهرست حذف کنید، دوباره اضافه کنید و روی «Override System Protections» کلیک کنید.",
       "he": "הסר את %@ מהרשימה, הוסף אותו שוב ולחץ על ״Override System Protections״."
     },
     "Remove all": {
@@ -5258,7 +5258,7 @@
       "nl": "Verwijder alles",
       "ar": "إزالة الكل",
       "fa": "حذف همه",
-      "he": "הסר הכול"
+      "he": "הסרת הכול"
     },
     "Remove all aliases?": {
       "en-GB": "Remove all aliases?",
@@ -5375,9 +5375,9 @@
       "hi": "प्रतीक ट्रिगर",
       "ru": "Триггер символов",
       "pl": "Wyzwalacz symboli",
-      "nl": "Symbool-trigger",
+      "nl": "Symbooltrigger",
       "ar": "مُشغِّل الرموز",
-      "fa": "ماشه نمادها",
+      "fa": "محرک نمادها",
       "he": "טריגר סמלים"
     },
     "System & App Protection Override": {
@@ -5457,7 +5457,7 @@
       "pl": "Spróbuj wpisać :smile",
       "nl": "Probeer :smile te typen",
       "ar": "جرّب كتابة ‎:smile",
-      "fa": "امتحان کنید ‎:smile را تایپ کنید",
+      "fa": "‏تایپ ‎:smile را امتحان کنید",
       "he": "נסה להקליד ‎:smile"
     },
     "Type these aliases to insert their emoji or symbol. They work alongside the built-in shortcodes.": {
@@ -5467,14 +5467,14 @@
       "es-419": "Escribe estos alias para insertar su emoji o símbolo. Funcionan junto con los códigos cortos integrados.",
       "fr": "Saisissez ces alias pour insérer l’emoji ou le symbole associé. Ils s’ajoutent aux shortcodes intégrés.",
       "it": "Scrivi questi alias per inserire il relativo emoji o simbolo. Funzionano insieme agli shortcode integrati.",
-      "pt-BR": "Digite esses apelidos para inserir o emoji ou símbolo correspondente. Eles funcionam junto com os atalhos integrados.",
+      "pt-BR": "Digite esses apelidos para inserir o emoji ou símbolo correspondente. Eles funcionam junto com os códigos curtos integrados.",
       "ja": "このエイリアスを入力すると、対応する絵文字や記号を挿入できます。組み込みのショートコードと併用できます。",
       "zh-Hans": "输入这些别名即可插入对应的表情符号或符号，它们可与内置短代码一起使用。",
       "zh-Hant": "輸入這些別名即可插入對應的表情符號或符號，它們可與內建短碼一起使用。",
       "ko": "이 별칭을 입력하면 해당 이모지나 기호가 삽입됩니다. 기본 제공 숏코드와 함께 사용할 수 있어요.",
       "hi": "इन उपनामों को टाइप करके उनका इमोजी या प्रतीक डालें। ये अंतर्निहित शॉर्टकोड के साथ काम करते हैं।",
       "ru": "Вводите эти псевдонимы, чтобы вставлять соответствующие эмодзи или символы. Они работают вместе со встроенными шорткодами.",
-      "pl": "Wpisz te aliasy, aby wstawić odpowiadające im emoji lub symbole. Działają obok wbudowanych skrótów.",
+      "pl": "Wpisz te aliasy, aby wstawić odpowiadające im emoji lub symbole. Działają obok wbudowanych kodów skrótowych.",
       "nl": "Typ deze aliassen om de bijbehorende emoji of het bijbehorende symbool in te voegen. Ze werken naast de ingebouwde shortcodes.",
       "ar": "اكتب هذه الأسماء المستعارة لإدراج الإيموجي أو الرمز الخاص بها. تعمل إلى جانب الرموز المختصرة المدمجة.",
       "fa": "این نام‌های مستعار را تایپ کنید تا ایموجی یا نماد مربوط به آن‌ها درج شود. آن‌ها در کنار کدهای کوتاه داخلی کار می‌کنند.",
@@ -5517,7 +5517,7 @@
       "pl": "Co ma autouzupełniać %@?",
       "nl": "Wat moet %@ automatisch invullen?",
       "ar": "ماذا ينبغي أن يُكمل %@ تلقائيًا؟",
-      "fa": "%@ چه چیزی را خودکار تکمیل کند؟",
+      "fa": "‏%@ چه چیزی را خودکار تکمیل کند؟",
       "he": "מה %@ צריך להשלים אוטומטית?"
     },
     "Why does an emoji tool need this?": {
@@ -5525,7 +5525,7 @@
       "de": "Warum braucht ein Emoji-Tool das?",
       "es": "¿Por qué necesita esto una herramienta de emoji?",
       "es-419": "¿Por qué necesita esto una herramienta de emoji?",
-      "fr": "Pourquoi un outil d’emoji a-t-il besoin de ça ?",
+      "fr": "Pourquoi un outil d’emoji a-t-il besoin de cette autorisation ?",
       "it": "Perché serve a uno strumento per emoji?",
       "pt-BR": "Por que uma ferramenta de emoji precisa disso?",
       "ja": "絵文字ツールになぜこの権限が必要なのですか？",
@@ -5610,14 +5610,14 @@
       "pt-BR": "O Mac vai pedir sua senha ou o Touch ID para confirmar.",
       "ja": "確認のため、Mac がパスワードまたは Touch ID を求めます。",
       "zh-Hans": "你的 Mac 会要求输入密码或使用触控 ID 进行确认。",
-      "zh-Hant": "你的 Mac 會要求輸入密碼或使用觸控 ID 進行確認。",
+      "zh-Hant": "你的 Mac 會要求輸入密碼或使用Touch ID 進行確認。",
       "ko": "확인을 위해 Mac에서 암호 또는 Touch ID를 요청합니다.",
       "hi": "पुष्टि के लिए आपका Mac पासवर्ड या Touch ID माँगेगा।",
       "ru": "Для подтверждения Mac запросит пароль или Touch ID.",
       "pl": "Mac poprosi o hasło lub Touch ID w celu potwierdzenia.",
       "nl": "Je Mac vraagt om je wachtwoord of Touch ID ter bevestiging.",
       "ar": "سيطلب جهاز Mac كلمة المرور أو Touch ID للتأكيد.",
-      "fa": "Mac برای تأیید رمز عبور یا Touch ID را درخواست می‌کند.",
+      "fa": "‏Mac برای تأیید رمز عبور یا Touch ID را درخواست می‌کند.",
       "he": "ה-Mac יבקש את הסיסמה או Touch ID שלך לאישור."
     },
     "Your alias, e.g. check": {
@@ -5643,11 +5643,11 @@
     "Autocomplete `::symbols` everywhere.": {
       "en-GB": "Autocomplete `::symbols` everywhere.",
       "de": "`::symbols` überall ergänzen.",
-      "es": "Autocompleta `::symbols` siempre.",
-      "es-419": "Autocompleta `::symbols` siempre.",
+      "es": "Autocompleta `::symbols` donde sea.",
+      "es-419": "Autocompleta `::symbols` donde sea.",
       "fr": "Autocomplétez `::symbols` partout.",
       "it": "Autocompleta `::symbols` ovunque.",
-      "pt-BR": "Autocompletar `::symbols` sempre.",
+      "pt-BR": "Complete `::symbols` em todo lugar.",
       "ja": "どこでも `::symbols` を自動補完。",
       "zh-Hans": "随处自动补全 `::symbols`。",
       "zh-Hant": "到處都能自動完成 `::symbols`。",
@@ -5655,19 +5655,19 @@
       "hi": "हर जगह `::symbols` ऑटोकम्प्लीट करें।",
       "ru": "Автодополнение `::symbols` везде.",
       "pl": "Autouzupełniaj `::symbols` wszędzie.",
-      "nl": "Autocomplete `::symbols` overal.",
+      "nl": "Overal `::symbols` aanvullen.",
       "ar": "الإكمال التلقائي لـ `::symbols` في كل مكان.",
       "fa": "تکمیل خودکار `::symbols` همه‌جا.",
-      "he": "השלמה אוטומטית של `::symbols` בכל מקום."
+      "he": "השלמת `::symbols` בכל מקום."
     },
     "Autocomplete `:::gifs` everywhere.": {
       "en-GB": "Autocomplete `:::gifs` everywhere.",
       "de": "`:::gifs` überall ergänzen.",
-      "es": "Autocompleta `:::gifs` siempre.",
-      "es-419": "Autocompleta `:::gifs` siempre.",
+      "es": "Autocompleta `:::gifs` donde sea.",
+      "es-419": "Autocompleta `:::gifs` donde sea.",
       "fr": "Autocomplétez `:::gifs` partout.",
       "it": "Autocompleta `:::gifs` ovunque.",
-      "pt-BR": "Autocompletar `:::gifs` sempre.",
+      "pt-BR": "Complete `:::gifs` em todo lugar.",
       "ja": "どこでも `:::gifs` を自動補完。",
       "zh-Hans": "随处自动补全 `:::gifs`。",
       "zh-Hant": "到處都能自動完成 `:::gifs`。",
@@ -5675,10 +5675,10 @@
       "hi": "हर जगह `:::gifs` ऑटोकम्प्लीट करें।",
       "ru": "Автодополнение `:::gifs` везде.",
       "pl": "Autouzupełniaj `:::gifs` wszędzie.",
-      "nl": "Autocomplete `:::gifs` overal.",
+      "nl": "Overal `:::gifs` aanvullen.",
       "ar": "الإكمال التلقائي لـ `:::gifs` في كل مكان.",
       "fa": "تکمیل خودکار `:::gifs` همه‌جا.",
-      "he": "השלמה אוטומטית של `:::gifs` בכל מקום."
+      "he": "השלמת `:::gifs` בכל מקום."
     },
     "Emoji, symbols and GIFs in any text field on your Mac.": {
       "en-GB": "Emoji, symbols and GIFs in any text field on your Mac.",
