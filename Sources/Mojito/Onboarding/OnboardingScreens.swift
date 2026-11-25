@@ -484,8 +484,8 @@ struct FeaturesStep: View {
         VStack(spacing: OnboardingHeader.formSpacing) {
             OnboardingHeader(
                 systemImage: "switch.2",
-                title: "Choose what \(AppInfo.displayName) does",
-                subtitle: "Turn each feature on or off and pick the shortcut that starts it."
+                title: "What should \(AppInfo.displayName) autofill?",
+                subtitle: "You can also configure the trigger key if you'd like."
             )
             featureForm
             Spacer(minLength: 0)
