@@ -23,7 +23,7 @@ final class OnboardingWindowController {
         window.titlebarAppearsTransparent = true
         window.isMovableByWindowBackground = true
         // Size THEN center — `center()` uses current size for the origin.
-        window.setContentSize(NSSize(width: 600, height: 520))
+        window.setContentSize(OnboardingRoot.windowSize)
         window.center()
         window.delegate = OnboardingWindowDelegate.shared
         OnboardingWindowDelegate.shared.bind(controller: self)

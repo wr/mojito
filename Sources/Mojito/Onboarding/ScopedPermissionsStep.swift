@@ -26,7 +26,11 @@ struct ScopedPermissionsStep: View {
     private var plusIcon: Text { SettingsGlyph.inline("plus", fill: .quaternaryLabelColor, glyph: .labelColor) }
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 12) {
+            Image(systemName: "lock.shield")
+                .font(.system(size: 32))
+                .foregroundStyle(.tint)
+
             VStack(spacing: 6) {
                 Text("\(name) needs your permission")
                     .font(.system(size: 22, weight: .semibold))

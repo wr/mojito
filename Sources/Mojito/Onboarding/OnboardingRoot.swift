@@ -13,6 +13,9 @@ struct OnboardingRoot: View {
         var isLast: Bool { self == .done }
     }
 
+    /// Taller where the permissions step has to list every Settings click.
+    static let windowSize = NSSize(width: 600, height: ControlAccess.systemHasScopedGrants ? 580 : 520)
+
     @EnvironmentObject private var permissions: PermissionsCoordinator
     @State private var step: Step
     /// `.trailing` = forward, `.leading` = back.
@@ -61,7 +64,7 @@ struct OnboardingRoot: View {
                     .padding(.vertical, 20)
             }
         }
-        .frame(width: 600, height: 520)
+        .frame(width: Self.windowSize.width, height: Self.windowSize.height)
         .focusable()
         .focused($focused)
         .onAppear {
