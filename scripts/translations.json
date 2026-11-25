@@ -5699,6 +5699,26 @@
       "ar": "إيموجي ورموز وصور GIF في أي حقل نص على جهاز Mac.",
       "fa": "ایموجی، نماد و GIF در هر فیلد متنی روی Mac شما.",
       "he": "אימוג'י, סמלים ו-GIF בכל שדה טקסט ב-Mac שלך."
+    },
+    "GIFs": {
+      "en-GB": "GIFs",
+      "de": "GIFs",
+      "es": "GIFs",
+      "es-419": "GIFs",
+      "fr": "GIFs",
+      "it": "GIFs",
+      "pt-BR": "GIFs",
+      "ja": "GIF",
+      "zh-Hans": "GIF",
+      "zh-Hant": "GIF",
+      "ko": "GIF",
+      "hi": "GIF",
+      "ru": "GIF",
+      "pl": "GIFs",
+      "nl": "GIFs",
+      "ar": "GIF",
+      "fa": "GIF",
+      "he": "GIF"
     }
   }
 }
