@@ -150,7 +150,7 @@ struct ScopedPermissionsStep: View {
         actionTitle: LocalizedStringKey? = nil,
         action: (() -> Void)? = nil
     ) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             Group {
                 if done {
                     Image(systemName: "checkmark.circle.fill")
@@ -181,7 +181,6 @@ struct ScopedPermissionsStep: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .padding(.top, 2)
 
             Spacer(minLength: 0)
 
