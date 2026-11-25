@@ -20,17 +20,17 @@ struct ScopedPermissionsStep: View {
     private var added: Bool { control != .none }
     private var overridden: Bool { control == .full }
 
-    private var privacyIcon: Image { SettingsGlyph.image("hand.raised.fill", fill: .systemBlue) }
-    private var overrideIcon: Image { SettingsGlyph.image("square.2.layers.3d.fill", fill: .systemBlue) }
-    private var inputIcon: Image { SettingsGlyph.image("keyboard.fill", fill: .systemGray) }
-    private var plusIcon: Image { SettingsGlyph.image("plus", fill: .quaternaryLabelColor, glyph: .labelColor) }
+    private var privacyIcon: Text { SettingsGlyph.inline("hand.raised.fill", fill: .systemBlue) }
+    private var overrideIcon: Text { SettingsGlyph.inline("square.2.layers.3d.fill", fill: .systemBlue) }
+    private var inputIcon: Text { SettingsGlyph.inline("keyboard.fill", fill: .systemGray) }
+    private var plusIcon: Text { SettingsGlyph.inline("plus", fill: .quaternaryLabelColor, glyph: .labelColor) }
 
     var body: some View {
         VStack(spacing: 14) {
             VStack(spacing: 6) {
-                Text("Let \(name) work with your keyboard")
+                Text("\(name) needs your permission")
                     .font(.system(size: 22, weight: .semibold))
-                Text("macOS asks you to add \(name) by hand. It takes about a minute.")
+                Text("The steps below are required to use \(name).")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -122,9 +122,9 @@ struct ScopedPermissionsStep: View {
     }
 
     private func box<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 10) { content() }
+        VStack(alignment: .leading, spacing: 14) { content() }
             .padding(.horizontal, 14)
-            .padding(.vertical, 11)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(.background.secondary)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -184,28 +184,56 @@ struct ScopedPermissionsStep: View {
 }
 
 /// Small rounded-square icons in the style of System Settings' sidebar, as
-/// images so they can sit inline in a line of text.
+/// text runs so they can sit inline in a sentence.
 enum SettingsGlyph {
-    static func image(_ symbol: String, fill: NSColor, glyph: NSColor = .white) -> Image {
-        let side: CGFloat = 15
-        let image = NSImage(size: NSSize(width: side, height: side), flipped: false) { rect in
+    private static let side: CGFloat = 15
+
+    /// Sized and lowered to centre on the cap height of 13 pt system text.
+    static func inline(_ symbol: String, fill: NSColor, glyph: NSColor = .white) -> Text {
+        Text(Image(nsImage: image(symbol, fill: fill, glyph: glyph))).baselineOffset(-3)
+    }
+
+    /// Drawn into a 3x bitmap: an image inside a line of text isn't
+    /// re-rasterised for the display, so a 1x drawing comes out soft.
+    private static func image(_ symbol: String, fill: NSColor, glyph: NSColor) -> NSImage {
+        let scale: CGFloat = 3
+        let pixels = Int(side * scale)
+        let image = NSImage(size: NSSize(width: side, height: side))
+        guard let rep = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: pixels, pixelsHigh: pixels,
+            bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+            colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+        ) else { return image }
+        // Set before making the context so it draws in points, not pixels.
+        rep.size = image.size
+        guard let context = NSGraphicsContext(bitmapImageRep: rep) else { return image }
+
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = context
+        NSApp.effectiveAppearance.performAsCurrentDrawingAppearance {
+            let box = NSRect(x: 0, y: 0, width: side, height: side)
             fill.setFill()
-            NSBezierPath(roundedRect: rect, xRadius: 3.5, yRadius: 3.5).fill()
+            NSBezierPath(roundedRect: box, xRadius: 3.5, yRadius: 3.5).fill()
+
             let config = NSImage.SymbolConfiguration(pointSize: 9, weight: .semibold)
                 .applying(.init(paletteColors: [glyph]))
             if let mark = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
                 .withSymbolConfiguration(config) {
-                let size = mark.size
+                // Centre the visible glyph, not the image frame: symbol
+                // images carry uneven margins around the drawing.
+                let visible = mark.alignmentRect
                 mark.draw(in: NSRect(
-                    x: (side - size.width) / 2,
-                    y: (side - size.height) / 2,
-                    width: size.width,
-                    height: size.height
+                    x: box.midX - visible.midX,
+                    y: box.midY - visible.midY,
+                    width: mark.size.width,
+                    height: mark.size.height
                 ))
             }
-            return true
         }
-        return Image(nsImage: image)
+        NSGraphicsContext.restoreGraphicsState()
+
+        image.addRepresentation(rep)
+        return image
     }
 }
 
