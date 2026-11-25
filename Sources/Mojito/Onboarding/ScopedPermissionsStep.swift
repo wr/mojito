@@ -41,7 +41,7 @@ struct ScopedPermissionsStep: View {
             }
 
             VStack(spacing: 8) {
-                box {
+                box(done: overridden) {
                     step(
                         1,
                         done: added || openedControlSettings,
@@ -80,7 +80,7 @@ struct ScopedPermissionsStep: View {
                         detail: "Your Mac will ask for your password or Touch ID to confirm."
                     )
                 }
-                box {
+                box(done: inputMonitoringGranted) {
                     step(
                         5,
                         done: inputMonitoringGranted,
@@ -125,13 +125,20 @@ struct ScopedPermissionsStep: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { AppRelauncher.relaunch() }
     }
 
-    private func box<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+    private func box<Content: View>(done: Bool, @ViewBuilder _ content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 14) { content() }
             .padding(.horizontal, 14)
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.background.secondary)
+            .background {
+                if done {
+                    Color.green.opacity(0.14)
+                } else {
+                    Rectangle().fill(.background.secondary)
+                }
+            }
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .animation(.easeInOut(duration: 0.25), value: done)
     }
 
     private func step(
