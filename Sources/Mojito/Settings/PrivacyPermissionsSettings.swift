@@ -11,16 +11,31 @@ struct PrivacyPermissionsSettingsView: View {
             // Permissions first — the actionable rows. Privacy
             // explanation below since it's read-once.
             Section("Permissions") {
-                permissionRow(
-                    title: "Accessibility",
-                    detail: "Anchors the picker next to your text cursor.",
-                    granted: permissions.accessibility,
-                    onAction: handleAccessibility
-                )
+                if ControlAccess.systemHasScopedGrants {
+                    if permissions.control == .limited {
+                        LimitedAccessNotice(openSettings: permissions.openAccessibilitySettings)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 6, bottom: 6, trailing: 6))
+                    }
+                    permissionRow(
+                        title: "System & App Protection Override",
+                        detail: "Watches for triggers, finds your text cursor and types the emoji.",
+                        granted: permissions.control.isUsable,
+                        actionTitle: "Open Settings",
+                        onAction: permissions.openAccessibilitySettings
+                    )
+                } else {
+                    permissionRow(
+                        title: "Accessibility",
+                        detail: "Anchors the picker next to your text cursor.",
+                        granted: permissions.accessibility,
+                        onAction: handleAccessibility
+                    )
+                }
                 permissionRow(
                     title: "Input Monitoring",
                     detail: "Watches keystrokes for the `:` trigger.",
                     granted: permissions.inputMonitoring,
+                    actionTitle: ControlAccess.systemHasScopedGrants ? "Open Settings" : "Allow",
                     onAction: handleInputMonitoring
                 )
             }
@@ -38,6 +53,7 @@ struct PrivacyPermissionsSettingsView: View {
         title: LocalizedStringKey,
         detail: LocalizedStringKey,
         granted: Bool,
+        actionTitle: LocalizedStringKey = "Allow",
         onAction: @escaping () -> Void
     ) -> some View {
         HStack(alignment: .center, spacing: 12) {
@@ -54,7 +70,7 @@ struct PrivacyPermissionsSettingsView: View {
                     .font(.system(size: 18))
                     .foregroundStyle(.green)
             } else {
-                Button("Allow", action: onAction)
+                Button(actionTitle, action: onAction)
             }
         }
         .padding(.vertical, 2)
@@ -72,7 +88,9 @@ struct PrivacyPermissionsSettingsView: View {
     }
 
     private func handleInputMonitoring() {
-        if imPromptFired {
+        if imPromptFired || ControlAccess.systemHasScopedGrants {
+            // Scoped systems show no dialog; asking can still add the row.
+            if !imPromptFired { _ = permissions.promptInputMonitoring(); imPromptFired = true }
             permissions.openInputMonitoringSettings()
         } else {
             _ = permissions.promptInputMonitoring()
@@ -86,6 +104,13 @@ struct PrivacyPermissionsSettingsView: View {
 /// Shared between Settings → Privacy and the onboarding "Privacy details…" sheet.
 struct PrivacyDetailsRows: View {
     var body: some View {
+        if ControlAccess.systemHasScopedGrants {
+            privacyRow(
+                icon: "exclamationmark.shield",
+                title: "Why macOS warns you",
+                detail: "To watch for triggers and type emoji, \(AppInfo.displayName) needs the same permission that lets an app control your Mac. macOS warns about every app that asks for it."
+            )
+        }
         privacyRow(
             icon: "keyboard",
             title: "Keystrokes aren't logged",
@@ -98,8 +123,8 @@ struct PrivacyDetailsRows: View {
         )
         privacyRow(
             icon: "dollarsign.circle",
-            title: "Funded by donations",
-            detail: "No ads, tracking, or subscriptions."
+            title: "You are not the product",
+            detail: "Funded by donations, not ads, tracking, or subscriptions."
         ) {
             Button("Donate") {
                 NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsworkshop")!)
@@ -152,21 +177,13 @@ struct PrivacyDetailsSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 18) {
-                Image(systemName: "hand.raised.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(.tint)
-                    .padding(.top, 24)
-
-                VStack(spacing: 6) {
-                    Text("Privacy")
-                        .font(.system(size: 22, weight: .semibold))
-                    Text("\(AppInfo.displayName) is built to respect your privacy. Here's how.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 420)
-                }
+            VStack(spacing: OnboardingHeader.formSpacing) {
+                OnboardingHeader(
+                    systemImage: "hand.raised.fill",
+                    title: "Privacy",
+                    subtitle: "\(AppInfo.displayName) is built to respect your privacy. Here's how."
+                )
+                .padding(.top, 28)
 
                 Form {
                     PrivacyDetailsRows()
@@ -180,7 +197,6 @@ struct PrivacyDetailsSheet: View {
                     .toggleStyle(.switch)
                 }
                 .formStyle(.grouped)
-                .scrollDisabled(true)
             }
 
             HStack {
@@ -191,11 +207,18 @@ struct PrivacyDetailsSheet: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
         }
-        .frame(width: 500, height: 560)
+        .frame(width: 500, height: ControlAccess.systemHasScopedGrants ? 620 : 560)
         .onAppear {
             // Seeing the privacy sheet (with the stats toggle + anonymity
             // explanation) satisfies the one-time stats-consent gate.
             UserDefaults.standard.set(true, forKey: PrefsKey.telemetryConsentSeen)
+            // The sheet otherwise opens with a focus ring on its first
+            // button, which reads as a suggestion to press it. Tab still
+            // reaches every control.
+            DispatchQueue.main.async {
+                let window = NSApp.keyWindow?.attachedSheet ?? NSApp.keyWindow
+                window?.makeFirstResponder(nil)
+            }
         }
     }
 }

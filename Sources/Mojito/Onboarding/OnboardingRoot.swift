@@ -13,6 +13,8 @@ struct OnboardingRoot: View {
         var isLast: Bool { self == .done }
     }
 
+    static let windowSize = NSSize(width: 600, height: 620)
+
     @EnvironmentObject private var permissions: PermissionsCoordinator
     @State private var step: Step
     /// `.trailing` = forward, `.leading` = back.
@@ -61,7 +63,7 @@ struct OnboardingRoot: View {
                     .padding(.vertical, 20)
             }
         }
-        .frame(width: 600, height: 520)
+        .frame(width: Self.windowSize.width, height: Self.windowSize.height)
         .focusable()
         .focused($focused)
         .onAppear {
@@ -83,6 +85,18 @@ struct OnboardingRoot: View {
         case .welcome:           WelcomeStep()
         case .features:          FeaturesStep()
         case .permissions:
+            if ControlAccess.systemHasScopedGrants {
+                ScopedPermissionsStep(
+                    control: permissions.control,
+                    inputMonitoringGranted: permissions.inputMonitoring,
+                    openControlSettings: permissions.openAccessibilitySettings,
+                    openInputMonitoringSettings: {
+                        // Asking first can add the row to the list.
+                        _ = permissions.promptInputMonitoring()
+                        permissions.openInputMonitoringSettings()
+                    }
+                )
+            } else {
             PermissionsStep(
                 accessibilityGranted: permissions.accessibility,
                 inputMonitoringGranted: permissions.inputMonitoring,
@@ -91,6 +105,7 @@ struct OnboardingRoot: View {
                 openAccessibilitySettings: permissions.openAccessibilitySettings,
                 openInputMonitoringSettings: permissions.openInputMonitoringSettings
             )
+            }
         case .done:              DoneStep()
         }
     }
@@ -149,7 +164,7 @@ struct OnboardingRoot: View {
 
     private var primaryEnabled: Bool {
         switch step {
-        case .permissions: return permissions.accessibility && permissions.inputMonitoring
+        case .permissions: return permissions.control == .full && permissions.inputMonitoring
         default:           return true
         }
     }

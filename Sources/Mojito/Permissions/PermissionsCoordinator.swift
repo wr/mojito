@@ -7,6 +7,12 @@ import IOKit.hid
 final class PermissionsCoordinator: ObservableObject {
     @Published private(set) var accessibility = false
     @Published private(set) var inputMonitoring = false
+    @Published private(set) var control: ControlAccess = .none
+
+    private let trustedAtLaunch = AXIsProcessTrusted()
+    private let canPostAtLaunch = CGPreflightPostEventAccess()
+    private var trustChangedSinceLaunch = false
+    private var keysArriving = false
 
     private var timer: Timer?
     private var distributedObserver: NSObjectProtocol?
@@ -75,6 +81,19 @@ final class PermissionsCoordinator: ObservableObject {
     func refresh() {
         let ax = AXIsProcessTrusted()
         let im = checkInputMonitoring()
+        if ax != trustedAtLaunch { trustChangedSinceLaunch = true }
+        if !ax { keysArriving = false }
+        let resolved = ControlAccess.resolve(
+            trusted: ax,
+            scopedGrants: ControlAccess.systemHasScopedGrants,
+            launchReadingValid: trustedAtLaunch && !trustChangedSinceLaunch,
+            canPostAtLaunch: canPostAtLaunch,
+            keysArriving: keysArriving
+        )
+        if resolved != control {
+            control = resolved
+            DebugRecorder.record(.permissions, "control", ["state": "\(resolved)"])
+        }
         if ax != accessibility {
             accessibility = ax
             DebugRecorder.record(.permissions, ax ? "axGranted" : "axRevoked")
@@ -100,6 +119,18 @@ final class PermissionsCoordinator: ObservableObject {
     }
 
     var allGranted: Bool { accessibility && inputMonitoring }
+
+    /// True when setup has something to fix. A limited grant still counts as
+    /// `allGranted` so the key tap runs and can prove the reading wrong.
+    var needsSetup: Bool { !allGranted || control == .limited }
+
+    /// A real key came through the event tap, which only happens with full
+    /// access.
+    func confirmKeysArriving() {
+        guard !keysArriving else { return }
+        keysArriving = true
+        refresh()
+    }
 
     /// Fires the system prompt the first time. Returns true if already
     /// trusted, false otherwise.

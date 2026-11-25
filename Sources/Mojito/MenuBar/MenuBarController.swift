@@ -257,7 +257,7 @@ final class MenuBarController {
 
     private func statusTitle() -> NSAttributedString {
         let active = engine?.isActive ?? false
-        let permissionsOK = (permissions?.allGranted) ?? false
+        let permissionsOK = !((permissions?.needsSetup) ?? true)
         let name = AppInfo.displayName
         let title: String = {
             if !permissionsOK { return String(localized: "\(name) needs permission") }

@@ -465,6 +465,9 @@ final class Engine: ObservableObject, KeyMonitorDelegate {
         }
         if !monitor.isRunning {
             monitor.delegate = self
+            monitor.onFirstKey = { [weak self] in
+                MainActor.assumeIsolated { self?.permissions?.confirmKeysArriving() }
+            }
             if monitor.start() {
                 isActive = true
             }
