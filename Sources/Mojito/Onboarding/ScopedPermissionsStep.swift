@@ -33,74 +33,80 @@ struct ScopedPermissionsStep: View {
                 subtitle: "The steps below are required to use \(name)."
             )
 
-            VStack(spacing: 8) {
-                box(done: overridden) {
-                    step(
-                        1,
-                        done: added || openedControlSettings,
-                        title: "Open \(privacyIcon) Privacy & Security → \(overrideIcon) System & App Protection Override",
-                        actionTitle: overridden ? nil : "Open Settings",
-                        action: {
-                            openedControlSettings = true
-                            openControlSettings()
-                        }
-                    )
-                    step(
-                        2,
-                        done: added,
-                        title: "Click the \(plusIcon) button at the bottom of the list and choose \(name) in the file browser"
-                    )
-                    if control == .limited {
+            // Scrolls only if a translation or the limited-access warning
+            // outgrows the fixed window; normally everything fits.
+            ScrollView {
+                VStack(spacing: OnboardingHeader.contentSpacing) {
+                VStack(spacing: 8) {
+                    box(done: overridden) {
                         step(
-                            3,
-                            done: false,
-                            warning: true,
-                            title: "\(name) was added with Choose Apps, so it can't see your keyboard",
-                            detail: "Remove \(name) from the list, add it again, and click Override System Protections."
+                            1,
+                            done: added || openedControlSettings,
+                            title: "Open \(privacyIcon) Privacy & Security → \(overrideIcon) System & App Protection Override",
+                            actionTitle: overridden ? nil : "Open Settings",
+                            action: {
+                                openedControlSettings = true
+                                openControlSettings()
+                            }
                         )
-                    } else {
                         step(
-                            3,
+                            2,
+                            done: added,
+                            title: "Click the \(plusIcon) button at the bottom of the list and choose \(name) in the file browser"
+                        )
+                        if control == .limited {
+                            step(
+                                3,
+                                done: false,
+                                warning: true,
+                                title: "\(name) was added with Choose Apps, so it can't see your keyboard",
+                                detail: "Remove \(name) from the list, add it again, and click Override System Protections."
+                            )
+                        } else {
+                            step(
+                                3,
+                                done: overridden,
+                                title: "Click the Override System Protections button",
+                                detail: "Don't click Choose Apps — \(name) will not work with app-level permissions."
+                            )
+                        }
+                        step(
+                            4,
                             done: overridden,
-                            title: "Click the Override System Protections button",
-                            detail: "Don't click Choose Apps — \(name) will not work with app-level permissions."
+                            title: "Click all of the red OK buttons to enable the red Allow System & App Protection Override button, and click it",
+                            detail: "Your Mac will ask for your password or Touch ID to confirm."
                         )
                     }
-                    step(
-                        4,
-                        done: overridden,
-                        title: "Click all of the red OK buttons to enable the red Allow System & App Protection Override button, and click it",
-                        detail: "Your Mac will ask for your password or Touch ID to confirm."
-                    )
+                    box(done: inputMonitoringGranted) {
+                        step(
+                            5,
+                            done: inputMonitoringGranted,
+                            title: "Open \(privacyIcon) Privacy & Security → \(inputIcon) Input Monitoring, click the \(plusIcon) button and choose \(name)",
+                            actionTitle: inputMonitoringGranted ? nil : "Open Settings",
+                            action: openInputMonitoringSettings
+                        )
+                    }
                 }
-                box(done: inputMonitoringGranted) {
-                    step(
-                        5,
-                        done: inputMonitoringGranted,
-                        title: "Open \(privacyIcon) Privacy & Security → \(inputIcon) Input Monitoring, click the \(plusIcon) button and choose \(name)",
-                        actionTitle: inputMonitoringGranted ? nil : "Open Settings",
-                        action: openInputMonitoringSettings
-                    )
-                }
-            }
 
-            Group {
-            if relaunching {
-                HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
-                    Text("Reopening \(name) to finish…")
-                        .foregroundStyle(.secondary)
-                }
-                .font(.system(size: 13))
-            } else {
-                Button("Why does an emoji tool need this?") { showPrivacyDetails = true }
-                    .buttonStyle(.link)
+                Group {
+                if relaunching {
+                    HStack(spacing: 6) {
+                        ProgressView().controlSize(.small)
+                        Text("Reopening \(name) to finish…")
+                            .foregroundStyle(.secondary)
+                    }
                     .font(.system(size: 13))
+                } else {
+                    Button("Why does an emoji tool need this?") { showPrivacyDetails = true }
+                        .buttonStyle(.link)
+                        .font(.system(size: 13))
+                }
+                }
+                .padding(.top, -8)
+                }
             }
-            }
-            .padding(.top, -8)
-
-            Spacer(minLength: 0)
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.automatic)
         }
         .sheet(isPresented: $showPrivacyDetails) {
             PrivacyDetailsSheet()
@@ -122,7 +128,7 @@ struct ScopedPermissionsStep: View {
     }
 
     private func box<Content: View>(done: Bool, @ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 14) { content() }
+        VStack(alignment: .leading, spacing: 18) { content() }
             .padding(.horizontal, 14)
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity, alignment: .leading)

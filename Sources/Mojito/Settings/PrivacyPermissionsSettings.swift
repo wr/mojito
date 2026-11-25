@@ -212,6 +212,13 @@ struct PrivacyDetailsSheet: View {
             // Seeing the privacy sheet (with the stats toggle + anonymity
             // explanation) satisfies the one-time stats-consent gate.
             UserDefaults.standard.set(true, forKey: PrefsKey.telemetryConsentSeen)
+            // The sheet otherwise opens with a focus ring on its first
+            // button, which reads as a suggestion to press it. Tab still
+            // reaches every control.
+            DispatchQueue.main.async {
+                let window = NSApp.keyWindow?.attachedSheet ?? NSApp.keyWindow
+                window?.makeFirstResponder(nil)
+            }
         }
     }
 }
