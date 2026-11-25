@@ -4059,7 +4059,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "`:::gifs` überall automatisch vervollständigen."
+            "value": "`:::gifs` überall ergänzen."
           }
         },
         "en-GB": {
@@ -4071,13 +4071,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `:::gifs` en todas partes."
+            "value": "Autocompleta `:::gifs` siempre."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `:::gifs` en todas partes."
+            "value": "Autocompleta `:::gifs` siempre."
           }
         },
         "fa": {
@@ -4107,7 +4107,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Completamento automatico di `:::gifs` ovunque."
+            "value": "Autocompleta `:::gifs` ovunque."
           }
         },
         "ja": {
@@ -4131,19 +4131,19 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autouzupełnianie `:::gifs` wszędzie."
+            "value": "Autouzupełniaj `:::gifs` wszędzie."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompletar `:::gifs` em qualquer lugar."
+            "value": "Autocompletar `:::gifs` sempre."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Автодополнение `:::gifs` где угодно."
+            "value": "Автодополнение `:::gifs` везде."
           }
         },
         "zh-Hans": {
@@ -4171,7 +4171,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "`::symbols` überall automatisch vervollständigen."
+            "value": "`::symbols` überall ergänzen."
           }
         },
         "en-GB": {
@@ -4183,13 +4183,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `::symbols` en todas partes."
+            "value": "Autocompleta `::symbols` siempre."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `::symbols` en todas partes."
+            "value": "Autocompleta `::symbols` siempre."
           }
         },
         "fa": {
@@ -4219,7 +4219,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Completamento automatico di `::symbols` ovunque."
+            "value": "Autocompleta `::symbols` ovunque."
           }
         },
         "ja": {
@@ -4243,19 +4243,19 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autouzupełnianie `::symbols` wszędzie."
+            "value": "Autouzupełniaj `::symbols` wszędzie."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompletar `::symbols` em qualquer lugar."
+            "value": "Autocompletar `::symbols` sempre."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Автодополнение `::symbols` где угодно."
+            "value": "Автодополнение `::symbols` везде."
           }
         },
         "zh-Hans": {
@@ -4283,7 +4283,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "`:emoji:` überall automatisch vervollständigen."
+            "value": "`:emoji:` überall ergänzen."
           }
         },
         "en-GB": {
@@ -4295,13 +4295,13 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `:emoji:` en todas partes."
+            "value": "Autocompleta `:emoji:` siempre."
           }
         },
         "es-419": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompleta `:emoji:` en todas partes."
+            "value": "Autocompleta `:emoji:` siempre."
           }
         },
         "fa": {
@@ -4331,7 +4331,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Completamento automatico di `:emoji:` ovunque."
+            "value": "Autocompleta `:emoji:` ovunque."
           }
         },
         "ja": {
@@ -4355,19 +4355,19 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autouzupełnianie `:emoji:` wszędzie."
+            "value": "Autouzupełniaj `:emoji:` wszędzie."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Autocompletar `:emoji:` em qualquer lugar."
+            "value": "Autocompletar `:emoji:` sempre."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Автодополнение `:emoji:` где угодно."
+            "value": "Автодополнение `:emoji:` везде."
           }
         },
         "zh-Hans": {
