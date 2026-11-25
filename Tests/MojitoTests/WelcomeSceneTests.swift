@@ -20,10 +20,15 @@ struct WelcomeSceneTests {
         }
     }
 
-    @Test func gifScenesCarryTilesAndInsertNoText() {
-        for scene in WelcomeScene.script where scene.act == .gifs {
+    @Test func gifScenesInsertNoTextAndEveryTileIsBundled() {
+        let scenes = WelcomeScene.script.filter { $0.act == .gifs }
+        #expect(!scenes.isEmpty)
+        for scene in scenes {
             #expect(scene.result.isEmpty)
             #expect(scene.tiles.count == 6)
+            for tile in scene.tiles {
+                #expect(WelcomeScene.gifURL(tile) != nil, "missing \(tile).gif")
+            }
         }
     }
 

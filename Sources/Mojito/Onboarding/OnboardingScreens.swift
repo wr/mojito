@@ -40,22 +40,26 @@ struct WelcomeScene: Equatable {
     let query: String
     /// Inserted on commit. Empty for GIFs, which show a tile instead.
     let result: String
-    /// Stand-ins for GIF results; the demo never touches the network.
+    /// Bundled GIFs shown as results (resource names, no extension), so the
+    /// demo never touches the network. The first one is the one chosen.
     var tiles: [String] = []
 
     /// Plays once, ending on emoji so the resting screen shows the default
     /// feature.
     static let script: [WelcomeScene] = [
-        WelcomeScene(act: .emoji,   prefix: "Just shipped a new app ", query: "rocket", result: "🚀"),
+        WelcomeScene(act: .emoji,   prefix: "Just shipped a new app ", query: "rocket",  result: "🚀"),
         WelcomeScene(act: .symbols, prefix: "Press ",                  query: "command", result: "⌘"),
-        WelcomeScene(act: .gifs,    prefix: "we should celebrate ",    query: "party",  result: "",
-                     tiles: ["🥳", "🎉", "🪩", "🎊", "🕺", "🍾"]),
-        WelcomeScene(act: .emoji,   prefix: "see you soon ",           query: "wave",   result: "👋"),
-        WelcomeScene(act: .symbols, prefix: "Rated ",                  query: "star",   result: "★"),
-        WelcomeScene(act: .gifs,    prefix: "it finally works ",       query: "yes",    result: "",
-                     tiles: ["🙌", "💃", "🎯", "🤩", "👏", "🔥"]),
-        WelcomeScene(act: .emoji,   prefix: "fix the ",                query: "bug",    result: "🐛"),
+        WelcomeScene(act: .gifs,    prefix: "so ready for tonight ",   query: "sponge",  result: "",
+                     tiles: ["spongebob-woot", "spongebob-grin", "spongebob-smug",
+                             "spongebob-omfg", "spongebob-band", "spongebob-crowd"]),
+        WelcomeScene(act: .emoji,   prefix: "see you soon ",           query: "wave",    result: "👋"),
+        WelcomeScene(act: .symbols, prefix: "Rated ",                  query: "star",    result: "★"),
+        WelcomeScene(act: .emoji,   prefix: "fix the ",                query: "bug",     result: "🐛"),
     ]
+
+    static func gifURL(_ name: String) -> URL? {
+        Bundle.main.url(forResource: name, withExtension: "gif")
+    }
 }
 
 struct WelcomeStep: View {
@@ -111,7 +115,7 @@ struct WelcomeStep: View {
             .accessibilityHidden(true)
 
             WelcomeAnimation(act: $act)
-                .frame(height: 270)
+                .frame(height: 280)
 
             Spacer(minLength: 0)
         }
@@ -166,8 +170,8 @@ private struct WelcomeAnimation: View {
             .shadow(color: Color.black.opacity(0.10), radius: 14, x: 0, y: 4)
 
             if gifTileVisible, let tile = scene.tiles.first {
-                WelcomeGifTile(symbol: tile, selected: false)
-                    .frame(width: 64, height: 48)
+                WelcomeGifTile(name: tile, selected: false)
+                    .frame(width: 48, height: 48)
                     .offset(x: caretRectInBubble.maxX + 6, y: max(14, caretRectInBubble.minY - 2))
                     .transition(.scale(scale: 0.6).combined(with: .opacity))
             }
@@ -190,7 +194,7 @@ private struct WelcomeAnimation: View {
                 .allowsHitTesting(false)
             }
         }
-        .frame(width: Self.bubbleWidth, height: 270, alignment: .topLeading)
+        .frame(width: Self.bubbleWidth, height: 280, alignment: .topLeading)
         .animation(.easeOut(duration: 0.10), value: pickerVisible)
         .animation(.spring(duration: 0.25), value: gifTileVisible)
         .task {
@@ -272,8 +276,8 @@ private struct WelcomeAnimation: View {
     }
 }
 
-/// Stand-in for the GIF picker's results. Locally drawn so the first screen
-/// makes no network request and ships no third-party media.
+/// The GIF picker's results, drawn from bundled files so the first screen
+/// makes no network request.
 private struct WelcomeGifResults: View {
     let query: String
     let tiles: [String]
@@ -290,9 +294,9 @@ private struct WelcomeGifResults: View {
             .padding(.horizontal, 4)
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 3), spacing: 5) {
-                ForEach(Array(tiles.enumerated()), id: \.offset) { index, tile in
-                    WelcomeGifTile(symbol: tile, selected: index == 0)
-                        .aspectRatio(4 / 3, contentMode: .fit)
+                ForEach(tiles, id: \.self) { tile in
+                    WelcomeGifTile(name: tile, selected: tile == tiles.first)
+                        .aspectRatio(1, contentMode: .fit)
                 }
             }
         }
@@ -301,28 +305,15 @@ private struct WelcomeGifResults: View {
 }
 
 private struct WelcomeGifTile: View {
-    let symbol: String
+    let name: String
     let selected: Bool
-    @State private var up = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 6, style: .continuous)
-            .fill(Color.accentColor.opacity(0.14))
-            .overlay(
-                Text(symbol)
-                    .font(.system(size: 24))
-                    .offset(y: up ? -3 : 2)
-                    .rotationEffect(.degrees(up ? 7 : -4))
-            )
+        AnimatedGifView(url: WelcomeScene.gifURL(name), cornerRadius: 6)
             .overlay(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .strokeBorder(Color.accentColor, lineWidth: selected ? 2 : 0)
             )
-            .onAppear {
-                guard !reduceMotion else { return }
-                withAnimation(.easeInOut(duration: 0.55).repeatForever(autoreverses: true)) { up = true }
-            }
     }
 }
 
