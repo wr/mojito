@@ -31703,6 +31703,345 @@
           }
         }
       }
+    },
+    "Autocomplete `::symbols` everywhere.": {
+      "extractionState": "stale",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocomplete `::symbols` everywhere."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`::symbols` überall automatisch vervollständigen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocompleta `::symbols` en todas partes."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocompleta `::symbols` en todas partes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocomplétez `::symbols` partout."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completamento automatico di `::symbols` ovunque."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocompletar `::symbols` em qualquer lugar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "どこでも `::symbols` を自動補完。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随处自动补全 `::symbols`。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "到處都能自動完成 `::symbols`。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어디서나 `::symbols` 자동 완성."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हर जगह `::symbols` ऑटोकम्प्लीट करें।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автодополнение `::symbols` где угодно."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autouzupełnianie `::symbols` wszędzie."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocomplete `::symbols` overal."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإكمال التلقائي لـ `::symbols` في كل مكان."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تکمیل خودکار `::symbols` همه‌جا."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "השלמה אוטומטית של `::symbols` בכל מקום."
+          }
+        }
+      }
+    },
+    "Autocomplete `:::gifs` everywhere.": {
+      "extractionState": "stale",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocomplete `:::gifs` everywhere."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "`:::gifs` überall automatisch vervollständigen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocompleta `:::gifs` en todas partes."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocompleta `:::gifs` en todas partes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocomplétez `:::gifs` partout."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completamento automatico di `:::gifs` ovunque."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocompletar `:::gifs` em qualquer lugar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "どこでも `:::gifs` を自動補完。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随处自动补全 `:::gifs`。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "到處都能自動完成 `:::gifs`。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어디서나 `:::gifs` 자동 완성."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हर जगह `:::gifs` ऑटोकम्प्लीट करें।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автодополнение `:::gifs` где угодно."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autouzupełnianie `:::gifs` wszędzie."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocomplete `:::gifs` overal."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإكمال التلقائي لـ `:::gifs` في كل مكان."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تکمیل خودکار `:::gifs` همه‌جا."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "השלמה אוטומטית של `:::gifs` בכל מקום."
+          }
+        }
+      }
+    },
+    "Emoji, symbols and GIFs in any text field on your Mac.": {
+      "extractionState": "stale",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji, symbols and GIFs in any text field on your Mac."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji, Symbole und GIFs in jedem Textfeld auf deinem Mac."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji, símbolos y GIF en cualquier campo de texto de tu Mac."
+          }
+        },
+        "es-419": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji, símbolos y GIF en cualquier campo de texto de tu Mac."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Des emoji, des symboles et des GIF dans n’importe quel champ de texte de votre Mac."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji, simboli e GIF in qualsiasi campo di testo del Mac."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji, símbolos e GIFs em qualquer campo de texto do seu Mac."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac のあらゆるテキストフィールドで、絵文字・記号・GIF を。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Mac 的任何文本栏中输入表情符号、符号和 GIF。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Mac 的任何文字欄位中輸入表情符號、符號和 GIF。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac의 모든 텍스트 필드에서 이모지, 기호, GIF를 사용하세요."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपके Mac के किसी भी टेक्स्ट फ़ील्ड में इमोजी, प्रतीक और GIF।"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эмодзи, символы и GIF в любом текстовом поле на вашем Mac."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji, symbole i GIF-y w każdym polu tekstowym na Twoim Macu."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji, symbolen en GIF’s in elk tekstveld op je Mac."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إيموجي ورموز وصور GIF في أي حقل نص على جهاز Mac."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ایموجی، نماد و GIF در هر فیلد متنی روی Mac شما."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אימוג'י, סמלים ו-GIF בכל שדה טקסט ב-Mac שלך."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
