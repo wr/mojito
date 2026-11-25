@@ -483,7 +483,7 @@ struct FeaturesStep: View {
     var body: some View {
         VStack(spacing: OnboardingHeader.formSpacing) {
             OnboardingHeader(
-                systemImage: "switch.2",
+                systemImage: "character.cursor.ibeam",
                 title: "What should \(AppInfo.displayName) autofill?",
                 subtitle: "You can also configure the trigger key if you'd like."
             )
