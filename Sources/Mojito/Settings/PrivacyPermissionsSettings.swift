@@ -11,16 +11,31 @@ struct PrivacyPermissionsSettingsView: View {
             // Permissions first — the actionable rows. Privacy
             // explanation below since it's read-once.
             Section("Permissions") {
-                permissionRow(
-                    title: "Accessibility",
-                    detail: "Anchors the picker next to your text cursor.",
-                    granted: permissions.accessibility,
-                    onAction: handleAccessibility
-                )
+                if ControlAccess.systemHasScopedGrants {
+                    if permissions.control == .limited {
+                        LimitedAccessNotice(openSettings: permissions.openAccessibilitySettings)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 6, bottom: 6, trailing: 6))
+                    }
+                    permissionRow(
+                        title: "System & App Protection Override",
+                        detail: "Watches for triggers, finds your text cursor and types the emoji.",
+                        granted: permissions.control.isUsable,
+                        actionTitle: "Open Settings",
+                        onAction: permissions.openAccessibilitySettings
+                    )
+                } else {
+                    permissionRow(
+                        title: "Accessibility",
+                        detail: "Anchors the picker next to your text cursor.",
+                        granted: permissions.accessibility,
+                        onAction: handleAccessibility
+                    )
+                }
                 permissionRow(
                     title: "Input Monitoring",
                     detail: "Watches keystrokes for the `:` trigger.",
                     granted: permissions.inputMonitoring,
+                    actionTitle: ControlAccess.systemHasScopedGrants ? "Open Settings" : "Allow",
                     onAction: handleInputMonitoring
                 )
             }
@@ -38,6 +53,7 @@ struct PrivacyPermissionsSettingsView: View {
         title: LocalizedStringKey,
         detail: LocalizedStringKey,
         granted: Bool,
+        actionTitle: LocalizedStringKey = "Allow",
         onAction: @escaping () -> Void
     ) -> some View {
         HStack(alignment: .center, spacing: 12) {
@@ -54,7 +70,7 @@ struct PrivacyPermissionsSettingsView: View {
                     .font(.system(size: 18))
                     .foregroundStyle(.green)
             } else {
-                Button("Allow", action: onAction)
+                Button(actionTitle, action: onAction)
             }
         }
         .padding(.vertical, 2)
@@ -72,7 +88,9 @@ struct PrivacyPermissionsSettingsView: View {
     }
 
     private func handleInputMonitoring() {
-        if imPromptFired {
+        if imPromptFired || ControlAccess.systemHasScopedGrants {
+            // Scoped systems show no dialog; asking can still add the row.
+            if !imPromptFired { _ = permissions.promptInputMonitoring(); imPromptFired = true }
             permissions.openInputMonitoringSettings()
         } else {
             _ = permissions.promptInputMonitoring()
@@ -86,6 +104,13 @@ struct PrivacyPermissionsSettingsView: View {
 /// Shared between Settings → Privacy and the onboarding "Privacy details…" sheet.
 struct PrivacyDetailsRows: View {
     var body: some View {
+        if ControlAccess.systemHasScopedGrants {
+            privacyRow(
+                icon: "exclamationmark.shield",
+                title: "Why macOS warns you",
+                detail: "macOS says \(AppInfo.displayName) can control your Mac and monitor what you do. \(AppInfo.displayName) uses that access to watch for triggers as you type, find your text cursor and type the emoji. A blue icon in the menu bar lists \(AppInfo.displayName) while it runs."
+            )
+        }
         privacyRow(
             icon: "keyboard",
             title: "Keystrokes aren't logged",

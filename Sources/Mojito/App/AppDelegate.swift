@@ -99,9 +99,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         // Force onboarding any time permissions aren't granted — revoked
         // perms / fresh accounts get the guided fix, not a silent break.
         let needsOnboarding = !UserDefaults.standard.bool(forKey: PrefsKey.onboardingComplete)
-            || !permissions.allGranted
+            || permissions.needsSetup
         if needsOnboarding {
             openOnboarding()
+            // A limited reading is an inference. Run the tap anyway so a key
+            // arriving through it can correct the state.
+            if permissions.control == .limited { engine.start() }
         } else {
             engine.start()
             TelemetryConsent.presentIfNeeded()
@@ -209,7 +212,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         guard !flag else { return true }
         let onboardingComplete = UserDefaults.standard.bool(forKey: PrefsKey.onboardingComplete)
-        if onboardingComplete && permissions.allGranted {
+        if onboardingComplete && !permissions.needsSetup {
             openSettings()
         } else {
             openOnboarding()

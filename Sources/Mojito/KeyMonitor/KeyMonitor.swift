@@ -24,6 +24,10 @@ final class KeyMonitor {
     private var runLoopSource: CFRunLoopSource?
     private(set) var isRunning = false
 
+    /// Called once per `start()`, on the first real key the tap delivers.
+    var onFirstKey: (() -> Void)?
+    private var sawKey = false
+
     /// Lone Globe/Fn-tap detection: fn-down then fn-up within the threshold
     /// with no key pressed in between. `nil` timestamp = no press in flight.
     private var fnDownTimestamp: CGEventTimestamp?
@@ -62,6 +66,7 @@ final class KeyMonitor {
         self.eventTap = tap
         self.runLoopSource = source
         self.isRunning = true
+        self.sawKey = false
         DebugRecorder.record(.keyMonitor, "tapStart")
         return true
     }
@@ -94,6 +99,10 @@ final class KeyMonitor {
             DebugRecorder.record(.keyMonitor, "tapLost", ["reason": type == .tapDisabledByTimeout ? "timeout" : "userInput"])
             delegate?.keyMonitorDidLoseTap(self)
             return Unmanaged.passUnretained(event)
+        }
+        if !sawKey, type == .keyDown {
+            sawKey = true
+            onFirstKey?()
         }
         if type == .flagsChanged {
             handleFlagsChanged(event)
