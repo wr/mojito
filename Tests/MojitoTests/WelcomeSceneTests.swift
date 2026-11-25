@@ -32,7 +32,9 @@ struct WelcomeSceneTests {
         }
     }
 
-    @Test func scriptEndsOnEmoji() {
-        #expect(WelcomeScene.script.last?.act == .emoji)
+    @Test func everyPartAppearsInTheScript() {
+        for act in WelcomeAct.allCases {
+            #expect(WelcomeScene.script.contains { $0.act == act })
+        }
     }
 }

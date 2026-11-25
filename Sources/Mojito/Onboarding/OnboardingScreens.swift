@@ -40,21 +40,22 @@ struct WelcomeScene: Equatable {
     let query: String
     /// Inserted on commit. Empty for GIFs, which show a tile instead.
     let result: String
+    /// Typed after the result, so the line reads as a finished sentence.
+    var suffix: String = ""
     /// Bundled GIFs shown as results (resource names, no extension), so the
     /// demo never touches the network. The first one is the one chosen.
     var tiles: [String] = []
 
-    /// Plays once, ending on emoji so the resting screen shows the default
-    /// feature.
+    /// Loops for as long as the welcome screen is open.
     static let script: [WelcomeScene] = [
-        WelcomeScene(act: .emoji,   prefix: "Just shipped a new app ", query: "rocket",  result: "🚀"),
-        WelcomeScene(act: .symbols, prefix: "Press ",                  query: "command", result: "⌘"),
+        WelcomeScene(act: .emoji,   prefix: "Just shipped a new app ", query: "rocket",  result: "🚀", suffix: " and it works"),
+        WelcomeScene(act: .symbols, prefix: "Press ",                  query: "command", result: "⌘", suffix: "K to search"),
         WelcomeScene(act: .gifs,    prefix: "so ready for tonight ",   query: "sponge",  result: "",
                      tiles: ["spongebob-woot", "spongebob-grin", "spongebob-smug",
                              "spongebob-omfg", "spongebob-band", "spongebob-crowd"]),
-        WelcomeScene(act: .emoji,   prefix: "see you soon ",           query: "wave",    result: "👋"),
-        WelcomeScene(act: .symbols, prefix: "Rated ",                  query: "star",    result: "★"),
-        WelcomeScene(act: .emoji,   prefix: "fix the ",                query: "bug",     result: "🐛"),
+        WelcomeScene(act: .emoji,   prefix: "see you soon ",           query: "wave",    result: "👋", suffix: " same time tomorrow"),
+        WelcomeScene(act: .symbols, prefix: "Rated ",                  query: "star",    result: "★", suffix: "★★★★ would type again"),
+        WelcomeScene(act: .emoji,   prefix: "fix the ",                query: "bug",     result: "🐛", suffix: " before lunch"),
     ]
 
     static func gifURL(_ name: String) -> URL? {
@@ -64,6 +65,8 @@ struct WelcomeScene: Equatable {
 
 struct WelcomeStep: View {
     @State private var act: WelcomeAct = .emoji
+    /// Set by a click on a label; the demo jumps to that part.
+    @State private var jump: WelcomeJump?
 
     /// Colours the trigger word, which the localized title marks as code.
     private static func tinted(_ title: String.LocalizationValue) -> AttributedString {
@@ -97,24 +100,30 @@ struct WelcomeStep: View {
 
             HStack(spacing: 6) {
                 ForEach(WelcomeAct.allCases, id: \.self) { item in
-                    HStack(spacing: 5) {
-                        Text(item.label)
-                        Text(item.trigger)
-                            .font(.system(size: 12, design: .monospaced))
-                            .opacity(0.7)
+                    Button {
+                        jump = WelcomeJump(act: item)
+                    } label: {
+                        HStack(spacing: 5) {
+                            Text(item.label)
+                            Text(item.trigger)
+                                .font(.system(size: 12, design: .monospaced))
+                                .opacity(0.7)
+                        }
+                        .font(.system(size: 12))
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 4)
+                        .foregroundStyle(item == act ? Color.accentColor : Color.secondary)
+                        .background(
+                            Capsule().fill(item == act ? Color.accentColor.opacity(0.14) : Color.clear)
+                        )
+                        .contentShape(Capsule())
                     }
-                    .font(.system(size: 12))
-                    .padding(.horizontal, 11)
-                    .padding(.vertical, 4)
-                    .foregroundStyle(item == act ? Color.accentColor : Color.secondary)
-                    .background(
-                        Capsule().fill(item == act ? Color.accentColor.opacity(0.14) : Color.clear)
-                    )
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(item == act ? .isSelected : [])
                 }
             }
-            .accessibilityHidden(true)
 
-            WelcomeAnimation(act: $act)
+            WelcomeAnimation(act: $act, jump: jump)
                 .frame(height: 280)
 
             Spacer(minLength: 0)
@@ -123,15 +132,25 @@ struct WelcomeStep: View {
     }
 }
 
+/// A request to play one part of the demo. A fresh value each click, so
+/// clicking the part that is already playing restarts it.
+struct WelcomeJump: Equatable {
+    let act: WelcomeAct
+    let id = UUID()
+}
+
 /// Real `NSTextView` + the production `PickerView` so the demo renders
 /// through the same pipeline as the real app. State changes poke the
 /// NSTextView programmatically.
 private struct WelcomeAnimation: View {
     @Binding var act: WelcomeAct
+    let jump: WelcomeJump?
 
     private let scenes = WelcomeScene.script
 
     @State private var sceneIndex: Int = 0
+    /// Bumped to (re)start the scene at `sceneIndex`, including the same one.
+    @State private var run: Int = 0
     /// Visible text excluding the typed trigger and query.
     @State private var committedText: String = ""
     @State private var queryText: String = ""
@@ -143,16 +162,15 @@ private struct WelcomeAnimation: View {
     @State private var pickerVisible: Bool = false
     @State private var gifTileVisible: Bool = false
     @State private var caretRectInBubble: CGRect = .zero
-    /// True once the script has played. Drops the text view's first-responder
-    /// status so the OS caret stops blinking — every blink invalidates
-    /// the bubble region and is the main steady-state CPU cost.
-    @State private var animationStopped: Bool = false
     /// The symbol sweep is slow and blocks whoever touches it first, so it is
     /// built off the main thread and symbol scenes wait for it.
     @State private var symbolsReady: Bool = false
 
     private var scene: WelcomeScene { scenes[sceneIndex] }
     private static let bubbleWidth: CGFloat = 460
+    /// Tall enough for a line of text with a chosen GIF under it.
+    private static let bubbleHeight: CGFloat = 150
+    private static let gifSide: CGFloat = 96
     private static let pickerWidth: CGFloat = 280
 
     var body: some View {
@@ -162,17 +180,17 @@ private struct WelcomeAnimation: View {
                 queryText: queryText,
                 commitEmoji: pendingCommit,
                 caretRect: $caretRectInBubble,
-                showCaret: !animationStopped
+                showCaret: true
             )
-            .frame(width: Self.bubbleWidth, height: 88)
+            .frame(width: Self.bubbleWidth, height: Self.bubbleHeight)
             // Solid bubble — translucent would sample whatever's behind
             // the onboarding window (desktop, other apps).
             .shadow(color: Color.black.opacity(0.10), radius: 14, x: 0, y: 4)
 
             if gifTileVisible, let tile = scene.tiles.first {
                 WelcomeGifTile(name: tile, selected: false)
-                    .frame(width: 48, height: 48)
-                    .offset(x: caretRectInBubble.maxX + 6, y: max(14, caretRectInBubble.minY - 2))
+                    .frame(width: Self.gifSide, height: Self.gifSide)
+                    .offset(x: 16, y: caretRectInBubble.maxY + 8)
                     .transition(.scale(scale: 0.6).combined(with: .opacity))
             }
 
@@ -201,21 +219,43 @@ private struct WelcomeAnimation: View {
             await Task.detached(priority: .utility) { _ = SymbolsDatabase.byHexcode }.value
             symbolsReady = true
         }
-        .task(id: sceneIndex) { await runScene() }
+        .task(id: run) { await runScene() }
+        .onChange(of: jump) { _, new in
+            guard let new, let index = scenes.firstIndex(where: { $0.act == new.act }) else { return }
+            sceneIndex = index
+            run += 1
+        }
     }
 
     // MARK: - Animation loop
 
+    /// Sleeps, and reports whether the scene should keep going. A click on a
+    /// label cancels the running scene, and a cancelled sleep returns at once,
+    /// so every step has to check before touching state again.
+    private func pause(_ milliseconds: Int) async -> Bool {
+        try? await Task.sleep(for: .milliseconds(milliseconds))
+        return !Task.isCancelled
+    }
+
+    private func typingDelay(after character: Character) -> Int {
+        Int.random(in: 22...55) + (character == " " ? Int.random(in: 12...32) : 0)
+    }
+
     @MainActor
     private func runScene() async {
-        if animationStopped { return }
-
-        // Skip rather than stall the main thread on the symbol sweep.
+        // Never stall the main thread on the symbol sweep: wait if this part
+        // was asked for, otherwise skip it.
         if scene.act == .symbols && !symbolsReady {
-            advance()
-            return
+            guard jump?.act == .symbols else {
+                advance()
+                return
+            }
+            while !symbolsReady {
+                guard await pause(100) else { return }
+            }
         }
 
+        let scene = scene
         act = scene.act
         committedText = ""
         queryText = ""
@@ -224,23 +264,20 @@ private struct WelcomeAnimation: View {
         gifTileVisible = false
         pickerViewModel.update(query: "", results: [])
 
-        try? await Task.sleep(for: .milliseconds(260))
+        guard await pause(260) else { return }
 
         let prefixChars = Array(scene.prefix)
         for i in 1...prefixChars.count {
             committedText = String(prefixChars.prefix(i))
-            let last = prefixChars[i - 1]
-            let base = Int.random(in: 22...55)
-            let wordBreakBonus = (last == " ") ? Int.random(in: 12...32) : 0
-            try? await Task.sleep(for: .milliseconds(base + wordBreakBonus))
+            guard await pause(typingDelay(after: prefixChars[i - 1])) else { return }
         }
 
-        try? await Task.sleep(for: .milliseconds(80))
+        guard await pause(80) else { return }
 
         let trigger = scene.act.trigger
         for i in 1...trigger.count {
             queryText = String(trigger.prefix(i))
-            try? await Task.sleep(for: .milliseconds(90))
+            guard await pause(90) else { return }
         }
 
         pickerVisible = true
@@ -251,10 +288,10 @@ private struct WelcomeAnimation: View {
             if scene.act != .gifs {
                 pickerViewModel.update(query: q, results: WelcomeFuzzyCache.shared.results(for: q, act: scene.act))
             }
-            try? await Task.sleep(for: .milliseconds(Int.random(in: 50...95)))
+            guard await pause(Int.random(in: 50...95)) else { return }
         }
 
-        try? await Task.sleep(for: .milliseconds(scene.act == .gifs ? 700 : 260))
+        guard await pause(scene.act == .gifs ? 700 : 260) else { return }
 
         pendingCommit = scene.result
         queryText = ""
@@ -262,17 +299,22 @@ private struct WelcomeAnimation: View {
         pickerVisible = false
         gifTileVisible = scene.act == .gifs
 
-        try? await Task.sleep(for: .milliseconds(1300))
-        if Task.isCancelled { return }
+        if !scene.suffix.isEmpty {
+            guard await pause(320) else { return }
+            let suffixChars = Array(scene.suffix)
+            for i in 1...suffixChars.count {
+                committedText = scene.prefix + scene.result + String(suffixChars.prefix(i))
+                guard await pause(typingDelay(after: suffixChars[i - 1])) else { return }
+            }
+        }
+
+        guard await pause(scene.act == .gifs ? 2200 : 1500) else { return }
         advance()
     }
 
     private func advance() {
-        if sceneIndex + 1 >= scenes.count {
-            animationStopped = true
-        } else {
-            sceneIndex += 1
-        }
+        sceneIndex = (sceneIndex + 1) % scenes.count
+        run += 1
     }
 }
 
