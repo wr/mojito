@@ -177,21 +177,13 @@ struct PrivacyDetailsSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 12) {
-                Image(systemName: "hand.raised.fill")
-                    .font(.system(size: 28))
-                    .foregroundStyle(.tint)
-                    .padding(.top, 12)
-
-                VStack(spacing: 6) {
-                    Text("Privacy")
-                        .font(.system(size: 22, weight: .semibold))
-                    Text("\(AppInfo.displayName) is built to respect your privacy. Here's how.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 420)
-                }
+            VStack(spacing: OnboardingHeader.formSpacing) {
+                OnboardingHeader(
+                    systemImage: "hand.raised.fill",
+                    title: "Privacy",
+                    subtitle: "\(AppInfo.displayName) is built to respect your privacy. Here's how."
+                )
+                .padding(.top, 28)
 
                 Form {
                     PrivacyDetailsRows()
@@ -215,7 +207,7 @@ struct PrivacyDetailsSheet: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
         }
-        .frame(width: 500, height: ControlAccess.systemHasScopedGrants ? 590 : 560)
+        .frame(width: 500, height: ControlAccess.systemHasScopedGrants ? 620 : 560)
         .onAppear {
             // Seeing the privacy sheet (with the stats toggle + anonymity
             // explanation) satisfies the one-time stats-consent gate.

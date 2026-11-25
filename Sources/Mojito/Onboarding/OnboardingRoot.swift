@@ -13,8 +13,7 @@ struct OnboardingRoot: View {
         var isLast: Bool { self == .done }
     }
 
-    /// Taller where the permissions step has to list every Settings click.
-    static let windowSize = NSSize(width: 600, height: ControlAccess.systemHasScopedGrants ? 580 : 520)
+    static let windowSize = NSSize(width: 600, height: 620)
 
     @EnvironmentObject private var permissions: PermissionsCoordinator
     @State private var step: Step

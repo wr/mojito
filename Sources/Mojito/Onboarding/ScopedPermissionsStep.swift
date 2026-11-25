@@ -26,19 +26,12 @@ struct ScopedPermissionsStep: View {
     private var plusIcon: Text { SettingsGlyph.inline("plus", fill: .quaternaryLabelColor, glyph: .labelColor) }
 
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "lock.shield")
-                .font(.system(size: 32))
-                .foregroundStyle(.tint)
-
-            VStack(spacing: 6) {
-                Text("\(name) needs your permission")
-                    .font(.system(size: 22, weight: .semibold))
-                Text("The steps below are required to use \(name).")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
+        VStack(spacing: OnboardingHeader.contentSpacing) {
+            OnboardingHeader(
+                systemImage: "lock.shield",
+                title: "\(name) needs your permission",
+                subtitle: "The steps below are required to use \(name)."
+            )
 
             VStack(spacing: 8) {
                 box(done: overridden) {
@@ -91,6 +84,7 @@ struct ScopedPermissionsStep: View {
                 }
             }
 
+            Group {
             if relaunching {
                 HStack(spacing: 6) {
                     ProgressView().controlSize(.small)
@@ -103,6 +97,8 @@ struct ScopedPermissionsStep: View {
                     .buttonStyle(.link)
                     .font(.system(size: 13))
             }
+            }
+            .padding(.top, -8)
 
             Spacer(minLength: 0)
         }

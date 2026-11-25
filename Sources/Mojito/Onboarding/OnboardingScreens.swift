@@ -481,6 +481,18 @@ struct FeaturesStep: View {
     }
 
     var body: some View {
+        VStack(spacing: OnboardingHeader.formSpacing) {
+            OnboardingHeader(
+                systemImage: "switch.2",
+                title: "Choose what \(AppInfo.displayName) does",
+                subtitle: "Turn each feature on or off and pick the shortcut that starts it."
+            )
+            featureForm
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var featureForm: some View {
         Form {
             Section {
                 SettingsSectionHeader(
