@@ -41,7 +41,7 @@ struct ScopedPermissionsStep: View {
                     step(
                         1,
                         done: added || openedControlSettings,
-                        title: "Open \(privacyIcon) **Privacy & Security** → \(overrideIcon) **System & App Protection Override**",
+                        title: "Open \(privacyIcon) Privacy & Security → \(overrideIcon) System & App Protection Override",
                         actionTitle: overridden ? nil : "Open Settings",
                         action: {
                             openedControlSettings = true
@@ -51,28 +51,28 @@ struct ScopedPermissionsStep: View {
                     step(
                         2,
                         done: added,
-                        title: "Click the \(plusIcon) button at the bottom of the list and choose **\(name)** in the file browser"
+                        title: "Click the \(plusIcon) button at the bottom of the list and choose \(name) in the file browser"
                     )
                     if control == .limited {
                         step(
                             3,
                             done: false,
                             warning: true,
-                            title: "\(name) was added with **Choose Apps**, so it can't see your keyboard",
-                            detail: "Remove \(name) from the list, add it again, and click **Override System Protections**."
+                            title: "\(name) was added with Choose Apps, so it can't see your keyboard",
+                            detail: "Remove \(name) from the list, add it again, and click Override System Protections."
                         )
                     } else {
                         step(
                             3,
                             done: overridden,
-                            title: "Click the **Override System Protections** button",
-                            detail: "Don't click **Choose Apps** — \(name) will not work with app-level permissions."
+                            title: "Click the Override System Protections button",
+                            detail: "Don't click Choose Apps — \(name) will not work with app-level permissions."
                         )
                     }
                     step(
                         4,
                         done: overridden,
-                        title: "Click all of the red **OK** buttons to enable the red **Allow System & App Protection Override** button, and click it",
+                        title: "Click all of the red OK buttons to enable the red Allow System & App Protection Override button, and click it",
                         detail: "Your Mac will ask for your password or Touch ID to confirm."
                     )
                 }
@@ -80,7 +80,7 @@ struct ScopedPermissionsStep: View {
                     step(
                         5,
                         done: inputMonitoringGranted,
-                        title: "Turn on **\(name)** under \(privacyIcon) **Privacy & Security** → \(inputIcon) **Input Monitoring**",
+                        title: "Turn on \(name) under \(privacyIcon) Privacy & Security → \(inputIcon) Input Monitoring",
                         actionTitle: inputMonitoringGranted ? nil : "Open Settings",
                         action: openInputMonitoringSettings
                     )
