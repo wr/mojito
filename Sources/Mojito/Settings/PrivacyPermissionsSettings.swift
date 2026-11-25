@@ -108,7 +108,7 @@ struct PrivacyDetailsRows: View {
             privacyRow(
                 icon: "exclamationmark.shield",
                 title: "Why macOS warns you",
-                detail: "macOS says \(AppInfo.displayName) can control your Mac and monitor what you do. \(AppInfo.displayName) uses that access to watch for triggers as you type, find your text cursor and type the emoji. A blue icon in the menu bar lists \(AppInfo.displayName) while it runs."
+                detail: "\(AppInfo.displayName) only watches for triggers and types the emoji. A blue menu bar icon lists it while it runs."
             )
         }
         privacyRow(
@@ -123,8 +123,8 @@ struct PrivacyDetailsRows: View {
         )
         privacyRow(
             icon: "dollarsign.circle",
-            title: "Funded by donations",
-            detail: "No ads, tracking, or subscriptions."
+            title: "You are not the product",
+            detail: "Funded by donations, not ads, tracking, or subscriptions."
         ) {
             Button("Donate") {
                 NSWorkspace.shared.open(URL(string: "https://buymeacoffee.com/wellsworkshop")!)
@@ -177,11 +177,11 @@ struct PrivacyDetailsSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 18) {
+            VStack(spacing: 12) {
                 Image(systemName: "hand.raised.fill")
-                    .font(.system(size: 44))
+                    .font(.system(size: 28))
                     .foregroundStyle(.tint)
-                    .padding(.top, 24)
+                    .padding(.top, 12)
 
                 VStack(spacing: 6) {
                     Text("Privacy")
@@ -205,7 +205,6 @@ struct PrivacyDetailsSheet: View {
                     .toggleStyle(.switch)
                 }
                 .formStyle(.grouped)
-                .scrollDisabled(true)
             }
 
             HStack {
@@ -216,7 +215,7 @@ struct PrivacyDetailsSheet: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 14)
         }
-        .frame(width: 500, height: 560)
+        .frame(width: 500, height: ControlAccess.systemHasScopedGrants ? 590 : 560)
         .onAppear {
             // Seeing the privacy sheet (with the stats toggle + anonymity
             // explanation) satisfies the one-time stats-consent gate.
