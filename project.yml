@@ -90,6 +90,9 @@ targets:
       # Text("…") literal into this on build.
       - path: Resources/Localizable.xcstrings
         buildPhase: resources
+      # GIFs played by the welcome screen's demo.
+      - path: Resources/WelcomeGifs
+        buildPhase: resources
       # Opaque-named effect assets. Names don't reveal their content; see
       # the Bundle.url(forResource:) call sites in Sources/Mojito/App/ for
       # which file is which.

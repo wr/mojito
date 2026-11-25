@@ -2,66 +2,176 @@ import SwiftUI
 
 // MARK: - Welcome
 
-struct WelcomeStep: View {
-    var body: some View {
-        VStack(spacing: 20) {
-            VStack(spacing: 6) {
-                Text("Autocomplete `:emoji:` everywhere.")
-                    .font(.system(size: 28, weight: .semibold))
-                Text("Type `:` to search for any emoji or symbol in seconds.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 440)
-            }
-            .padding(.top, 4)
+/// What the welcome demo is showing. Uses the default triggers: this screen
+/// comes before the one where they can be changed.
+enum WelcomeAct: Int, CaseIterable {
+    case emoji, symbols, gifs
 
-            WelcomeAnimation()
+    var trigger: String {
+        switch self {
+        case .emoji:   return TriggerConfig.default.emoji.open
+        case .symbols: return TriggerConfig.default.symbols.open
+        case .gifs:    return TriggerConfig.default.gif.open
+        }
+    }
+
+    var label: LocalizedStringKey {
+        switch self {
+        case .emoji:   return "Emoji"
+        case .symbols: return "Symbols"
+        case .gifs:    return "GIFs"
+        }
+    }
+
+    var title: String.LocalizationValue {
+        switch self {
+        case .emoji:   return "Autocomplete `:emoji:` everywhere."
+        case .symbols: return "Autocomplete `::symbols` everywhere."
+        case .gifs:    return "Autocomplete `:::gifs` everywhere."
+        }
+    }
+}
+
+/// One line of the welcome demo.
+struct WelcomeScene: Equatable {
+    let act: WelcomeAct
+    let prefix: String
+    /// Typed after the trigger.
+    let query: String
+    /// Inserted on commit. Empty for GIFs, which show a tile instead.
+    let result: String
+    /// Typed after the result, so the line reads as a finished sentence.
+    var suffix: String = ""
+    /// Bundled GIFs shown as results (resource names, no extension), so the
+    /// demo never touches the network. The first one is the one chosen.
+    var tiles: [String] = []
+
+    /// Loops for as long as the welcome screen is open.
+    static let script: [WelcomeScene] = [
+        WelcomeScene(act: .emoji,   prefix: "Just shipped a new app ", query: "rocket",  result: "🚀", suffix: " and it works"),
+        WelcomeScene(act: .symbols, prefix: "Press ",                  query: "command", result: "⌘", suffix: "K to search"),
+        WelcomeScene(act: .gifs,    prefix: "so ready for tonight ",   query: "sponge",  result: "",
+                     tiles: ["spongebob-woot", "spongebob-grin", "spongebob-smug",
+                             "spongebob-omfg", "spongebob-band", "spongebob-crowd"]),
+        WelcomeScene(act: .emoji,   prefix: "see you soon ",           query: "wave",    result: "👋", suffix: " same time tomorrow"),
+        WelcomeScene(act: .symbols, prefix: "Rated ",                  query: "star",    result: "★", suffix: "★★★★ would type again"),
+        WelcomeScene(act: .emoji,   prefix: "fix the ",                query: "bug",     result: "🐛", suffix: " before lunch"),
+    ]
+
+    static func gifURL(_ name: String) -> URL? {
+        Bundle.main.url(forResource: name, withExtension: "gif")
+    }
+}
+
+struct WelcomeStep: View {
+    @State private var act: WelcomeAct = .emoji
+    /// Set by a click on a label; the demo jumps to that part.
+    @State private var jump: WelcomeJump?
+
+    /// Colours the trigger word, which the localized title marks as code.
+    private static func tinted(_ title: String.LocalizationValue) -> AttributedString {
+        var text = AttributedString(localized: title)
+        for run in text.runs where run.inlinePresentationIntent?.contains(.code) == true {
+            text[run.range].foregroundColor = .accentColor
+        }
+        return text
+    }
+
+    var body: some View {
+        VStack(spacing: OnboardingHeader.contentSpacing) {
+            VStack(spacing: 14) {
+                if let icon = AppInfo.appIcon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .frame(width: 64, height: 64)
+                        .accessibilityHidden(true)
+                }
+                VStack(spacing: 6) {
+                    Text(Self.tinted(act.title))
+                        .font(.system(size: 28, weight: .semibold))
+                        .contentTransition(.opacity)
+                    Text("Emoji, symbols and GIFs in any text field on your Mac.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 440)
+                }
+            }
+
+            HStack(spacing: 6) {
+                ForEach(WelcomeAct.allCases, id: \.self) { item in
+                    Button {
+                        jump = WelcomeJump(act: item)
+                    } label: {
+                        HStack(spacing: 5) {
+                            Text(item.label)
+                            Text(item.trigger)
+                                .font(.system(size: 12, design: .monospaced))
+                                .opacity(0.7)
+                        }
+                        .font(.system(size: 12))
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 4)
+                        .foregroundStyle(item == act ? Color.accentColor : Color.secondary)
+                        .background(
+                            Capsule().fill(item == act ? Color.accentColor.opacity(0.14) : Color.clear)
+                        )
+                        .contentShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(item == act ? .isSelected : [])
+                }
+            }
+
+            WelcomeAnimation(act: $act, jump: jump)
                 .frame(height: 280)
-                .padding(.top, 8)
 
             Spacer(minLength: 0)
         }
+        .animation(.easeInOut(duration: 0.2), value: act)
     }
+}
+
+/// A request to play one part of the demo. A fresh value each click, so
+/// clicking the part that is already playing restarts it.
+struct WelcomeJump: Equatable {
+    let act: WelcomeAct
+    let id = UUID()
 }
 
 /// Real `NSTextView` + the production `PickerView` so the demo renders
 /// through the same pipeline as the real app. State changes poke the
 /// NSTextView programmatically.
 private struct WelcomeAnimation: View {
+    @Binding var act: WelcomeAct
+    let jump: WelcomeJump?
 
-    fileprivate struct Snippet {
-        let prefix: String
-        let query: String  // partial after `:` (e.g. "tad")
-        let emoji: String
-    }
+    private let scenes = WelcomeScene.script
 
-    // Pulled from the homepage carousel (mojito-site/picker.js `scenes`).
-    private let snippets: [Snippet] = [
-        Snippet(prefix: "Hit deadline ",           query: "fire",   emoji: "🔥"),
-        Snippet(prefix: "see you soon ",           query: "wave",   emoji: "👋"),
-        Snippet(prefix: "fix the ",                query: "bug",    emoji: "🐛"),
-        Snippet(prefix: "Just shipped a new app ", query: "rocket", emoji: "🚀"),
-        Snippet(prefix: "Pick up ",                query: "gift",   emoji: "🎁"),
-    ]
-
-    @State private var snippetIndex: Int = 0
-    /// Visible text excluding the typed `:query`.
+    @State private var sceneIndex: Int = 0
+    /// Bumped to (re)start the scene at `sceneIndex`, including the same one.
+    @State private var run: Int = 0
+    /// Visible text excluding the typed trigger and query.
     @State private var committedText: String = ""
     @State private var queryText: String = ""
     /// Non-nil triggers the replace-and-hold step.
     @State private var pendingCommit: String? = nil
-    /// Shared across snippets — building a new `@Published`-backed VM and
-    /// SwiftUI subscriptions per cycle would be expensive.
+    /// Shared across scenes — building a new `@Published`-backed VM and
+    /// SwiftUI subscriptions per scene would be expensive.
     @StateObject private var pickerViewModel = PickerViewModel()
     @State private var pickerVisible: Bool = false
+    @State private var gifTileVisible: Bool = false
     @State private var caretRectInBubble: CGRect = .zero
-    @State private var cyclesCompleted: Int = 0
-    /// True once cycles are done. Drops the text view's first-responder
-    /// status so the OS caret stops blinking — every blink invalidates
-    /// the bubble region and is the main steady-state CPU cost.
-    @State private var animationStopped: Bool = false
-    private let maxCycles: Int = 2
+    /// The symbol sweep is slow and blocks whoever touches it first, so it is
+    /// built off the main thread and symbol scenes wait for it.
+    @State private var symbolsReady: Bool = false
+
+    private var scene: WelcomeScene { scenes[sceneIndex] }
+    private static let bubbleWidth: CGFloat = 460
+    /// Tall enough for a line of text with a chosen GIF under it.
+    private static let bubbleHeight: CGFloat = 150
+    private static let gifSide: CGFloat = 96
+    private static let pickerWidth: CGFloat = 280
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -70,96 +180,182 @@ private struct WelcomeAnimation: View {
                 queryText: queryText,
                 commitEmoji: pendingCommit,
                 caretRect: $caretRectInBubble,
-                showCaret: !animationStopped
+                showCaret: true
             )
-            .frame(width: 460, height: 88)
+            .frame(width: Self.bubbleWidth, height: Self.bubbleHeight)
             // Solid bubble — translucent would sample whatever's behind
             // the onboarding window (desktop, other apps).
             .shadow(color: Color.black.opacity(0.10), radius: 14, x: 0, y: 4)
 
-            if pickerVisible && !pickerViewModel.results.isEmpty {
-                PickerView(viewModel: pickerViewModel)
-                    .modifier(OnboardingPickerChrome())
-                    .frame(width: 280)
-                    .offset(
-                        x: max(8, min(caretRectInBubble.minX - 4, 460 - 280 - 8)),
-                        y: caretRectInBubble.maxY + 6
-                    )
-                    .transition(.opacity)
-                    .allowsHitTesting(false)
+            if gifTileVisible, let tile = scene.tiles.first {
+                WelcomeGifTile(name: tile, selected: false)
+                    .frame(width: Self.gifSide, height: Self.gifSide)
+                    .offset(x: 16, y: caretRectInBubble.maxY + 8)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+            }
+
+            if pickerVisible {
+                Group {
+                    if scene.act == .gifs {
+                        WelcomeGifResults(query: String(queryText.dropFirst(scene.act.trigger.count)), tiles: scene.tiles)
+                    } else if !pickerViewModel.results.isEmpty {
+                        PickerView(viewModel: pickerViewModel)
+                    }
+                }
+                .modifier(OnboardingPickerChrome())
+                .frame(width: Self.pickerWidth)
+                .offset(
+                    x: max(8, min(caretRectInBubble.minX - 4, Self.bubbleWidth - Self.pickerWidth - 8)),
+                    y: caretRectInBubble.maxY + 6
+                )
+                .transition(.opacity)
+                .allowsHitTesting(false)
             }
         }
-        .frame(width: 460, height: 240, alignment: .topLeading)
+        .frame(width: Self.bubbleWidth, height: 280, alignment: .topLeading)
         .animation(.easeOut(duration: 0.10), value: pickerVisible)
-        .task(id: snippetIndex) { await runAnimation() }
+        .animation(.spring(duration: 0.25), value: gifTileVisible)
+        .task {
+            await Task.detached(priority: .utility) { _ = SymbolsDatabase.byHexcode }.value
+            symbolsReady = true
+        }
+        .task(id: run) { await runScene() }
+        .onChange(of: jump) { _, new in
+            guard let new, let index = scenes.firstIndex(where: { $0.act == new.act }) else { return }
+            sceneIndex = index
+            run += 1
+        }
     }
 
     // MARK: - Animation loop
 
-    private var snippet: Snippet { snippets[snippetIndex] }
+    /// Sleeps, and reports whether the scene should keep going. A click on a
+    /// label cancels the running scene, and a cancelled sleep returns at once,
+    /// so every step has to check before touching state again.
+    private func pause(_ milliseconds: Int) async -> Bool {
+        try? await Task.sleep(for: .milliseconds(milliseconds))
+        return !Task.isCancelled
+    }
+
+    private func typingDelay(after character: Character) -> Int {
+        Int.random(in: 22...55) + (character == " " ? Int.random(in: 12...32) : 0)
+    }
 
     @MainActor
-    private func runAnimation() async {
-        // Final state stays on screen after maxCycles.
-        if cyclesCompleted >= maxCycles {
-            return
+    private func runScene() async {
+        // Never stall the main thread on the symbol sweep: wait if this part
+        // was asked for, otherwise skip it.
+        if scene.act == .symbols && !symbolsReady {
+            guard jump?.act == .symbols else {
+                advance()
+                return
+            }
+            while !symbolsReady {
+                guard await pause(100) else { return }
+            }
         }
 
+        let scene = scene
+        act = scene.act
         committedText = ""
         queryText = ""
         pendingCommit = nil
         pickerVisible = false
+        gifTileVisible = false
         pickerViewModel.update(query: "", results: [])
 
-        try? await Task.sleep(for: .milliseconds(180))
+        guard await pause(260) else { return }
 
-        let prefixChars = Array(snippet.prefix)
+        let prefixChars = Array(scene.prefix)
         for i in 1...prefixChars.count {
             committedText = String(prefixChars.prefix(i))
-            let last = prefixChars[i - 1]
-            let base = Int.random(in: 22...55)
-            let wordBreakBonus = (last == " ") ? Int.random(in: 12...32) : 0
-            try? await Task.sleep(for: .milliseconds(base + wordBreakBonus))
+            guard await pause(typingDelay(after: prefixChars[i - 1])) else { return }
         }
 
-        try? await Task.sleep(for: .milliseconds(80))
+        guard await pause(80) else { return }
 
-        queryText = ":"
-        try? await Task.sleep(for: .milliseconds(100))
+        let trigger = scene.act.trigger
+        for i in 1...trigger.count {
+            queryText = String(trigger.prefix(i))
+            guard await pause(90) else { return }
+        }
 
         pickerVisible = true
-        let queryChars = Array(snippet.query)
+        let queryChars = Array(scene.query)
         for i in 1...queryChars.count {
             let q = String(queryChars.prefix(i))
-            queryText = ":" + q
-            updatePicker(pickerViewModel, query: q)
-            try? await Task.sleep(for: .milliseconds(Int.random(in: 50...95)))
+            queryText = trigger + q
+            if scene.act != .gifs {
+                pickerViewModel.update(query: q, results: WelcomeFuzzyCache.shared.results(for: q, act: scene.act))
+            }
+            guard await pause(Int.random(in: 50...95)) else { return }
         }
 
-        try? await Task.sleep(for: .milliseconds(220))
+        guard await pause(scene.act == .gifs ? 700 : 260) else { return }
 
-        pendingCommit = snippet.emoji
+        pendingCommit = scene.result
         queryText = ""
-        committedText = snippet.prefix + snippet.emoji
+        committedText = scene.prefix + scene.result
         pickerVisible = false
+        gifTileVisible = scene.act == .gifs
 
-        try? await Task.sleep(for: .milliseconds(1100))
+        if !scene.suffix.isEmpty {
+            guard await pause(320) else { return }
+            let suffixChars = Array(scene.suffix)
+            for i in 1...suffixChars.count {
+                committedText = scene.prefix + scene.result + String(suffixChars.prefix(i))
+                guard await pause(typingDelay(after: suffixChars[i - 1])) else { return }
+            }
+        }
 
-        let nextIndex = (snippetIndex + 1) % snippets.count
-        if nextIndex == 0 {
-            cyclesCompleted += 1
-        }
-        if cyclesCompleted >= maxCycles {
-            animationStopped = true
-            return
-        }
-        snippetIndex = nextIndex
+        guard await pause(scene.act == .gifs ? 2200 : 1500) else { return }
+        advance()
     }
 
-    private func updatePicker(_ vm: PickerViewModel, query: String) {
-        // Cache outside SwiftUI state so reads/writes don't trigger re-renders.
-        let results = WelcomeFuzzyCache.shared.results(for: query)
-        vm.update(query: query, results: results)
+    private func advance() {
+        sceneIndex = (sceneIndex + 1) % scenes.count
+        run += 1
+    }
+}
+
+/// The GIF picker's results, drawn from bundled files so the first screen
+/// makes no network request.
+private struct WelcomeGifResults: View {
+    let query: String
+    let tiles: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                Text(query)
+                Spacer(minLength: 0)
+            }
+            .font(.system(size: 12))
+            .padding(.horizontal, 4)
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 3), spacing: 5) {
+                ForEach(tiles, id: \.self) { tile in
+                    WelcomeGifTile(name: tile, selected: tile == tiles.first)
+                        .aspectRatio(1, contentMode: .fit)
+                }
+            }
+        }
+        .padding(8)
+    }
+}
+
+private struct WelcomeGifTile: View {
+    let name: String
+    let selected: Bool
+
+    var body: some View {
+        AnimatedGifView(url: WelcomeScene.gifURL(name), cornerRadius: 6)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .strokeBorder(Color.accentColor, lineWidth: selected ? 2 : 0)
+            )
     }
 }
 
@@ -168,17 +364,18 @@ private final class WelcomeFuzzyCache {
     static let shared = WelcomeFuzzyCache()
     private var cache: [String: [ScoredEmoji]] = [:]
 
-    func results(for query: String) -> [ScoredEmoji] {
-        if let hit = cache[query] { return hit }
+    func results(for query: String, act: WelcomeAct) -> [ScoredEmoji] {
+        let key = "\(act.rawValue):\(query)"
+        if let hit = cache[key] { return hit }
         let r = FuzzyMatcher.search(
             query: query,
             in: EmojiDatabase.shared,
             usage: [:],
-            corpus: .emojiOnly,
+            corpus: act == .symbols ? .symbolsOnly : .emojiOnly,
             useFrequencyBoost: false,
             limit: 5
         )
-        cache[query] = r
+        cache[key] = r
         return r
     }
 }
