@@ -108,7 +108,7 @@ struct PrivacyDetailsRows: View {
             privacyRow(
                 icon: "exclamationmark.shield",
                 title: "Why macOS warns you",
-                detail: "\(AppInfo.displayName) only watches for triggers and types the emoji. A blue menu bar icon lists it while it runs."
+                detail: "To watch for triggers and type emoji, \(AppInfo.displayName) needs the same permission that lets an app control your Mac. macOS warns about every app that asks for it."
             )
         }
         privacyRow(
